@@ -1,0 +1,9 @@
+﻿Build started 12/12/2012 7:21:41 PM.
+     1>Project "C:\dev\MojoGit\Mojo.2.0\Mojo\Mojo.Core\Mojo.Core.vcxproj" on node 2 (clean target(s)).
+     1>_PrepareForClean:
+         Deleting file "obj\Win32\Release\Mojo.Core.lastbuildstate".
+     1>Done Building Project "C:\dev\MojoGit\Mojo.2.0\Mojo\Mojo.Core\Mojo.Core.vcxproj" (clean target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:00:00.01

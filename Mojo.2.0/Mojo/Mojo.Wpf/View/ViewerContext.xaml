@@ -1,0 +1,10 @@
+﻿<UserControl x:Class             = "Mojo.Wpf.View.ViewerContext"
+             xmlns               = "http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x             = "http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:Mojo.Wpf.View = "clr-namespace:Mojo.Wpf.View"
+             MinWidth            = "128"
+             MinHeight           = "128" >
+      <WindowsFormsHost x:Name="WindowsFormsHost" >
+          <Mojo.Wpf.View:D3D11RenderingPaneHost x:Name="D3D11RenderingPaneHost" />
+      </WindowsFormsHost>
+</UserControl>

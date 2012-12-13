@@ -1,0 +1,318 @@
+ImageRuntimeVersion: v4.0.30319
+Assembly Mojo.Interop, Version=0.0.*, Culture=Invariant Language (Invariant Country): 
+	hash=SHA1, flags=PublicKey
+Assembly mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089: 
+	hash=None, flags=None
+Assembly System, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089: 
+	hash=None, flags=None
+Assembly ObservableDictionary, Version=0.0.*, Culture=Invariant Language (Invariant Country): 
+	hash=None, flags=None
+Assembly Microsoft.VisualC, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a: 
+	hash=None, flags=None
+Assembly SlimDX, Version=2.0.10.43, Culture=neutral, PublicKeyToken=b1b0c32fd1ffe4f9: 
+	hash=None, flags=None
+Assembly mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089: 
+	hash=None, flags=None
+Assembly System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089: 
+	hash=None, flags=None
+Assembly Microsoft.VisualC, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a: 
+	hash=None, flags=None
+Class Mojo.Interop.NotifyPropertyChanged: AutoLayout, AnsiClass, Class, Public, BeforeFieldInit
+    Void .ctor(): PrivateScope, Public, HideBySig, SpecialName, RTSpecialName
+  Interfaces:
+    System.ComponentModel.INotifyPropertyChanged
+  Events:
+    System.ComponentModel.PropertyChangedEventHandler PropertyChanged: SpecialName
+  Methods:
+    add_PropertyChanged(PropertyChangedEventHandler): PrivateScope, Public, Virtual, HideBySig, VtableLayoutMask, SpecialName
+    remove_PropertyChanged(PropertyChangedEventHandler): PrivateScope, Public, Virtual, HideBySig, VtableLayoutMask, SpecialName
+Class Mojo.Interop.ObservableDictionary`2[K,V]: AutoLayout, AnsiClass, Class, Public, BeforeFieldInit
+  Type parameter: K
+  Type parameter: V
+  :Mojo.Interop.NotifyPropertyChanged
+    Void .ctor(): PrivateScope, Public, HideBySig, SpecialName, RTSpecialName
+  Interfaces:
+    System.Collections.IEnumerable
+  Properties:
+    DrWPF.Windows.Data.ObservableDictionary`2[K,V] Internal 'get set' : 
+  Methods:
+    get_Internal(): PrivateScope, Public, HideBySig, SpecialName
+    set_Internal(ObservableDictionary`2): PrivateScope, Public, HideBySig, SpecialName
+    Get(K): PrivateScope, Public, HideBySig
+    Set(K, V): PrivateScope, Public, HideBySig
+    Add(K, V): PrivateScope, Public, HideBySig
+    GetEnumerator(): PrivateScope, Public, Virtual, HideBySig, VtableLayoutMask
+Class Mojo.Interop.Cuda: AutoLayout, AnsiClass, Class, Public, BeforeFieldInit
+  Methods:
+    Initialize(Device): PrivateScope, Public, Static, HideBySig
+    Terminate(): PrivateScope, Public, Static, HideBySig
+Class Mojo.Interop.PrimitiveMap: AutoLayout, AnsiClass, Class, Public, BeforeFieldInit
+    Void .ctor(): PrivateScope, Public, HideBySig, SpecialName, RTSpecialName
+  Interfaces:
+    System.Collections.IEnumerable
+  Methods:
+    GetEnumerator(): PrivateScope, Public, Virtual, HideBySig, VtableLayoutMask
+    Add(PrimitiveType, String, Boolean(HasFieldMarshal)): PrivateScope, Public, HideBySig
+    Add(PrimitiveType, String, Int32): PrivateScope, Public, HideBySig
+    Add(PrimitiveType, String, Single): PrivateScope, Public, HideBySig
+    Add(PrimitiveType, String, Vector2): PrivateScope, Public, HideBySig
+    Add(PrimitiveType, String, Vector4): PrivateScope, Public, HideBySig
+    ToCore(PrimitiveMap*): PrivateScope, Public, HideBySig
+    GetFloat4(String): PrivateScope, Public, HideBySig
+    GetFloat2(String): PrivateScope, Public, HideBySig
+    GetUChar4(String): PrivateScope, Public, HideBySig
+    GetFloat(String): PrivateScope, Public, HideBySig
+    GetInt(String): PrivateScope, Public, HideBySig
+    GetBool(String): PrivateScope, Public, HideBySig
+    SetFloat4(String, Vector4): PrivateScope, Public, HideBySig
+    SetFloat2(String, Vector2): PrivateScope, Public, HideBySig
+    SetUChar4(String, Vector4): PrivateScope, Public, HideBySig
+    SetFloat(String, Single): PrivateScope, Public, HideBySig
+    SetInt(String, Int32): PrivateScope, Public, HideBySig
+    SetBool(String, Boolean(HasFieldMarshal)): PrivateScope, Public, HideBySig
+    GetDictionaryFloat4(): PrivateScope, Public, HideBySig
+    GetDictionaryFloat2(): PrivateScope, Public, HideBySig
+    GetDictionaryUChar4(): PrivateScope, Public, HideBySig
+    GetDictionaryFloat(): PrivateScope, Public, HideBySig
+    GetDictionaryInt(): PrivateScope, Public, HideBySig
+    GetDictionaryBool(): PrivateScope, Public, HideBySig
+Struct Mojo.Interop.PrimitiveType: AutoLayout, AnsiClass, Class, Public, Sealed, BeforeFieldInit
+  :System.Enum
+  Fields:
+    Int32 value__ : Public, SpecialName, RTSpecialName
+    Mojo.Interop.PrimitiveType Bool = 5 : Public, Static, Literal, HasDefault
+    Mojo.Interop.PrimitiveType Int = 4 : Public, Static, Literal, HasDefault
+    Mojo.Interop.PrimitiveType Float = 3 : Public, Static, Literal, HasDefault
+    Mojo.Interop.PrimitiveType UChar4 = 2 : Public, Static, Literal, HasDefault
+    Mojo.Interop.PrimitiveType Float2 = 1 : Public, Static, Literal, HasDefault
+    Mojo.Interop.PrimitiveType Float4 = 0 : Public, Static, Literal, HasDefault
+Class Mojo.Interop.VolumeDescription: AutoLayout, AnsiClass, Class, Public, BeforeFieldInit
+    Void .ctor(Mojo.Core.VolumeDescription*): PrivateScope, Public, HideBySig, SpecialName, RTSpecialName
+    Void .ctor(): PrivateScope, Public, HideBySig, SpecialName, RTSpecialName
+  Properties:
+    Boolean IsSigned 'get set' : 
+    Int32 NumBytesPerVoxel 'get set' : 
+    SlimDX.DXGI.Format DxgiFormat 'get set' : 
+    Int32 NumVoxelsZ 'get set' : 
+    Int32 NumVoxelsY 'get set' : 
+    Int32 NumVoxelsX 'get set' : 
+    IntPtr Data 'get set' : 
+    SlimDX.DataStream DataStream 'get set' : 
+  Methods:
+    ToCore(VolumeDescription*): PrivateScope, Public, HideBySig
+    get_DataStream(): PrivateScope, Public, HideBySig, SpecialName
+    set_DataStream(DataStream): PrivateScope, Public, HideBySig, SpecialName
+    get_Data(): PrivateScope, Public, HideBySig, SpecialName
+    set_Data(IntPtr): PrivateScope, Public, HideBySig, SpecialName
+    get_NumVoxelsX(): PrivateScope, Public, HideBySig, SpecialName
+    set_NumVoxelsX(Int32): PrivateScope, Public, HideBySig, SpecialName
+    get_NumVoxelsY(): PrivateScope, Public, HideBySig, SpecialName
+    set_NumVoxelsY(Int32): PrivateScope, Public, HideBySig, SpecialName
+    get_NumVoxelsZ(): PrivateScope, Public, HideBySig, SpecialName
+    set_NumVoxelsZ(Int32): PrivateScope, Public, HideBySig, SpecialName
+    get_DxgiFormat(): PrivateScope, Public, HideBySig, SpecialName
+    set_DxgiFormat(Format): PrivateScope, Public, HideBySig, SpecialName
+    get_NumBytesPerVoxel(): PrivateScope, Public, HideBySig, SpecialName
+    set_NumBytesPerVoxel(Int32): PrivateScope, Public, HideBySig, SpecialName
+    get_IsSigned(): PrivateScope, Public, HideBySig, SpecialName
+    set_IsSigned(Boolean(HasFieldMarshal)): PrivateScope, Public, HideBySig, SpecialName
+Class Mojo.Interop.Segmenter: AutoLayout, AnsiClass, Class, Public, BeforeFieldInit
+  :Mojo.Interop.NotifyPropertyChanged
+    Void .ctor(SlimDX.Direct3D11.Device, SlimDX.Direct3D11.DeviceContext, Mojo.Interop.PrimitiveMap): PrivateScope, Public, HideBySig, SpecialName, RTSpecialName
+  Interfaces:
+    System.IDisposable
+  Methods:
+    LoadVolume(ObservableDictionary`2): PrivateScope, Public, HideBySig
+    UnloadVolume(): PrivateScope, Public, HideBySig
+    IsVolumeLoaded(): PrivateScope, Public, HideBySig
+    LoadSegmentation(ObservableDictionary`2): PrivateScope, Public, HideBySig
+    SaveSegmentationAs(ObservableDictionary`2): PrivateScope, Public, HideBySig
+    InitializeEdgeXYMap(ObservableDictionary`2): PrivateScope, Public, HideBySig
+    InitializeEdgeXYMapForSplitting(ObservableDictionary`2, Int32): PrivateScope, Public, HideBySig
+    InitializeSegmentation(): PrivateScope, Public, HideBySig
+    InitializeSegmentationAndRemoveFromCommittedSegmentation(Int32): PrivateScope, Public, HideBySig
+    InitializeConstraintMap(): PrivateScope, Public, HideBySig
+    InitializeConstraintMapFromIdMap(Int32): PrivateScope, Public, HideBySig
+    InitializeConstraintMapFromIdMapForSplitting(Int32): PrivateScope, Public, HideBySig
+    InitializeConstraintMapFromPrimalMap(): PrivateScope, Public, HideBySig
+    DilateConstraintMap(): PrivateScope, Public, HideBySig
+    AddForegroundHardConstraint(ValueType Vector3 IsBoxed, ValueType Vector3 IsBoxed, Single): PrivateScope, Public, HideBySig
+    AddForegroundHardConstraint(ValueType Vector3 IsBoxed, Single): PrivateScope, Public, HideBySig
+    AddBackgroundHardConstraint(ValueType Vector3 IsBoxed, ValueType Vector3 IsBoxed, Single): PrivateScope, Public, HideBySig
+    AddBackgroundHardConstraint(ValueType Vector3 IsBoxed, Single): PrivateScope, Public, HideBySig
+    Update2D(Int32, Int32): PrivateScope, Public, HideBySig
+    Update3D(Int32): PrivateScope, Public, HideBySig
+    VisualUpdate(): PrivateScope, Public, HideBySig
+    UpdateCommittedSegmentation(Int32, ValueType Vector3 IsBoxed): PrivateScope, Public, HideBySig
+    UpdateCommittedSegmentationDoNotRemove(Int32, ValueType Vector3 IsBoxed): PrivateScope, Public, HideBySig
+    ReplaceSegmentationLabelInCommittedSegmentation2D(Int32, Int32, ValueType Vector3 IsBoxed, Int32): PrivateScope, Public, HideBySig
+    ReplaceSegmentationLabelInCommittedSegmentation3D(Int32, Int32, ValueType Vector3 IsBoxed): PrivateScope, Public, HideBySig
+    ReplaceSegmentationLabelInCommittedSegmentation2DConnectedComponentOnly(Int32, Int32, ValueType Vector3 IsBoxed, Int32, ValueType Vector3 IsBoxed): PrivateScope, Public, HideBySig
+    ReplaceSegmentationLabelInCommittedSegmentation3DConnectedComponentOnly(Int32, Int32, ValueType Vector3 IsBoxed, ValueType Vector3 IsBoxed): PrivateScope, Public, HideBySig
+    UndoLastChangeToCommittedSegmentation(): PrivateScope, Public, HideBySig
+    RedoLastChangeToCommittedSegmentation(): PrivateScope, Public, HideBySig
+    VisualUpdateColorMap(): PrivateScope, Public, HideBySig
+    InitializeCostMap(): PrivateScope, Public, HideBySig
+    InitializeCostMapFromPrimalMap(): PrivateScope, Public, HideBySig
+    IncrementCostMapFromPrimalMapForward(): PrivateScope, Public, HideBySig
+    IncrementCostMapFromPrimalMapBackward(): PrivateScope, Public, HideBySig
+    FinalizeCostMapFromPrimalMap(): PrivateScope, Public, HideBySig
+    UpdateConstraintMapAndPrimalMapFromCostMap(): PrivateScope, Public, HideBySig
+    GetSegmentationLabelId(ValueType Vector3 IsBoxed): PrivateScope, Public, HideBySig
+    GetSegmentationLabelColor(ValueType Vector3 IsBoxed): PrivateScope, Public, HideBySig
+    GetPrimalValue(ValueType Vector3 IsBoxed): PrivateScope, Public, HideBySig
+    DumpIntermediateData(): PrivateScope, Public, HideBySig
+    DebugInitialize(): PrivateScope, Public, HideBySig
+    DebugUpdate(): PrivateScope, Public, HideBySig
+    DebugTerminate(): PrivateScope, Public, HideBySig
+    GetD3D11CudaTextures(): PrivateScope, Public, HideBySig
+    GetVolumeDescription(): PrivateScope, Public, HideBySig
+    GetConvergenceGap(): PrivateScope, Public, HideBySig
+    SetConvergenceGap(Single): PrivateScope, Public, HideBySig
+    GetConvergenceGapDelta(): PrivateScope, Public, HideBySig
+    SetConvergenceGapDelta(Single): PrivateScope, Public, HideBySig
+    GetMaxForegroundCostDelta(): PrivateScope, Public, HideBySig
+    SetMaxForegroundCostDelta(Single): PrivateScope, Public, HideBySig
+    Dispose(): PrivateScope, Public, Final, Virtual, HideBySig
+Class Mojo.Interop.SegmenterImageStackLoader: AutoLayout, AnsiClass, Class, Public, BeforeFieldInit
+    Void .ctor(): PrivateScope, Public, HideBySig, SpecialName, RTSpecialName
+  Methods:
+    SaveIdImages(VolumeDescription, String): PrivateScope, Public, Static, HideBySig
+Class Mojo.Interop.Thrust: AutoLayout, AnsiClass, Class, Public, BeforeFieldInit
+  Methods:
+    Initialize(): PrivateScope, Public, Static, HideBySig
+    Terminate(): PrivateScope, Public, Static, HideBySig
+Class Mojo.Interop.TileCacheEntry: AutoLayout, AnsiClass, Class, Public, BeforeFieldInit
+    Void .ctor(): PrivateScope, Public, HideBySig, SpecialName, RTSpecialName
+  Properties:
+    Boolean Active 'get set' : 
+    SlimDX.Vector3 ExtentDataSpace 'get set' : 
+    SlimDX.Vector3 CenterDataSpace 'get set' : 
+    SlimDX.Vector4 IndexTileSpace 'get set' : 
+    Mojo.Interop.TileCacheEntryKeepState KeepState 'get set' : 
+    Mojo.Interop.ObservableDictionary`2[System.String,SlimDX.Direct3D11.ShaderResourceView] D3D11CudaTextures 'get set' : 
+  Methods:
+    get_D3D11CudaTextures(): PrivateScope, Public, HideBySig, SpecialName
+    set_D3D11CudaTextures(ObservableDictionary`2): PrivateScope, Public, HideBySig, SpecialName
+    get_KeepState(): PrivateScope, Public, HideBySig, SpecialName
+    set_KeepState(TileCacheEntryKeepState): PrivateScope, Public, HideBySig, SpecialName
+    get_IndexTileSpace(): PrivateScope, Public, HideBySig, SpecialName
+    set_IndexTileSpace(Vector4): PrivateScope, Public, HideBySig, SpecialName
+    get_CenterDataSpace(): PrivateScope, Public, HideBySig, SpecialName
+    set_CenterDataSpace(Vector3): PrivateScope, Public, HideBySig, SpecialName
+    get_ExtentDataSpace(): PrivateScope, Public, HideBySig, SpecialName
+    set_ExtentDataSpace(Vector3): PrivateScope, Public, HideBySig, SpecialName
+    get_Active(): PrivateScope, Public, HideBySig, SpecialName
+    set_Active(Boolean(HasFieldMarshal)): PrivateScope, Public, HideBySig, SpecialName
+Struct Mojo.Interop.TileCacheEntryKeepState: AutoLayout, AnsiClass, Class, Public, Sealed, BeforeFieldInit
+  :System.Enum
+  Fields:
+    Int32 value__ : Public, SpecialName, RTSpecialName
+    Mojo.Interop.TileCacheEntryKeepState TileCacheEntryKeepState_CanDiscard = 1 : Public, Static, Literal, HasDefault
+    Mojo.Interop.TileCacheEntryKeepState TileCacheEntryKeepState_MustKeep = 0 : Public, Static, Literal, HasDefault
+Class Mojo.Interop.TiledVolumeDescription: AutoLayout, AnsiClass, Class, Public, BeforeFieldInit
+    Void .ctor(Mojo.Native.TiledVolumeDescription*): PrivateScope, Public, HideBySig, SpecialName, RTSpecialName
+    Void .ctor(): PrivateScope, Public, HideBySig, SpecialName, RTSpecialName
+  Properties:
+    Boolean IsSigned 'get set' : 
+    Int32 NumBytesPerVoxel 'get set' : 
+    SlimDX.DXGI.Format DxgiFormat 'get set' : 
+    Int32 NumVoxelsZ 'get set' : 
+    Int32 NumVoxelsY 'get set' : 
+    Int32 NumVoxelsX 'get set' : 
+    Int32 NumVoxelsPerTileZ 'get set' : 
+    Int32 NumVoxelsPerTileY 'get set' : 
+    Int32 NumVoxelsPerTileX 'get set' : 
+    Int32 NumTilesW 'get set' : 
+    Int32 NumTilesZ 'get set' : 
+    Int32 NumTilesY 'get set' : 
+    Int32 NumTilesX 'get set' : 
+    System.String FileExtension 'get set' : 
+    System.String ImageDataDirectory 'get set' : 
+  Methods:
+    ToNative(TiledVolumeDescription*): PrivateScope, Public, HideBySig
+    get_ImageDataDirectory(): PrivateScope, Public, HideBySig, SpecialName
+    set_ImageDataDirectory(String): PrivateScope, Public, HideBySig, SpecialName
+    get_FileExtension(): PrivateScope, Public, HideBySig, SpecialName
+    set_FileExtension(String): PrivateScope, Public, HideBySig, SpecialName
+    get_NumTilesX(): PrivateScope, Public, HideBySig, SpecialName
+    set_NumTilesX(Int32): PrivateScope, Public, HideBySig, SpecialName
+    get_NumTilesY(): PrivateScope, Public, HideBySig, SpecialName
+    set_NumTilesY(Int32): PrivateScope, Public, HideBySig, SpecialName
+    get_NumTilesZ(): PrivateScope, Public, HideBySig, SpecialName
+    set_NumTilesZ(Int32): PrivateScope, Public, HideBySig, SpecialName
+    get_NumTilesW(): PrivateScope, Public, HideBySig, SpecialName
+    set_NumTilesW(Int32): PrivateScope, Public, HideBySig, SpecialName
+    get_NumVoxelsPerTileX(): PrivateScope, Public, HideBySig, SpecialName
+    set_NumVoxelsPerTileX(Int32): PrivateScope, Public, HideBySig, SpecialName
+    get_NumVoxelsPerTileY(): PrivateScope, Public, HideBySig, SpecialName
+    set_NumVoxelsPerTileY(Int32): PrivateScope, Public, HideBySig, SpecialName
+    get_NumVoxelsPerTileZ(): PrivateScope, Public, HideBySig, SpecialName
+    set_NumVoxelsPerTileZ(Int32): PrivateScope, Public, HideBySig, SpecialName
+    get_NumVoxelsX(): PrivateScope, Public, HideBySig, SpecialName
+    set_NumVoxelsX(Int32): PrivateScope, Public, HideBySig, SpecialName
+    get_NumVoxelsY(): PrivateScope, Public, HideBySig, SpecialName
+    set_NumVoxelsY(Int32): PrivateScope, Public, HideBySig, SpecialName
+    get_NumVoxelsZ(): PrivateScope, Public, HideBySig, SpecialName
+    set_NumVoxelsZ(Int32): PrivateScope, Public, HideBySig, SpecialName
+    get_DxgiFormat(): PrivateScope, Public, HideBySig, SpecialName
+    set_DxgiFormat(Format): PrivateScope, Public, HideBySig, SpecialName
+    get_NumBytesPerVoxel(): PrivateScope, Public, HideBySig, SpecialName
+    set_NumBytesPerVoxel(Int32): PrivateScope, Public, HideBySig, SpecialName
+    get_IsSigned(): PrivateScope, Public, HideBySig, SpecialName
+    set_IsSigned(Boolean(HasFieldMarshal)): PrivateScope, Public, HideBySig, SpecialName
+Class Mojo.Interop.TiledDatasetDescription: AutoLayout, AnsiClass, Class, Public, BeforeFieldInit
+  :Mojo.Interop.NotifyPropertyChanged
+    Void .ctor(): PrivateScope, Public, HideBySig, SpecialName, RTSpecialName
+  Properties:
+    Mojo.Interop.ObservableDictionary`2[System.String,System.String] Paths 'get set' : 
+    System.Collections.Generic.IDictionary`2[System.UInt32,System.Collections.Generic.IList`1[SlimDX.Vector4]] IdTileMap 'get set' : 
+    Mojo.Interop.ObservableDictionary`2[System.String,Mojo.Interop.TiledVolumeDescription] TiledVolumeDescriptions 'get set' : 
+  Methods:
+    ToNative(TiledDatasetDescription*): PrivateScope, Public, HideBySig
+    get_TiledVolumeDescriptions(): PrivateScope, Public, HideBySig, SpecialName
+    set_TiledVolumeDescriptions(ObservableDictionary`2): PrivateScope, Public, HideBySig, SpecialName
+    get_IdTileMap(): PrivateScope, Public, HideBySig, SpecialName
+    set_IdTileMap(IDictionary`2): PrivateScope, Public, HideBySig, SpecialName
+    get_Paths(): PrivateScope, Public, HideBySig, SpecialName
+    set_Paths(ObservableDictionary`2): PrivateScope, Public, HideBySig, SpecialName
+Class Mojo.Interop.TiledDatasetView: AutoLayout, AnsiClass, Class, Public, BeforeFieldInit
+    Void .ctor(): PrivateScope, Public, HideBySig, SpecialName, RTSpecialName
+  Properties:
+    Int32 WidthNumPixels 'get set' : 
+    SlimDX.Vector3 ExtentDataSpace 'get set' : 
+    SlimDX.Vector3 CenterDataSpace 'get set' : 
+  Methods:
+    ToNative(TiledDatasetView*): PrivateScope, Public, HideBySig
+    get_CenterDataSpace(): PrivateScope, Public, HideBySig, SpecialName
+    set_CenterDataSpace(Vector3): PrivateScope, Public, HideBySig, SpecialName
+    get_ExtentDataSpace(): PrivateScope, Public, HideBySig, SpecialName
+    set_ExtentDataSpace(Vector3): PrivateScope, Public, HideBySig, SpecialName
+    get_WidthNumPixels(): PrivateScope, Public, HideBySig, SpecialName
+    set_WidthNumPixels(Int32): PrivateScope, Public, HideBySig, SpecialName
+Class Mojo.Interop.TileManager: AutoLayout, AnsiClass, Class, Public, BeforeFieldInit
+  :Mojo.Interop.NotifyPropertyChanged
+    Void .ctor(SlimDX.Direct3D11.Device, SlimDX.Direct3D11.DeviceContext, Mojo.Interop.PrimitiveMap): PrivateScope, Public, HideBySig, SpecialName, RTSpecialName
+  Interfaces:
+    System.IDisposable
+  Methods:
+    GetTileManager(): PrivateScope, Public, HideBySig
+    LoadTiledDataset(TiledDatasetDescription): PrivateScope, Public, HideBySig
+    UnloadTiledDataset(): PrivateScope, Public, HideBySig
+    IsTiledDatasetLoaded(): PrivateScope, Public, HideBySig
+    LoadSegmentation(TiledDatasetDescription): PrivateScope, Public, HideBySig
+    UnloadSegmentation(): PrivateScope, Public, HideBySig
+    IsSegmentationLoaded(): PrivateScope, Public, HideBySig
+    Update(): PrivateScope, Public, HideBySig
+    LoadTiles(TiledDatasetView): PrivateScope, Public, HideBySig
+    GetTileCache(): PrivateScope, Public, HideBySig
+    GetIdColorMap(): PrivateScope, Public, HideBySig
+    GetSegmentationLabelId(TiledDatasetView, ValueType Vector3 IsBoxed): PrivateScope, Public, HideBySig
+    GetSegmentationLabelColor(Int32): PrivateScope, Public, HideBySig
+    ReplaceSegmentationLabel(Int32, Int32): PrivateScope, Public, HideBySig
+    ReplaceSegmentationLabelCurrentSlice(Int32, Int32, TiledDatasetView, ValueType Vector3 IsBoxed): PrivateScope, Public, HideBySig
+    ReplaceSegmentationLabelCurrentConnectedComponent(Int32, Int32, TiledDatasetView, ValueType Vector3 IsBoxed): PrivateScope, Public, HideBySig
+    UndoChange(): PrivateScope, Public, HideBySig
+    RedoChange(): PrivateScope, Public, HideBySig
+    SaveAndClearFileSystemTileCache(): PrivateScope, Public, HideBySig
+    Dispose(): PrivateScope, Public, Final, Virtual, HideBySig

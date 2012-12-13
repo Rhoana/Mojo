@@ -1,0 +1,210 @@
+﻿<Window x:Class                  = "Mojo.Wpf.View.MainWindow"
+        xmlns                    = "http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x                  = "http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:Mojo.Wpf.View      = "clr-namespace:Mojo.Wpf.View"
+        xmlns:Mojo.Wpf.ViewModel = "clr-namespace:Mojo.Wpf.ViewModel"
+        MinWidth                 = "750"
+        MinHeight                = "550"
+        Width                    = "1200"
+        Height                   = "700"
+        WindowStartupLocation    = "CenterScreen"
+        Title                    = "Mojo v2.0" >
+
+    <Window.Resources>
+        
+        <BitmapImage x:Key="DatasetLoad"             UriSource="../Icons/DatasetLoad.png"             />
+
+        <BitmapImage x:Key="SegmentationLabelAdd"    UriSource="../Icons/SegmentationLabelAdd.png"    />
+        <BitmapImage x:Key="SegmentationLabelRemove" UriSource="../Icons/SegmentationLabelRemove.png" />
+
+        <BitmapImage x:Key="SegmentationCancel"      UriSource="../Icons/SegmentationCancel.png"      />
+        <BitmapImage x:Key="SegmentationCommit"      UriSource="../Icons/SegmentationCommit.png"      />
+        <BitmapImage x:Key="SegmentationCompute"     UriSource="../Icons/SegmentationCompute.png"     />
+        <BitmapImage x:Key="SegmentationEdit"        UriSource="../Icons/SegmentationEdit.png"        />
+        <BitmapImage x:Key="SegmentationLoad"        UriSource="../Icons/SegmentationLoad.png"        />
+        <BitmapImage x:Key="SegmentationMerge"       UriSource="../Icons/SegmentationMerge.png"       />
+        <BitmapImage x:Key="SegmentationPrecompute"  UriSource="../Icons/SegmentationPrecompute.png"  />
+        <BitmapImage x:Key="SegmentationSave"        UriSource="../Icons/SegmentationSaveAs.png"      />
+        <BitmapImage x:Key="SegmentationSaveAs"      UriSource="../Icons/SegmentationSaveAs.png"      />
+        <BitmapImage x:Key="SegmentationSplit"       UriSource="../Icons/SegmentationSplit.png"       />
+        <BitmapImage x:Key="SegmentationUndo"        UriSource="../Icons/SegmentationUndo.png"        />
+        <BitmapImage x:Key="SegmentationRedo"        UriSource="../Icons/SegmentationRedo.png"        />
+
+        <Mojo.Wpf.ViewModel:EnumBooleanConverter x:Key="EnumBooleanConverter" />
+        
+    </Window.Resources>
+    
+    <DockPanel x:Name="DockPanel" Background="AntiqueWhite" >
+
+        <Menu DockPanel.Dock="Top" Focusable="False" Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}" BorderBrush="Gray" BorderThickness="1">
+            <MenuItem Header="File" Focusable="False">
+                <MenuItem Name="LoadDatasetMenuItem" Header="Load Dataset…" Command="{Binding Path=LoadDatasetCommand}" Focusable="False">
+                    <MenuItem.Icon>
+                        <Image Width="16" Height="16" Source="{StaticResource DatasetLoad}"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+                <Separator />
+                <MenuItem Name="LoadSegmentationMenuItem" Header="Load Segmentation…" Focusable="False" Command="{Binding Path=LoadSegmentationCommand}">
+                    <MenuItem.Icon>
+                        <Image Width="16" Height="16" Source="{StaticResource SegmentationLoad}"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Name="SaveSegmentationMenuItem" Header="Save Segmentation" Focusable="False" IsEnabled="False">
+                    <MenuItem.Icon>
+                        <Image Width="16" Height="16" Source="{StaticResource SegmentationSave}"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Name="SaveSegmentationAsMenuItem" Header="Save Segmentation As…" Focusable="False" IsEnabled="False">
+                    <MenuItem.Icon>
+                        <Image Width="16" Height="16" Source="{StaticResource SegmentationSaveAs}"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+            </MenuItem>
+            <!--<MenuItem Header="Edit" Focusable="False" IsEnabled="{Binding Path=SegmenterDataContext.EditMenuIsEnabled}">
+                <MenuItem Name="UndoLastCommitMenuItem" Header="Undo Last Commit" Focusable="False" IsEnabled="{Binding Path=SegmenterDataContext.UndoLastCommitMenuItemIsEnabled}">
+                    <MenuItem.Icon>
+                        <Image Width="16" Height="16" Source="{StaticResource SegmentationUndo}"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Name="RedoLastCommitMenuItem" Header="Redo Last Commit" Focusable="False" IsEnabled="{Binding Path=SegmenterDataContext.RedoLastCommitMenuItemIsEnabled}">
+                    <MenuItem.Icon>
+                        <Image Width="16" Height="16" Source="{StaticResource SegmentationRedo}"/>
+                    </MenuItem.Icon>
+                </MenuItem>                
+            </MenuItem>-->
+        </Menu>
+
+        <Border DockPanel.Dock="Top" Focusable="False" BorderBrush="Gray" BorderThickness="1,0,1,1">
+            <ToolBarTray  Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}">
+                <ToolBar Band="1" BandIndex="1">
+                    <RadioButton Focusable="False" GroupName="SegmenterToolGroup" Margin="5,5,5,5" IsChecked="{Binding Path=Engine.CurrentToolMode, Converter={StaticResource EnumBooleanConverter}, ConverterParameter=AdjustSegmentation }" >
+                        <StackPanel Orientation="Horizontal">
+                            <Image Width="32" Height="32" Source="{StaticResource SegmentationEdit}"/>
+                            <Label Content="Adjust Segmentation"/>
+                        </StackPanel>
+                    </RadioButton>
+                    <RadioButton Focusable="False" GroupName="SegmenterToolGroup" Margin="0,5,5,5" IsChecked="{Binding Path=Engine.CurrentToolMode, Converter={StaticResource EnumBooleanConverter}, ConverterParameter=MergeSegmentation }" >
+                        <StackPanel Orientation="Horizontal" >
+                            <Image Width="32" Height="32" Source="{StaticResource SegmentationMerge}"/>
+                            <Label Content="Merge Segmentation"/>
+                        </StackPanel>
+                    </RadioButton>
+                    <RadioButton Focusable="False" GroupName="SegmenterToolGroup" Margin="0,5,0,0" IsChecked="{Binding Path=Engine.CurrentToolMode, Converter={StaticResource EnumBooleanConverter}, ConverterParameter=SplitSegmentation }" >
+                        <StackPanel Orientation="Horizontal" >
+                            <Image Width="32" Height="32" Source="{StaticResource SegmentationSplit}"/>
+                            <Label Content="Split Segmentation"/>
+                        </StackPanel>
+                    </RadioButton>
+                    <Border Width="1" BorderBrush="Gray" BorderThickness="1,0,0,0" Margin="5,5,5,5" />
+                    <Button  Margin="0,5,5,5" IsEnabled="{Binding Path=SegmenterDataContext.NotMergeModeAndDatasetLoaded}">
+                        <StackPanel Orientation="Horizontal" >
+                            <Image Width="25" Source="{StaticResource SegmentationPrecompute}" />
+                            <Label Content="Precompute Segmentation"/>
+                        </StackPanel>
+                    </Button>
+                    <Button Margin="0,5,0,5" IsEnabled="{Binding Path=SegmenterDataContext.NotMergeModeAndDatasetLoaded}">
+                        <StackPanel Orientation="Horizontal" >
+                            <Image Width="25" Source="{StaticResource SegmentationCompute}"/>
+                            <Label Content="Compute Segmentation"/>
+                        </StackPanel>
+                    </Button>
+                    <Border Width="1" BorderBrush="Gray" BorderThickness="1,0,0,0" Margin="5,5,5,5" />
+                    <Button  Margin="0,5,5,5" IsEnabled="{Binding Path=SegmenterDataContext.NotMergeModeAndDatasetLoaded}">
+                        <StackPanel Orientation="Horizontal" >
+                            <Image Width="25" Source="{StaticResource SegmentationCommit}"/>
+                            <Label Content="Commit Segmentation"/>
+                        </StackPanel>
+                    </Button>
+                    <Button Margin="0,5,0,5" IsEnabled="{Binding Path=SegmenterDataContext.NotMergeModeAndDatasetLoaded}">
+                        <StackPanel Orientation="Horizontal" >
+                            <Image Width="25" Source="{StaticResource SegmentationCancel}"/>
+                            <Label Content="Cancel Segmentation"/>
+                        </StackPanel>
+                    </Button>
+                </ToolBar>
+            </ToolBarTray>
+        </Border>
+
+        <Border DockPanel.Dock="Top" Focusable="False" BorderBrush="Gray" BorderThickness="1,0,1,1">
+            <StackPanel Orientation="Horizontal" Focusable="False" Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}" IsEnabled="True">
+
+                <Label Content="Segmentation Visibility" VerticalAlignment="Center"/>
+                <Slider Height="23" Name="SegmentationRatioSlider" Width="150" 
+                        Value="{Binding Path=Engine.TileManager.SegmentationVisibilityRatio}" Minimum="0" Maximum="1" 
+                        SmallChange="0.1" LargeChange="0.2"/>
+
+                <Border Width="1" BorderBrush="Gray" BorderThickness="1,0,0,0" Margin="5,5,5,5" />
+
+                <CheckBox Margin="5,5,5,5" IsEnabled="{Binding Path=SegmenterDataContext.MergeModeAndDatasetLoaded}" IsChecked="{Binding Path=Engine.TileManager.ConstrainSegmentationMergeToCurrentSlice}" >
+                    <Label Content="Constrain Segmentation Merging To Current Slice"/>
+                </CheckBox>
+
+                <CheckBox Margin="5,5,5,5" IsEnabled="{Binding Path=SegmenterDataContext.MergeModeAndDatasetLoaded}" IsChecked="{Binding Path=Engine.TileManager.ConstrainSegmentationMergeToConnectedComponent}" >
+                    <Label Content="Constrain Segmentation Merging To Connected Component"/>
+                </CheckBox>
+
+            </StackPanel>
+        </Border>
+        
+        <Border DockPanel.Dock="Bottom" Focusable="False" Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}" BorderBrush="Gray" BorderThickness="1,1,1,1">
+            <StackPanel Focusable="False" Orientation="Horizontal" Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}">
+                <Label Focusable="False" MinHeight="20" MinWidth="150" Content="{Binding Path=TileManagerDataContext.CurrentZLocationString}" />
+                <Label Focusable="False" MinHeight="20" Content="Selection:" />
+                <Rectangle Height="20" Name="SelectionRectangle" Stroke="Black" Width="50" Fill="{Binding Path=TileManagerDataContext.SelectedSegmentBrush}" />
+                <Label Focusable="False" MinHeight="20" MinWidth="100"  Content="{Binding Path=Engine.TileManager.SelectedSegmentId}" />
+                <Label Focusable="False" MinHeight="20" Content="Target:" />
+                <Rectangle Height="20" Name="TargetRectangle" Stroke="Black" Width="50" Fill="{Binding Path=TileManagerDataContext.MouseOverSegmentBrush}" />
+                <Label Focusable="False" MinHeight="20" MinWidth="100"  Content="{Binding Path=Engine.TileManager.MouseOverSegmentId}" />
+            </StackPanel>
+        </Border>
+
+        <Border DockPanel.Dock="Right" Focusable="False" Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}" BorderBrush="Gray" BorderThickness="1,0,1,0" Width="370">
+            <DockPanel Focusable="False" IsEnabled="{Binding Path=SegmenterDataContext.NotMergeModeAndDatasetLoaded}" Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}">
+                <Label DockPanel.Dock="Top" Focusable="False" MinHeight="20" Content="Segmentation Labels" />
+                <Grid DockPanel.Dock="Bottom" Focusable="False" Margin="5,5,5,5" Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}">
+                    <Grid.RowDefinitions>
+                        <RowDefinition></RowDefinition>
+                        <RowDefinition></RowDefinition>
+                        <RowDefinition></RowDefinition>
+                        <RowDefinition></RowDefinition>
+                        <RowDefinition></RowDefinition>
+                        <RowDefinition MinHeight="20"></RowDefinition>
+                    </Grid.RowDefinitions>
+
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="155"></ColumnDefinition>
+                        <ColumnDefinition></ColumnDefinition>
+                    </Grid.ColumnDefinitions>
+
+                    <Label Grid.Row="1" Grid.ColumnSpan="2" Content="Segmentation Label Name:"/>
+
+                    <TextBox Name="CreateSegmentationLabelName"   Grid.Row="1" Grid.Column="2"/>
+                    <Button  Name="CreateSegmentationLabelButton" Grid.Row="3" Grid.Column="2" Margin="0,5,0,5" >
+                        <StackPanel Orientation="Horizontal">
+                            <Image Width="25" Source="{StaticResource SegmentationLabelAdd}"/>
+                            <Label Width="150" Content="Add Segmentation Label"/>
+                        </StackPanel>
+                    </Button>
+                    <Border Height="1" Grid.Row="4" Grid.ColumnSpan="2" BorderBrush="Gray" BorderThickness="0,1,0,0" Margin="0,10,0,10" />
+                    <Button Name="RemoveSegmentationLabelButton" Grid.Row="5" Grid.Column="2" Margin="0,5,0,5">
+                        <StackPanel Orientation="Horizontal">
+                            <Image Width="25" Source="{StaticResource SegmentationLabelRemove}"/>
+                            <Label Width="150" Content="Remove Segmentation Label"/>
+                        </StackPanel>
+                    </Button>
+                </Grid>
+                <ListBox x:Name="SegmentationLabelesListBox" Focusable="False" ItemsSource="{Binding Path=Engine.Segmenter.DatasetDescription.SegmentationLabelDescriptions.Internal}" SelectedItem="{Binding Path=SegmenterDataContext.CurrentSegmentationLabel}" >
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Path=Value.Name}"/>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </DockPanel>
+        </Border>
+
+        <Mojo.Wpf.View:ViewerContext x:Name="TileManager2DViewerContext" Viewer="{Binding Path=Engine.Viewers.Internal[TileManager2D]}" />
+        
+    </DockPanel>
+                
+</Window>

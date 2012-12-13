@@ -1,0 +1,202 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Constants.hpp" />
+    <ClInclude Include="SimpleSplitTools.hpp" />
+    <ClInclude Include="FileSystemTileCacheEntry.hpp" />
+    <ClInclude Include="FileSystemUndoRedoItem.hpp" />
+    <ClInclude Include="ITileServer.hpp" />
+    <ClInclude Include="Segmenter.hpp" />
+    <ClInclude Include="TileCacheEntry.hpp" />
+    <ClInclude Include="TiledDatasetDescription.hpp" />
+    <ClInclude Include="TiledDatasetView.hpp" />
+    <ClInclude Include="TiledVolumeDescription.hpp" />
+    <ClInclude Include="TileManager.hpp" />
+    <ClInclude Include="FileSystemTileServer.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="SimpleSplitTools.cpp" />
+    <ClCompile Include="FileSystemTileCacheEntry.cpp" />
+    <ClCompile Include="FileSystemUndoRedoItem.cpp" />
+    <ClCompile Include="Segmenter.cpp" />
+    <ClCompile Include="TileCacheEntry.cpp" />
+    <ClCompile Include="TiledDatasetView.cpp" />
+    <ClCompile Include="TiledVolumeDescription.cpp" />
+    <ClCompile Include="TileManager.cpp" />
+    <ClCompile Include="FileSystemTileServer.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Mojo.Core\Mojo.Core.vcxproj">
+      <Project>{cc8440eb-75bf-400b-b29a-df5b961efce0}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\Mojo.Cuda\Mojo.Cuda.vcxproj">
+      <Project>{eb624a2e-6fcd-4885-b55b-4feceb582514}</Project>
+      <Private>false</Private>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <CopyLocalSatelliteAssemblies>false</CopyLocalSatelliteAssemblies>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+      <UseLibraryDependencyInputs>false</UseLibraryDependencyInputs>
+    </ProjectReference>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{8DD92DA7-F3EE-4334-AFA2-3CBF59D6518A}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>Mojo.Native</RootNamespace>
+    <CudaToolkitCustomDir>..\Sdk\Cuda\v4.2</CudaToolkitCustomDir>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>NotSet</CharacterSet>
+    <PlatformToolset>v100</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>NotSet</CharacterSet>
+    <PlatformToolset>v100</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+    <Import Project="$(VCTargetsPath)\BuildCustomizations\CUDA 4.2.props" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <IntDir>obj\$(PlatformName)\$(Configuration)\</IntDir>
+    <OutDir>bin\$(PlatformName)\$(Configuration)\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <IntDir>obj\$(PlatformName)\$(Configuration)\</IntDir>
+    <OutDir>bin\$(PlatformName)\$(Configuration)\</OutDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>_ITERATOR_DEBUG_LEVEL=0;WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <CompileAsManaged>false</CompileAsManaged>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <MinimalRebuild>false</MinimalRebuild>
+      <ExceptionHandling>Async</ExceptionHandling>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <AdditionalIncludeDirectories>..\;..\Sdk\Marray\v1.0\marray\include\;..\Sdk\Hdf5\1.8.8\include\;..\Sdk\OpenCV\OpenCV2.4\build\include\;..\Sdk\Thrust\thrust-v1.3.0\;..\Sdk\Cutil\NVIDIA GPU Computing SDK 4.2\C\common\inc\;..\Sdk\Cuda\v4.2\include\;..\Sdk\Boost\boost_1_44\;..\Sdk\DirectX\Microsoft DirectX SDK (June 2010)\Include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <Lib>
+      <OutputFile>$(ProjectDir)bin\$(PlatformName)\$(Configuration)\$(TargetName)$(TargetExt)</OutputFile>
+    </Lib>
+    <CudaCompile>
+      <PtxAsOptionV>true</PtxAsOptionV>
+      <Runtime>MTd</Runtime>
+    </CudaCompile>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
+    <CUDA_Build_Rule>
+      <CompilerPath>..\Sdk\Cuda\v4.2\bin</CompilerPath>
+    </CUDA_Build_Rule>
+    <CUDA_Build_Rule>
+      <VcCompilerRootPath>C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC</VcCompilerRootPath>
+      <AlternateNvccPath>
+      </AlternateNvccPath>
+      <Include>"."</Include>
+      <ExtraNvccOptions>-m32 --ptxas-options=-v</ExtraNvccOptions>
+    </CUDA_Build_Rule>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <CompileAsManaged>false</CompileAsManaged>
+      <MinimalRebuild>false</MinimalRebuild>
+      <ExceptionHandling>Async</ExceptionHandling>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <AdditionalIncludeDirectories>..\;..\Sdk\Marray\v1.0\marray\include\;..\Sdk\Hdf5\1.8.8\include\;..\Sdk\OpenCV\OpenCV2.4\build\include\;..\Sdk\Thrust\thrust-v1.3.0\;..\Sdk\Cutil\NVIDIA GPU Computing SDK 4.2\C\common\inc\;..\Sdk\Cuda\v4.2\include\;..\Sdk\Boost\boost_1_44\;..\Sdk\DirectX\Microsoft DirectX SDK (June 2010)\Include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalLibraryDirectories>..\Mojo.Cuda\bin\Win32\$(Configuration)\;..\Sdk\Cgal\CGAL-3.8\lib\;..\Sdk\boost\boost_1_44\lib\;..\Mojo.Core\bin\Win32\Release v90\;..\Sdk\Cuda\v4.2\lib\Win32\;%(AdditionalLibraryDirectories);$(CudaToolkitLibDir)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>Mojo.Cuda.lib;Mojo.Core.lib;cudart.lib;cuda.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <Lib>
+      <OutputFile>$(ProjectDir)bin\$(PlatformName)\$(Configuration)\$(TargetName)$(TargetExt)</OutputFile>
+    </Lib>
+    <CudaCompile>
+      <PtxAsOptionV>true</PtxAsOptionV>
+      <Runtime>MT</Runtime>
+    </CudaCompile>
+    <ProjectReference>
+      <LinkLibraryDependencies>true</LinkLibraryDependencies>
+    </ProjectReference>
+    <CUDA_Build_Rule>
+      <CompilerPath>..\Sdk\Cuda\v4.2\bin</CompilerPath>
+    </CUDA_Build_Rule>
+    <CUDA_Build_Rule>
+      <VcCompilerRootPath>C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC</VcCompilerRootPath>
+      <AlternateNvccPath>
+      </AlternateNvccPath>
+      <Include>"."</Include>
+      <ExtraNvccOptions>-m32 --ptxas-options=-v</ExtraNvccOptions>
+    </CUDA_Build_Rule>
+    <PostBuildEvent>
+      <Command>
+      </Command>
+      <Message>
+      </Message>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Lib>
+      <Verbose>true</Verbose>
+    </Lib>
+    <Link>
+      <AdditionalLibraryDirectories>..\Mojo.Cuda\bin\Win32\$(Configuration)\;..\Sdk\Cgal\CGAL-3.8\lib\;..\Sdk\boost\boost_1_44\lib\;..\Mojo.Core\bin\Win32\Release v90\;..\Sdk\Cuda\v4.2\lib\Win32\;%(AdditionalLibraryDirectories);$(CudaToolkitLibDir)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>Mojo.Cuda.lib;Mojo.Core.lib;cudart.lib;cuda.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <PostBuildEvent>
+      <Command>
+      </Command>
+      <Message>
+      </Message>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+    <Import Project="$(VCTargetsPath)\BuildCustomizations\CUDA 4.2.targets" />
+  </ImportGroup>
+</Project>

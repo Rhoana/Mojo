@@ -1,0 +1,39 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClInclude Include="Cuda.hpp" />
+    <ClInclude Include="Assert.hpp" />
+    <ClInclude Include="D3D11.hpp" />
+    <ClInclude Include="D3D11CudaTexture.hpp" />
+    <ClInclude Include="ForEach.hpp" />
+    <ClInclude Include="ID3D11CudaTexture.hpp" />
+    <ClInclude Include="Printf.hpp" />
+    <ClInclude Include="SegmenterState.hpp" />
+    <ClInclude Include="Thrust.hpp" />
+    <ClInclude Include="ToString.hpp" />
+    <ClInclude Include="VolumeDescription.hpp" />
+    <ClInclude Include="HashMap.hpp" />
+    <ClInclude Include="D3D11CudaTextureMap.hpp" />
+    <ClInclude Include="DeviceVectorMap.hpp" />
+    <ClInclude Include="HostVectorMap.hpp" />
+    <ClInclude Include="PrimitiveMap.hpp" />
+    <ClInclude Include="Boost.hpp" />
+    <ClInclude Include="OpenCV.hpp" />
+    <ClInclude Include="Index.hpp" />
+    <ClInclude Include="Stl.hpp" />
+    <ClInclude Include="Comparator.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="VolumeDescription.cpp" />
+    <ClCompile Include="Cuda.cpp" />
+    <ClCompile Include="SegmenterState.cpp" />
+    <ClCompile Include="Thrust.cpp" />
+    <ClCompile Include="Printf.cpp" />
+    <ClCompile Include="ToString.cpp" />
+    <ClCompile Include="D3D11CudaTextureMap.cpp" />
+    <ClCompile Include="DeviceVectorMap.cpp" />
+    <ClCompile Include="HostVectorMap.cpp" />
+    <ClCompile Include="PrimitiveMap.cpp" />
+    <ClCompile Include="Index.cpp" />
+  </ItemGroup>
+</Project>

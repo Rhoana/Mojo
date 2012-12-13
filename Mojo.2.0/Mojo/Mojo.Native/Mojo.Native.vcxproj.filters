@@ -1,0 +1,28 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="Segmenter.cpp" />
+    <ClCompile Include="TileCacheEntry.cpp" />
+    <ClCompile Include="TiledVolumeDescription.cpp" />
+    <ClCompile Include="TileManager.cpp" />
+    <ClCompile Include="FileSystemTileServer.cpp" />
+    <ClCompile Include="TiledDatasetView.cpp" />
+    <ClCompile Include="FileSystemTileCacheEntry.cpp" />
+    <ClCompile Include="FileSystemUndoRedoItem.cpp" />
+    <ClCompile Include="SimpleSplitTools.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Segmenter.hpp" />
+    <ClInclude Include="TileCacheEntry.hpp" />
+    <ClInclude Include="TiledDatasetDescription.hpp" />
+    <ClInclude Include="TiledVolumeDescription.hpp" />
+    <ClInclude Include="TileManager.hpp" />
+    <ClInclude Include="ITileServer.hpp" />
+    <ClInclude Include="FileSystemTileServer.hpp" />
+    <ClInclude Include="TiledDatasetView.hpp" />
+    <ClInclude Include="FileSystemTileCacheEntry.hpp" />
+    <ClInclude Include="FileSystemUndoRedoItem.hpp" />
+    <ClInclude Include="Constants.hpp" />
+    <ClInclude Include="SimpleSplitTools.hpp" />
+  </ItemGroup>
+</Project>

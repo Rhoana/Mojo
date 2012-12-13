@@ -1,0 +1,33 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClInclude Include="Cuda.hpp" />
+    <ClInclude Include="Segmenter.hpp" />
+    <ClInclude Include="VolumeDescription.hpp" />
+    <ClInclude Include="NotifyPropertyChanged.hpp" />
+    <ClInclude Include="Thrust.hpp" />
+    <ClInclude Include="SegmenterImageStackLoader.hpp" />
+    <ClInclude Include="TileManager.hpp" />
+    <ClInclude Include="TiledVolumeDescription.hpp" />
+    <ClInclude Include="TiledDatasetDescription.hpp" />
+    <ClInclude Include="ObservableDictionary.hpp" />
+    <ClInclude Include="PrimitiveMap.hpp" />
+    <ClInclude Include="TileCacheEntry.hpp" />
+    <ClInclude Include="TiledDatasetView.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Cuda.cpp" />
+    <ClCompile Include="Segmenter.cpp" />
+    <ClCompile Include="VolumeDescription.cpp" />
+    <ClCompile Include="NotifyPropertyChanged.cpp" />
+    <ClCompile Include="Thrust.cpp" />
+    <ClCompile Include="SegmenterImageStackLoader.cpp" />
+    <ClCompile Include="TileManager.cpp" />
+    <ClCompile Include="TiledVolumeDescription.cpp" />
+    <ClCompile Include="TiledDatasetDescription.cpp" />
+    <ClCompile Include="ObservableDictionary.cpp" />
+    <ClCompile Include="PrimitiveMap.cpp" />
+    <ClCompile Include="TileCacheEntry.cpp" />
+    <ClCompile Include="TiledDatasetView.cpp" />
+  </ItemGroup>
+</Project>

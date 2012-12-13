@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>9.0.30729</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{D1C7878E-1E04-444D-B192-6C9C0BA0D033}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Mojo.Xml</RootNamespace>
+    <AssemblyName>Mojo.Xml</AssemblyName>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <WarningLevel>4</WarningLevel>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <OldToolsVersion>3.5</OldToolsVersion>
+    <UpgradeBackupLocation />
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x86\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisIgnoreBuiltInRuleSets>true</CodeAnalysisIgnoreBuiltInRuleSets>
+    <CodeAnalysisIgnoreBuiltInRules>true</CodeAnalysisIgnoreBuiltInRules>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
+    <OutputPath>bin\x86\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisIgnoreBuiltInRuleSets>true</CodeAnalysisIgnoreBuiltInRuleSets>
+    <CodeAnalysisIgnoreBuiltInRules>true</CodeAnalysisIgnoreBuiltInRules>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup />
+  <PropertyGroup>
+    <StartupObject />
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+    <Reference Include="System" />
+    <Reference Include="System.XML" />
+    <Reference Include="WindowsBase" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="idTileMap.cs">
+      <DependentUpon>idTileMap.xsd</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\AssemblyInfo.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="tiledVolumeDescription.cs">
+      <DependentUpon>tiledVolumeDescription.xsd</DependentUpon>
+    </Compile>
+    <None Include="Properties\Settings.settings">
+      <Generator>PublicSettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <AppDesigner Include="Properties\" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PreBuildEvent>
+    </PreBuildEvent>
+  </PropertyGroup>
+  <!-- define relevant properties for automatically generating the C# files -->
+  <PropertyGroup>
+    <MojoSchemaInputDirectory>$(ProjectDir)</MojoSchemaInputDirectory>
+    <MojoSchemaOutputDirectory>$(ProjectDir)</MojoSchemaOutputDirectory>
+    <MojoSchemaInputExtension>.xsd</MojoSchemaInputExtension>
+    <MojoSchemaOutputExtension>.cs</MojoSchemaOutputExtension>
+    <MojoSchemaInputWildCardExpression>*$(MojoSchemaInputExtension)</MojoSchemaInputWildCardExpression>
+    <MojoSchemaCSharpNamespace>Mojo.Xml</MojoSchemaCSharpNamespace>
+    <MojoSchemaTool>$(ProjectDir)..\..\Sdk\Windows\x64\v7.1\Bin\xsd.exe</MojoSchemaTool>
+    <MojoSchemaConstantToolOptions>/outputdir:$(MojoSchemaOutputDirectory) /classes /language:CS</MojoSchemaConstantToolOptions>
+  </PropertyGroup>
+  <!-- define an item group for the input schema files -->
+  <ItemGroup>
+    <MojoSchemaInputItemGroup Include="*.xsd" />
+  </ItemGroup>
+  <!-- define a target for generating c# classes -->
+  <Target Name="MojoGenerateCSharpClassesFromSchemas" Inputs="@(MojoSchemaInputItemGroup)" Outputs="@(MojoSchemaInputItemGroup -> '$(MojoSchemaOutputDirectory)%(FileName)$(MojoSchemaOutputExtension)')">
+    <Message Importance="high" Text="Executing Target MojoGenerateCSharpClassesFromSchemas" />
+    <!-- add metadata for calling the xsd.exe command-line tool -->
+    <ItemGroup>
+      <MojoSchemaInputItemGroupWithMetaData Include="@(MojoSchemaInputItemGroup)">
+        <MojoSchemaToolCommand>$(MojoSchemaTool) %(MojoSchemaInputItemGroup.FullPath) $(MojoSchemaConstantToolOptions) /namespace:$(MojoSchemaCSharpNamespace)</MojoSchemaToolCommand>
+      </MojoSchemaInputItemGroupWithMetaData>
+    </ItemGroup>
+    <Message Importance="high" Text="Exec Command='%(MojoSchemaInputItemGroupWithMetaData.MojoSchemaToolCommand)'" />
+    <Exec Command="%(MojoSchemaInputItemGroupWithMetaData.MojoSchemaToolCommand)" />
+  </Target>
+  <!-- define relevant properties for automatically generating serialization assemblies -->
+  <PropertyGroup>
+    <MojoSerializerBinOutputDir>$(ProjectDir)$(OutputPath)</MojoSerializerBinOutputDir>
+    <MojoSerializerOutputName>$(AssemblyName).XmlSerializers.dll</MojoSerializerOutputName>
+    <MojoSerializerTool>$(ProjectDir)..\..\Sdk\Windows\x64\v7.1\Bin</MojoSerializerTool>
+  </PropertyGroup>
+  <!-- define a target for generating a serialization assembly -->
+  <Target Name="MojoGenerateSerializerAssembly" Inputs="@(MojoSchemaInputItemGroup)" Outputs="$(MojoSerializerBinOutputDir)$(MojoSerializerOutputName)">
+    <Message Importance="high" Text="Executing Target MojoGenerateSerializerAssembly" />
+    <Message Importance="high" Text="Delete Files='$(MojoSerializerBinOutputDir)$(MojoSerializerOutputName)' ContinueOnError='true'" />
+    <Delete Files="$(MojoSerializerBinOutputDir)$(MojoSerializerOutputName)" ContinueOnError="true" />
+    <Message Importance="high" Text="SGen BuildAssemblyName='$(TargetFileName)' BuildAssemblyPath='$(OutputPath)' Platform='x86' ShouldGenerateSerializer='true' ToolPath='$(MojoSerializerTool)' Types='@(MojoSerializerQualifiedClassItemGroup)' UseProxyTypes='false'" />
+    <SGen BuildAssemblyName="$(TargetFileName)" BuildAssemblyPath="$(OutputPath)" Platform="x86" ShouldGenerateSerializer="true" ToolPath="$(MojoSerializerTool)" UseProxyTypes="false" />
+  </Target>
+  <Target Name="BeforeBuild" DependsOnTargets="MojoGenerateCSharpClassesFromSchemas">
+  </Target>
+  <Target Name="AfterBuild" DependsOnTargets="MojoGenerateSerializerAssembly">
+  </Target>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
