@@ -7,6 +7,10 @@ namespace Mojo
     {
         private readonly TileManager mTileManager;
         private int newId = 0;
+        private bool mCurrentlyDrawing = false;
+        private float mDrawStartX;
+        private float mDrawStartY;
+        private float mDrawDistMax;
 
         public SimpleSegmenterTool( TileManager tileManager, Engine engine )
             : base( tileManager, engine )
@@ -60,12 +64,109 @@ namespace Mojo
                 case System.Windows.Input.Key.S:
                     mTileManager.Internal.PrepForSplit( mTileManager.SelectedSegmentId, (int) mTileManager.TiledDatasetView.CenterDataSpace.Z );
                     break;
+
+                case System.Windows.Input.Key.OemComma:
+                    if ( mTileManager.DrawSize > 4 )
+                    {
+                        mTileManager.DrawSize -= 2;
+                    }
+                    break;
+                case System.Windows.Input.Key.OemPeriod:
+                    if ( mTileManager.DrawSize < 16 )
+                    {
+                        mTileManager.DrawSize += 2;
+                    }
+                    break;
+
+            }
+        }
+
+        public override void OnMouseDown( System.Windows.Forms.MouseEventArgs mouseEventArgs, int width, int height )
+        {
+            if ( mouseEventArgs.Button == System.Windows.Forms.MouseButtons.Right )
+            {
+                if ( mTileManager.SegmentationLoaded )
+                {
+
+                    //Get the id of the segment being clicked
+
+                    var centerDataSpace = mTileManager.TiledDatasetView.CenterDataSpace;
+                    var extentDataSpace = mTileManager.TiledDatasetView.ExtentDataSpace;
+
+                    var topLeftDataSpaceX = centerDataSpace.X - ( extentDataSpace.X / 2f );
+                    var topLeftDataSpaceY = centerDataSpace.Y - ( extentDataSpace.Y / 2f );
+
+                    var offsetDataSpaceX = ( (float)mouseEventArgs.X / width ) * extentDataSpace.X;
+                    var offsetDataSpaceY = ( (float)mouseEventArgs.Y / height ) * extentDataSpace.Y;
+
+                    var x = topLeftDataSpaceX + offsetDataSpaceX;
+                    var y = topLeftDataSpaceY + offsetDataSpaceY;
+                    var z = centerDataSpace.Z;
+
+                    var p = new Vector3( x, y, z );
+
+                    var clickedId = mTileManager.Internal.GetSegmentationLabelId( mTileManager.TiledDatasetView, p );
+
+                    if ( clickedId == mTileManager.SelectedSegmentId )
+                    {
+                        mCurrentlyDrawing = true;
+                        mDrawStartX = x;
+                        mDrawStartY = y;
+                        mDrawDistMax = 0;
+                        //mTileManager.Internal.AddSplitSource( mTileManager.TiledDatasetView, p );
+                        //mTileManager.Internal.DrawSplit( mTileManager.TiledDatasetView, p, mTileManager.DrawSize );
+                    }
+                }
+            }
+            else
+            {
+                base.OnMouseDown( mouseEventArgs, width, height );
+            }
+        }
+
+        public override void OnMouseUp( System.Windows.Forms.MouseEventArgs mouseEventArgs, int width, int height )
+        {
+            if ( mouseEventArgs.Button == System.Windows.Forms.MouseButtons.Right )
+            {
+                mCurrentlyDrawing = false;
+
+                //Get the id of the segment being clicked
+
+                var centerDataSpace = mTileManager.TiledDatasetView.CenterDataSpace;
+                var extentDataSpace = mTileManager.TiledDatasetView.ExtentDataSpace;
+
+                var topLeftDataSpaceX = centerDataSpace.X - ( extentDataSpace.X / 2f );
+                var topLeftDataSpaceY = centerDataSpace.Y - ( extentDataSpace.Y / 2f );
+
+                var offsetDataSpaceX = ( (float)mouseEventArgs.X / width ) * extentDataSpace.X;
+                var offsetDataSpaceY = ( (float)mouseEventArgs.Y / height ) * extentDataSpace.Y;
+
+                var x = topLeftDataSpaceX + offsetDataSpaceX;
+                var y = topLeftDataSpaceY + offsetDataSpaceY;
+                var z = centerDataSpace.Z;
+
+                var p = new Vector3( x, y, z );
+
+                var clickedId = mTileManager.Internal.GetSegmentationLabelId( mTileManager.TiledDatasetView, p );
+
+                Console.WriteLine( "MouseUp: mDrawDistMax=" + mDrawDistMax + "." );
+
+                if ( clickedId == mTileManager.SelectedSegmentId && mDrawDistMax > 0.05 )
+                {
+                    mTileManager.Internal.AddSplitSource( mTileManager.TiledDatasetView, new Vector3( mDrawStartX, mDrawStartY, z ) );
+                    mTileManager.Internal.AddSplitSource( mTileManager.TiledDatasetView, p );
+                    mTileManager.Internal.FindSplitLine2D( clickedId );
+                }
+            }
+            else
+            {
+                base.OnMouseUp( mouseEventArgs, width, height );
             }
         }
 
         public override void OnMouseClick( System.Windows.Forms.MouseEventArgs mouseEventArgs, int width, int height )
         {
-            if ( mTileManager.SegmentationLoaded )
+            if ( mTileManager.SegmentationLoaded && !mCurrentlyDrawing )
             {
                 //Get the id of the segment being clicked
 
@@ -94,11 +195,11 @@ namespace Mojo
                         if ( newId == clickedId )
                         {
                             //Unselect this segment
-                            newId = 0;
-                            mTileManager.SelectedSegmentId = 0;
+                            //newId = 0;
+                            //mTileManager.SelectedSegmentId = 0;
 
                             //Load 2D segment at full res for path finding
-                            mTileManager.Internal.ResetSplitState();
+                            //mTileManager.Internal.ResetSplitState();
                         }
                         else
                         {
@@ -117,7 +218,16 @@ namespace Mojo
                     if ( clickedId > 0 && clickedId == mTileManager.SelectedSegmentId )
                     {
                         mTileManager.Internal.AddSplitSource( mTileManager.TiledDatasetView, p );
-                        mTileManager.Internal.FindSplitLine2DTemp( clickedId );
+                        mTileManager.Internal.FindSplitLine2D( clickedId );
+                    }
+                    else if ( clickedId > 0 )
+                    {
+                        //
+                        // Merge with the clicked segment in 2D ( try this out to see if it makes sense )
+                        //
+                        mTileManager.Internal.ReplaceSegmentationLabelCurrentSlice( clickedId, mTileManager.SelectedSegmentId, mTileManager.TiledDatasetView, p );
+                        mTileManager.Internal.PrepForSplit( mTileManager.SelectedSegmentId, (int)z );
+
                     }
                 }
             }
@@ -130,8 +240,8 @@ namespace Mojo
             {
                 mCurrentlyHandlingMouseOver = true;
 
-                //Mouseover - update display to highlight segment under mouse
-                //Get the id of the segment being clicked
+                //Mouseover - update display to highlight segment or area under mouse
+                //Get the id of the segment under the mouse
 
                 var centerDataSpace = mTileManager.TiledDatasetView.CenterDataSpace;
                 var extentDataSpace = mTileManager.TiledDatasetView.ExtentDataSpace;
@@ -159,11 +269,23 @@ namespace Mojo
                     mTileManager.MouseOverSegmentId = 0;
                 }
 
-                if ( segmentId == mTileManager.SelectedSegmentId )
+                if ( segmentId > 0 && segmentId == mTileManager.SelectedSegmentId )
                 {
-                    //Make a cross-hair inside the selected segment
+                    //Make a hover circle
                     mTileManager.MouseOverX = x;
                     mTileManager.MouseOverY = y;
+                    //Make a hover line (currently too slow)
+                    //mTileManager.Internal.FindSplitLine2DHover( segmentId, p );
+
+                    if ( mCurrentlyDrawing )
+                    {
+                        mTileManager.Internal.DrawSplit( mTileManager.TiledDatasetView, p, mTileManager.DrawSize );
+                        float drawDist = (float) System.Math.Sqrt( ( p.X - mDrawStartX ) * ( p.X - mDrawStartX ) + ( p.Y - mDrawStartY ) * ( p.Y - mDrawStartY ) );
+                        if ( drawDist > mDrawDistMax )
+                        {
+                            mDrawDistMax = drawDist;
+                        }
+                    }
                 }
                 else
                 {

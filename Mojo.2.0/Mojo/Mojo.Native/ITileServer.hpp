@@ -32,11 +32,13 @@ public:
     virtual void                                                  ReplaceSegmentationLabelCurrentSlice( int oldId, int newId, float3 pointTileSpace )     = 0;
     virtual void                                                  ReplaceSegmentationLabelCurrentConnectedComponent( int oldId, int newId, float3 pointTileSpace )        = 0;
 
+    virtual void                                                  DrawSplit( float3 pointTileSpace, float radius )                                        = 0;
     virtual void                                                  AddSplitSource( float3 pointTileSpace )                                                 = 0;
     virtual void                                                  RemoveSplitSource()                                                                     = 0;
     virtual void                                                  ResetSplitState()                                                                       = 0;
     virtual void                                                  PrepForSplit( int segId, int zIndex )                                                   = 0;
-	virtual void                                                  FindSplitLine2DTemp( int segId )                                                        = 0;
+	virtual void                                                  FindSplitLine2D( int segId )                                                        = 0;
+	virtual void                                                  FindSplitLine2DHover( int segId, float3 pointTileSpace )                                                        = 0;
     virtual int                                                   CompleteSplit( int segId )                                                              = 0;
 
 	virtual void                                                  UndoChange() = 0;

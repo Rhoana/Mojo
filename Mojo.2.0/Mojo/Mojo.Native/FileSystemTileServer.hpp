@@ -1,5 +1,7 @@
 #pragma once
 
+#include "vld.h"
+
 #include "Mojo.Core/Stl.hpp"
 #include <queue>
 
@@ -45,11 +47,13 @@ public:
     virtual void                                                  ReplaceSegmentationLabelCurrentSlice( int oldId, int newId, float3 pointTileSpace );
     virtual void                                                  ReplaceSegmentationLabelCurrentConnectedComponent( int oldId, int newId, float3 pointTileSpace );
 
+    virtual void                                                  DrawSplit( float3 pointTileSpace, float radius );
     virtual void                                                  AddSplitSource( float3 pointTileSpace );
     virtual void                                                  RemoveSplitSource();
     virtual void                                                  ResetSplitState();
     virtual void                                                  PrepForSplit( int segId, int zIndex );
-	virtual void                                                  FindSplitLine2DTemp( int segId );
+	virtual void                                                  FindSplitLine2D( int segId );
+	virtual void                                                  FindSplitLine2DHover( int segId, float3 pointTileSpace );
     virtual int                                                   CompleteSplit( int segId );
 
 	virtual void                                                  UndoChange();
@@ -82,6 +86,7 @@ private:
 
     std::string                                                   CreateTileString( int4 tileIndex );
 	int4                                                          CreateTileIndex( std::string tileString );
+    void                                                          ReduceCacheSize();
     void                                                          ReduceCacheSizeIfNecessary();
 
     bool                                                          TileContainsId ( int3 numVoxelsPerTile, int3 currentIdNumVoxels, int* currentIdVolume, int segId );
@@ -105,6 +110,8 @@ private:
     void                                                          UnloadTileHdf5Internal( Core::VolumeDescription& volumeDescription );
 
 	void                                                          UpdateSplitTiles();
+	void                                                          UpdateSplitTilesHover();
+	void                                                          ResetSplitTiles();
 	void                                                          PrepForNextUndoRedoChange();
 
     Core::PrimitiveMap                                            mConstParameters;
@@ -129,6 +136,7 @@ private:
     int*                                                          mSplitPrev;
     int*                                                          mSplitBorderTargets;
     int*                                                          mSplitSearchMask;
+    int*                                                          mSplitBonusArea;
     unsigned int*                                                 mSplitResultArea;
 
 	FileSystemUndoRedoItem                                        mUndoItem;
@@ -300,7 +308,16 @@ inline bool FileSystemTileServer::TryLoadTileHdf5Internal( int4 tileIndex, std::
 
         hid_t hdf5FileHandle = marray::hdf5::openFile( tilePath );
         marray::Marray< TMarrayType > marray;
-        marray::hdf5::load( hdf5FileHandle, hdf5InternalDatasetName, marray );
+        try
+        {
+            marray::hdf5::load( hdf5FileHandle, hdf5InternalDatasetName, marray );
+        }
+        catch (...)
+        {
+            Core::Printf( "Warning - error loading hdf5 tile. Attempting to reduce cache size." );
+            ReduceCacheSize();
+            marray::hdf5::load( hdf5FileHandle, hdf5InternalDatasetName, marray );
+        }
         marray::hdf5::closeFile( hdf5FileHandle );
 
         RELEASE_ASSERT( marray.dimension() == 2 );

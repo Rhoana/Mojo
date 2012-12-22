@@ -146,6 +146,12 @@ void TileManager::ReplaceSegmentationLabelCurrentSlice( int oldId, int newId, Ti
     mTileManager->ReplaceSegmentationLabelCurrentSlice( oldId, newId, pDataSpaceFloat3  );
 }
 
+void TileManager::DrawSplit( TiledDatasetView^ tiledDatasetView, Vector3^ pDataSpace, float radius )
+{
+    float3 pDataSpaceFloat3 = make_float3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
+    mTileManager->DrawSplit( pDataSpaceFloat3, radius );
+}
+
 void TileManager::AddSplitSource( TiledDatasetView^ tiledDatasetView, Vector3^ pDataSpace )
 {
     float3 pDataSpaceFloat3 = make_float3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
@@ -168,9 +174,15 @@ void TileManager::PrepForSplit( int segId, int zIndex )
 }
 
 
-void TileManager::FindSplitLine2DTemp( int segId )
+void TileManager::FindSplitLine2D( int segId )
 {
-    mTileManager->FindSplitLine2DTemp( segId );
+    mTileManager->FindSplitLine2D( segId );
+}
+
+void TileManager::FindSplitLine2DHover( int segId, Vector3^ pDataSpace )
+{
+    float3 pDataSpaceFloat3 = make_float3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
+    mTileManager->FindSplitLine2DHover( segId, pDataSpaceFloat3 );
 }
 
 int TileManager::CompleteSplit( int segId )

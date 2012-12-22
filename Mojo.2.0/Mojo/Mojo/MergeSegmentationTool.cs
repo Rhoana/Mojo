@@ -37,6 +37,11 @@ namespace Mojo
                     if ( keyEventArgs.KeyboardDevice.Modifiers == System.Windows.Input.ModifierKeys.Control )
                         mTileManager.Internal.RedoChange();
                     break;
+                case System.Windows.Input.Key.Escape:
+                    //Unselect this segment
+                    mTileManager.SelectedSegmentId = 0;
+                    break;
+
             }
         }
 
@@ -71,8 +76,8 @@ namespace Mojo
                         if ( newId == clickedId )
                         {
                             //Unselect this segment
-                            newId = 0;
-                            mTileManager.SelectedSegmentId = 0;
+                            //newId = 0;
+                            //mTileManager.SelectedSegmentId = 0;
                         }
                         else
                         {

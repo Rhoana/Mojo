@@ -179,6 +179,20 @@ namespace Mojo
             }
         }
 
+        private float mDrawSize = 10;
+        public float DrawSize
+        {
+            get
+            {
+                return mDrawSize;
+            }
+            set
+            {
+                mDrawSize = value;
+                OnPropertyChanged( "DrawSize" );
+            }
+        }
+
         private bool mConstrainSegmentationMergeToCurrentSlice = true;
         public bool ConstrainSegmentationMergeToCurrentSlice
         {
@@ -306,7 +320,7 @@ namespace Mojo
                                                   {
                                                       { "SourceMap", sourceMapTiledVolumeDescription },
                                                       { "IdMap", idMapTiledVolumeDescription },
-                                                      { "SplitMap", idMapTiledVolumeDescription }
+                                                      { "OverlayMap", idMapTiledVolumeDescription }
                                                       //,
                                                       //{ "TempIdMap", tempIdMapTiledVolumeDescription }
                                                   },

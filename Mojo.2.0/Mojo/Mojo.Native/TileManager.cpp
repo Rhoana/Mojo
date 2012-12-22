@@ -188,14 +188,14 @@ void TileManager::LoadTiles( const TiledDatasetView& tiledDatasetView )
 					Core::Thrust::MemcpyHostToDevice( mTileCache[ newCacheIndex ].deviceVectors.Get< int >( "IdMap" ), volumeDescriptions.Get( "IdMap" ).data, idNumVoxelsPerTile );
 				}
 
-				if ( volumeDescriptions.GetHashMap().find( "SplitMap" ) != volumeDescriptions.GetHashMap().end() )
+				if ( volumeDescriptions.GetHashMap().find( "OverlayMap" ) != volumeDescriptions.GetHashMap().end() )
 				{
-					mTileCache[ newCacheIndex ].d3d11CudaTextures.Get( "SplitMap" )->Update( volumeDescriptions.Get( "SplitMap" ) );
+					mTileCache[ newCacheIndex ].d3d11CudaTextures.Get( "OverlayMap" )->Update( volumeDescriptions.Get( "OverlayMap" ) );
 
-					int3 volShape = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "SplitMap" ).numVoxelsPerTile;
+					int3 volShape = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "OverlayMap" ).numVoxelsPerTile;
 					int idNumVoxelsPerTile = volShape.x * volShape.y * volShape.z;
 
-					Core::Thrust::MemcpyHostToDevice( mTileCache[ newCacheIndex ].deviceVectors.Get< int >( "SplitMap" ), volumeDescriptions.Get( "SplitMap" ).data, idNumVoxelsPerTile );
+					Core::Thrust::MemcpyHostToDevice( mTileCache[ newCacheIndex ].deviceVectors.Get< int >( "OverlayMap" ), volumeDescriptions.Get( "OverlayMap" ).data, idNumVoxelsPerTile );
 				}
 			}
 
@@ -300,6 +300,13 @@ void TileManager::ReplaceSegmentationLabelCurrentSlice( int oldId, int newId, fl
     ReloadTileCache();
 }
 
+void TileManager::DrawSplit( float3 pointTileSpace, float radius )
+{
+    mTileServer->DrawSplit( pointTileSpace, radius );
+
+    ReloadTileCacheOverlayMapOnly();
+}
+
 void TileManager::AddSplitSource( float3 pointTileSpace )
 {
     mTileServer->AddSplitSource( pointTileSpace );
@@ -314,21 +321,28 @@ void TileManager::ResetSplitState()
 {
     mTileServer->ResetSplitState();
 
-    ReloadTileCache();
+    ReloadTileCacheOverlayMapOnly();
 }
 
 void TileManager::PrepForSplit( int segId, int zIndex )
 {
     mTileServer->PrepForSplit( segId, zIndex );
 
-	ReloadTileCache();
+	ReloadTileCacheOverlayMapOnly();
 }
 
-void TileManager::FindSplitLine2DTemp( int segId )
+void TileManager::FindSplitLine2D( int segId )
 {
-    mTileServer->FindSplitLine2DTemp( segId );
+    mTileServer->FindSplitLine2D( segId );
 
-    ReloadTileCache();
+    ReloadTileCacheOverlayMapOnly();
+}
+
+void TileManager::FindSplitLine2DHover( int segId, float3 pointTileSpace )
+{
+    mTileServer->FindSplitLine2DHover( segId, pointTileSpace );
+
+    ReloadTileCacheOverlayMapOnly();
 }
 
 int TileManager::CompleteSplit( int segId )
@@ -417,6 +431,8 @@ void TileManager::UnloadTiledDatasetInternal()
             mTileCache[ i ].deviceVectors.Clear();
 
             delete mTileCache[ i ].d3d11CudaTextures.Get( "SourceMap" );
+            delete mTileCache[ i ].d3d11CudaTextures.Get( "IdMap" );
+            delete mTileCache[ i ].d3d11CudaTextures.Get( "OverlayMap" );
 
             mTileCache[ i ].d3d11CudaTextures.GetHashMap().clear();
         }
@@ -463,19 +479,6 @@ void TileManager::UnloadSegmentationInternal()
         mIdColorMapBuffer = NULL;
 
         mIdColorMap = marray::Marray< unsigned char >();
-
-
-   //     //
-   //     // delete id textures in the tile cache
-   //     //
-   //     for ( int i = 0; i < TILE_CACHE_SIZE; i++ )
-   //     {
-			//mTileCache[ i ].deviceVectors.EraseAll( "IdMap" );
-
-   //         delete mTileCache[ i ].d3d11CudaTextures.Get( "IdMap" );
-
-   //         mTileCache[ i ].d3d11CudaTextures.GetHashMap().erase( "IdMap" );
-   //     }
 
         //
         // output memory stats to the console
@@ -670,25 +673,65 @@ void TileManager::ReloadTileCache()
 
 			if ( mIsSegmentationLoaded )
 			{
-					if ( volumeDescriptions.GetHashMap().find( "SplitMap" ) != volumeDescriptions.GetHashMap().end() )
-					{
-						mTileCache[ cacheIndex ].d3d11CudaTextures.Get( "IdMap"     )->Update( volumeDescriptions.Get( "IdMap"     ) );
+				if ( volumeDescriptions.GetHashMap().find( "IdMap" ) != volumeDescriptions.GetHashMap().end() )
+				{
+					mTileCache[ cacheIndex ].d3d11CudaTextures.Get( "IdMap"     )->Update( volumeDescriptions.Get( "IdMap"     ) );
 
-						int3 volShape = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "IdMap" ).numVoxelsPerTile;
-						int idNumVoxelsPerTile = volShape.x * volShape.y * volShape.z;
+					int3 volShape = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "IdMap" ).numVoxelsPerTile;
+					int idNumVoxelsPerTile = volShape.x * volShape.y * volShape.z;
 
-						Core::Thrust::MemcpyHostToDevice( mTileCache[ cacheIndex ].deviceVectors.Get< int >( "IdMap" ), volumeDescriptions.Get( "IdMap" ).data, idNumVoxelsPerTile );
-					}
+					Core::Thrust::MemcpyHostToDevice( mTileCache[ cacheIndex ].deviceVectors.Get< int >( "IdMap" ), volumeDescriptions.Get( "IdMap" ).data, idNumVoxelsPerTile );
+				}
 
-					if ( volumeDescriptions.GetHashMap().find( "SplitMap" ) != volumeDescriptions.GetHashMap().end() )
-					{
-						mTileCache[ cacheIndex ].d3d11CudaTextures.Get( "SplitMap" )->Update( volumeDescriptions.Get( "SplitMap" ) );
+				if ( volumeDescriptions.GetHashMap().find( "OverlayMap" ) != volumeDescriptions.GetHashMap().end() )
+				{
+					mTileCache[ cacheIndex ].d3d11CudaTextures.Get( "OverlayMap" )->Update( volumeDescriptions.Get( "OverlayMap" ) );
 
-						int3 volShape = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "SplitMap" ).numVoxelsPerTile;
-						int idNumVoxelsPerTile = volShape.x * volShape.y * volShape.z;
+					int3 volShape = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "OverlayMap" ).numVoxelsPerTile;
+					int idNumVoxelsPerTile = volShape.x * volShape.y * volShape.z;
 
-						Core::Thrust::MemcpyHostToDevice( mTileCache[ cacheIndex ].deviceVectors.Get< int >( "SplitMap" ), volumeDescriptions.Get( "SplitMap" ).data, idNumVoxelsPerTile );
-					}
+					Core::Thrust::MemcpyHostToDevice( mTileCache[ cacheIndex ].deviceVectors.Get< int >( "OverlayMap" ), volumeDescriptions.Get( "OverlayMap" ).data, idNumVoxelsPerTile );
+				}
+			}
+
+            //
+            // unload image data from from host memory
+            //
+            mTileServer->UnloadTile( tileIndex );
+        }
+    }
+}
+
+void TileManager::ReloadTileCacheOverlayMapOnly()
+{
+    for ( int cacheIndex = 0; cacheIndex < TILE_CACHE_SIZE; cacheIndex++ )
+    {
+        if ( mTileCache[ cacheIndex ].indexTileSpace.x != TILE_CACHE_PAGE_TABLE_BAD_INDEX &&
+             mTileCache[ cacheIndex ].indexTileSpace.y != TILE_CACHE_PAGE_TABLE_BAD_INDEX &&
+             mTileCache[ cacheIndex ].indexTileSpace.z != TILE_CACHE_PAGE_TABLE_BAD_INDEX &&
+             mTileCache[ cacheIndex ].indexTileSpace.w != TILE_CACHE_PAGE_TABLE_BAD_INDEX )
+        {
+            //
+            // load image data into host memory
+            //
+            int4 tileIndex = mTileCache[ cacheIndex ].indexTileSpace;
+            Core::HashMap< std::string, Core::VolumeDescription > volumeDescriptions = mTileServer->LoadTile( tileIndex );
+
+            //
+            // load the new data into into device memory for the new cache entry
+            //
+
+			if ( mIsSegmentationLoaded )
+			{
+				if ( volumeDescriptions.GetHashMap().find( "OverlayMap" ) != volumeDescriptions.GetHashMap().end() )
+				{
+					mTileCache[ cacheIndex ].d3d11CudaTextures.Get( "OverlayMap" )->Update( volumeDescriptions.Get( "OverlayMap" ) );
+
+					int3 volShape = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "OverlayMap" ).numVoxelsPerTile;
+					int idNumVoxelsPerTile = volShape.x * volShape.y * volShape.z;
+
+					Core::Thrust::MemcpyHostToDevice( mTileCache[ cacheIndex ].deviceVectors.Get< int >( "OverlayMap" ), volumeDescriptions.Get( "OverlayMap" ).data, idNumVoxelsPerTile );
+				}
 			}
 
             //

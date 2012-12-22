@@ -6,16 +6,31 @@ import PIL
 import PIL.Image
 import lxml
 import lxml.etree
+import glob
 
 tile_num_pixels_y = 512
 tile_num_pixels_x = 512
 
-original_input_images_path = 'C:\\dev\\datasets\\challengeCubeFirstTenSlices2\\images'
-output_tile_image_path     = 'C:\\dev\\datasets\\challengeCubeFirstTenSlices2\\mojo\\images\\tiles'
-output_pyramid_image_path  = 'C:\\dev\\datasets\\challengeCubeFirstTenSlices2\\mojo\\images\\pyramid'
-output_tile_volume_file    = 'C:\\dev\\datasets\\challengeCubeFirstTenSlices2\\mojo\\images\\tiledVolumeDescription.xml'
+original_input_images_path = 'D:\\dev\\datasets\\challengeCubeV2x1000\\images'
+output_tile_image_path     = 'D:\\dev\\datasets\\challengeCubeV2x1000\\mojo\\images\\tiles'
+output_pyramid_image_path  = 'D:\\dev\\datasets\\challengeCubeV2x1000\\mojo\\images\\pyramid'
+output_tile_volume_file    = 'D:\\dev\\datasets\\challengeCubeV2x1000\\mojo\\images\\tiledVolumeDescription.xml'
 output_image_extension     = '.png'
 image_resize_filter        = PIL.Image.ANTIALIAS
+
+#original_input_images_path = 'C:\\dev\\datasets\\challengeCubeV2x20\\images'
+#output_tile_image_path     = 'C:\\dev\\datasets\\challengeCubeV2x20\\mojo\\images\\tiles'
+#output_pyramid_image_path  = 'C:\\dev\\datasets\\challengeCubeV2x20\\mojo\\images\\pyramid'
+#output_tile_volume_file    = 'C:\\dev\\datasets\\challengeCubeV2x20\\mojo\\images\\tiledVolumeDescription.xml'
+#output_image_extension     = '.png'
+#image_resize_filter        = PIL.Image.ANTIALIAS
+
+#original_input_images_path = 'C:\\dev\\datasets\\challengeCubeFirstTenSlices2\\images'
+#output_tile_image_path     = 'C:\\dev\\datasets\\challengeCubeFirstTenSlices2\\mojo\\images\\tiles'
+#output_pyramid_image_path  = 'C:\\dev\\datasets\\challengeCubeFirstTenSlices2\\mojo\\images\\pyramid'
+#output_tile_volume_file    = 'C:\\dev\\datasets\\challengeCubeFirstTenSlices2\\mojo\\images\\tiledVolumeDescription.xml'
+#output_image_extension     = '.png'
+#image_resize_filter        = PIL.Image.ANTIALIAS
 
 ##original_input_images_path = 'C:\\Users\\mike\\Documents\\Work\\Data\\2012.MIA\\datasets\\verenaTestOutput\\colors'
 ##output_tile_image_path     = 'C:\\Users\\mike\\Documents\\Work\\Data\\2012.MIA\\datasets\\verenaTestOutput\\mojo\\colors\\tiles'
@@ -52,12 +67,12 @@ def mkdir_safe( dir_to_make ):
         os.system( execute_string )
                 
         
-files = sorted( os.listdir( original_input_images_path ) )
+files = sorted( glob.glob( original_input_images_path + '\\*.png' ) )
 
 tile_index_z = 0
 
 for file in files:
-    original_image = PIL.Image.open( original_input_images_path + '\\' + file )
+    original_image = PIL.Image.open( file )
 
     ( original_image_num_pixels_x, original_image_num_pixels_y ) = original_image.size
 

@@ -59,11 +59,13 @@ public:
     void                                                  ReplaceSegmentationLabelCurrentSlice( int oldId, int newId, float3 pDataSpace );
     void                                                  ReplaceSegmentationLabelCurrentConnectedComponent( int oldId, int newId, float3 pDataSpace );
 
+    void                                                  DrawSplit( float3 pointTileSpace, float radius );
     void                                                  AddSplitSource( float3 pointTileSpace );
     void                                                  RemoveSplitSource();
     void                                                  ResetSplitState();
     void                                                  PrepForSplit( int segId, int zIndex );
-	void                                                  FindSplitLine2DTemp( int segId );
+	void                                                  FindSplitLine2D( int segId );
+	void                                                  FindSplitLine2DHover( int segId, float3 pointTileSpace );
     int                                                   CompleteSplit( int segId );
 
 	void                                                  UndoChange();
@@ -87,6 +89,7 @@ private:
     int3                                                  GetOffsetVoxelSpace( float4 pTileSpace, int4 pTileIndex, int3 numVoxelsPerTile );
 
     void                                                  ReloadTileCache();
+    void                                                  ReloadTileCacheOverlayMapOnly();
 
     ID3D11Device*                                         mD3D11Device;
     ID3D11DeviceContext*                                  mD3D11DeviceContext;
@@ -129,7 +132,7 @@ inline void TileManager::LoadTiledDatasetInternal( TiledDatasetDescription& tile
     RELEASE_ASSERT( mTileServer->IsTiledDatasetLoaded() );
 
     //
-    // store a copy of the tiled dataset description
+    // store a refernce to the tiled dataset description
     //
     mTiledDatasetDescription = tiledDatasetDescription;
 
@@ -150,7 +153,7 @@ inline void TileManager::LoadTiledDatasetInternal( TiledDatasetDescription& tile
             mTiledDatasetDescription.tiledVolumeDescriptions.Get( "IdMap" ).numVoxelsPerTile.z;
 
         tileCacheEntry.deviceVectors.Set( "IdMap", thrust::device_vector< int >( numVoxelsPerTile, mConstParameters.Get< int >( "ID_MAP_INITIAL_VALUE" ) ) );
-        tileCacheEntry.deviceVectors.Set( "SplitMap", thrust::device_vector< int >( numVoxelsPerTile, mConstParameters.Get< int >( "ID_MAP_INITIAL_VALUE" ) ) );
+        tileCacheEntry.deviceVectors.Set( "OverlayMap", thrust::device_vector< int >( numVoxelsPerTile, mConstParameters.Get< int >( "ID_MAP_INITIAL_VALUE" ) ) );
 
 
         D3D11_TEXTURE3D_DESC textureDesc3D;
@@ -173,8 +176,8 @@ inline void TileManager::LoadTiledDatasetInternal( TiledDatasetDescription& tile
 
 
 		//
-		// Allocate memory for the IdMap and SplitMap tiles here
-		// (IdMap will be overwriten in LoadSegmentationInternal)
+		// Allocate memory for the IdMap and OverlayMap tiles here
+		// (data will be loaded in LoadSegmentationInternal)
 		//
         ZeroMemory( &textureDesc3D, sizeof( D3D11_TEXTURE3D_DESC ) );
 
@@ -196,13 +199,13 @@ inline void TileManager::LoadTiledDatasetInternal( TiledDatasetDescription& tile
                 tileCacheEntry.deviceVectors.Get< int >( "IdMap" ) ) );
         
         tileCacheEntry.d3d11CudaTextures.Set(
-            "SplitMap",
+            "OverlayMap",
             new Core::D3D11CudaTexture< ID3D11Texture3D, int >(
                 mD3D11Device,
                 mD3D11DeviceContext,
                 textureDesc3D,
                 mTiledDatasetDescription.tiledVolumeDescriptions.Get( "IdMap" ).numVoxelsPerTile,
-                tileCacheEntry.deviceVectors.Get< int >( "SplitMap" ) ) );
+                tileCacheEntry.deviceVectors.Get< int >( "OverlayMap" ) ) );
 
         mTileCache[ i ] = tileCacheEntry;
     }

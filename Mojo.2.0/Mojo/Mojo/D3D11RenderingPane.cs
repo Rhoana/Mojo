@@ -79,20 +79,23 @@ namespace Mojo
 
         public void SetSize( Size size )
         {
-            DestroyD3D11Resources();
+            lock ( mSwapChain )
+            {
+                DestroyD3D11Resources();
 
-            mSwapChain.ResizeBuffers( 1,
-                                        (int)size.Width,
-                                        (int)size.Height,
-                                        Format.R8G8B8A8_UNorm,
-                                        SwapChainFlags.None );
+                mSwapChain.ResizeBuffers( 1,
+                                            (int)size.Width,
+                                            (int)size.Height,
+                                            Format.R8G8B8A8_UNorm,
+                                            SwapChainFlags.None );
 
-            mSwapChain.ResizeTarget( new ModeDescription( (int)size.Width,
-                                                            (int)size.Height,
-                                                            new Rational( 60, 1 ),
-                                                            Format.R8G8B8A8_UNorm ) );
+                mSwapChain.ResizeTarget( new ModeDescription( (int)size.Width,
+                                                                (int)size.Height,
+                                                                new Rational( 60, 1 ),
+                                                                Format.R8G8B8A8_UNorm ) );
 
-            CreateD3D11Resources( (int)size.Width, (int)size.Height );
+                CreateD3D11Resources( (int)size.Width, (int)size.Height );
+            }
 
         }
 

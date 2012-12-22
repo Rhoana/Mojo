@@ -7,33 +7,53 @@ import PIL.Image
 import numpy
 import scipy
 import scipy.io
-import cv
+#import cv
 import h5py
 import lxml
 import lxml.etree
-
+import glob
 
 
 tile_num_pixels_y             = 512
 tile_num_pixels_x             = 512
 
-original_input_color_map_path = 'C:\\dev\\datasets\\amelioBigCube\\cube_coloring\\cmap.mat'
-original_input_ids_path       = 'C:\\dev\\datasets\\amelioBigCube\\stitched\\labels_mat'
+##original_input_color_map_path = 'C:\\dev\\datasets\\amelioBigCube\\cube_coloring\\cmap.mat'
+##original_input_ids_path       = 'C:\\dev\\datasets\\amelioBigCube\\stitched\\labels_mat'
+##
+##color_map_variable_name       = 'cmap'
+##ids_variable_name             = 'i_L'
+##ids_upscale_factor            = 5
+##
+##output_tile_colors_path       = 'C:\\dev\\datasets\\challengeCubeFirstTenSlices2\\mojo\\ids\\debug\\tiles\\colors'
+##output_pyramid_colors_path    = 'C:\\dev\\datasets\\challengeCubeFirstTenSlices2\\mojo\\ids\\debug\\pyramid\\colors'
+##
+##output_tile_ids_path          = 'C:\\dev\\datasets\\challengeCubeFirstTenSlices2\\mojo\\ids\\tiles'
+##output_pyramid_ids_path       = 'C:\\dev\\datasets\\challengeCubeFirstTenSlices2\\mojo\\ids\\pyramid'
+##
+##output_id_tile_map_path       = 'C:\\dev\\datasets\\challengeCubeFirstTenSlices2\\mojo\\idTileMap'
+##output_id_color_map_path      = 'C:\\dev\\datasets\\challengeCubeFirstTenSlices2\\mojo\\idColorMap'
+##
+##output_tile_volume_file       = 'C:\\dev\\datasets\\challengeCubeFirstTenSlices2\\mojo\\ids\\tiledVolumeDescription.xml'
+
+original_input_color_map_path = 'C:\\dev\\datasets\\conn\\main_dataset\\5K_cube\\diced_xy=512_z=32_xyOv=128_zOv=12_dwnSmp=1\\res_from_0ct15_PF\\FS=1\\cmap.mat'
+original_input_ids_path       = 'C:\\dev\\datasets\\conn\\main_dataset\\5K_cube\\diced_xy=512_z=32_xyOv=128_zOv=12_dwnSmp=1\\res_from_0ct15_PF\\FS=1\\stitched\\labels_grow'
+##original_input_ids_path       = 'C:\\dev\\datasets\\conn\\main_dataset\\5K_cube\\diced_xy=512_z=32_xyOv=128_zOv=12_dwnSmp=1\\res_from_0ct15_PF\\FS=1\\stitched\\labels\\'
 
 color_map_variable_name       = 'cmap'
-ids_variable_name             = 'i_L'
-ids_upscale_factor            = 5
+##ids_variable_name             = 'i_L'
+ids_upscale_factor            = 1
 
-output_tile_colors_path       = 'C:\\dev\\datasets\\challengeCubeFirstTenSlices2\\mojo\\ids\\debug\\tiles\\colors'
-output_pyramid_colors_path    = 'C:\\dev\\datasets\\challengeCubeFirstTenSlices2\\mojo\\ids\\debug\\pyramid\\colors'
+output_tile_colors_path       = 'C:\\dev\\datasets\\challengeCubeV2x20G\\mojo\\ids\\debug\\tiles\\colors'
+output_pyramid_colors_path    = 'C:\\dev\\datasets\\challengeCubeV2x20G\\mojo\\ids\\debug\\pyramid\\colors'
 
-output_tile_ids_path          = 'C:\\dev\\datasets\\challengeCubeFirstTenSlices2\\mojo\\ids\\tiles'
-output_pyramid_ids_path       = 'C:\\dev\\datasets\\challengeCubeFirstTenSlices2\\mojo\\ids\\pyramid'
+output_tile_ids_path          = 'C:\\dev\\datasets\\challengeCubeV2x20G\\mojo\\ids\\tiles'
+output_pyramid_ids_path       = 'C:\\dev\\datasets\\challengeCubeV2x20G\\mojo\\ids\\pyramid'
 
-output_id_tile_map_path       = 'C:\\dev\\datasets\\challengeCubeFirstTenSlices2\\mojo\\idTileMap'
-output_id_color_map_path      = 'C:\\dev\\datasets\\challengeCubeFirstTenSlices2\\mojo\\idColorMap'
+output_id_tile_map_path       = 'C:\\dev\\datasets\\challengeCubeV2x20G\\mojo\\idTileMap'
+output_id_color_map_path      = 'C:\\dev\\datasets\\challengeCubeV2x20G\\mojo\\idColorMap'
+output_id_counts_path      = 'C:\\dev\\datasets\\challengeCubeV2x20G\\mojo\\idCounts'
 
-output_tile_volume_file       = 'C:\\dev\\datasets\\challengeCubeFirstTenSlices2\\mojo\\ids\\tiledVolumeDescription.xml'
+output_tile_volume_file       = 'C:\\dev\\datasets\\challengeCubeV2x20G\\mojo\\ids\\tiledVolumeDescription.xml'
 
 def mkdir_safe( dir_to_make ):
 
@@ -93,18 +113,33 @@ def save_id_tile_map( file_path, id_tile_map ):
 
 color_map_mat_dict   = scipy.io.loadmat( original_input_color_map_path )
 id_color_map         = color_map_mat_dict[ 'cmap' ]
-files                = sorted( os.listdir( original_input_ids_path ) )
+files                = sorted( glob.glob( original_input_ids_path + '\\*.png' ) )
+id_counts            = numpy.zeros( id_color_map.shape[0], dtype=numpy.int64 );
 id_tile_map          = {}
 tile_index_z         = 0
 
+# Make a color index
+id_label = id_color_map[ :, 0 ] + id_color_map[ :, 1 ] * 2**8 + id_color_map[ :, 2 ] * 2**16
+id_label_index = numpy.zeros( numpy.max(id_label) + 1, dtype=int )
+id_label_index[ id_label ] = range(len(id_label))
+
 for file in files:
 
-    original_input_ids_name = original_input_ids_path + '\\' + file
+    original_input_ids_name = file
 
-    ids_mat_dict            = scipy.io.loadmat( original_input_ids_name )
-    ids_raw                 = ids_mat_dict[ ids_variable_name ]
-    original_ids            = numpy.kron( ids_raw, numpy.ones( ( ids_upscale_factor, ids_upscale_factor ) ) ).astype( numpy.uint32 ).copy()
+##    ids_mat_dict            = scipy.io.loadmat( original_input_ids_name )
+##    ids_raw                 = ids_mat_dict[ ids_variable_name ]
+##    
+##    original_ids            = numpy.kron( ids_raw, numpy.ones( ( ids_upscale_factor, ids_upscale_factor ) ) ).astype( numpy.uint32 ).copy()
 
+    original_colors = numpy.array(PIL.Image.open( original_input_ids_name ))
+    original_labels = original_colors[ :, :, 0 ] + original_colors[ :, :, 1 ] * 2**8 + original_colors[ :, :, 2 ] * 2**16
+    original_ids = id_label_index[ original_labels ]
+
+    current_image_counts = numpy.bincount( original_ids.flatten() )
+    current_image_counts_ids = numpy.nonzero( current_image_counts )[0]
+    id_counts[ current_image_counts_ids ] = id_counts[ current_image_counts_ids ] + current_image_counts [ current_image_counts_ids ]
+    
     ( original_image_num_pixels_x, original_image_num_pixels_y ) = original_ids.shape
 
     current_image_num_pixels_y = original_image_num_pixels_y
@@ -157,7 +192,7 @@ for file in files:
                 tile_colors_image = PIL.Image.fromarray( tile_colors )
                 save_image( current_tile_colors_name, tile_colors_image )
 
-                tile_index      = ( tile_index_x, tile_index_y, tile_index_z, tile_index_w )                
+                tile_index      = ( tile_index_x, tile_index_y, tile_index_z, tile_index_w )
                 unique_tile_ids = numpy.unique( tile_ids )
                 
                 for unique_tile_id in unique_tile_ids:
@@ -178,18 +213,21 @@ for file in files:
 
 
 
-    if tile_index_z > 9:
+    if tile_index_z > 19:
         break
 
 
 mkdir_safe( output_id_tile_map_path )
 mkdir_safe( output_id_color_map_path )
+mkdir_safe( output_id_counts_path )
 
 output_id_tile_map_name  = output_id_tile_map_path  + '\\idTileMap.xml'
 output_id_color_map_name = output_id_color_map_path + '\\idColorMap.hdf5'
+output_id_counts_name = output_id_counts_path + '\\idCounts.hdf5'
 
 save_id_tile_map( output_id_tile_map_name, id_tile_map )
 save_hdf5( output_id_color_map_name, 'IdColorMap', id_color_map )
+save_hdf5( output_id_counts_name, 'IdCounts', id_counts )
 
 #Output TiledVolumeDescription xml file
 tiledVolumeDescription = lxml.etree.Element( "tiledVolumeDescription",

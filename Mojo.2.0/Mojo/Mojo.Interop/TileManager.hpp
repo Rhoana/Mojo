@@ -1,5 +1,7 @@
 #pragma once
 
+#include "vld.h"
+
 #include "Mojo.Native/ITileServer.hpp"
 #include "Mojo.Native/TileManager.hpp"
 
@@ -51,11 +53,13 @@ public:
     void                                                    ReplaceSegmentationLabelCurrentSlice( int oldId, int newId, TiledDatasetView^ tiledDatasetView, Vector3^ pDataSpace );
     void                                                    ReplaceSegmentationLabelCurrentConnectedComponent( int oldId, int newId, TiledDatasetView^ tiledDatasetView, Vector3^ pDataSpace );
 
+    void                                                    DrawSplit( TiledDatasetView^ tiledDatasetView, Vector3^ pDataSpace, float radius );
     void                                                    AddSplitSource( TiledDatasetView^ tiledDatasetView, Vector3^ pDataSpace );
     void                                                    RemoveSplitSource();
     void                                                    ResetSplitState();
     void                                                    PrepForSplit( int segId, int zIndex );
-	void                                                    FindSplitLine2DTemp( int segId );
+	void                                                    FindSplitLine2D( int segId );
+	void                                                    FindSplitLine2DHover( int segId, Vector3^ pDataSpace );
     int                                                     CompleteSplit( int segId );
 
 	void                                                    UndoChange();

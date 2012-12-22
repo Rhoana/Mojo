@@ -5,7 +5,7 @@
     <EnableUnmanagedDebugging>true</EnableUnmanagedDebugging>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
-    <StartWorkingDirectory>C:\dev\Mojo\Mojo.2.0\Mojo\Bin\</StartWorkingDirectory>
+    <StartWorkingDirectory>C:\dev\MojoGit\Mojo.2.0\Mojo\Bin\</StartWorkingDirectory>
     <EnableUnmanagedDebugging>true</EnableUnmanagedDebugging>
   </PropertyGroup>
 </Project>

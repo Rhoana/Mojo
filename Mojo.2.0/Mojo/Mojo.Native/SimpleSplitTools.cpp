@@ -1,3 +1,4 @@
+#include <math.h>
 #include "SimpleSplitTools.hpp"
 #include "Mojo.Core/Stl.hpp"
 #include "Mojo.Core/Comparator.hpp"
@@ -90,7 +91,63 @@ void SimpleSplitTools::ApplyLargeMask ( const int fromIndex, const int width, co
     }
 }
 
-void SimpleSplitTools::DijkstraSearch ( const int* searchArea, const int* searchMask, const int fromIndex, const int width, const int height, const int targetMax, int* dist, int* prev, int* toIndex )
+void SimpleSplitTools::ApplyCircleMask ( const int fromIndex, const int width, const int height, const int targetVal, float radius, int* area )
+{
+    int mask_r = (int) ( radius + 0.5 );
+    int mask_wh = mask_r * 2 + 1;
+    float dist;
+
+    int nx, ny, ax, ay;
+
+    for ( nx = -mask_r; nx <= mask_r; ++nx )
+    {
+        for ( ny = -mask_r; ny <= mask_r; ++ny )
+        {
+            dist = sqrt( (float) ( nx * nx + ny * ny ) );
+
+            if ( dist <= radius )
+            {
+                ax = fromIndex % width + nx;
+                ay = fromIndex / width + ny;
+                if ( ax >= 0 && ax < width &&
+                    ay >= 0 && ay < height )
+                {
+                    area[ ax + ay * width ] = targetVal;
+                }
+            }
+        }
+    }
+}
+
+void SimpleSplitTools::ApplyCircleMask ( const int fromIndex, const int width, const int height, const int targetVal, float radius, unsigned int* area )
+{
+    int mask_r = (int) ( radius + 0.5 );
+    int mask_wh = mask_r * 2 + 1;
+    float dist;
+
+    int nx, ny, ax, ay;
+
+    for ( nx = -mask_r; nx <= mask_r; ++nx )
+    {
+        for ( ny = -mask_r; ny <= mask_r; ++ny )
+        {
+            dist = sqrt( (float) ( nx * nx + ny * ny ) );
+
+            if ( dist <= radius )
+            {
+                ax = fromIndex % width + nx;
+                ay = fromIndex / width + ny;
+                if ( ax >= 0 && ax < width &&
+                    ay >= 0 && ay < height )
+                {
+                    area[ ax + ay * width ] = targetVal;
+                }
+            }
+        }
+    }
+}
+
+void SimpleSplitTools::DijkstraSearch ( const int* searchArea, const int* searchMask, const int* searchBonus, const int fromIndex, const int width, const int height, const int targetMax, int* dist, int* prev, int* toIndex )
 {
 	for ( int i = 0; i < width * height; ++i )
 	{
@@ -174,6 +231,10 @@ void SimpleSplitTools::DijkstraSearch ( const int* searchArea, const int* search
 			{
 				stepDist = 0;
 			}
+            else if ( searchBonus[ nextIndex ] == BONUS_REGION )
+            {
+                stepDist = searchArea[ nextIndex ] - BONUS_VALUE;
+            }
 
 			//Core::Printf( "stepDist=", stepDist, ".\n" );
 
@@ -215,7 +276,7 @@ void SimpleSplitTools::DijkstraSearch ( const int* searchArea, const int* search
 		//
 		*toIndex = currentIndex;
         //currentIndex = prev[ currentIndex ];
-		Core::Printf( "Found target - tracing back." );
+		//Core::Printf( "Found target - tracing back." );
 		int linePix = 0;
 		int tempIndex;
 		while ( currentIndex != fromIndex )
@@ -226,7 +287,7 @@ void SimpleSplitTools::DijkstraSearch ( const int* searchArea, const int* search
 			prev[ tempIndex ] = PATH_RESULT_VALUE;
 			++linePix;
 		}
-		Core::Printf( "Found ", linePix, " line pixels." );
+		//Core::Printf( "Found ", linePix, " line pixels." );
 	}
 	else
 	{

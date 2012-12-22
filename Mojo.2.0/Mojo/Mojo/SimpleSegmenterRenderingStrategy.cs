@@ -256,9 +256,9 @@ namespace Mojo
                 mEffect.GetVariableByName( "gIdTexture3D" ).AsResource().SetResource( tileCacheEntry.D3D11CudaTextures.Get( "IdMap" ) );
                 mEffect.GetVariableByName( "gIdColorMapBuffer" ).AsResource().SetResource( mTileManager.Internal.GetIdColorMap() );
 
-                if ( tileCacheEntry.D3D11CudaTextures.Internal.ContainsKey( "SplitMap" ) )
+                if ( tileCacheEntry.D3D11CudaTextures.Internal.ContainsKey( "OverlayMap" ) )
                 {
-                    mEffect.GetVariableByName( "gSplitTexture3D" ).AsResource().SetResource( tileCacheEntry.D3D11CudaTextures.Get( "SplitMap" ) );
+                    mEffect.GetVariableByName( "gOverlayTexture3D" ).AsResource().SetResource( tileCacheEntry.D3D11CudaTextures.Get( "OverlayMap" ) );
                     mTinyTextContext.Print( viewport, "Got Splits!", 10, 50 );
                 }
                 else
@@ -273,6 +273,7 @@ namespace Mojo
 
             mEffect.GetVariableByName( "gMouseOverX" ).AsScalar().Set( ( mTileManager.MouseOverX - tileMinExtentX ) / tileCacheEntry.ExtentDataSpace.X );
             mEffect.GetVariableByName( "gMouseOverY" ).AsScalar().Set( ( mTileManager.MouseOverY - tileMinExtentY ) / tileCacheEntry.ExtentDataSpace.Y );
+            mEffect.GetVariableByName( "gMouseHighlightSize" ).AsScalar().Set( mTileManager.DrawSize );
 
             mPass.Apply( deviceContext );
             deviceContext.Draw( QUAD_NUM_VERTICES, 0 );
