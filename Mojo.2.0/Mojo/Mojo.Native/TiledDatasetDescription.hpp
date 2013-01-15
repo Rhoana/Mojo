@@ -16,7 +16,6 @@ class TiledDatasetDescription
 {
 public:
     Core::HashMap< std::string, TiledVolumeDescription >                            tiledVolumeDescriptions;
-    Core::HashMap< unsigned int, std::set< int4, Mojo::Core::Int4Comparator > >     idTileMap;
     Core::HashMap< std::string, std::string >                                       paths;
 	unsigned int                                                                    maxLabelId;
 };

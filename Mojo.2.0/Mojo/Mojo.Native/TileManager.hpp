@@ -65,7 +65,7 @@ public:
     void                                                  AddSplitSource( float3 pointTileSpace );
     void                                                  RemoveSplitSource();
     void                                                  ResetSplitState();
-    void                                                  PrepForSplit( int segId, int zIndex );
+    void                                                  PrepForSplit( int segId, float3 pointTileSpace );
 	void                                                  FindBoundaryJoinPoints2D( int segId );
 	void                                                  FindBoundaryWithinRegion2D( int segId );
 	void                                                  FindCutBetweenRegions2D( int segId );
@@ -374,7 +374,8 @@ inline void TileManager::LoadSegmentationInternal( TiledDatasetDescription& tile
 
     uchar4* idColorMap = new uchar4[ mIdColorMap.shape( 0 ) ];
 
-    for ( unsigned int i = 0; i < mIdColorMap.shape( 0 ); i++ )
+    unsigned int i;
+    for ( i = 0; i < mIdColorMap.shape( 0 ); i++ )
         idColorMap[ i ] = make_uchar4( mIdColorMap( i, 0 ), mIdColorMap( i, 1 ), mIdColorMap( i, 2 ), 255 );
 
     D3D11_BUFFER_DESC bufferDesc;

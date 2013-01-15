@@ -33,19 +33,19 @@ public:
         }
     }
 
-    property Collections::Generic::IDictionary< unsigned int, Collections::Generic::IList< Vector4 >^ >^ IdTileMap
-    {
-        Collections::Generic::IDictionary< unsigned int, Collections::Generic::IList< Vector4 >^ >^ get()
-        {
-            return mIdTileMap;
-        }
-        
-        void set( Collections::Generic::IDictionary< unsigned int, Collections::Generic::IList< Vector4 >^ >^ value )
-        {
-            mIdTileMap = value;
-            OnPropertyChanged( "IdTileMap" );
-        }
-    }
+    //property Collections::Generic::IDictionary< unsigned int, Collections::Generic::IList< Vector4 >^ >^ IdTileMap
+    //{
+    //    Collections::Generic::IDictionary< unsigned int, Collections::Generic::IList< Vector4 >^ >^ get()
+    //    {
+    //        return mIdTileMap;
+    //    }
+    //    
+    //    void set( Collections::Generic::IDictionary< unsigned int, Collections::Generic::IList< Vector4 >^ >^ value )
+    //    {
+    //        mIdTileMap = value;
+    //        OnPropertyChanged( "IdTileMap" );
+    //    }
+    //}
 
     property ObservableDictionary< String^, String^ >^ Paths
     {
@@ -77,7 +77,6 @@ public:
 
 private:
     ObservableDictionary< String^, TiledVolumeDescription^ >^                                   mTiledVolumeDescriptions;
-    Collections::Generic::IDictionary< unsigned int, Collections::Generic::IList< Vector4 >^ >^ mIdTileMap;
     ObservableDictionary< String^, String^ >^                                                   mPaths;
 	unsigned int                                                                                mMaxLabelId;
 };

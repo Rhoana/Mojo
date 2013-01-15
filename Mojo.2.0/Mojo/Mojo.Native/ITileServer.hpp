@@ -25,6 +25,11 @@ public:
 
     virtual bool                                                  IsSegmentationLoaded()                                                                  = 0;
 
+    virtual void                                                  SaveSegmentation()                                                                      = 0;
+    virtual void                                                  SaveSegmentationAs( std::string saveName )                                              = 0;
+
+    virtual int                                                   GetTileCountForId( int segId )                                                          = 0;
+
     virtual Core::HashMap< std::string, Core::VolumeDescription > LoadTile( int4 tileIndex )                                                              = 0;
     virtual void                                                  UnloadTile( int4 tileIndex )                                                            = 0;
 
@@ -38,7 +43,7 @@ public:
     virtual void                                                  AddSplitSource( float3 pointTileSpace )                                                 = 0;
     virtual void                                                  RemoveSplitSource()                                                                     = 0;
     virtual void                                                  ResetSplitState()                                                                       = 0;
-    virtual void                                                  PrepForSplit( int segId, int zIndex )                                                   = 0;
+    virtual void                                                  PrepForSplit( int segId, float3 pointTileSpace )                                        = 0;
 	virtual void                                                  FindBoundaryJoinPoints2D( int segId )                                                   = 0;
 	virtual void                                                  FindBoundaryWithinRegion2D( int segId )                                                 = 0;
 	virtual void                                                  FindCutBetweenRegions2D( int segId )                                                    = 0;

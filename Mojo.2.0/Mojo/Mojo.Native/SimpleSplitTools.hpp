@@ -1,15 +1,23 @@
 #pragma once
 
-#define SOURCE_TARGET -2
-#define BORDER_TARGET -1
+#define SPLIT_SEARCH_REGION_VALUE 1
 
-#define BONUS_REGION -3
+#define BORDER_TARGET 2
+#define SOURCE_TARGET 3
+
+#define PATH_RESULT_VALUE 4
+
+#define BONUS_REGION 5
 #define BONUS_VALUE 65536
+
+#define PENALTY_REGION 6
+#define PENALTY_VALUE 65536
 
 #define REGION_A -4
 #define REGION_B -5
 
 #define PATH_RESULT_VALUE -2
+
 
 namespace Mojo
 {

@@ -59,7 +59,7 @@ public:
     void                                                    AddSplitSource( TiledDatasetView^ tiledDatasetView, Vector3^ pDataSpace );
     void                                                    RemoveSplitSource();
     void                                                    ResetSplitState();
-    void                                                    PrepForSplit( int segId, int zIndex );
+    void                                                    PrepForSplit( int segId, Vector3^ pDataSpace );
 	void                                                    FindBoundaryJoinPoints2D( int segId );
 	void                                                    FindBoundaryWithinRegion2D( int segId );
 	void                                                    FindCutBetweenRegions2D( int segId );

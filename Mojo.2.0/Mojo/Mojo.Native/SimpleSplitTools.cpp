@@ -241,6 +241,10 @@ void SimpleSplitTools::DijkstraSearch ( const int* searchArea, const int* search
 			{
 				stepDist = 0;
 			}
+            else if ( searchBonus[ nextIndex ] == PENALTY_REGION )
+            {
+                stepDist = searchArea[ nextIndex ] + PENALTY_VALUE;
+            }
 
 			//Core::Printf( "stepDist=", stepDist, ".\n" );
 
