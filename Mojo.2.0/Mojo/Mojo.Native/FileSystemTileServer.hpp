@@ -40,6 +40,11 @@ public:
 
     virtual bool                                                  IsSegmentationLoaded();
 
+    virtual void                                                  SaveSegmentation();
+    virtual void                                                  SaveSegmentationAs( std::string saveName );
+
+    virtual int                                                   GetTileCountForId( int segId );
+
     virtual Core::HashMap< std::string, Core::VolumeDescription > LoadTile( int4 tileIndex );
     virtual void                                                  UnloadTile( int4 tileIndex );
 
@@ -50,8 +55,9 @@ public:
     virtual void                                                  DrawSplit( float3 pointTileSpace, float radius );
     virtual void                                                  AddSplitSource( float3 pointTileSpace );
     virtual void                                                  RemoveSplitSource();
+    virtual void                                                  LoadSplitDistances( int segId );
     virtual void                                                  ResetSplitState();
-    virtual void                                                  PrepForSplit( int segId, int zIndex );
+    virtual void                                                  PrepForSplit( int segId, float3 pointTileSpace );
 	virtual void                                                  FindSplitLine2D( int segId );
 	virtual void                                                  FindSplitLine2DHover( int segId, float3 pointTileSpace );
     virtual int                                                   CompleteSplit( int segId );
@@ -110,6 +116,7 @@ private:
     void                                                          UnloadTileHdf5Internal( Core::VolumeDescription& volumeDescription );
 
 	void                                                          UpdateSplitTiles();
+	void                                                          UpdateSplitTilesBoundingBox( int2 upperLeft, int2 lowerRight );
 	void                                                          UpdateSplitTilesHover();
 	void                                                          ResetSplitTiles();
 	void                                                          PrepForNextUndoRedoChange();
@@ -120,6 +127,9 @@ private:
     bool                                                          mIsSegmentationLoaded;
 
     Core::HashMap < std::string, FileSystemTileCacheEntry >       mFileSystemTileCache;
+
+    Core::HashMap< unsigned int, 
+        std::set< int4, Mojo::Core::Int4Comparator > >            mIdTileMap;
 
     //
     // simple split variables
@@ -154,7 +164,32 @@ template < typename TCudaType >
 inline void FileSystemTileServer::LoadSegmentationInternal( TiledDatasetDescription& tiledDatasetDescription )
 {
     mTiledDatasetDescription = tiledDatasetDescription;
+
+    //Core::Printf( "Loading idTileMap..." );
+
+    marray::Marray< unsigned int > rawIdTileMap;
+    hid_t hdf5FileHandle = marray::hdf5::openFile( mTiledDatasetDescription.paths.Get( "IdTileMap" ) );
+    marray::hdf5::load( hdf5FileHandle, "IdTileMap", rawIdTileMap );
+    marray::hdf5::closeFile( hdf5FileHandle );
+
+    mIdTileMap.GetHashMap().clear();
+    mTiledDatasetDescription.maxLabelId = 0;
+
+    unsigned int i;
+    for ( i = 0; i < rawIdTileMap.shape( 0 ); i++ )
+    {
+        mIdTileMap.GetHashMap()[ rawIdTileMap( i, 0 ) ].insert( make_int4( rawIdTileMap( i, 1 ), rawIdTileMap( i, 2 ), rawIdTileMap( i, 3 ), rawIdTileMap( i, 4 ) ) );
+        if ( rawIdTileMap( i, 0 ) > mTiledDatasetDescription.maxLabelId )
+        {
+            mTiledDatasetDescription.maxLabelId = rawIdTileMap( i, 0 );
+        }
+    }
+
+    //Core::Printf( "Loaded ", i, " entries into the idTileMap." );
+
     mIsSegmentationLoaded    = true;
+
+    //Core::Printf( "FileSystemTileServer::LoadSegmentationInternal Returning." );
 }
 
 template <>

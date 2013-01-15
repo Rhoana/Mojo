@@ -329,7 +329,6 @@ namespace Mojo
                                                   {
                                                       //{ "IdColorMap", idColorMapPath },
                                                   },
-                                              IdTileMap = null,
                                               MaxLabelId = 0
                                           };
 
@@ -361,17 +360,19 @@ namespace Mojo
             var idMapTiledVolumeDescription = GetTiledVolumeDescription( idMapRootDirectory, idMapTiledVolumeDescriptionPath );
             var tempIdMapTiledVolumeDescription = GetTiledVolumeDescription( tempIdMapRootDirectory, idMapTiledVolumeDescriptionPath );
 
-            var idTileMapXml = XmlReader.ReadFromFile<idTileMap, idTileMapSerializer>( idTileMapPath );
+            //var idTileMapXml = XmlReader.ReadFromFile<idTileMap, idTileMapSerializer>( idTileMapPath );
 
-            var idTileMap = idTileMapXml.idTileMapEntry.ToDictionary(
-                                idTileMapEntry => idTileMapEntry.id,
-                                idTileMapEntry => (IList<Vector4>)idTileMapEntry.tiles.Select( tile => new Vector4( tile.x, tile.y, tile.z, tile.w ) ).ToList() );
+            //var idTileMap = idTileMapXml.idTileMapEntry.ToDictionary(
+            //                    idTileMapEntry => idTileMapEntry.id,
+            //                    idTileMapEntry => (IList<Vector4>)idTileMapEntry.tiles.Select( tile => new Vector4( tile.x, tile.y, tile.z, tile.w ) ).ToList() );
 
             TiledDatasetDescription.TiledVolumeDescriptions.Set( "IdMap", idMapTiledVolumeDescription );
             TiledDatasetDescription.TiledVolumeDescriptions.Set( "TempIdMap", tempIdMapTiledVolumeDescription );
             TiledDatasetDescription.Paths.Set( "IdColorMap", idColorMapPath );
-            TiledDatasetDescription.IdTileMap = idTileMap;
-            TiledDatasetDescription.MaxLabelId = idTileMap.Keys.Max();
+            TiledDatasetDescription.Paths.Set( "IdTileMap", idTileMapPath );
+
+            //TiledDatasetDescription.IdTileMap = idTileMap;
+            //TiledDatasetDescription.MaxLabelId = idTileMap.Keys.Max();
 
             LoadSegmentation( TiledDatasetDescription );
 

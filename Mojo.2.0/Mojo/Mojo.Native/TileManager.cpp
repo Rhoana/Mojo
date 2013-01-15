@@ -324,9 +324,9 @@ void TileManager::ResetSplitState()
     ReloadTileCacheOverlayMapOnly();
 }
 
-void TileManager::PrepForSplit( int segId, int zIndex )
+void TileManager::PrepForSplit( int segId, float3 pointTileSpace )
 {
-    mTileServer->PrepForSplit( segId, zIndex );
+    mTileServer->PrepForSplit( segId, pointTileSpace );
 
 	ReloadTileCacheOverlayMapOnly();
 }

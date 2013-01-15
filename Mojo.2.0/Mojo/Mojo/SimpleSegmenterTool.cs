@@ -16,19 +16,27 @@ namespace Mojo
             : base( tileManager, engine )
         {
             mTileManager = tileManager;
+
+            //
+            // Prep the draw queue 
         }
 
         public override void Select()
         {
             if ( mTileManager.SelectedSegmentId != 0 )
             {
-                mTileManager.Internal.PrepForSplit( mTileManager.SelectedSegmentId, (int)mTileManager.TiledDatasetView.CenterDataSpace.Z );
+                var centerDataSpace = mTileManager.TiledDatasetView.CenterDataSpace;
+                var p = new Vector3( centerDataSpace.X, centerDataSpace.Y, centerDataSpace.Z );
+                mTileManager.Internal.PrepForSplit( mTileManager.SelectedSegmentId, p );
             }
         }
 
         public override void OnKeyDown( System.Windows.Input.KeyEventArgs keyEventArgs, int width, int height )
         {
             base.OnKeyDown( keyEventArgs, width, height );
+
+            var centerDataSpace = mTileManager.TiledDatasetView.CenterDataSpace;
+            var p = new Vector3( centerDataSpace.X, centerDataSpace.Y, centerDataSpace.Z );
 
             switch ( keyEventArgs.Key )
             {
@@ -59,10 +67,10 @@ namespace Mojo
 
                 //Base class will move the view - make sure we prep for splitting again
                 case System.Windows.Input.Key.W:
-                    mTileManager.Internal.PrepForSplit( mTileManager.SelectedSegmentId, (int) mTileManager.TiledDatasetView.CenterDataSpace.Z );
+                    mTileManager.Internal.PrepForSplit( mTileManager.SelectedSegmentId, p );
                     break;
                 case System.Windows.Input.Key.S:
-                    mTileManager.Internal.PrepForSplit( mTileManager.SelectedSegmentId, (int) mTileManager.TiledDatasetView.CenterDataSpace.Z );
+                    mTileManager.Internal.PrepForSplit( mTileManager.SelectedSegmentId, p );
                     break;
 
                 case System.Windows.Input.Key.OemComma:
@@ -208,7 +216,7 @@ namespace Mojo
                             mTileManager.SelectedSegmentId = clickedId;
 
                             //Load 2D segment at full res for path finding
-                            mTileManager.Internal.PrepForSplit( clickedId, (int) z );
+                            mTileManager.Internal.PrepForSplit( clickedId, p );
 
                         }
                     }
@@ -226,14 +234,14 @@ namespace Mojo
                         // Merge with the clicked segment in 2D ( try this out to see if it makes sense )
                         //
                         mTileManager.Internal.ReplaceSegmentationLabelCurrentSlice( clickedId, mTileManager.SelectedSegmentId, mTileManager.TiledDatasetView, p );
-                        mTileManager.Internal.PrepForSplit( mTileManager.SelectedSegmentId, (int)z );
+                        mTileManager.Internal.PrepForSplit( mTileManager.SelectedSegmentId, p );
 
                     }
                 }
             }
         }
 
-        public override void OnMouseMove(MouseEventArgs mouseEventArgs, int width, int height)
+        public override void OnMouseMove( MouseEventArgs mouseEventArgs, int width, int height )
         {
             base.OnMouseMove( mouseEventArgs, width, height );
             if ( !mCurrentlyPanning && !mCurrentlyHandlingMouseOver && mTileManager.TiledDatasetLoaded && mTileManager.SegmentationLoaded )

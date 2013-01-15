@@ -57,7 +57,7 @@ public:
     void                                                    AddSplitSource( TiledDatasetView^ tiledDatasetView, Vector3^ pDataSpace );
     void                                                    RemoveSplitSource();
     void                                                    ResetSplitState();
-    void                                                    PrepForSplit( int segId, int zIndex );
+    void                                                    PrepForSplit( int segId, Vector3^ pDataSpace );
 	void                                                    FindSplitLine2D( int segId );
 	void                                                    FindSplitLine2DHover( int segId, Vector3^ pDataSpace );
     int                                                     CompleteSplit( int segId );

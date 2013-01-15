@@ -168,9 +168,10 @@ void TileManager::ResetSplitState()
     mTileManager->ResetSplitState();
 }
 
-void TileManager::PrepForSplit( int segId, int zIndex )
+void TileManager::PrepForSplit( int segId, Vector3^ pDataSpace )
 {
-    mTileManager->PrepForSplit( segId, zIndex );
+    float3 pDataSpaceFloat3 = make_float3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
+    mTileManager->PrepForSplit( segId, pDataSpaceFloat3 );
 }
 
 
