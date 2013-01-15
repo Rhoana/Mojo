@@ -11,11 +11,18 @@ import glob
 tile_num_pixels_y = 512
 tile_num_pixels_x = 512
 
-original_input_images_path = 'D:\\dev\\datasets\\challengeCubeV2x1000\\images'
-output_tile_image_path     = 'D:\\dev\\datasets\\challengeCubeV2x1000\\mojo\\images\\tiles'
-output_pyramid_image_path  = 'D:\\dev\\datasets\\challengeCubeV2x1000\\mojo\\images\\pyramid'
-output_tile_volume_file    = 'D:\\dev\\datasets\\challengeCubeV2x1000\\mojo\\images\\tiledVolumeDescription.xml'
-output_image_extension     = '.png'
+##original_input_images_path = 'D:\\dev\\datasets\\challengeCubeV2x1000\\images'
+##output_tile_image_path     = 'D:\\dev\\datasets\\challengeCubeV2x1000\\mojo\\images\\tiles'
+##output_pyramid_image_path  = 'D:\\dev\\datasets\\challengeCubeV2x1000\\mojo\\images\\pyramid'
+##output_tile_volume_file    = 'D:\\dev\\datasets\\challengeCubeV2x1000\\mojo\\images\\tiledVolumeDescription.xml'
+##output_image_extension     = '.png'
+##image_resize_filter        = PIL.Image.ANTIALIAS
+
+original_input_images_path = 'C:\\dev\\datasets\\ac3x10\\images'
+output_tile_image_path     = 'C:\\dev\\datasets\\ac3x10\\mojo\\images\\tiles'
+output_pyramid_image_path  = 'C:\\dev\\datasets\\ac3x10\\mojo\\images\\pyramid'
+output_tile_volume_file    = 'C:\\dev\\datasets\\ac3x10\\mojo\\images\\tiledVolumeDescription.xml'
+output_image_extension     = '.tif'
 image_resize_filter        = PIL.Image.ANTIALIAS
 
 #original_input_images_path = 'C:\\dev\\datasets\\challengeCubeV2x20\\images'
@@ -67,7 +74,7 @@ def mkdir_safe( dir_to_make ):
         os.system( execute_string )
                 
         
-files = sorted( glob.glob( original_input_images_path + '\\*.png' ) )
+files = sorted( glob.glob( original_input_images_path + '\\*' + output_image_extension ) )
 
 tile_index_z = 0
 

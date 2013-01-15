@@ -193,42 +193,32 @@ namespace Mojo
             }
         }
 
-        private bool mConstrainSegmentationMergeToCurrentSlice = true;
-        public bool ConstrainSegmentationMergeToCurrentSlice
+        private MergeMode mCurrentMergeMode = MergeMode.Fill2D;
+        public MergeMode CurrentMergeMode
         {
-            get
-            {
-                return mConstrainSegmentationMergeToCurrentSlice;
-            }
+            get { return mCurrentMergeMode; }
             set
             {
-                mConstrainSegmentationMergeToCurrentSlice = value;
-                OnPropertyChanged( "ConstrainSegmentationMergeToCurrentSlice" );
+                if ( mCurrentMergeMode != value )
+                {
+                    mCurrentMergeMode = value;
+                    OnPropertyChanged( "CurrentMergeMode" );
+                }
             }
         }
 
-        public void ToggleConstrainSegmentationMergeToCurrentSlice()
+        private SplitMode mCurrentSplitMode = SplitMode.JoinPoints;
+        public SplitMode CurrentSplitMode
         {
-            ConstrainSegmentationMergeToCurrentSlice = !ConstrainSegmentationMergeToCurrentSlice;
-        }
-
-        private bool mConstrainSegmentationMergeToConnectedComponent = true;
-        public bool ConstrainSegmentationMergeToConnectedComponent
-        {
-            get
-            {
-                return mConstrainSegmentationMergeToConnectedComponent;
-            }
+            get { return mCurrentSplitMode; }
             set
             {
-                mConstrainSegmentationMergeToConnectedComponent = value;
-                OnPropertyChanged( "ConstrainSegmentationMergeToConnectedComponent" );
+                if ( mCurrentSplitMode != value )
+                {
+                    mCurrentSplitMode = value;
+                    OnPropertyChanged( "CurrentSplitMode" );
+                }
             }
-        }
-
-        public void ToggleConstrainSegmentationMergeToConnectedComponent()
-        {
-            ConstrainSegmentationMergeToConnectedComponent = !ConstrainSegmentationMergeToConnectedComponent;
         }
 
         public TileManager( Interop.TileManager tileManager )

@@ -35,25 +35,45 @@ tile_num_pixels_x             = 512
 ##
 ##output_tile_volume_file       = 'C:\\dev\\datasets\\challengeCubeFirstTenSlices2\\mojo\\ids\\tiledVolumeDescription.xml'
 
-original_input_color_map_path = 'C:\\dev\\datasets\\conn\\main_dataset\\5K_cube\\diced_xy=512_z=32_xyOv=128_zOv=12_dwnSmp=1\\res_from_0ct15_PF\\FS=1\\cmap.mat'
-original_input_ids_path       = 'C:\\dev\\datasets\\conn\\main_dataset\\5K_cube\\diced_xy=512_z=32_xyOv=128_zOv=12_dwnSmp=1\\res_from_0ct15_PF\\FS=1\\stitched\\labels_grow'
-##original_input_ids_path       = 'C:\\dev\\datasets\\conn\\main_dataset\\5K_cube\\diced_xy=512_z=32_xyOv=128_zOv=12_dwnSmp=1\\res_from_0ct15_PF\\FS=1\\stitched\\labels\\'
+##original_input_color_map_path = 'C:\\dev\\datasets\\conn\\main_dataset\\5K_cube\\diced_xy=512_z=32_xyOv=128_zOv=12_dwnSmp=1\\res_from_0ct15_PF\\FS=1\\cmap.mat'
+##original_input_ids_path       = 'C:\\dev\\datasets\\conn\\main_dataset\\5K_cube\\diced_xy=512_z=32_xyOv=128_zOv=12_dwnSmp=1\\res_from_0ct15_PF\\FS=1\\stitched\\labels_grow'
+####original_input_ids_path       = 'C:\\dev\\datasets\\conn\\main_dataset\\5K_cube\\diced_xy=512_z=32_xyOv=128_zOv=12_dwnSmp=1\\res_from_0ct15_PF\\FS=1\\stitched\\labels\\'
+##
+##color_map_variable_name       = 'cmap'
+####ids_variable_name             = 'i_L'
+##ids_upscale_factor            = 1
+##
+##output_tile_colors_path       = 'C:\\dev\\datasets\\challengeCubeV2x20G\\mojo\\ids\\debug\\tiles\\colors'
+##output_pyramid_colors_path    = 'C:\\dev\\datasets\\challengeCubeV2x20G\\mojo\\ids\\debug\\pyramid\\colors'
+##
+##output_tile_ids_path          = 'C:\\dev\\datasets\\challengeCubeV2x20G\\mojo\\ids\\tiles'
+##output_pyramid_ids_path       = 'C:\\dev\\datasets\\challengeCubeV2x20G\\mojo\\ids\\pyramid'
+##
+##output_id_tile_map_path       = 'C:\\dev\\datasets\\challengeCubeV2x20G\\mojo\\idTileMap'
+##output_id_color_map_path      = 'C:\\dev\\datasets\\challengeCubeV2x20G\\mojo\\idColorMap'
+##output_id_counts_path         = 'C:\\dev\\datasets\\challengeCubeV2x20G\\mojo\\idCounts'
+##
+##output_tile_volume_file       = 'C:\\dev\\datasets\\challengeCubeV2x20G\\mojo\\ids\\tiledVolumeDescription.xml'
+
+
+original_input_color_map_path = 'C:\\dev\\datasets\\conn\\main_dataset\\ac3train\\res_from_sept_30_minotrC_PF\\FS=1\\cube_coloring\\cmap.mat'
+original_input_ids_path       = 'C:\\dev\\datasets\\conn\\main_dataset\\ac3train\\res_from_sept_30_minotrC_PF\\FS=1\\stitched\\labels_grow'
 
 color_map_variable_name       = 'cmap'
-##ids_variable_name             = 'i_L'
 ids_upscale_factor            = 1
 
-output_tile_colors_path       = 'C:\\dev\\datasets\\challengeCubeV2x20G\\mojo\\ids\\debug\\tiles\\colors'
-output_pyramid_colors_path    = 'C:\\dev\\datasets\\challengeCubeV2x20G\\mojo\\ids\\debug\\pyramid\\colors'
+output_tile_colors_path       = 'C:\\dev\\datasets\\ac3x10\\mojo\\ids\\debug\\tiles\\colors'
+output_pyramid_colors_path    = 'C:\\dev\\datasets\\ac3x10\\mojo\\ids\\debug\\pyramid\\colors'
 
-output_tile_ids_path          = 'C:\\dev\\datasets\\challengeCubeV2x20G\\mojo\\ids\\tiles'
-output_pyramid_ids_path       = 'C:\\dev\\datasets\\challengeCubeV2x20G\\mojo\\ids\\pyramid'
+output_tile_ids_path          = 'C:\\dev\\datasets\\ac3x10\\mojo\\ids\\tiles'
+output_pyramid_ids_path       = 'C:\\dev\\datasets\\ac3x10\\mojo\\ids\\pyramid'
 
-output_id_tile_map_path       = 'C:\\dev\\datasets\\challengeCubeV2x20G\\mojo\\idTileMap'
-output_id_color_map_path      = 'C:\\dev\\datasets\\challengeCubeV2x20G\\mojo\\idColorMap'
-output_id_counts_path      = 'C:\\dev\\datasets\\challengeCubeV2x20G\\mojo\\idCounts'
+output_id_tile_map_path       = 'C:\\dev\\datasets\\ac3x10\\mojo\\idTileMap'
+output_id_color_map_path      = 'C:\\dev\\datasets\\ac3x10\\mojo\\idColorMap'
+output_id_counts_path         = 'C:\\dev\\datasets\\ac3x10\\mojo\\idCounts'
 
-output_tile_volume_file       = 'C:\\dev\\datasets\\challengeCubeV2x20G\\mojo\\ids\\tiledVolumeDescription.xml'
+output_tile_volume_file       = 'C:\\dev\\datasets\\ac3x10\\mojo\\ids\\tiledVolumeDescription.xml'
+
 
 def mkdir_safe( dir_to_make ):
 
@@ -213,7 +233,7 @@ for file in files:
 
 
 
-    if tile_index_z > 19:
+    if tile_index_z > 9:
         break
 
 

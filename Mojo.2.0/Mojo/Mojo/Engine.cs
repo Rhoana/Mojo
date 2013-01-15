@@ -15,7 +15,21 @@ namespace Mojo
         Null,
         AdjustSegmentation,
         MergeSegmentation,
-        SplitSegmentation
+        SplitSegmentation,
+    }
+
+    public enum MergeMode
+    {
+        Fill2D,
+        Fill3D,
+        GlobalReplace
+    }
+
+    public enum SplitMode
+    {
+        JoinPoints,
+        DrawSplit,
+        DrawRegions
     }
 
     public class Engine : NotifyPropertyChanged, IDisposable
@@ -26,18 +40,16 @@ namespace Mojo
         public TileManager TileManager { get; private set; }
         public Segmenter Segmenter { get; private set; }
 
-        public ObservableDictionary< ViewerMode, ObservableDictionary< ToolMode, ITool > > Tools { get; private set; }
-        public ObservableDictionary< ViewerMode, ObservableDictionary< ToolMode, IRenderingStrategy > > RenderingStrategies { get; private set; }
-        public ObservableDictionary< ViewerMode, Viewer > Viewers { get; private set; }
+        public ObservableDictionary<ViewerMode, ObservableDictionary<ToolMode, ITool>> Tools { get; private set; }
+        public ObservableDictionary<ViewerMode, ObservableDictionary<ToolMode, IRenderingStrategy>> RenderingStrategies { get; private set; }
+        public ObservableDictionary<ViewerMode, Viewer> Viewers { get; private set; }
 
         private ToolMode mCurrentToolMode;
         private bool mToolModeChanging = false;
+
         public ToolMode CurrentToolMode
         {
-            get
-            {
-                return mCurrentToolMode;
-            }
+            get { return mCurrentToolMode; }
             set
             {
 
@@ -46,15 +58,16 @@ namespace Mojo
                  * On change from Split to Merge mode using keyboard shortcut this method is called twice and ends up back in Split mode.
                  */
 
-                if ( value != mCurrentToolMode && ! mToolModeChanging )
+                if ( value != mCurrentToolMode && !mToolModeChanging )
                 {
                     mToolModeChanging = true;
                     mCurrentToolMode = value;
 
-                    Tools.Internal.ToList().ForEach( viewerModeToolsMap => viewerModeToolsMap.Value.Internal[ mCurrentToolMode ].Select() );
+                    Tools.Internal.ToList().ForEach( viewerModeToolsMap => viewerModeToolsMap.Value.Internal[mCurrentToolMode].Select() );
 
-                    Viewers.Internal.ToList().ForEach( viewer => viewer.Value.D3D11RenderingPane.RenderingStrategy = RenderingStrategies.Internal[ viewer.Key ].Internal[ mCurrentToolMode ] );
-                    Viewers.Internal.ToList().ForEach( viewer => viewer.Value.UserInputHandler = Tools.Internal[ viewer.Key ].Internal[ mCurrentToolMode ] );
+                    Viewers.Internal.ToList()
+                           .ForEach( viewer => viewer.Value.D3D11RenderingPane.RenderingStrategy = RenderingStrategies.Internal[viewer.Key].Internal[mCurrentToolMode] );
+                    Viewers.Internal.ToList().ForEach( viewer => viewer.Value.UserInputHandler = Tools.Internal[viewer.Key].Internal[mCurrentToolMode] );
 
                     OnPropertyChanged( "CurrentToolMode" );
                     mToolModeChanging = false;
@@ -62,7 +75,7 @@ namespace Mojo
             }
         }
 
-        public Engine( ObservableDictionary< string, D3D11HwndDescription > d3d11HwndDescriptions )
+        public Engine( ObservableDictionary<string, D3D11HwndDescription> d3d11HwndDescriptions )
         {
             Console.WriteLine( "\nMojo initializing...\n" );
 
@@ -73,7 +86,7 @@ namespace Mojo
             TileManager = new TileManager( new Interop.TileManager( mD3D11Device, mD3D11Device.ImmediateContext, Constants.ConstParameters ) );
             Segmenter = new Segmenter( new Interop.Segmenter( mD3D11Device, mD3D11Device.ImmediateContext, Constants.ConstParameters ) );
 
-            Tools = new ObservableDictionary< ViewerMode, ObservableDictionary< ToolMode, ITool > >
+            Tools = new ObservableDictionary<ViewerMode, ObservableDictionary<ToolMode, ITool>>
                     {
                         {
                             ViewerMode.TileManager2D,
@@ -87,7 +100,7 @@ namespace Mojo
                             }
                     };
 
-            RenderingStrategies = new ObservableDictionary< ViewerMode, ObservableDictionary< ToolMode, IRenderingStrategy > >
+            RenderingStrategies = new ObservableDictionary<ViewerMode, ObservableDictionary<ToolMode, IRenderingStrategy>>
                                   {
                                       {
                                           ViewerMode.TileManager2D,
@@ -101,7 +114,7 @@ namespace Mojo
                                           }
                                   };
 
-            Viewers = new ObservableDictionary< ViewerMode, Viewer >
+            Viewers = new ObservableDictionary<ViewerMode, Viewer>
                       {
                           {
                               ViewerMode.TileManager2D,
@@ -118,6 +131,7 @@ namespace Mojo
                               }
                               }
                       };
+
         }
 
         public void Dispose()
@@ -153,7 +167,7 @@ namespace Mojo
             TileManager.Update();
             Segmenter.Update();
 
-            Viewers.Internal.ToList().ForEach( viewer => viewer.Value.D3D11RenderingPane.Render( ) );
+            Viewers.Internal.ToList().ForEach( viewer => viewer.Value.D3D11RenderingPane.Render() );
         }
     }
 }

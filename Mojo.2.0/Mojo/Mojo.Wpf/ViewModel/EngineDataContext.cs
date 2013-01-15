@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Collections.Generic;
 using Mojo.Interop;
 using SlimDX;
 
@@ -15,6 +16,21 @@ namespace Mojo.Wpf.ViewModel
         public RelayCommand LoadDatasetCommand { get; private set; }
         public RelayCommand LoadSegmentationCommand { get; private set; }
 
+        public class MergeModeItem
+        {
+            public MergeMode MergeMode { get; set; }
+            public String DisplayName { get; set; }
+        }
+
+        public class SplitModeItem
+        {
+            public SplitMode SplitMode { get; set; }
+            public String DisplayName { get; set; }
+        }
+
+        public List<MergeModeItem> MergeModes { get; private set; }
+        public List<SplitModeItem> SplitModes { get; private set; }
+
         public EngineDataContext( Engine engine, TileManagerDataContext tileManagerDataContext, SegmenterDataContext segmenterDataContext )
         {
             Engine = engine;
@@ -27,6 +43,23 @@ namespace Mojo.Wpf.ViewModel
 
             TileManagerDataContext.StateChanged += StateChangedHandler;
             SegmenterDataContext.StateChanged += StateChangedHandler;
+
+            MergeModes = new List<MergeModeItem>
+            {
+              new MergeModeItem() { MergeMode = MergeMode.Fill2D, DisplayName = "2D Region Fill" },
+              new MergeModeItem() { MergeMode = MergeMode.Fill3D, DisplayName = "3D Region Fill" },
+              new MergeModeItem() { MergeMode = MergeMode.GlobalReplace, DisplayName = "Global Replace" }
+            };
+
+            SplitModes = new List<SplitModeItem>
+            {
+                new SplitModeItem() { SplitMode = SplitMode.JoinPoints, DisplayName = "Points" },
+                new SplitModeItem() { SplitMode = SplitMode.DrawSplit, DisplayName = "Draw Split Line" },
+                new SplitModeItem() { SplitMode = SplitMode.DrawRegions, DisplayName = "Draw Regions" }
+            };
+
+            OnPropertyChanged( "MergeModes" );
+            OnPropertyChanged( "SplitModes" );
         }
 
         public void Dispose()
@@ -106,7 +139,8 @@ namespace Mojo.Wpf.ViewModel
                     Engine.TileManager.TiledDatasetView.CenterDataSpace = new Vector3( maxExtentDataSpaceX / 2f, maxExtentDataSpaceY / 2f, 0f );
                     Engine.TileManager.TiledDatasetView.ExtentDataSpace = new Vector3( viewportDataSpaceX / zoomLevel, viewportDataSpaceY / zoomLevel, 0f );
 
-                    Engine.CurrentToolMode = ToolMode.MergeSegmentation;
+                    Engine.CurrentToolMode = ToolMode.SplitSegmentation;
+                    //Engine.CurrentToolMode = ToolMode.MergeSegmentation;
                     //SegmenterDataContext.MergeSegmentationToolRadioButtonIsChecked = true;
 
                 }
@@ -151,8 +185,13 @@ namespace Mojo.Wpf.ViewModel
                     //Engine.TileManager.TiledDatasetView.CenterDataSpace = new Vector3( maxExtentDataSpaceX / 2f, maxExtentDataSpaceY / 2f, 0f );
                     //Engine.TileManager.TiledDatasetView.ExtentDataSpace = new Vector3( viewportDataSpaceX / zoomLevel, viewportDataSpaceY / zoomLevel, 0f );
 
-                    Engine.CurrentToolMode = ToolMode.MergeSegmentation;
-                    //SegmenterDataContext.MergeSegmentationToolRadioButtonIsChecked = true;
+                    //
+                    // Enable controls and set detault values
+                    //
+                    Engine.CurrentToolMode = ToolMode.SplitSegmentation;
+                    //Engine.CurrentToolMode = ToolMode.MergeSegmentation;
+                    SegmenterDataContext.MergeSegmentationToolRadioButtonIsChecked = true;
+                    Engine.TileManager.SegmentationVisibilityRatio = 0.5f;
 
                 }
             }

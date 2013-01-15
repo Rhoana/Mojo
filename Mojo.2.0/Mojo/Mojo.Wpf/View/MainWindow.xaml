@@ -135,13 +135,21 @@
 
                 <Border Width="1" BorderBrush="Gray" BorderThickness="1,0,0,0" Margin="5,5,5,5" />
 
-                <CheckBox Margin="5,5,5,5" IsEnabled="{Binding Path=SegmenterDataContext.MergeModeAndDatasetLoaded}" IsChecked="{Binding Path=Engine.TileManager.ConstrainSegmentationMergeToCurrentSlice}" >
-                    <Label Content="Constrain Segmentation Merging To Current Slice"/>
-                </CheckBox>
+                <Label Content="Merge Method" VerticalAlignment="Center"></Label>
+                <ComboBox Name="MergeCombo" Margin="5,5,5,5" Width="120"
+                    ItemsSource="{Binding Path=MergeModes}"
+                    DisplayMemberPath="DisplayName"
+                    SelectedValuePath="MergeMode"
+                    SelectedValue="{Binding Path=Engine.TileManager.CurrentMergeMode, Mode=TwoWay}">
+                </ComboBox>
 
-                <CheckBox Margin="5,5,5,5" IsEnabled="{Binding Path=SegmenterDataContext.MergeModeAndDatasetLoaded}" IsChecked="{Binding Path=Engine.TileManager.ConstrainSegmentationMergeToConnectedComponent}" >
-                    <Label Content="Constrain Segmentation Merging To Connected Component"/>
-                </CheckBox>
+                <Label Content="Split Method" VerticalAlignment="Center"></Label>
+                <ComboBox Margin="5,5,5,5" Width="120"
+                    ItemsSource="{Binding Path=SplitModes}"
+                    DisplayMemberPath="DisplayName"
+                    SelectedValuePath="SplitMode"
+                    SelectedValue="{Binding Path=Engine.TileManager.CurrentSplitMode, Mode=TwoWay}">
+                </ComboBox>
 
             </StackPanel>
         </Border>

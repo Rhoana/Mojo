@@ -8,9 +8,6 @@ namespace Mojo
         private readonly TileManager mTileManager;
         private int newId = 0;
         private bool mCurrentlyDrawing = false;
-        private float mDrawStartX;
-        private float mDrawStartY;
-        private float mDrawDistMax;
 
         public SimpleSegmenterTool( TileManager tileManager, Engine engine )
             : base( tileManager, engine )
@@ -107,14 +104,9 @@ namespace Mojo
 
                     var clickedId = mTileManager.Internal.GetSegmentationLabelId( mTileManager.TiledDatasetView, p );
 
-                    if ( clickedId == mTileManager.SelectedSegmentId )
+                    if ( clickedId == mTileManager.SelectedSegmentId && mTileManager.CurrentSplitMode != SplitMode.JoinPoints )
                     {
                         mCurrentlyDrawing = true;
-                        mDrawStartX = x;
-                        mDrawStartY = y;
-                        mDrawDistMax = 0;
-                        //mTileManager.Internal.AddSplitSource( mTileManager.TiledDatasetView, p );
-                        //mTileManager.Internal.DrawSplit( mTileManager.TiledDatasetView, p, mTileManager.DrawSize );
                     }
                 }
             }
@@ -126,36 +118,17 @@ namespace Mojo
 
         public override void OnMouseUp( System.Windows.Forms.MouseEventArgs mouseEventArgs, int width, int height )
         {
-            if ( mouseEventArgs.Button == System.Windows.Forms.MouseButtons.Right )
+            if ( mCurrentlyDrawing )
             {
                 mCurrentlyDrawing = false;
 
-                //Get the id of the segment being clicked
-
-                var centerDataSpace = mTileManager.TiledDatasetView.CenterDataSpace;
-                var extentDataSpace = mTileManager.TiledDatasetView.ExtentDataSpace;
-
-                var topLeftDataSpaceX = centerDataSpace.X - ( extentDataSpace.X / 2f );
-                var topLeftDataSpaceY = centerDataSpace.Y - ( extentDataSpace.Y / 2f );
-
-                var offsetDataSpaceX = ( (float)mouseEventArgs.X / width ) * extentDataSpace.X;
-                var offsetDataSpaceY = ( (float)mouseEventArgs.Y / height ) * extentDataSpace.Y;
-
-                var x = topLeftDataSpaceX + offsetDataSpaceX;
-                var y = topLeftDataSpaceY + offsetDataSpaceY;
-                var z = centerDataSpace.Z;
-
-                var p = new Vector3( x, y, z );
-
-                var clickedId = mTileManager.Internal.GetSegmentationLabelId( mTileManager.TiledDatasetView, p );
-
-                Console.WriteLine( "MouseUp: mDrawDistMax=" + mDrawDistMax + "." );
-
-                if ( clickedId == mTileManager.SelectedSegmentId && mDrawDistMax > 0.05 )
+                if ( mTileManager.CurrentSplitMode == SplitMode.DrawSplit )
                 {
-                    mTileManager.Internal.AddSplitSource( mTileManager.TiledDatasetView, new Vector3( mDrawStartX, mDrawStartY, z ) );
-                    mTileManager.Internal.AddSplitSource( mTileManager.TiledDatasetView, p );
-                    mTileManager.Internal.FindSplitLine2D( clickedId );
+                    mTileManager.Internal.FindBoundaryWithinRegion2D( mTileManager.SelectedSegmentId );
+                }
+                if ( mTileManager.CurrentSplitMode == SplitMode.DrawRegions )
+                {
+                    mTileManager.Internal.FindCutBetweenRegions2D( mTileManager.SelectedSegmentId );
                 }
             }
             else
@@ -215,10 +188,10 @@ namespace Mojo
                 }
                 else if ( mouseEventArgs.Button == MouseButtons.Right )
                 {
-                    if ( clickedId > 0 && clickedId == mTileManager.SelectedSegmentId )
+                    if ( clickedId > 0 && clickedId == mTileManager.SelectedSegmentId && mTileManager.CurrentSplitMode == SplitMode.JoinPoints )
                     {
                         mTileManager.Internal.AddSplitSource( mTileManager.TiledDatasetView, p );
-                        mTileManager.Internal.FindSplitLine2D( clickedId );
+                        mTileManager.Internal.FindBoundaryJoinPoints2D( clickedId );
                     }
                     else if ( clickedId > 0 )
                     {
@@ -227,7 +200,6 @@ namespace Mojo
                         //
                         mTileManager.Internal.ReplaceSegmentationLabelCurrentSlice( clickedId, mTileManager.SelectedSegmentId, mTileManager.TiledDatasetView, p );
                         mTileManager.Internal.PrepForSplit( mTileManager.SelectedSegmentId, (int)z );
-
                     }
                 }
             }
@@ -274,16 +246,23 @@ namespace Mojo
                     //Make a hover circle
                     mTileManager.MouseOverX = x;
                     mTileManager.MouseOverY = y;
-                    //Make a hover line (currently too slow)
-                    //mTileManager.Internal.FindSplitLine2DHover( segmentId, p );
 
                     if ( mCurrentlyDrawing )
                     {
-                        mTileManager.Internal.DrawSplit( mTileManager.TiledDatasetView, p, mTileManager.DrawSize );
-                        float drawDist = (float) System.Math.Sqrt( ( p.X - mDrawStartX ) * ( p.X - mDrawStartX ) + ( p.Y - mDrawStartY ) * ( p.Y - mDrawStartY ) );
-                        if ( drawDist > mDrawDistMax )
+                        if ( mTileManager.CurrentSplitMode == SplitMode.DrawSplit )
                         {
-                            mDrawDistMax = drawDist;
+                            mTileManager.Internal.DrawSplit( mTileManager.TiledDatasetView, p, mTileManager.DrawSize );
+                        }
+                        else if ( mTileManager.CurrentSplitMode == SplitMode.DrawRegions )
+                        {
+                            if ( mouseEventArgs.Button == MouseButtons.Left )
+                            {
+                                mTileManager.Internal.DrawRegionA( mTileManager.TiledDatasetView, p, mTileManager.DrawSize );
+                            }
+                            else if ( mouseEventArgs.Button == MouseButtons.Right )
+                            {
+                                mTileManager.Internal.DrawRegionB( mTileManager.TiledDatasetView, p, mTileManager.DrawSize );
+                            }
                         }
                     }
                 }

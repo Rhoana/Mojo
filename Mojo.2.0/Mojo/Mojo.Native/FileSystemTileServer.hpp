@@ -1,6 +1,6 @@
 #pragma once
 
-#include "vld.h"
+//#include "vld.h"
 
 #include "Mojo.Core/Stl.hpp"
 #include <queue>
@@ -48,12 +48,16 @@ public:
     virtual void                                                  ReplaceSegmentationLabelCurrentConnectedComponent( int oldId, int newId, float3 pointTileSpace );
 
     virtual void                                                  DrawSplit( float3 pointTileSpace, float radius );
+    virtual void                                                  DrawRegionB( float3 pointTileSpace, float radius );
+    virtual void                                                  DrawRegionA( float3 pointTileSpace, float radius );
+    virtual void                                                  DrawRegionValue( float3 pointTileSpace, float radius, int value );
     virtual void                                                  AddSplitSource( float3 pointTileSpace );
     virtual void                                                  RemoveSplitSource();
     virtual void                                                  ResetSplitState();
     virtual void                                                  PrepForSplit( int segId, int zIndex );
-	virtual void                                                  FindSplitLine2D( int segId );
-	virtual void                                                  FindSplitLine2DHover( int segId, float3 pointTileSpace );
+	virtual void                                                  FindBoundaryJoinPoints2D( int segId );
+	virtual void                                                  FindBoundaryWithinRegion2D( int segId );
+	virtual void                                                  FindCutBetweenRegions2D( int segId );
     virtual int                                                   CompleteSplit( int segId );
 
 	virtual void                                                  UndoChange();

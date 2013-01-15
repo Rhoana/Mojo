@@ -152,6 +152,18 @@ void TileManager::DrawSplit( TiledDatasetView^ tiledDatasetView, Vector3^ pDataS
     mTileManager->DrawSplit( pDataSpaceFloat3, radius );
 }
 
+void TileManager::DrawRegionA( TiledDatasetView^ tiledDatasetView, Vector3^ pDataSpace, float radius )
+{
+    float3 pDataSpaceFloat3 = make_float3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
+    mTileManager->DrawRegionA( pDataSpaceFloat3, radius );
+}
+
+void TileManager::DrawRegionB( TiledDatasetView^ tiledDatasetView, Vector3^ pDataSpace, float radius )
+{
+    float3 pDataSpaceFloat3 = make_float3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
+    mTileManager->DrawRegionB( pDataSpaceFloat3, radius );
+}
+
 void TileManager::AddSplitSource( TiledDatasetView^ tiledDatasetView, Vector3^ pDataSpace )
 {
     float3 pDataSpaceFloat3 = make_float3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
@@ -173,16 +185,19 @@ void TileManager::PrepForSplit( int segId, int zIndex )
     mTileManager->PrepForSplit( segId, zIndex );
 }
 
-
-void TileManager::FindSplitLine2D( int segId )
+void TileManager::FindBoundaryJoinPoints2D( int segId )
 {
-    mTileManager->FindSplitLine2D( segId );
+    mTileManager->FindBoundaryJoinPoints2D( segId );
 }
 
-void TileManager::FindSplitLine2DHover( int segId, Vector3^ pDataSpace )
+void TileManager::FindBoundaryWithinRegion2D( int segId )
 {
-    float3 pDataSpaceFloat3 = make_float3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
-    mTileManager->FindSplitLine2DHover( segId, pDataSpaceFloat3 );
+    mTileManager->FindBoundaryWithinRegion2D( segId );
+}
+
+void TileManager::FindCutBetweenRegions2D( int segId )
+{
+    mTileManager->FindCutBetweenRegions2D( segId );
 }
 
 int TileManager::CompleteSplit( int segId )

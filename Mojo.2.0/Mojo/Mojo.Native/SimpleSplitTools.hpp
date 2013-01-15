@@ -6,6 +6,9 @@
 #define BONUS_REGION -3
 #define BONUS_VALUE 65536
 
+#define REGION_A -4
+#define REGION_B -5
+
 #define PATH_RESULT_VALUE -2
 
 namespace Mojo

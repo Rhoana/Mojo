@@ -92,11 +92,11 @@ namespace Mojo
                     //Update this segment
                     if ( clickedId > 0 && newId > 0 )
                     {
-                        if ( mTileManager.ConstrainSegmentationMergeToCurrentSlice )
+                        if ( mTileManager.CurrentMergeMode == MergeMode.Fill2D )
                         {
                             mTileManager.Internal.ReplaceSegmentationLabelCurrentSlice( clickedId, newId, mTileManager.TiledDatasetView, p );
                         }
-                        else if ( mTileManager.ConstrainSegmentationMergeToConnectedComponent )
+                        else if ( mTileManager.CurrentMergeMode == MergeMode.Fill3D )
                         {
                             mTileManager.Internal.ReplaceSegmentationLabelCurrentConnectedComponent( clickedId, newId, mTileManager.TiledDatasetView, p );
                         }

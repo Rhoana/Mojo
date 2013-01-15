@@ -765,6 +765,21 @@ void FileSystemTileServer::ReplaceSegmentationLabelCurrentConnectedComponent( in
 
 void FileSystemTileServer::DrawSplit( float3 pointTileSpace, float radius )
 {
+	DrawRegionValue( pointTileSpace, radius, BONUS_REGION );
+}
+
+void FileSystemTileServer::DrawRegionA( float3 pointTileSpace, float radius )
+{
+	DrawRegionValue( pointTileSpace, radius, REGION_A );
+}
+
+void FileSystemTileServer::DrawRegionB( float3 pointTileSpace, float radius )
+{
+	DrawRegionValue( pointTileSpace, radius, REGION_B );
+}
+
+void FileSystemTileServer::DrawRegionValue( float3 pointTileSpace, float radius, int value )
+{
     int3 numVoxelsPerTile = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "IdMap" ).numVoxelsPerTile;
 
     int3 pVoxelSpace = 
@@ -776,11 +791,11 @@ void FileSystemTileServer::DrawSplit( float3 pointTileSpace, float radius )
     int areaIndex = ( pVoxelSpace.x - mSplitWindowStart.x * numVoxelsPerTile.x ) +
         ( pVoxelSpace.y - mSplitWindowStart.y * numVoxelsPerTile.y ) * mSplitWindowWidth;
 
-    SimpleSplitTools::ApplyCircleMask( areaIndex, mSplitWindowWidth, mSplitWindowHeight, BONUS_REGION, radius, mSplitBonusArea );
+    SimpleSplitTools::ApplyCircleMask( areaIndex, mSplitWindowWidth, mSplitWindowHeight, value, radius, mSplitBonusArea );
 
     UpdateSplitTiles();
 
-    //Core::Printf( "\nDrew split circle voxel (x", pVoxelSpace.x, ", y", pVoxelSpace.y, " z", pVoxelSpace.z, "), with radius ", radius, ".\n" );
+    //Core::Printf( "\nDrew circle at voxel (x", pVoxelSpace.x, ", y", pVoxelSpace.y, " z", pVoxelSpace.z, "), with radius ", radius, ".\n" );
 }
 
 void FileSystemTileServer::AddSplitSource( float3 pointTileSpace )
@@ -1300,7 +1315,7 @@ void FileSystemTileServer::PrepForSplit( int segId, int zIndex )
 					// Distance calculation
 					//
 					int segVal = ((int) currentSrcVolume[ tileIndex1D ]) + 10;
-					mSplitStepDist[ areaIndex1D ] = segVal * segVal + BONUS_VALUE;
+					mSplitStepDist[ areaIndex1D ] = segVal * segVal;
 					++areaCount;
 
                     //
@@ -1841,14 +1856,7 @@ int FileSystemTileServer::CompleteSplit( int segId )
 
 }
 
-void FileSystemTileServer::FindSplitLine2DHover( int segId, float3 pointTileSpace )
-{
-    //
-    // This was too slow - is there a faster way?
-    //
-}
-
-void FileSystemTileServer::FindSplitLine2D( int segId )
+void FileSystemTileServer::FindBoundaryJoinPoints2D( int segId )
 {
 	//
 	// Find a splitting line that links all the given points
@@ -1961,6 +1969,10 @@ void FileSystemTileServer::FindSplitLine2D( int segId )
                     int areaIndex = sourceLocations[ si ];
 					mSplitResultArea[ areaIndex ] = 2;
                     SimpleSplitTools::ApplyLargeMask( areaIndex, mSplitWindowWidth, mSplitWindowHeight, 0, mSplitSearchMask );
+                }
+                for ( int si = 0; si < nSources; ++si )
+                {
+                    int areaIndex = sourceLocations[ si ];
 					mSplitSearchMask [ areaIndex ] = SOURCE_TARGET;
                 }
 
@@ -1989,7 +2001,7 @@ void FileSystemTileServer::FindSplitLine2D( int segId )
 			}
 			else
 			{
-				Core::Printf( "WARNING: Could not find shortest path in FindSplitLine2D." );
+				Core::Printf( "WARNING: Could not find shortest path in FindBoundaryJoinPoints2D." );
 				break;
 			}
 
@@ -2004,6 +2016,12 @@ void FileSystemTileServer::FindSplitLine2D( int segId )
 
 	}
 }
+
+void FileSystemTileServer::FindBoundaryWithinRegion2D( int segId )
+{}
+
+void FileSystemTileServer::FindCutBetweenRegions2D( int segId )
+{}
 
 
 //

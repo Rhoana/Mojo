@@ -93,9 +93,28 @@ namespace Mojo
 
         public virtual void OnMouseUp( System.Windows.Forms.MouseEventArgs mouseEventArgs, int width, int height )
         {
-            if ( mouseEventArgs.Button == System.Windows.Forms.MouseButtons.Middle )
+            var centerDataSpace = mTileManager.TiledDatasetView.CenterDataSpace;
+            switch ( mouseEventArgs.Button )
             {
-                mCurrentlyPanning = false;
+                case System.Windows.Forms.MouseButtons.Middle:
+                    mCurrentlyPanning = false;
+                    break;
+                case System.Windows.Forms.MouseButtons.XButton1:
+                    if ( centerDataSpace.Z > 0 )
+                    {
+                        centerDataSpace.Z -= 1f;
+                        mTileManager.TiledDatasetView.CenterDataSpace = centerDataSpace;
+                        mTileManager.UpdateView();
+                    }
+                    break;
+                case System.Windows.Forms.MouseButtons.XButton2:
+                    if ( centerDataSpace.Z < mTileManager.TiledDatasetDescription.TiledVolumeDescriptions.Get( "SourceMap" ).NumVoxelsZ - 1 )
+                    {
+                        centerDataSpace.Z += 1f;
+                        mTileManager.TiledDatasetView.CenterDataSpace = centerDataSpace;
+                        mTileManager.UpdateView();
+                    }
+                    break;
             }
         }
 

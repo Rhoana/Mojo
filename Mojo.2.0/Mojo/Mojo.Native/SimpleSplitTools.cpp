@@ -227,14 +227,20 @@ void SimpleSplitTools::DijkstraSearch ( const int* searchArea, const int* search
 			//
 			//Core::Printf( "Checking neighbour ", nextIndex, ": dist=", dist[ nextIndex ], ".\n" );
 			int stepDist = searchArea[ nextIndex ];
+
+			if ( searchMask[ nextIndex ] == 1 )
+			{
+				//
+				// Allow this step but make it very expensive
+				//
+				stepDist = stepDist + BONUS_VALUE;
+				//continue;
+			}
+
 			if ( searchMask[ nextIndex ] == SOURCE_TARGET )
 			{
 				stepDist = 0;
 			}
-            else if ( searchBonus[ nextIndex ] == BONUS_REGION )
-            {
-                stepDist = searchArea[ nextIndex ] - BONUS_VALUE;
-            }
 
 			//Core::Printf( "stepDist=", stepDist, ".\n" );
 

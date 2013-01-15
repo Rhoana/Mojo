@@ -154,6 +154,14 @@ namespace Mojo.Wpf.ViewModel
             }
         }
 
+        public bool SplitModeAndDatasetLoaded
+        {
+            get
+            {
+                return mSegmenter.CurrentSegmenterToolMode == SegmenterToolMode.Split;
+            }
+        }
+
         public object CurrentSegmentationLabel
         {
             get
@@ -217,6 +225,7 @@ namespace Mojo.Wpf.ViewModel
             OnPropertyChanged( "SplitSegmentationToolRadioButtonIsChecked" );
             OnPropertyChanged( "MergeModeAndDatasetLoaded" );
             OnPropertyChanged( "NotMergeModeAndDatasetLoaded" );
+            OnPropertyChanged( "SplitModeAndDatasetLoaded" );
             OnPropertyChanged( "CurrentSegmentationLabel" );
             OnPropertyChanged( "ToolbarString" );
         }
