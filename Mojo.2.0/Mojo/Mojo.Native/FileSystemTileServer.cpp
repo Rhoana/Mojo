@@ -29,7 +29,7 @@ FileSystemTileServer::FileSystemTileServer( Core::PrimitiveMap constParameters )
     mSplitResultDist = 0;
     mSplitPrev = 0;
     mSplitSearchMask = 0;
-    mSplitBonusArea = 0;
+    mSplitDrawArea = 0;
 	mSplitBorderTargets = 0;
     mSplitResultArea = 0;
 }
@@ -48,8 +48,8 @@ FileSystemTileServer::~FileSystemTileServer()
     if ( mSplitSearchMask != 0 )
         delete[] mSplitSearchMask;
 
-    if ( mSplitBonusArea != 0 )
-        delete[] mSplitBonusArea;
+    if ( mSplitDrawArea != 0 )
+        delete[] mSplitDrawArea;
 
 	if ( mSplitBorderTargets != 0 )
 		delete[] mSplitBorderTargets;
@@ -884,7 +884,7 @@ void FileSystemTileServer::ReplaceSegmentationLabelCurrentConnectedComponent( in
 
 void FileSystemTileServer::DrawSplit( float3 pointTileSpace, float radius )
 {
-	DrawRegionValue( pointTileSpace, radius, BONUS_REGION );
+	DrawRegionValue( pointTileSpace, radius, REGION_SPLIT );
 }
 
 void FileSystemTileServer::DrawRegionA( float3 pointTileSpace, float radius )
@@ -911,7 +911,7 @@ void FileSystemTileServer::DrawRegionValue( float3 pointTileSpace, float radius,
     int areaY = pVoxelSpace.y - mSplitWindowStart.y * numVoxelsPerTile.y;
     int areaIndex = areaX + areaY * mSplitWindowWidth;
 
-    SimpleSplitTools::ApplyCircleMask( areaIndex, mSplitWindowWidth, mSplitWindowHeight, value, radius, mSplitBonusArea );
+    SimpleSplitTools::ApplyCircleMask( areaIndex, mSplitWindowWidth, mSplitWindowHeight, value, radius, mSplitDrawArea );
 
     int irad = (int) ( radius + 0.5 );
     int2 upperLeft = make_int2( areaX - irad, areaY - irad );
@@ -961,53 +961,13 @@ void FileSystemTileServer::RemoveSplitSource()
     Core::Printf( "\nRemoved split point.\n" );
 }
 
-void FileSystemTileServer::UpdateSplitTilesHover()
-{
-	//
-	// Export result to a layer
-	//
-    int3 numVoxelsPerTile = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "IdMap" ).numVoxelsPerTile;
-
-	Core::HashMap< std::string, Core::VolumeDescription > volumeDescriptions;
-
-	unsigned int* splitData;
-
-	for ( int xd = 0; xd < mSplitWindowTileSize.x; ++xd )
-	{
-		for (int yd = 0; yd < mSplitWindowTileSize.y; ++yd )
-		{
-
-			int4 tileIndex = make_int4( mSplitWindowStart.x + xd, mSplitWindowStart.y + yd, mSplitWindowStart.z, 0 );
-
-			splitData = (unsigned int*) LoadTile( tileIndex ).Get( "OverlayMap" ).data;
-
-			//
-			// Copy result values into the tile
-			//
-			int xOffset = xd * numVoxelsPerTile.x;
-			int yOffset = yd * numVoxelsPerTile.y;
-			int nVoxels = numVoxelsPerTile.x * numVoxelsPerTile.y;
-
-			for ( int tileIndex1D = 0; tileIndex1D < nVoxels; ++tileIndex1D )
-			{
-				int tileX = tileIndex1D % numVoxelsPerTile.x;
-				int tileY = tileIndex1D / numVoxelsPerTile.x;
-				int areaIndex1D = xOffset + tileX + ( yOffset + tileY ) * mSplitWindowWidth;
-
-				splitData[ tileIndex1D ] = mSplitResultArea[ areaIndex1D ];
-
-			}
-
-			UnloadTile( tileIndex );
-
-		}
-	}
-}
-
 void FileSystemTileServer::UpdateSplitTiles()
 {
-    int2 upperLeft = make_int2( 0, mSplitWindowTileSize.x );
-    int2 lowerRight = make_int2( 0, mSplitWindowTileSize.y );
+    int3 numVoxelsPerTile = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "IdMap" ).numVoxelsPerTile;
+
+    int2 upperLeft = make_int2( 0, 0 );
+    int2 lowerRight = make_int2( mSplitWindowNTiles.x * numVoxelsPerTile.x, mSplitWindowNTiles.y * numVoxelsPerTile.y );
+
     UpdateSplitTilesBoundingBox( upperLeft, lowerRight );
 }
 
@@ -1023,13 +983,13 @@ void FileSystemTileServer::UpdateSplitTilesBoundingBox( int2 upperLeft, int2 low
 
         std::map< int4, int, Core::Int4Comparator > wQueue;
 
-		//int tileCount = 0;
+		int tileCount = 0;
 		int sourceSplitCount = 0;
 		unsigned int* splitData;
 
-		for ( int xd = 0; xd < mSplitWindowTileSize.x; ++xd )
+		for ( int xd = 0; xd < mSplitWindowNTiles.x; ++xd )
 		{
-			for (int yd = 0; yd < mSplitWindowTileSize.y; ++yd )
+			for (int yd = 0; yd < mSplitWindowNTiles.y; ++yd )
 			{
 
                 //
@@ -1056,8 +1016,8 @@ void FileSystemTileServer::UpdateSplitTilesBoundingBox( int2 upperLeft, int2 low
 
                 if ( minX < maxX && minY < maxY )
                 {
-				    //++tileCount;
-				    //Core::Printf( "Copying result tile ", tileCount, "." );
+				    ++tileCount;
+				    Core::Printf( "Copying result tile ", tileCount, "." );
 
 				    int4 tileIndex = make_int4( mSplitWindowStart.x + xd, mSplitWindowStart.y + yd, mSplitWindowStart.z, 0 );
 				    volumeDescriptions = LoadTile( tileIndex );
@@ -1078,42 +1038,24 @@ void FileSystemTileServer::UpdateSplitTilesBoundingBox( int2 upperLeft, int2 low
 
 					        RELEASE_ASSERT( areaIndex1D < mSplitWindowNPix );
 
-                            if ( splitData[ tileIndex1D ] != mSplitResultArea[ areaIndex1D ] )
+                            if ( mSplitResultArea[ areaIndex1D ] && splitData[ tileIndex1D ] != mSplitResultArea[ areaIndex1D ] )
                             {
                                 splitData[ tileIndex1D ] = mSplitResultArea[ areaIndex1D ];
                                 wQueue[ make_int4( ( mSplitWindowStart.x * numVoxelsPerTile.x + xOffset + tileX ) / 2, ( mSplitWindowStart.y * numVoxelsPerTile.y + yOffset + tileY ) / 2, mSplitWindowStart.z, 1) ] = mSplitResultArea[ areaIndex1D ];
                             }
-                            if ( mSplitBonusArea[ areaIndex1D ] && !mSplitResultArea[ areaIndex1D ] && splitData[ tileIndex1D ] != BONUS_REGION )
+                            else if ( mSplitDrawArea[ areaIndex1D ] && splitData[ tileIndex1D ] != mSplitDrawArea[ areaIndex1D ] )
                             {
-                                splitData[ tileIndex1D ] = BONUS_REGION;
-						        wQueue[ make_int4( ( mSplitWindowStart.x * numVoxelsPerTile.x + xOffset + tileX ) / 2, ( mSplitWindowStart.y * numVoxelsPerTile.y + yOffset + tileY ) / 2, mSplitWindowStart.z, 1) ] = BONUS_REGION;
+                                splitData[ tileIndex1D ] = mSplitDrawArea[ areaIndex1D ];
+						        wQueue[ make_int4( ( mSplitWindowStart.x * numVoxelsPerTile.x + xOffset + tileX ) / 2, ( mSplitWindowStart.y * numVoxelsPerTile.y + yOffset + tileY ) / 2, mSplitWindowStart.z, 1) ] = mSplitDrawArea[ areaIndex1D ];
                             }
+							else if ( splitData[ tileIndex1D ] && mSplitResultArea[ areaIndex1D ] == 0 && mSplitDrawArea[ areaIndex1D ] == 0)
+							{
+                                splitData[ tileIndex1D ] = 0;
+						        wQueue[ make_int4( ( mSplitWindowStart.x * numVoxelsPerTile.x + xOffset + tileX ) / 2, ( mSplitWindowStart.y * numVoxelsPerTile.y + yOffset + tileY ) / 2, mSplitWindowStart.z, 1) ] = 0;
+							}
 
                         }
                     }
-
-                    //int nVoxels = numVoxelsPerTile.x * numVoxelsPerTile.y;
-
-                    //for ( int tileIndex1D = 0; tileIndex1D < nVoxels; ++tileIndex1D )
-                    //{
-                    //    int tileX = tileIndex1D % numVoxelsPerTile.x;
-                    //    int tileY = tileIndex1D / numVoxelsPerTile.x;
-                    //    int areaIndex1D = xOffset + tileX + ( yOffset + tileY ) * mSplitWindowWidth;
-
-                    //    RELEASE_ASSERT( areaIndex1D < mSplitWindowNPix );
-
-
-                    //    if ( splitData[ tileIndex1D ] != mSplitResultArea[ areaIndex1D ] )
-                    //    {
-                    //        splitData[ tileIndex1D ] = mSplitResultArea[ areaIndex1D ];
-                    //        wQueue[ make_int4( ( mSplitWindowStart.x * numVoxelsPerTile.x + xOffset + tileX ) / 2, ( mSplitWindowStart.y * numVoxelsPerTile.y + yOffset + tileY ) / 2, mSplitWindowStart.z, 1) ] = mSplitResultArea[ areaIndex1D ];
-                    //    }
-                    //    if ( mSplitBonusArea[ areaIndex1D ] && !mSplitResultArea[ areaIndex1D ] )
-                    //    {
-                    //        splitData[ tileIndex1D ] = 3;
-                    //        wQueue[ make_int4( ( mSplitWindowStart.x * numVoxelsPerTile.x + xOffset + tileX ) / 2, ( mSplitWindowStart.y * numVoxelsPerTile.y + yOffset + tileY ) / 2, mSplitWindowStart.z, 1) ] = 3;
-                    //    }
-                    //}
 
 				    UnloadTile( tileIndex );
                 }
@@ -1220,9 +1162,9 @@ void FileSystemTileServer::ResetSplitTiles()
 		int sourceSplitCount = 0;
 		unsigned int* splitData;
 
-		for ( int xd = 0; xd < mSplitWindowTileSize.x; ++xd )
+		for ( int xd = 0; xd < mSplitWindowNTiles.x; ++xd )
 		{
-			for (int yd = 0; yd < mSplitWindowTileSize.y; ++yd )
+			for (int yd = 0; yd < mSplitWindowNTiles.y; ++yd )
 			{
 
 				++tileCount;
@@ -1249,9 +1191,9 @@ void FileSystemTileServer::ResetSplitTiles()
 
 					RELEASE_ASSERT( areaIndex1D < mSplitWindowNPix );
 
-					if ( splitData[ tileIndex1D ] != SPLIT_SEARCH_REGION_VALUE )
+					if ( splitData[ tileIndex1D ] != 0 )
 					{
-                        splitData[ tileIndex1D ] = SPLIT_SEARCH_REGION_VALUE;
+                        splitData[ tileIndex1D ] = 0;
 						wQueue.push( make_int4( ( mSplitWindowStart.x * numVoxelsPerTile.x + xOffset + tileX ) / 2, ( mSplitWindowStart.y * numVoxelsPerTile.y + yOffset + tileY ) / 2, mSplitWindowStart.z, 1) );
 					}
 				}
@@ -1319,9 +1261,9 @@ void FileSystemTileServer::ResetSplitTiles()
 
 			//Core::Printf( "Writing to index1D=", index1D, " ( thisVoxel.x=", thisVoxel.x, " thisVoxel.y=", thisVoxel.y, " thisVoxel.z=", thisVoxel.z, " thisVoxel.w=", thisVoxel.w, " ).");
 
-            if ( splitData[ index1D ] != SPLIT_SEARCH_REGION_VALUE )
+            if ( splitData[ index1D ] != 0 )
             {
-                splitData[ index1D ] = SPLIT_SEARCH_REGION_VALUE;
+                splitData[ index1D ] = 0;
 
                 //
 		        // Add a scaled-down w to the queue
@@ -1343,13 +1285,15 @@ void FileSystemTileServer::ResetSplitState()
 
     mSplitSourcePoints.clear();
 
+	//memset( mSplitResultArea, 0, mSplitWindowNPix );
+	//memset( mSplitDrawArea, 0, mSplitWindowNPix );
+	//memcpy( mSplitSearchMask, mSplitBorderTargets, mSplitWindowNPix );
+
     for ( int i = 0; i < mSplitWindowNPix; ++i )
     {
-		//mSplitSearchMask[ i ] = 0;
-        //mSplitResultArea[ i ] = 0;
 		mSplitSearchMask[ i ] = mSplitBorderTargets[ i ];
-        mSplitResultArea[ i ] = SPLIT_SEARCH_REGION_VALUE;
-        mSplitBonusArea[ i ] = 0;
+        mSplitResultArea[ i ] = 0;
+        mSplitDrawArea[ i ] = 0;
     }
 
 	ResetSplitTiles();
@@ -1371,9 +1315,9 @@ void FileSystemTileServer::LoadSplitDistances( int segId )
 
     int tileCount = 0;
     int areaCount = 0;
-    for ( int xd = 0; xd < mSplitWindowTileSize.x; ++xd )
+    for ( int xd = 0; xd < mSplitWindowNTiles.x; ++xd )
     {
-        for (int yd = 0; yd < mSplitWindowTileSize.y; ++yd )
+        for (int yd = 0; yd < mSplitWindowNTiles.y; ++yd )
         {
 
             ++tileCount;
@@ -1403,7 +1347,7 @@ void FileSystemTileServer::LoadSplitDistances( int segId )
                 // Distance calculation
                 //
                 int segVal = ((int) currentSrcVolume[ tileIndex1D ]) + 10;
-                mSplitStepDist[ areaIndex1D ] = segVal * segVal + BONUS_VALUE;
+                mSplitStepDist[ areaIndex1D ] = segVal * segVal;
                 ++areaCount;
 
                 //
@@ -1491,13 +1435,13 @@ void FileSystemTileServer::PrepForSplit( int segId, float3 pointTileSpace )
         // Calculate sizes
         //
         mSplitWindowStart = make_int3( minTileX, minTileY, (int) pointTileSpace.z );
-        mSplitWindowTileSize = make_int3( ( maxTileX - minTileX + 1 ), ( maxTileY - minTileY + 1 ), 1 );
+        mSplitWindowNTiles = make_int3( ( maxTileX - minTileX + 1 ), ( maxTileY - minTileY + 1 ), 1 );
 
         Core::Printf( "mSplitWindowStart=", mSplitWindowStart.x, ":", mSplitWindowStart.y, ":", mSplitWindowStart.z, ".\n" );
-        Core::Printf( "mSplitWindowSize=", mSplitWindowTileSize.x, ":", mSplitWindowTileSize.y, ":", mSplitWindowTileSize.z, ".\n" );
+        Core::Printf( "mSplitWindowSize=", mSplitWindowNTiles.x, ":", mSplitWindowNTiles.y, ":", mSplitWindowNTiles.z, ".\n" );
 
-		mSplitWindowWidth = numVoxelsPerTile.x * mSplitWindowTileSize.x;
-		mSplitWindowHeight = numVoxelsPerTile.y * mSplitWindowTileSize.y;
+		mSplitWindowWidth = numVoxelsPerTile.x * mSplitWindowNTiles.x;
+		mSplitWindowHeight = numVoxelsPerTile.y * mSplitWindowNTiles.y;
 		mSplitWindowNPix = mSplitWindowWidth * mSplitWindowHeight;
 
         Core::Printf( "mSplitWindowWidth=", mSplitWindowWidth, ", mSplitWindowHeight=", mSplitWindowHeight, ", nPix=", mSplitWindowNPix, ".\n" );
@@ -1520,8 +1464,8 @@ void FileSystemTileServer::PrepForSplit( int segId, float3 pointTileSpace )
         if ( mSplitSearchMask != 0 )
             delete[] mSplitSearchMask;
 
-        if ( mSplitBonusArea != 0 )
-            delete[] mSplitBonusArea;
+        if ( mSplitDrawArea != 0 )
+            delete[] mSplitDrawArea;
 
 		if ( mSplitBorderTargets != 0 )
 			delete[] mSplitBorderTargets;
@@ -1533,75 +1477,11 @@ void FileSystemTileServer::PrepForSplit( int segId, float3 pointTileSpace )
         mSplitResultDist = new int[ mSplitWindowNPix ];
 		mSplitPrev = new int[ mSplitWindowNPix ];
 		mSplitSearchMask = new int[ mSplitWindowNPix ];
-		mSplitBonusArea = new int[ mSplitWindowNPix ];
+		mSplitDrawArea = new int[ mSplitWindowNPix ];
 		mSplitBorderTargets = new int[ mSplitWindowNPix ];
 		mSplitResultArea = new unsigned int[ mSplitWindowNPix ];
 
         LoadSplitDistances( segId );
-
-        unsigned char* currentSrcVolume;
-        int* currentIdVolume;
-
-		int tileCount = 0;
-		int areaCount = 0;
-		for ( int xd = 0; xd < mSplitWindowTileSize.x; ++xd )
-		{
-			for (int yd = 0; yd < mSplitWindowTileSize.y; ++yd )
-			{
-
-				++tileCount;
-				Core::Printf( "Loading distance tile ", tileCount, "." );
-
-				int4 tileIndex = make_int4( mSplitWindowStart.x + xd, mSplitWindowStart.y + yd, mSplitWindowStart.z, 0 );
-				volumeDescriptions = LoadTile( tileIndex );
-				currentSrcVolume = (unsigned char*)volumeDescriptions.Get( "SourceMap" ).data;
-				currentIdVolume = (int*)volumeDescriptions.Get( "IdMap" ).data;
-
-				//
-				// Copy distance values into the buffer
-				//
-				int xOffset = xd * numVoxelsPerTile.x;
-				int yOffset = yd * numVoxelsPerTile.y;
-				int nVoxels = numVoxelsPerTile.x * numVoxelsPerTile.y;
-
-				for ( int tileIndex1D = 0; tileIndex1D < nVoxels; ++tileIndex1D )
-				{
-                    int areaX = xOffset + tileIndex1D % numVoxelsPerTile.x;
-                    int areaY = yOffset + tileIndex1D / numVoxelsPerTile.x;
-					int areaIndex1D = areaX + areaY * mSplitWindowWidth;
-
-					RELEASE_ASSERT( areaIndex1D < mSplitWindowNPix );
-
-					//
-					// Distance calculation
-					//
-					int segVal = ((int) currentSrcVolume[ tileIndex1D ]) + 10;
-					mSplitStepDist[ areaIndex1D ] = segVal * segVal;
-					++areaCount;
-
-                    //
-                    // Mark border targets
-                    //
-					if ( currentIdVolume[ tileIndex1D ] == segId )
-					{
-						++mSplitLabelCount;
-                        mSplitBorderTargets[ areaIndex1D ] = 0;
-					}
-					else if ( currentIdVolume[ tileIndex1D ] != 0 ||
-                        areaX == 0 || areaX == mSplitWindowWidth - 1 || areaY == 0 || areaY == mSplitWindowHeight - 1 )
-					{
-                        mSplitBorderTargets[ areaIndex1D ] = BORDER_TARGET;
-					}
-                    else
-                    {
-                        mSplitBorderTargets[ areaIndex1D ] = 0;
-                    }
-				}
-
-				UnloadTile( tileIndex );
-
-			}
-		}
 
         ResetSplitState();
 
@@ -1636,7 +1516,7 @@ int FileSystemTileServer::CompleteSplit( int segId )
 				for ( int yd = -1; !seedFound && yd <= 1; ++yd )
 				{
 					seedIndex1D = areaIndex1D + step * xd + step * yd * mSplitWindowWidth;
-					if ( seedIndex1D >= 0 && seedIndex1D < mSplitWindowNPix && mSplitResultArea[ seedIndex1D ] == SPLIT_SEARCH_REGION_VALUE )
+					if ( seedIndex1D >= 0 && seedIndex1D < mSplitWindowNPix && mSplitResultArea[ seedIndex1D ] == 0 )
 					{
 						seedFound = true;
 						Core::Printf( "Seed found at:", seedIndex1D, "." );
@@ -1761,7 +1641,7 @@ int FileSystemTileServer::CompleteSplit( int segId )
 				(thisVoxel.y - mSplitWindowStart.y * numVoxelsPerTile.y) * mSplitWindowWidth;
 			if ( areaIndex1D >= 0 && areaIndex1D < mSplitWindowNPix )
 			{
-				isSplitBorder = mSplitResultArea[ areaIndex1D ] != SPLIT_SEARCH_REGION_VALUE;
+				isSplitBorder = mSplitResultArea[ areaIndex1D ] != 0;
 			}
 
 			if ( idValue == segId && !isSplitBorder && !changeBits->test( index1D ) )
@@ -1855,9 +1735,9 @@ int FileSystemTileServer::CompleteSplit( int segId )
 				// (any point next to the border line that hasn't been filled)
 				//
 
-				for ( int xd = 0; !seedFound && xd < mSplitWindowTileSize.x; ++xd )
+				for ( int xd = 0; !seedFound && xd < mSplitWindowNTiles.x; ++xd )
 				{
-					for (int yd = 0; !seedFound && yd < mSplitWindowTileSize.y; ++yd )
+					for (int yd = 0; !seedFound && yd < mSplitWindowNTiles.y; ++yd )
 					{
 						tileIndex = make_int4( mSplitWindowStart.x + xd, mSplitWindowStart.y + yd, mSplitWindowStart.z, 0 );
 						volumeDescriptions = LoadTile( tileIndex );
@@ -1873,15 +1753,15 @@ int FileSystemTileServer::CompleteSplit( int segId )
 							int areaY = yOffset + tileIndex1D / numVoxelsPerTile.x;
 							seedIndex1D = areaX + areaY * mSplitWindowWidth;
 
-							if ( currentIdVolume[ tileIndex1D ] == segId && !mUndoItem.changePixels.GetHashMap()[ CreateTileString( tileIndex ) ].test( tileIndex1D ) && mSplitResultArea[ seedIndex1D ] == SPLIT_SEARCH_REGION_VALUE )
+							if ( currentIdVolume[ tileIndex1D ] == segId && !mUndoItem.changePixels.GetHashMap()[ CreateTileString( tileIndex ) ].test( tileIndex1D ) && mSplitResultArea[ seedIndex1D ] == 0 )
 							{
 								//
 								// Check neighbours
 								//
-								if ( ( areaX > 0 && mSplitResultArea[ seedIndex1D - 1 ] != SPLIT_SEARCH_REGION_VALUE ) ||
-									( areaX < mSplitWindowWidth - 1 && mSplitResultArea[ seedIndex1D + 1 ] != SPLIT_SEARCH_REGION_VALUE ) ||
-									( areaY > 0 && mSplitResultArea[ seedIndex1D - mSplitWindowWidth ] != SPLIT_SEARCH_REGION_VALUE ) ||
-									( areaY < mSplitWindowHeight - 1 && mSplitResultArea[ seedIndex1D + mSplitWindowWidth ] != SPLIT_SEARCH_REGION_VALUE )
+								if ( ( areaX > 0 && mSplitResultArea[ seedIndex1D - 1 ] != 0 ) ||
+									( areaX < mSplitWindowWidth - 1 && mSplitResultArea[ seedIndex1D + 1 ] != 0 ) ||
+									( areaY > 0 && mSplitResultArea[ seedIndex1D - mSplitWindowWidth ] != 0 ) ||
+									( areaY < mSplitWindowHeight - 1 && mSplitResultArea[ seedIndex1D + mSplitWindowWidth ] != 0 )
 									)
 								{
 									seedFound = true;
@@ -2138,7 +2018,7 @@ void FileSystemTileServer::FindBoundaryJoinPoints2D( int segId )
             sourceLocations[ si ] = ( mSplitSourcePoints[ si ].x - mSplitWindowStart.x * numVoxelsPerTile.x ) +
                 ( mSplitSourcePoints[ si ].y - mSplitWindowStart.y * numVoxelsPerTile.y ) * mSplitWindowWidth;
 
-    		//Core::Printf( "Split point at:", mSplitSourcePoints[ si ].x, ":", mSplitSourcePoints[ si ].y, " index=", sourceLocations[ si ], ".\n" );
+    		Core::Printf( "Split point at:", mSplitSourcePoints[ si ].x, ":", mSplitSourcePoints[ si ].y, " index=", sourceLocations[ si ], ".\n" );
         }
 
         int nLinks = 0;
@@ -2149,10 +2029,13 @@ void FileSystemTileServer::FindBoundaryJoinPoints2D( int segId )
 		//
 		// Reset mask area
 		//
+		//memset( mSplitResultArea, 0, mSplitWindowNPix );
+		//memcpy( mSplitSearchMask, mSplitBorderTargets, mSplitWindowNPix );
+
 		for ( int i = 0; i < mSplitWindowNPix; ++i )
         {
 			mSplitSearchMask[ i ] = mSplitBorderTargets[ i ];
-            mSplitResultArea[ i ] = SPLIT_SEARCH_REGION_VALUE;
+            mSplitResultArea[ i ] = 0;
         }
 
 		//ResetSplitTiles();
@@ -2172,13 +2055,11 @@ void FileSystemTileServer::FindBoundaryJoinPoints2D( int segId )
                 //
                 if ( si == currentSourceIx || sourceLinks[ si ] >= 1 )
                 {
-                    mSplitSearchMask[ areaIndex ] = 1;
-					//Core::Printf( "Marked source (blocked) at ", areaIndex, ".\n" );
+                    mSplitSearchMask[ areaIndex ] = 0;
                 }
                 else
                 {
                     mSplitSearchMask[ areaIndex ] = SOURCE_TARGET;
-					//Core::Printf( "Marked source (ok) at ", areaIndex, ".\n" );
                 }
 
             }
@@ -2197,48 +2078,23 @@ void FileSystemTileServer::FindBoundaryJoinPoints2D( int segId )
             else
             {
                 //
-                // link to border only on the last step
+                // allow link to border on the last step
                 //
                 targetMax = nLinks == nSources * 2 - 1 ? BORDER_TARGET : SOURCE_TARGET;
             }
 
             int toIndex = -1;
 
-            Mojo::Native::SimpleSplitTools::DijkstraSearch( mSplitStepDist, mSplitSearchMask, mSplitBonusArea, sourceIndex, mSplitWindowWidth, mSplitWindowHeight, targetMax, mSplitResultDist, mSplitPrev, &toIndex );
+            Mojo::Native::SimpleSplitTools::DijkstraSearch( mSplitStepDist, mSplitSearchMask, mSplitDrawArea, sourceIndex, mSplitWindowWidth, mSplitWindowHeight, targetMax, mSplitResultDist, mSplitPrev, &toIndex );
 
 			if ( toIndex != -1 )
 			{
-
-			    //
-			    // Get the result line and mask around it
-			    //
-				for ( int i = 0; i < mSplitWindowNPix; ++i )
-				{
-					if ( mSplitPrev[ i ] == PATH_RESULT_VALUE && mSplitResultArea[ i ] == SPLIT_SEARCH_REGION_VALUE )
-					{
-						mSplitResultArea[ i ] = 1;
-                        SimpleSplitTools::ApplySmallMask( i, mSplitWindowWidth, mSplitWindowHeight, 1, mSplitSearchMask );
-					}
-				}
-
-				//
-				// Unmask the sources
-				//
-                for ( int si = 0; si < nSources; ++si )
-                {
-                    int areaIndex = sourceLocations[ si ];
-					mSplitResultArea[ areaIndex ] = 2;
-                    SimpleSplitTools::ApplyLargeMask( areaIndex, mSplitWindowWidth, mSplitWindowHeight, 0, mSplitSearchMask );
-                }
-                for ( int si = 0; si < nSources; ++si )
-                {
-                    int areaIndex = sourceLocations[ si ];
-					mSplitSearchMask [ areaIndex ] = SOURCE_TARGET;
-                }
-
 				++nLinks;
                 ++sourceLinks[ currentSourceIx ];
 
+				//
+				// Check the target type
+				//
                 if ( mSplitSearchMask[ toIndex ] == SOURCE_TARGET )
                 {
                     for ( int si = 0; si < nSources; ++si )
@@ -2256,6 +2112,31 @@ void FileSystemTileServer::FindBoundaryJoinPoints2D( int segId )
                 {
                     direction = 2;
                     currentSourceIx = 0;
+                }
+
+				//
+			    // Get the result line and mask around it
+			    //
+				for ( int i = 0; i < mSplitWindowNPix; ++i )
+				{
+					// debug mask
+					//mSplitResultArea[ i ] = mSplitSearchMask[ i ];
+
+					if ( mSplitPrev[ i ] == -PATH_RESULT )
+					{
+						mSplitResultArea[ i ] = PATH_RESULT;
+						SimpleSplitTools::ApplySmallMask( i, mSplitWindowWidth, mSplitWindowHeight, MASK_VALUE, mSplitSearchMask );
+					}
+				}
+
+				//
+				// Unmask the sources
+				//
+                for ( int si = 0; si < nSources; ++si )
+                {
+                    int areaIndex = sourceLocations[ si ];
+					mSplitResultArea[ areaIndex ] = SOURCE_TARGET;
+                    SimpleSplitTools::ApplyLargeMask( areaIndex, mSplitWindowWidth, mSplitWindowHeight, 0, mSplitSearchMask );
                 }
 
 			}

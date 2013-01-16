@@ -178,7 +178,7 @@ void SimpleSplitTools::DijkstraSearch ( const int* searchArea, const int* search
 
 		//Core::Printf( itCount, ": currentIndex=", currentIndex, "  dist=", dist[ currentIndex ], " searchArea=", searchArea[ currentIndex ], " searchMask=", searchMask[ currentIndex ] );
 
-		if ( searchMask[ currentIndex ] <= targetMax )
+		if ( searchMask[ currentIndex ] && searchMask[ currentIndex ] <= targetMax )
 		{
 			found_target = true;
 			break;
@@ -217,23 +217,18 @@ void SimpleSplitTools::DijkstraSearch ( const int* searchArea, const int* search
 				continue;
 			}
 
-			if ( searchMask[ nextIndex ] == 1 )
-			{
-				continue;
-			}
-
 			//
 			// Check this neighbour
 			//
 			//Core::Printf( "Checking neighbour ", nextIndex, ": dist=", dist[ nextIndex ], ".\n" );
 			int stepDist = searchArea[ nextIndex ];
 
-			if ( searchMask[ nextIndex ] == 1 )
+			if ( searchMask[ nextIndex ] == MASK_VALUE )
 			{
 				//
 				// Allow this step but make it very expensive
 				//
-				stepDist = stepDist + BONUS_VALUE;
+				stepDist = stepDist + MASK_PENALTY_VALUE;
 				//continue;
 			}
 
@@ -241,10 +236,6 @@ void SimpleSplitTools::DijkstraSearch ( const int* searchArea, const int* search
 			{
 				stepDist = 0;
 			}
-            else if ( searchBonus[ nextIndex ] == PENALTY_REGION )
-            {
-                stepDist = searchArea[ nextIndex ] + PENALTY_VALUE;
-            }
 
 			//Core::Printf( "stepDist=", stepDist, ".\n" );
 
@@ -294,10 +285,10 @@ void SimpleSplitTools::DijkstraSearch ( const int* searchArea, const int* search
 			//Core::Printf( currentIndex, "dif=", currentIndex - prev[ currentIndex ]);
 			tempIndex = currentIndex;
 			currentIndex = prev[ currentIndex ];
-			prev[ tempIndex ] = PATH_RESULT_VALUE;
+			prev[ tempIndex ] = -PATH_RESULT;
 			++linePix;
 		}
-		//Core::Printf( "Found ", linePix, " line pixels." );
+		Core::Printf( "Found ", linePix, " line pixels." );
 	}
 	else
 	{

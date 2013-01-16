@@ -1,23 +1,22 @@
 #pragma once
 
-#define SPLIT_SEARCH_REGION_VALUE 1
-
+// Point split
+#define SOURCE_TARGET 1
 #define BORDER_TARGET 2
-#define SOURCE_TARGET 3
 
-#define PATH_RESULT_VALUE 4
+// One region split
+#define REGION_SPLIT 3
 
-#define BONUS_REGION 5
-#define BONUS_VALUE 65536
+// Two region split
+#define REGION_A 4
+#define REGION_B 5
 
-#define PENALTY_REGION 6
-#define PENALTY_VALUE 65536
+// Result (all modes)
+#define PATH_RESULT 6
 
-#define REGION_A -4
-#define REGION_B -5
-
-#define PATH_RESULT_VALUE -2
-
+// Search mask
+#define MASK_VALUE 10
+#define MASK_PENALTY_VALUE 65536
 
 namespace Mojo
 {

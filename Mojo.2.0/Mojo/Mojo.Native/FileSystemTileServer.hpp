@@ -140,7 +140,7 @@ private:
     //
     std::vector< int3 >                                           mSplitSourcePoints;
     int3                                                          mSplitWindowStart;
-    int3                                                          mSplitWindowTileSize;
+    int3                                                          mSplitWindowNTiles;
     int                                                           mSplitWindowWidth;
     int                                                           mSplitWindowHeight;
     int                                                           mSplitWindowNPix;
@@ -150,7 +150,7 @@ private:
     int*                                                          mSplitPrev;
     int*                                                          mSplitBorderTargets;
     int*                                                          mSplitSearchMask;
-    int*                                                          mSplitBonusArea;
+    int*                                                          mSplitDrawArea;
     unsigned int*                                                 mSplitResultArea;
 
 	FileSystemUndoRedoItem                                        mUndoItem;
@@ -182,7 +182,7 @@ inline void FileSystemTileServer::LoadSegmentationInternal( TiledDatasetDescript
     unsigned int i;
     for ( i = 0; i < rawIdTileMap.shape( 0 ); i++ )
     {
-        mIdTileMap.GetHashMap()[ rawIdTileMap( i, 0 ) ].insert( make_int4( rawIdTileMap( i, 1 ), rawIdTileMap( i, 2 ), rawIdTileMap( i, 3 ), rawIdTileMap( i, 4 ) ) );
+        mIdTileMap.GetHashMap()[ rawIdTileMap( i, 0 ) ].insert( make_int4( rawIdTileMap( i, 4 ), rawIdTileMap( i, 3 ), rawIdTileMap( i, 2 ), rawIdTileMap( i, 1 ) ) );
         if ( rawIdTileMap( i, 0 ) > mTiledDatasetDescription.maxLabelId )
         {
             mTiledDatasetDescription.maxLabelId = rawIdTileMap( i, 0 );
