@@ -45,6 +45,9 @@ public:
 
     bool                                                  IsSegmentationLoaded();
 
+    void                                                  SaveSegmentation();
+    void                                                  SaveSegmentationAs( std::string savePath );
+
     void                                                  Update();
 
     void                                                  LoadTiles( const TiledDatasetView& tiledDatasetView );

@@ -15,6 +15,8 @@ namespace Mojo.Wpf.ViewModel
 
         public RelayCommand LoadDatasetCommand { get; private set; }
         public RelayCommand LoadSegmentationCommand { get; private set; }
+        public RelayCommand SaveSegmentationCommand { get; private set; }
+        public RelayCommand SaveSegmentationAsCommand { get; private set; }
 
         public class MergeModeItem
         {
@@ -40,6 +42,8 @@ namespace Mojo.Wpf.ViewModel
 
             LoadDatasetCommand = new RelayCommand( param => LoadDataset() );
             LoadSegmentationCommand = new RelayCommand( param => LoadSegmentation(), param => Engine.TileManager.TiledDatasetLoaded );
+            SaveSegmentationCommand = new RelayCommand( param => SaveSegmentation(), param => Engine.TileManager.SegmentationLoaded );
+            SaveSegmentationAsCommand = new RelayCommand( param => SaveSegmentationAs(), param => Engine.TileManager.SegmentationLoaded );
 
             TileManagerDataContext.StateChanged += StateChangedHandler;
             SegmenterDataContext.StateChanged += StateChangedHandler;
@@ -128,7 +132,9 @@ namespace Mojo.Wpf.ViewModel
 
                 if ( Engine.TileManager.TiledDatasetLoaded )
                 {
-                    //Set the initial view
+                    //
+                    // Set the initial view
+                    //
                     var viewportDataSpaceX = Engine.Viewers.Internal[ViewerMode.TileManager2D].D3D11RenderingPane.Viewport.Width / Engine.TileManager.TiledDatasetDescription.TiledVolumeDescriptions.Get( "SourceMap" ).NumVoxelsPerTileX;
                     var viewportDataSpaceY = Engine.Viewers.Internal[ViewerMode.TileManager2D].D3D11RenderingPane.Viewport.Height / Engine.TileManager.TiledDatasetDescription.TiledVolumeDescriptions.Get( "SourceMap" ).NumVoxelsPerTileY;
                     var maxExtentDataSpaceX = Engine.TileManager.TiledDatasetDescription.TiledVolumeDescriptions.Get( "SourceMap" ).NumTilesX * Constants.ConstParameters.GetInt( "TILE_SIZE_X" );
@@ -140,8 +146,6 @@ namespace Mojo.Wpf.ViewModel
                     Engine.TileManager.TiledDatasetView.ExtentDataSpace = new Vector3( viewportDataSpaceX / zoomLevel, viewportDataSpaceY / zoomLevel, 0f );
 
                     Engine.CurrentToolMode = ToolMode.SplitSegmentation;
-                    //Engine.CurrentToolMode = ToolMode.MergeSegmentation;
-                    //SegmenterDataContext.MergeSegmentationToolRadioButtonIsChecked = true;
 
                 }
             }
@@ -174,27 +178,46 @@ namespace Mojo.Wpf.ViewModel
 
                 if ( Engine.TileManager.SegmentationLoaded )
                 {
-                    //Set the initial view
-                    //var viewportDataSpaceX = Engine.Viewers.Internal[ViewerMode.TileManager2D].D3D11RenderingPane.Viewport.Width / Engine.TileManager.TiledDatasetDescription.TiledVolumeDescriptions.Get( "SourceMap" ).NumVoxelsPerTileX;
-                    //var viewportDataSpaceY = Engine.Viewers.Internal[ViewerMode.TileManager2D].D3D11RenderingPane.Viewport.Height / Engine.TileManager.TiledDatasetDescription.TiledVolumeDescriptions.Get( "SourceMap" ).NumVoxelsPerTileY;
-                    //var maxExtentDataSpaceX = Engine.TileManager.TiledDatasetDescription.TiledVolumeDescriptions.Get( "SourceMap" ).NumTilesX * Constants.ConstParameters.GetInt( "TILE_SIZE_X" );
-                    //var maxExtentDataSpaceY = Engine.TileManager.TiledDatasetDescription.TiledVolumeDescriptions.Get( "SourceMap" ).NumTilesY * Constants.ConstParameters.GetInt( "TILE_SIZE_Y" );
-
-                    //var zoomLevel = Math.Min( viewportDataSpaceX / maxExtentDataSpaceX, viewportDataSpaceY / maxExtentDataSpaceY );
-
-                    //Engine.TileManager.TiledDatasetView.CenterDataSpace = new Vector3( maxExtentDataSpaceX / 2f, maxExtentDataSpaceY / 2f, 0f );
-                    //Engine.TileManager.TiledDatasetView.ExtentDataSpace = new Vector3( viewportDataSpaceX / zoomLevel, viewportDataSpaceY / zoomLevel, 0f );
-
                     //
-                    // Enable controls and set detault values
+                    // Set the initial view
                     //
                     Engine.CurrentToolMode = ToolMode.SplitSegmentation;
-                    //Engine.CurrentToolMode = ToolMode.MergeSegmentation;
-                    SegmenterDataContext.MergeSegmentationToolRadioButtonIsChecked = true;
                     Engine.TileManager.SegmentationVisibilityRatio = 0.5f;
-
                 }
             }
         }
+
+        private void SaveSegmentation()
+        {
+            Engine.TileManager.SaveSegmentation();
+        }
+
+        private void SaveSegmentationAs()
+        {
+            var initialPath = Settings.Default.LoadSegmentationPath;
+            if ( string.IsNullOrEmpty( initialPath ) || !Directory.Exists( initialPath ) )
+            {
+                initialPath = Environment.GetFolderPath( Environment.SpecialFolder.MyDocuments );
+            }
+
+            var folderBrowserDialog = new Ookii.Dialogs.Wpf.VistaFolderBrowserDialog
+            {
+                Description = "Select New Save Folder (the folder you select should be called \"" + Constants.DATASET_ROOT_DIRECTORY_NAME + "\")",
+                UseDescriptionForTitle = true,
+                ShowNewFolderButton = false,
+                SelectedPath = initialPath
+            };
+
+            var result = folderBrowserDialog.ShowDialog();
+
+            if ( result != null && result == true )
+            {
+                Settings.Default.LoadSegmentationPath = folderBrowserDialog.SelectedPath;
+                Settings.Default.Save();
+
+                Engine.TileManager.SaveSegmentationAs( folderBrowserDialog.SelectedPath );
+            }
+        }
+
     }
 }

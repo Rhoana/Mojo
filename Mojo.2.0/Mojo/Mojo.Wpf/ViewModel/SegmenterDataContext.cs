@@ -79,11 +79,11 @@ namespace Mojo.Wpf.ViewModel
             {
                 if ( value )
                 {
-                    if ( mSegmenter.CurrentSegmenterToolMode != SegmenterToolMode.Adjust )
-                    {
-                        mSegmenter.Internal.InitializeEdgeXYMap( mSegmenter.DatasetDescription.VolumeDescriptions );
-                        mSegmenter.CommitSegmentation();
-                    }
+                    //if ( mSegmenter.CurrentSegmenterToolMode != SegmenterToolMode.Adjust )
+                    //{
+                    //    mSegmenter.Internal.InitializeEdgeXYMap( mSegmenter.DatasetDescription.VolumeDescriptions );
+                    //    mSegmenter.CommitSegmentation();
+                    //}
 
                     mSegmenter.CurrentSegmenterToolMode = SegmenterToolMode.Adjust;
                     Refresh();
@@ -126,23 +126,15 @@ namespace Mojo.Wpf.ViewModel
             {
                 if ( value )
                 {
-                    if ( mSegmenter.CurrentSegmenterToolMode != SegmenterToolMode.Split )
-                    {
-                        mSegmenter.Internal.InitializeEdgeXYMap( mSegmenter.DatasetDescription.VolumeDescriptions );
-                        mSegmenter.CommitSegmentation();
-                    }
+                    //if ( mSegmenter.CurrentSegmenterToolMode != SegmenterToolMode.Split )
+                    //{
+                    //    mSegmenter.Internal.InitializeEdgeXYMap( mSegmenter.DatasetDescription.VolumeDescriptions );
+                    //    mSegmenter.CommitSegmentation();
+                    //}
 
                     mSegmenter.CurrentSegmenterToolMode = SegmenterToolMode.Split;
                     Refresh();
                 }
-            }
-        }
-
-        public bool NotMergeModeAndDatasetLoaded
-        {
-            get
-            {
-                return mSegmenter.CurrentSegmenterToolMode != SegmenterToolMode.Merge;
             }
         }
 
@@ -159,6 +151,14 @@ namespace Mojo.Wpf.ViewModel
             get
             {
                 return mSegmenter.CurrentSegmenterToolMode == SegmenterToolMode.Split;
+            }
+        }
+
+        public bool AdjustModeAndDatasetLoaded
+        {
+            get
+            {
+                return mSegmenter.CurrentSegmenterToolMode == SegmenterToolMode.Adjust;
             }
         }
 
@@ -223,8 +223,8 @@ namespace Mojo.Wpf.ViewModel
             OnPropertyChanged( "AdjustSegmentationToolRadioButtonIsChecked" );
             OnPropertyChanged( "MergeSegmentationToolRadioButtonIsChecked" );
             OnPropertyChanged( "SplitSegmentationToolRadioButtonIsChecked" );
+            OnPropertyChanged( "AdjustModeAndDatasetLoaded" );
             OnPropertyChanged( "MergeModeAndDatasetLoaded" );
-            OnPropertyChanged( "NotMergeModeAndDatasetLoaded" );
             OnPropertyChanged( "SplitModeAndDatasetLoaded" );
             OnPropertyChanged( "CurrentSegmentationLabel" );
             OnPropertyChanged( "ToolbarString" );

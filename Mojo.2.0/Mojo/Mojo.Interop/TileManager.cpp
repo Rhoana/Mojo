@@ -101,6 +101,16 @@ bool TileManager::IsSegmentationLoaded()
     return mTileManager->IsSegmentationLoaded();
 }
 
+void TileManager::SaveSegmentation()
+{
+    return mTileManager->SaveSegmentation();
+}
+
+void TileManager::SaveSegmentationAs( String^ savePath )
+{
+    return mTileManager->SaveSegmentationAs( msclr::interop::marshal_as < std::string >( savePath ) );
+}
+
 void TileManager::Update()
 {
     mTileManager->Update();

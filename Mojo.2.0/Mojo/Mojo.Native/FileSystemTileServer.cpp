@@ -118,11 +118,71 @@ void FileSystemTileServer::SaveSegmentation()
     //
     // save any tile changes (to temp directory)
     //
+
+    Core::Printf( "Saving tiles (temp)." );
+
     SaveAndClearFileSystemTileCache();
 
     //
-    // move changed tiles to save directory
+    // save the idTileMap (to temp directory)
     //
+
+    Core::Printf( "Saving idTileMap (temp)." );
+
+    unsigned int tileMapEntries = 0;
+    stdext::hash_map< unsigned int, std::set< int4, Mojo::Core::Int4Comparator > >::iterator tileMapIt;
+    for ( tileMapIt = mIdTileMap.GetHashMap().begin(); tileMapIt != mIdTileMap.GetHashMap().end(); ++tileMapIt )
+    {
+        tileMapEntries += tileMapIt->second.size();
+    }
+
+    size_t shape[] = { tileMapEntries, 5 };
+    marray::Marray< unsigned int > outputTiles( shape, shape + 2 );
+
+    unsigned int mi = 0;
+    for ( unsigned int segId = 0; segId <= mTiledDatasetDescription.maxLabelId; ++segId )
+    {
+        if ( mIdTileMap.GetHashMap().find( segId ) != mIdTileMap.GetHashMap().end() )
+        {
+            std::set< int4, Mojo::Core::Int4Comparator > tileSet = mIdTileMap.Get( segId );
+            std::set< int4, Mojo::Core::Int4Comparator >::iterator tileIt;
+            for ( tileIt = tileSet.begin(); tileIt != tileSet.end(); ++tileIt )
+            {
+                outputTiles ( mi, 0 ) = segId;
+                outputTiles ( mi, 1 ) = tileIt->w;
+                outputTiles ( mi, 2 ) = tileIt->z;
+                outputTiles ( mi, 3 ) = tileIt->y;
+                outputTiles ( mi, 4 ) = tileIt->x;
+                ++mi;
+            }
+        }
+    }
+
+    if ( mi != tileMapEntries )
+    {
+        Core::Printf( "WARNING: Save expected to find ", tileMapEntries, " tile entries and found ", mi, "." );
+    }
+
+    boost::filesystem::path tempIdTileMapPath = boost::filesystem::path( mTiledDatasetDescription.paths.Get( "TempIdTileMap" ) );
+    if ( boost::filesystem::exists( tempIdTileMapPath ) )
+    {
+        boost::filesystem::remove( tempIdTileMapPath );
+    }
+    else
+    {
+        boost::filesystem::create_directories( tempIdTileMapPath.parent_path() );
+    }
+
+    hid_t hdf5FileHandle = marray::hdf5::createFile( mTiledDatasetDescription.paths.Get( "TempIdTileMap" ) );
+    marray::hdf5::save( hdf5FileHandle, "IdTileMap", outputTiles );
+    marray::hdf5::closeFile( hdf5FileHandle );
+
+    //
+    // move changed tiles to the save directory
+    //
+
+    Core::Printf( "Replacing tiles." );
+
     int4 numTiles = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "SourceMap" ).numTiles;
 
     //size_t shape[] = { numTiles.w, numTiles.z, numTiles.y, numTiles.x };
@@ -149,8 +209,11 @@ void FileSystemTileServer::SaveSegmentation()
                         tempVolumeDesctiption.fileExtension );
 
                     boost::filesystem::path tempTilePath = boost::filesystem::path( tempTilePathString );
+
                     if ( boost::filesystem::exists( tempTilePath ) )
                     {
+                        Core::Printf( "Moving file: ", tempTilePathString, "." );
+
                         std::string saveTilePathString = Core::ToString(
                             saveVolumeDesctiption.imageDataDirectory, "\\",
                             "w=", Core::ToStringZeroPad( w, 8 ), "\\",
@@ -159,7 +222,10 @@ void FileSystemTileServer::SaveSegmentation()
                             "x=", Core::ToStringZeroPad( x, 8 ), ".",
                             saveVolumeDesctiption.fileExtension );
 
+                        Core::Printf( "To: ", saveTilePathString, "." );
+
                         boost::filesystem::path saveTilePath = boost::filesystem::path( saveTilePathString );
+                        boost::filesystem::remove( saveTilePath );
                         boost::filesystem::rename( tempTilePath, saveTilePath );
                     }
                 }
@@ -168,47 +234,20 @@ void FileSystemTileServer::SaveSegmentation()
     }
 
     //
-    // save the idTileMap
+    // move idTileMap to the save directory
     //
-    unsigned int tileMapEntries = 0;
-    stdext::hash_map< unsigned int, std::set< int4, Mojo::Core::Int4Comparator > >::iterator tileMapIt;
-    for ( tileMapIt = mIdTileMap.GetHashMap().begin(); tileMapIt != mIdTileMap.GetHashMap().end(); ++tileMapIt )
-    {
-        tileMapEntries += tileMapIt->second.size();
-    }
 
-    size_t shape[] = { 5, tileMapEntries };
-    marray::Marray< unsigned int > outputTiles( shape, shape + 2 );
+    Core::Printf( "Replacing idTileMap." );
 
-    unsigned int mi = 0;
-    for ( unsigned int segId = 0; segId < mTiledDatasetDescription.maxLabelId; ++segId )
-    {
-        std::set< int4, Mojo::Core::Int4Comparator > tileSet = mIdTileMap.Get( segId );
-        std::set< int4, Mojo::Core::Int4Comparator >::iterator tileIt;
-        for ( tileIt = tileSet.begin(); tileIt != tileSet.end(); ++tileIt )
-        {
-            outputTiles ( 0, mi ) = segId;
-            outputTiles ( 1, mi ) = tileIt->w;
-            outputTiles ( 2, mi ) = tileIt->z;
-            outputTiles ( 3, mi ) = tileIt->y;
-            outputTiles ( 4, mi ) = tileIt->x;
-            ++mi;
-        }
-    }
+    boost::filesystem::path idTileMapPath = boost::filesystem::path( mTiledDatasetDescription.paths.Get( "IdTileMap" ) );
+    boost::filesystem::remove( idTileMapPath );
+    boost::filesystem::rename( tempIdTileMapPath, idTileMapPath );
 
-    if ( mi != tileMapEntries )
-    {
-        Core::Printf("WARNING: Save expected to find ", tileMapEntries, " tile entries and found ", mi, "." );
-    }
-
-    size_t origin[]       = { 0, 0 };
-    hid_t hdf5FileHandle = marray::hdf5::openFile( mTiledDatasetDescription.paths.Get( "IdTileMap" ), marray::hdf5::READ_WRITE );
-    marray::hdf5::saveHyperslab( hdf5FileHandle, "IdTileMap", origin, origin + 2, shape, outputTiles );
-    marray::hdf5::closeFile( hdf5FileHandle );
+    Core::Printf( "Segmentation saved." );
 
 }
 
-void FileSystemTileServer::SaveSegmentationAs( std::string saveName )
+void FileSystemTileServer::SaveSegmentationAs( std::string savePath )
 {
     //
     // save any tile changes (to temp directory)
@@ -221,6 +260,7 @@ void FileSystemTileServer::SaveSegmentationAs( std::string saveName )
     //
     // save the i
     //
+    Core::Printf( "Segmentation saved to: \"", savePath, "\" (disabled)." );
 }
 
 int FileSystemTileServer::GetTileCountForId( int segId )

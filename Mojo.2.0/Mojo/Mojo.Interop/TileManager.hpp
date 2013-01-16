@@ -38,7 +38,10 @@ public:
     void                                                    UnloadSegmentation();
 
     bool                                                    IsSegmentationLoaded();
-                                                            
+
+    void                                                    SaveSegmentation();
+    void                                                    SaveSegmentationAs( String^ savePath );
+
     void                                                    Update();
 
     void                                                    LoadTiles( TiledDatasetView^ tiledDatasetView );

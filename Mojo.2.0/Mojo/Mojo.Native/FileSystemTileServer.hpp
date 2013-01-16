@@ -41,7 +41,7 @@ public:
     virtual bool                                                  IsSegmentationLoaded();
 
     virtual void                                                  SaveSegmentation();
-    virtual void                                                  SaveSegmentationAs( std::string saveName );
+    virtual void                                                  SaveSegmentationAs( std::string savePath );
 
     virtual int                                                   GetTileCountForId( int segId );
 

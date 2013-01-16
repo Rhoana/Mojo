@@ -86,6 +86,16 @@ bool TileManager::IsSegmentationLoaded()
     return mIsSegmentationLoaded;
 }
 
+void TileManager::SaveSegmentation()
+{
+    mTileServer->SaveSegmentation();
+}
+
+void TileManager::SaveSegmentationAs( std::string savePath )
+{
+    mTileServer->SaveSegmentationAs( savePath );
+}
+
 void TileManager::Update()
 {
 }

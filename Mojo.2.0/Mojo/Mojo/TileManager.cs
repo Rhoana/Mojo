@@ -45,6 +45,20 @@ namespace Mojo
             }
         }
 
+        private bool mSegmentationControlsEnabled = false;
+        public bool SegmentationControlsEnabled
+        {
+            get
+            {
+                return mSegmentationControlsEnabled;
+            }
+            set
+            {
+                mSegmentationControlsEnabled = value;
+                OnPropertyChanged( "SegmentationControlsEnabled" );
+            }
+        }
+
         private TiledDatasetDescription mTiledDatasetDescription;
         public TiledDatasetDescription TiledDatasetDescription
         {
@@ -119,6 +133,23 @@ namespace Mojo
                         mShowSegmentation = true;
                         OnPropertyChanged( "ShowSegmentation" );
                     }
+                }
+            }
+        }
+
+        private bool mShowBoundaryLines = true;
+        public bool ShowBoundaryLines
+        {
+            get
+            {
+                return SegmentationLoaded && mShowBoundaryLines;
+            }
+            set
+            {
+                if ( SegmentationLoaded )
+                {
+                    mShowBoundaryLines = value;
+                    OnPropertyChanged( "ShowBoundaryLines" );
                 }
             }
         }
@@ -262,10 +293,10 @@ namespace Mojo
 
             Release.Assert( Directory.Exists( datasetRootDirectory ) );
 
-            Release.Assert(
-                datasetRootDirectory.EndsWith( Constants.DATASET_ROOT_DIRECTORY_NAME ) ||
-                datasetRootDirectory.EndsWith( Constants.DATASET_ROOT_DIRECTORY_NAME + "\\" ) ||
-                datasetRootDirectory.EndsWith( Constants.DATASET_ROOT_DIRECTORY_NAME + "/" ) );
+            //Release.Assert(
+            //    datasetRootDirectory.EndsWith( Constants.DATASET_ROOT_DIRECTORY_NAME ) ||
+            //    datasetRootDirectory.EndsWith( Constants.DATASET_ROOT_DIRECTORY_NAME + "\\" ) ||
+            //    datasetRootDirectory.EndsWith( Constants.DATASET_ROOT_DIRECTORY_NAME + "/" ) );
 
             var sourceMapRootDirectory = Path.Combine( datasetRootDirectory, Constants.SOURCE_MAP_ROOT_DIRECTORY_NAME );
 
@@ -343,6 +374,7 @@ namespace Mojo
             var idMapTiledVolumeDescriptionPath = Path.Combine( segmentationRootDirectory, Constants.ID_MAP_TILED_VOLUME_DESCRIPTION_NAME );
 
             var idTileMapPath = Path.Combine( segmentationRootDirectory, Constants.ID_TILE_MAP_PATH );
+            var tempIdTileMapPath = Path.Combine( segmentationRootDirectory, Constants.TEMP_ID_TILE_MAP_PATH );
             var idColorMapPath = Path.Combine( segmentationRootDirectory, Constants.ID_COLOR_MAP_PATH );
 
             Release.Assert( Directory.Exists( idMapRootDirectory ) );
@@ -360,11 +392,14 @@ namespace Mojo
             TiledDatasetDescription.TiledVolumeDescriptions.Set( "TempIdMap", tempIdMapTiledVolumeDescription );
             TiledDatasetDescription.Paths.Set( "IdColorMap", idColorMapPath );
             TiledDatasetDescription.Paths.Set( "IdTileMap", idTileMapPath );
+            TiledDatasetDescription.Paths.Set( "TempIdTileMap", tempIdTileMapPath );
 
             //TiledDatasetDescription.IdTileMap = idTileMap;
             //TiledDatasetDescription.MaxLabelId = idTileMap.Keys.Max();
 
             LoadSegmentation( TiledDatasetDescription );
+
+            SegmentationControlsEnabled = true;
 
             UpdateView();
 
@@ -439,6 +474,24 @@ namespace Mojo
             if ( Internal != null )
             {
                 Internal.UnloadSegmentation();
+            }
+
+            SegmentationControlsEnabled = false;
+        }
+
+        public void SaveSegmentation()
+        {
+            if ( Internal != null && SegmentationLoaded )
+            {
+                Internal.SaveSegmentation();
+            }
+        }
+
+        public void SaveSegmentationAs( string savePath )
+        {
+            if ( Internal != null && SegmentationLoaded )
+            {
+                Internal.SaveSegmentationAs( savePath );
             }
         }
 
