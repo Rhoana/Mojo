@@ -165,8 +165,16 @@ namespace Mojo
         public void Update()
         {
             TileManager.Update();
-            Segmenter.Update();
+            //Segmenter.Update();
 
+            Viewers.Internal.ToList().ForEach( viewer => viewer.Value.D3D11RenderingPane.Render() );
+        }
+
+        public void QuickRender()
+        {
+            //
+            // Render the tiles we have now without loading anything else
+            //
             Viewers.Internal.ToList().ForEach( viewer => viewer.Value.D3D11RenderingPane.Render() );
         }
     }

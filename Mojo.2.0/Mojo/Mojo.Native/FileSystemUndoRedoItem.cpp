@@ -9,7 +9,7 @@ namespace Native
 		oldId                 ( 0 ),
 		newId                 ( 0 )
 		{
-			changePixels = Core::HashMap< std::string, std::bitset< FILE_SYSTEM_TILE_CACHE_SIZE * FILE_SYSTEM_TILE_CACHE_SIZE > >();
+			changePixels = Core::HashMap< std::string, std::bitset< TILE_SIZE * TILE_SIZE > >();
 		}
 
 }

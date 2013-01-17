@@ -131,13 +131,13 @@ inline void Segmenter::LoadVolumeInternal( Core::HashMap< std::string, Core::Vol
         ( numElements * volumeDescriptions.Get( "SourceMap" ).numBytesPerVoxel ) / ( 1024 * 1024 ), " MBytes." );
 
 
-    unsigned int freeMemory, totalMemory;
+    size_t freeMemory, totalMemory;
     CUresult     memInfoResult;
     memInfoResult = cuMemGetInfo( &freeMemory, &totalMemory );
     RELEASE_ASSERT( memInfoResult == CUDA_SUCCESS );
     Core::Printf( "\nBefore allocating GPU memory:\n",
-                  "    Free memory:  ", freeMemory  / ( 1024 * 1024 ), " MBytes.\n",
-                  "    Total memory: ", totalMemory / ( 1024 * 1024 ), " MBytes.\n" );
+                  "    Free memory:  ", (unsigned int) freeMemory  / ( 1024 * 1024 ), " MBytes.\n",
+                  "    Total memory: ", (unsigned int) totalMemory / ( 1024 * 1024 ), " MBytes.\n" );
 
 
     D3D11_TEXTURE3D_DESC textureDesc3D;
@@ -203,8 +203,8 @@ inline void Segmenter::LoadVolumeInternal( Core::HashMap< std::string, Core::Vol
     memInfoResult = cuMemGetInfo( &freeMemory, &totalMemory );
     RELEASE_ASSERT( memInfoResult == CUDA_SUCCESS );
     Core::Printf( "After allocating GPU memory:\n",
-                  "    Free memory:  ", freeMemory  / ( 1024 * 1024 ), " MBytes.\n",
-                  "    Total memory: ", totalMemory / ( 1024 * 1024 ), " MBytes.\n" );
+                  "    Free memory:  ", (unsigned int) freeMemory  / ( 1024 * 1024 ), " MBytes.\n",
+                  "    Total memory: ", (unsigned int) totalMemory / ( 1024 * 1024 ), " MBytes.\n" );
 }
 
 }

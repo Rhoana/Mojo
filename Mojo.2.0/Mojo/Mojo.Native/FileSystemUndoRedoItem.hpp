@@ -22,7 +22,7 @@ struct FileSystemUndoRedoItem
 	std::set< int4, Mojo::Core::Int4Comparator >                           idTileMapAddNewId;
 	std::set< int4, Mojo::Core::Int4Comparator >                           idTileMapRemoveOldId;
 	Core::HashMap< std::string,
-		std::bitset< FILE_SYSTEM_TILE_CACHE_SIZE * FILE_SYSTEM_TILE_CACHE_SIZE > >
+		std::bitset< TILE_SIZE * TILE_SIZE > >
 		                                                                changePixels;
 };
 

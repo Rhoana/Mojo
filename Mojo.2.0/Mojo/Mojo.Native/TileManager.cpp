@@ -105,7 +105,7 @@ void TileManager::LoadTiles( const TiledDatasetView& tiledDatasetView )
     //
     // assume that all cache entries can be discarded unless explicitly marked otherwise
     //
-    for ( int cacheIndex = 0; cacheIndex < TILE_CACHE_SIZE; cacheIndex++ )
+    for ( int cacheIndex = 0; cacheIndex < DEVICE_TILE_CACHE_SIZE; cacheIndex++ )
     {
         mTileCache[ cacheIndex ].keepState = TileCacheEntryKeepState_CanDiscard;
         mTileCache[ cacheIndex ].active    = false;
@@ -245,7 +245,7 @@ void TileManager::LoadTiles( const TiledDatasetView& tiledDatasetView )
     }
 }
 
-boost::array< TileCacheEntry, TILE_CACHE_SIZE >& TileManager::GetTileCache()
+boost::array< TileCacheEntry, DEVICE_TILE_CACHE_SIZE >& TileManager::GetTileCache()
 {
     return mTileCache;
 }
@@ -445,19 +445,19 @@ void TileManager::UnloadTiledDatasetInternal()
         //
         // output memory stats to the console
         //
-        unsigned int freeMemory, totalMemory;
+        size_t freeMemory, totalMemory;
         CUresult     memInfoResult;
         memInfoResult = cuMemGetInfo( &freeMemory, &totalMemory );
         RELEASE_ASSERT( memInfoResult == CUDA_SUCCESS );
         Core::Printf( "\nUnloading tiled dataset...\n" );
         Core::Printf( "\n    Before freeing GPU memory:\n",
-                      "        Free memory:  ", freeMemory  / ( 1024 * 1024 ), " MBytes.\n",
-                      "        Total memory: ", totalMemory / ( 1024 * 1024 ), " MBytes.\n" );
+                      "        Free memory:  ", (unsigned int) freeMemory  / ( 1024 * 1024 ), " MBytes.\n",
+                      "        Total memory: ", (unsigned int) totalMemory / ( 1024 * 1024 ), " MBytes.\n" );
 
         //
         // delete textures in the tile cache
         //
-        for ( int i = 0; i < TILE_CACHE_SIZE; i++ )
+        for ( int i = 0; i < DEVICE_TILE_CACHE_SIZE; i++ )
         {
             mTileCache[ i ].deviceVectors.Clear();
 
@@ -474,8 +474,8 @@ void TileManager::UnloadTiledDatasetInternal()
         memInfoResult = cuMemGetInfo( &freeMemory, &totalMemory );
         RELEASE_ASSERT( memInfoResult == CUDA_SUCCESS );
         Core::Printf( "    After freeing GPU memory:\n",
-                      "        Free memory:  ", freeMemory  / ( 1024 * 1024 ), " MBytes.\n",
-                      "        Total memory: ", totalMemory / ( 1024 * 1024 ), " MBytes.\n" );
+                      "        Free memory:  ", (unsigned int) freeMemory  / ( 1024 * 1024 ), " MBytes.\n",
+                      "        Total memory: ", (unsigned int) totalMemory / ( 1024 * 1024 ), " MBytes.\n" );
     }
 }
 
@@ -491,14 +491,14 @@ void TileManager::UnloadSegmentationInternal()
         //
         // output memory stats to the console
         //
-        unsigned int freeMemory, totalMemory;
+        size_t freeMemory, totalMemory;
         CUresult     memInfoResult;
         memInfoResult = cuMemGetInfo( &freeMemory, &totalMemory );
         RELEASE_ASSERT( memInfoResult == CUDA_SUCCESS );
         Core::Printf( "\nUnloading segmentation...\n" );
         Core::Printf( "\n    Before freeing GPU memory:\n",
-                      "        Free memory:  ", freeMemory  / ( 1024 * 1024 ), " MBytes.\n",
-                      "        Total memory: ", totalMemory / ( 1024 * 1024 ), " MBytes.\n" );
+                      "        Free memory:  ", (unsigned int) freeMemory  / ( 1024 * 1024 ), " MBytes.\n",
+                      "        Total memory: ", (unsigned int) totalMemory / ( 1024 * 1024 ), " MBytes.\n" );
 
         //
         // release id color map
@@ -517,8 +517,8 @@ void TileManager::UnloadSegmentationInternal()
         memInfoResult = cuMemGetInfo( &freeMemory, &totalMemory );
         RELEASE_ASSERT( memInfoResult == CUDA_SUCCESS );
         Core::Printf( "    After freeing GPU memory:\n",
-                      "        Free memory:  ", freeMemory  / ( 1024 * 1024 ), " MBytes.\n",
-                      "        Total memory: ", totalMemory / ( 1024 * 1024 ), " MBytes.\n" );
+                      "        Free memory:  ", (unsigned int) freeMemory  / ( 1024 * 1024 ), " MBytes.\n",
+                      "        Total memory: ", (unsigned int) totalMemory / ( 1024 * 1024 ), " MBytes.\n" );
     }
 }
 
@@ -684,7 +684,7 @@ int3 TileManager::GetOffsetVoxelSpace( float4 pointTileSpace, int4 tileIndex, in
 
 void TileManager::ReloadTileCache()
 {
-    for ( int cacheIndex = 0; cacheIndex < TILE_CACHE_SIZE; cacheIndex++ )
+    for ( int cacheIndex = 0; cacheIndex < DEVICE_TILE_CACHE_SIZE; cacheIndex++ )
     {
         if ( mTileCache[ cacheIndex ].indexTileSpace.x != TILE_CACHE_PAGE_TABLE_BAD_INDEX &&
              mTileCache[ cacheIndex ].indexTileSpace.y != TILE_CACHE_PAGE_TABLE_BAD_INDEX &&
@@ -735,7 +735,7 @@ void TileManager::ReloadTileCache()
 
 void TileManager::ReloadTileCacheOverlayMapOnly()
 {
-    for ( int cacheIndex = 0; cacheIndex < TILE_CACHE_SIZE; cacheIndex++ )
+    for ( int cacheIndex = 0; cacheIndex < DEVICE_TILE_CACHE_SIZE; cacheIndex++ )
     {
         if ( mTileCache[ cacheIndex ].indexTileSpace.x != TILE_CACHE_PAGE_TABLE_BAD_INDEX &&
              mTileCache[ cacheIndex ].indexTileSpace.y != TILE_CACHE_PAGE_TABLE_BAD_INDEX &&

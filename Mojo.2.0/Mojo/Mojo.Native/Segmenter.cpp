@@ -678,15 +678,15 @@ void Segmenter::UnloadVolumeInternal()
     //
     // output memory stats to the console
     //
-    unsigned int freeMemory, totalMemory;
+    size_t freeMemory, totalMemory;
     CUresult memInfoResult;
 
     memInfoResult = cuMemGetInfo( &freeMemory, &totalMemory );
     RELEASE_ASSERT( memInfoResult == CUDA_SUCCESS );
     Core::Printf( "\nUnloading dataset...\n" );
     Core::Printf( "    Before freeing GPU memory:\n",
-                  "        Free memory:  ", freeMemory  / ( 1024 * 1024 ), " MBytes.\n",
-                  "        Total memory: ", totalMemory / ( 1024 * 1024 ), " MBytes.\n" );
+                  "        Free memory:  ", (unsigned int) freeMemory  / ( 1024 * 1024 ), " MBytes.\n",
+                  "        Total memory: ", (unsigned int) totalMemory / ( 1024 * 1024 ), " MBytes.\n" );
 
     //
     // clear device state
@@ -711,8 +711,8 @@ void Segmenter::UnloadVolumeInternal()
     memInfoResult = cuMemGetInfo( &freeMemory, &totalMemory );
     RELEASE_ASSERT( memInfoResult == CUDA_SUCCESS );
     Core::Printf( "    After freeing GPU memory:\n",
-                  "        Free memory:  ", freeMemory  / ( 1024 * 1024 ), " MBytes.\n",
-                  "        Total memory: ", totalMemory / ( 1024 * 1024 ), " MBytes.\n" );
+                  "        Free memory:  ", (unsigned int) freeMemory  / ( 1024 * 1024 ), " MBytes.\n",
+                  "        Total memory: ", (unsigned int) totalMemory / ( 1024 * 1024 ), " MBytes.\n" );
 
     //
     // clear host state

@@ -5,9 +5,17 @@
       <Configuration>Debug</Configuration>
       <Platform>Win32</Platform>
     </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
     <ProjectConfiguration Include="Release|Win32">
       <Configuration>Release</Configuration>
       <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
@@ -72,7 +80,22 @@
     <PlatformToolset>v100</PlatformToolset>
     <CLRSupport>true</CLRSupport>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>NotSet</CharacterSet>
+    <PlatformToolset>v100</PlatformToolset>
+    <CLRSupport>true</CLRSupport>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>NotSet</CharacterSet>
+    <PlatformToolset>v100</PlatformToolset>
+    <CLRSupport>true</CLRSupport>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <WholeProgramOptimization>true</WholeProgramOptimization>
@@ -87,7 +110,13 @@
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
@@ -95,7 +124,15 @@
     <IntDir>obj\$(PlatformName)\$(Configuration)\</IntDir>
     <OutDir>bin\$(PlatformName)\$(Configuration)\</OutDir>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <IntDir>obj\$(PlatformName)\$(Configuration)\</IntDir>
+    <OutDir>bin\$(PlatformName)\$(Configuration)\</OutDir>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <IntDir>obj\$(PlatformName)\$(Configuration)\</IntDir>
+    <OutDir>bin\$(PlatformName)\$(Configuration)\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <IntDir>obj\$(PlatformName)\$(Configuration)\</IntDir>
     <OutDir>bin\$(PlatformName)\$(Configuration)\</OutDir>
   </PropertyGroup>
@@ -138,7 +175,87 @@
       <LinkLibraryDependencies>true</LinkLibraryDependencies>
     </ProjectReference>
   </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <CompileAsManaged>true</CompileAsManaged>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <MinimalRebuild>false</MinimalRebuild>
+      <ExceptionHandling>Async</ExceptionHandling>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <AdditionalIncludeDirectories>..\;..\Sdk\Marray\v1.0\marray\include\;..\Sdk\Hdf5\1.8.8\include\;..\Sdk\OpenCV\OpenCV2.4\build\include\;..\Sdk\Thrust\thrust-v1.3.0\;..\Sdk\Cutil\NVIDIA GPU Computing SDK 4.2\C\common\inc\;..\Sdk\Cuda\v4.2\include\;..\Sdk\Boost\boost_1_44\;..\Sdk\DirectX\Microsoft DirectX SDK (June 2010)\Include\</AdditionalIncludeDirectories>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <AdditionalUsingDirectories>..\Sdk\SlimDX\SlimDX SDK (October 2010)\Bin\net20\x86\;..\Sdk\ObservableDictionary\v1.0\bin\Release\</AdditionalUsingDirectories>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>..\Mojo.Cuda\obj\$(PlatformName)\$(Configuration)\;..\Sdk\Hdf5\1.8.8\lib\;..\Sdk\OpenCV\OpenCV2.4\build\$(PlatformShortName)\vc10\lib\;..\Sdk\Cuda\v4.2\lib\Win32\;..\Sdk\Boost\boost_1_44\lib\</AdditionalLibraryDirectories>
+      <AdditionalDependencies>ConstraintMap.cu.obj;Debug.cu.obj;EdgeXYMap.cu.obj;EdgeZMap.cu.obj;Initialize.cu.obj;CostMap.cu.obj;PrimalDualSolver2D.cu.obj;PrimalDualSolver3D.cu.obj;CommittedSegmentation.cu.obj;hdf5.lib;libszip.lib;libzlib.lib;opencv_highgui240.lib;opencv_imgproc240.lib;opencv_core240.lib;cudart.lib;cuda.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <IgnoreSpecificDefaultLibraries>msvcrt.lib</IgnoreSpecificDefaultLibraries>
+    </Link>
+    <Lib>
+      <OutputFile>$(ProjectDir)bin\$(PlatformShortName)\$(Configuration)\$(TargetName)$(TargetExt)</OutputFile>
+    </Lib>
+    <CudaCompile>
+      <PtxAsOptionV>true</PtxAsOptionV>
+      <Include>..\;..\Sdk\Thrust\thrust-v1.3.0\;..\Sdk\Cutil\NVIDIA GPU Computing SDK 4.2\C\common\inc\;..\Sdk\DirectX\Microsoft DirectX SDK (June 2010)\Include\;..\Sdk\Boost\boost_1_44\;c:\Program Files (x86)\Microsoft Visual Studio 9.0\VC\include;c:\Program Files (x86)\Microsoft Visual Studio 9.0\VC\atlmfc\include;C:\Program Files\Microsoft SDKs\Windows\v6.0A\include</Include>
+      <GPUDebugInfo>true</GPUDebugInfo>
+      <Defines>_DEBUG</Defines>
+      <CodeGeneration>compute_20,sm_20</CodeGeneration>
+      <FastMath>true</FastMath>
+    </CudaCompile>
+    <ProjectReference>
+      <LinkLibraryDependencies>true</LinkLibraryDependencies>
+    </ProjectReference>
+  </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <CompileAsManaged>true</CompileAsManaged>
+      <MinimalRebuild>false</MinimalRebuild>
+      <ExceptionHandling>Async</ExceptionHandling>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <AdditionalIncludeDirectories>..\;..\Sdk\Marray\v1.0\marray\include\;..\Sdk\Hdf5\1.8.8\include\;..\Sdk\OpenCV\OpenCV2.4\build\include\;..\Sdk\Thrust\thrust-v1.3.0\;..\Sdk\Cutil\NVIDIA GPU Computing SDK 4.2\C\common\inc\;..\Sdk\Cuda\v4.2\include\;..\Sdk\Boost\boost_1_44\;..\Sdk\DirectX\Microsoft DirectX SDK (June 2010)\Include\</AdditionalIncludeDirectories>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <AdditionalUsingDirectories>..\Sdk\SlimDX\SlimDX SDK (October 2010)\Bin\net20\x86\;..\Sdk\ObservableDictionary\v1.0\bin\Release\</AdditionalUsingDirectories>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalLibraryDirectories>..\Mojo.Cuda\obj\$(PlatformName)\$(Configuration)\;..\Sdk\Hdf5\1.8.8\lib\;..\Sdk\OpenCV\OpenCV2.4\build\$(PlatformShortName)\vc10\lib\;..\Sdk\Cuda\v4.2\lib\Win32\;..\Sdk\Boost\boost_1_44\lib\</AdditionalLibraryDirectories>
+      <AdditionalDependencies>ConstraintMap.cu.obj;Debug.cu.obj;EdgeXYMap.cu.obj;EdgeZMap.cu.obj;Initialize.cu.obj;CostMap.cu.obj;PrimalDualSolver2D.cu.obj;PrimalDualSolver3D.cu.obj;CommittedSegmentation.cu.obj;hdf5.lib;libszip.lib;libzlib.lib;opencv_highgui240.lib;opencv_imgproc240.lib;opencv_core240.lib;cudart.lib;cuda.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AssemblyDebug>true</AssemblyDebug>
+    </Link>
+    <Lib>
+      <OutputFile>$(ProjectDir)bin\$(PlatformShortName)\$(Configuration)\$(TargetName)$(TargetExt)</OutputFile>
+    </Lib>
+    <CudaCompile>
+      <PtxAsOptionV>true</PtxAsOptionV>
+      <Runtime>MD</Runtime>
+      <Include>..\;..\Sdk\Thrust\thrust-v1.3.0\;..\Sdk\Cutil\NVIDIA GPU Computing SDK 4.2\C\common\inc\;..\Sdk\DirectX\Microsoft DirectX SDK (June 2010)\Include\;..\Sdk\Boost\boost_1_44\</Include>
+      <GPUDebugInfo>false</GPUDebugInfo>
+      <CodeGeneration>compute_20,sm_20</CodeGeneration>
+      <FastMath>true</FastMath>
+    </CudaCompile>
+    <ProjectReference>
+      <LinkLibraryDependencies>true</LinkLibraryDependencies>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <PrecompiledHeader>

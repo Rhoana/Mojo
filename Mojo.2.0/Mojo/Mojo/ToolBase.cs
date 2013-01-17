@@ -66,6 +66,7 @@ namespace Mojo
                         centerDataSpace.Z += 1f;
                         mTileManager.TiledDatasetView.CenterDataSpace = centerDataSpace;
                         mTileManager.UpdateView();
+                        mEngine.Update();
                     }
                     break;
 
@@ -75,6 +76,7 @@ namespace Mojo
                         centerDataSpace.Z -= 1f;
                         mTileManager.TiledDatasetView.CenterDataSpace = centerDataSpace;
                         mTileManager.UpdateView();
+                        mEngine.Update();
                     }
                     break;
 
@@ -176,6 +178,8 @@ namespace Mojo
 
             mTileManager.TiledDatasetView.CenterDataSpace = centerDataSpace;
             mTileManager.TiledDatasetView.ExtentDataSpace = extentDataSpace;
+
+            mEngine.QuickRender();
         }
 
         public virtual void SetSize( int oldWidth, int oldHeight, int newWidth, int newHeight )

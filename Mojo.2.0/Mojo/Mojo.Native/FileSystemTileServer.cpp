@@ -193,7 +193,7 @@ void FileSystemTileServer::SaveSegmentation()
 
     for ( int w = 0; w < numTiles.w; w++ )
     {
-        Core::Printf( "Saving w=", w, "." );
+        //Core::Printf( "Saving w=", w, "." );
         for ( int z = 0; z < numTiles.z; z++ )
         {
             for ( int y = 0; y < numTiles.y; y++ )
@@ -212,7 +212,7 @@ void FileSystemTileServer::SaveSegmentation()
 
                     if ( boost::filesystem::exists( tempTilePath ) )
                     {
-                        Core::Printf( "Moving file: ", tempTilePathString, "." );
+                        //Core::Printf( "Moving file: ", tempTilePathString, "." );
 
                         std::string saveTilePathString = Core::ToString(
                             saveVolumeDesctiption.imageDataDirectory, "\\",
@@ -222,7 +222,7 @@ void FileSystemTileServer::SaveSegmentation()
                             "x=", Core::ToStringZeroPad( x, 8 ), ".",
                             saveVolumeDesctiption.fileExtension );
 
-                        Core::Printf( "To: ", saveTilePathString, "." );
+                        //Core::Printf( "To: ", saveTilePathString, "." );
 
                         boost::filesystem::path saveTilePath = boost::filesystem::path( saveTilePathString );
                         boost::filesystem::remove( saveTilePath );
@@ -304,7 +304,7 @@ void FileSystemTileServer::ReplaceSegmentationLabel( int oldId, int newId )
 			//
 			// Get or create the change bitset for this tile
 			//
-			std::bitset< FILE_SYSTEM_TILE_CACHE_SIZE * FILE_SYSTEM_TILE_CACHE_SIZE > *changeBits = 
+			std::bitset< TILE_SIZE * TILE_SIZE > *changeBits = 
 				&mUndoItem.changePixels.GetHashMap()[ CreateTileString( tileIndex ) ];
 
             //
@@ -401,7 +401,7 @@ void FileSystemTileServer::ReplaceSegmentationLabelCurrentSlice( int oldId, int 
 		PrepForNextUndoRedoChange();
 		mUndoItem.newId = newId;
 		mUndoItem.oldId = oldId;
-		std::bitset< FILE_SYSTEM_TILE_CACHE_SIZE * FILE_SYSTEM_TILE_CACHE_SIZE > *changeBits;
+		std::bitset< TILE_SIZE * TILE_SIZE > *changeBits;
 
 		int4 previousTileIndex;
         bool tileLoaded = false;
@@ -663,7 +663,7 @@ void FileSystemTileServer::ReplaceSegmentationLabelCurrentConnectedComponent( in
 		PrepForNextUndoRedoChange();
 		mUndoItem.newId = newId;
 		mUndoItem.oldId = oldId;
-		std::bitset< FILE_SYSTEM_TILE_CACHE_SIZE * FILE_SYSTEM_TILE_CACHE_SIZE > *changeBits;
+		std::bitset< TILE_SIZE * TILE_SIZE > *changeBits;
 
 		int4 previousTileIndex;
         bool tileLoaded = false;
@@ -1590,7 +1590,7 @@ int FileSystemTileServer::CompleteSplit( int segId )
 
 		PrepForNextUndoRedoChange();
 
-		std::bitset< FILE_SYSTEM_TILE_CACHE_SIZE * FILE_SYSTEM_TILE_CACHE_SIZE > *changeBits;
+		std::bitset< TILE_SIZE * TILE_SIZE > *changeBits;
 
 		int4 previousTileIndex;
         bool tileLoaded = false;
@@ -2227,7 +2227,7 @@ void FileSystemTileServer::UndoChange()
 	if ( newId != 0 && oldId != 0 && newId != oldId && mIsSegmentationLoaded )
 	{
         Core::Printf( "\nUndo operation: changing segmentation label ", newId, " back to segmentation label ", oldId, "...\n" );
-		stdext::hash_map < std::string, std::bitset< FILE_SYSTEM_TILE_CACHE_SIZE * FILE_SYSTEM_TILE_CACHE_SIZE > >::iterator changeIt;
+		stdext::hash_map < std::string, std::bitset< TILE_SIZE * TILE_SIZE > >::iterator changeIt;
 
 		for ( changeIt = mUndoItem.changePixels.GetHashMap().begin(); changeIt != mUndoItem.changePixels.GetHashMap().end(); ++changeIt )
 		{
@@ -2243,7 +2243,7 @@ void FileSystemTileServer::UndoChange()
 			//
 			// Get or create the change bitset for this tile
 			//
-			std::bitset< FILE_SYSTEM_TILE_CACHE_SIZE * FILE_SYSTEM_TILE_CACHE_SIZE > *changeBits = &changeIt->second;
+			std::bitset< TILE_SIZE * TILE_SIZE > *changeBits = &changeIt->second;
 
             //
             // replace the old id and color with the new id and color...
@@ -2308,7 +2308,7 @@ void FileSystemTileServer::RedoChange()
 	if ( newId != 0 && oldId != 0 && newId != oldId && mIsSegmentationLoaded )
 	{
         Core::Printf( "\nRedo operation: changing segmentation label ", oldId, " back to segmentation label ", newId, "...\n" );
-		stdext::hash_map < std::string, std::bitset< FILE_SYSTEM_TILE_CACHE_SIZE * FILE_SYSTEM_TILE_CACHE_SIZE > >::iterator changeIt;
+		stdext::hash_map < std::string, std::bitset< TILE_SIZE * TILE_SIZE > >::iterator changeIt;
 
 		for ( changeIt = mRedoItem.changePixels.GetHashMap().begin(); changeIt != mRedoItem.changePixels.GetHashMap().end(); ++changeIt )
 		{
@@ -2324,7 +2324,7 @@ void FileSystemTileServer::RedoChange()
 			//
 			// Get or create the change bitset for this tile
 			//
-			std::bitset< FILE_SYSTEM_TILE_CACHE_SIZE * FILE_SYSTEM_TILE_CACHE_SIZE > *changeBits = &changeIt->second;
+			std::bitset< TILE_SIZE * TILE_SIZE > *changeBits = &changeIt->second;
 
             //
             // replace the old id and color with the new id and color...
@@ -2681,7 +2681,7 @@ void FileSystemTileServer::ReduceCacheSize()
     }
     std::sort(timestamps.begin(), timestamps.end());
 
-    clock_t cutoff = timestamps[mFileSystemTileCache.GetHashMap().size() / 2];
+    clock_t cutoff = timestamps[mFileSystemTileCache.GetHashMap().size() / 4];
 
     int removed = 0;
 

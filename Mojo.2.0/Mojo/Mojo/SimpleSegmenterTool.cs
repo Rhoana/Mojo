@@ -64,10 +64,16 @@ namespace Mojo
 
                 //Base class will move the view - make sure we prep for splitting again
                 case System.Windows.Input.Key.W:
-                    mTileManager.Internal.PrepForSplit( mTileManager.SelectedSegmentId, p );
+                    if ( mTileManager.SelectedSegmentId != 0 )
+                    {
+                        mTileManager.Internal.PrepForSplit( mTileManager.SelectedSegmentId, p );
+                    }
                     break;
                 case System.Windows.Input.Key.S:
-                    mTileManager.Internal.PrepForSplit( mTileManager.SelectedSegmentId, p );
+                    if ( mTileManager.SelectedSegmentId != 0 )
+                    {
+                        mTileManager.Internal.PrepForSplit( mTileManager.SelectedSegmentId, p );
+                    }
                     break;
 
                 case System.Windows.Input.Key.OemComma:
@@ -201,7 +207,7 @@ namespace Mojo
                         mTileManager.Internal.AddSplitSource( mTileManager.TiledDatasetView, p );
                         mTileManager.Internal.FindBoundaryJoinPoints2D( clickedId );
                     }
-                    else if ( clickedId > 0 )
+                    else if ( clickedId > 0 && mTileManager.SelectedSegmentId > 0 )
                     {
                         //
                         // Merge with the clicked segment in 2D ( try this out to see if it makes sense )

@@ -22,7 +22,7 @@
 struct ID3D11Device;
 struct ID3D11DeviceContext;
 
-const int TILE_CACHE_SIZE = 128;
+const int DEVICE_TILE_CACHE_SIZE = 128;
 
 namespace Mojo
 {
@@ -52,7 +52,8 @@ public:
 
     void                                                  LoadTiles( const TiledDatasetView& tiledDatasetView );
 
-    boost::array< TileCacheEntry, TILE_CACHE_SIZE >&      GetTileCache();
+    boost::array< TileCacheEntry,
+        DEVICE_TILE_CACHE_SIZE >&                         GetTileCache();
     ID3D11ShaderResourceView*                             GetIdColorMap();
 
     int                                                   GetSegmentationLabelId( const TiledDatasetView& tiledDatasetView, float3 pDataSpace );
@@ -107,7 +108,8 @@ private:
     Core::PrimitiveMap                                    mConstParameters;                                                
     TiledDatasetDescription                               mTiledDatasetDescription;
 
-    boost::array< TileCacheEntry, TILE_CACHE_SIZE >       mTileCache;
+    boost::array< TileCacheEntry,
+        DEVICE_TILE_CACHE_SIZE >                          mTileCache;
     marray::Marray< int >                                 mTileCachePageTable;
     marray::Marray< unsigned char >                       mIdColorMap;
 
@@ -121,14 +123,14 @@ inline void TileManager::LoadTiledDatasetInternal( TiledDatasetDescription& tile
     //
     // output memory stats to the console
     //
-    unsigned int freeMemory, totalMemory;
+    size_t freeMemory, totalMemory;
     CUresult     memInfoResult;
     memInfoResult = cuMemGetInfo( &freeMemory, &totalMemory );
     RELEASE_ASSERT( memInfoResult == CUDA_SUCCESS );
     Core::Printf( "\nLoading tiled dataset...\n" );
     Core::Printf( "\n    Before allocating GPU memory:\n",
-                  "        Free memory:  ", freeMemory  / ( 1024 * 1024 ), " MBytes.\n",
-                  "        Total memory: ", totalMemory / ( 1024 * 1024 ), " MBytes.\n" );
+                  "        Free memory:  ", (unsigned int) freeMemory  / ( 1024 * 1024 ), " MBytes.\n",
+                  "        Total memory: ", (unsigned int) totalMemory / ( 1024 * 1024 ), " MBytes.\n" );
 
     //
     // inform the tile server
@@ -145,7 +147,7 @@ inline void TileManager::LoadTiledDatasetInternal( TiledDatasetDescription& tile
     //
     // initialize the tile cache
     //
-    for ( int i = 0; i < TILE_CACHE_SIZE; i++ )
+    for ( int i = 0; i < DEVICE_TILE_CACHE_SIZE; i++ )
     {
         TileCacheEntry tileCacheEntry;
 
@@ -285,8 +287,8 @@ inline void TileManager::LoadTiledDatasetInternal( TiledDatasetDescription& tile
     memInfoResult = cuMemGetInfo( &freeMemory, &totalMemory );
     RELEASE_ASSERT( memInfoResult == CUDA_SUCCESS );
     Core::Printf( "    After allocating GPU memory:\n",
-                  "        Free memory:  ", freeMemory  / ( 1024 * 1024 ), " MBytes.\n",
-                  "        Total memory: ", totalMemory / ( 1024 * 1024 ), " MBytes.\n" );
+                  "        Free memory:  ", (unsigned int) freeMemory  / ( 1024 * 1024 ), " MBytes.\n",
+                  "        Total memory: ", (unsigned int) totalMemory / ( 1024 * 1024 ), " MBytes.\n" );
 }
 
 template < typename TCudaType >
@@ -296,14 +298,14 @@ inline void TileManager::LoadSegmentationInternal( TiledDatasetDescription& tile
     //
     // output memory stats to the console
     //
-    unsigned int freeMemory, totalMemory;
+    size_t freeMemory, totalMemory;
     CUresult     memInfoResult;
     memInfoResult = cuMemGetInfo( &freeMemory, &totalMemory );
     RELEASE_ASSERT( memInfoResult == CUDA_SUCCESS );
     Core::Printf( "\nLoading segmentation...\n" );
     Core::Printf( "\n    Before allocating GPU memory:\n",
-                  "        Free memory:  ", freeMemory  / ( 1024 * 1024 ), " MBytes.\n",
-                  "        Total memory: ", totalMemory / ( 1024 * 1024 ), " MBytes.\n" );
+                  "        Free memory:  ", (unsigned int) freeMemory  / ( 1024 * 1024 ), " MBytes.\n",
+                  "        Total memory: ", (unsigned int) totalMemory / ( 1024 * 1024 ), " MBytes.\n" );
 
     //
     // inform the tile server
@@ -321,7 +323,7 @@ inline void TileManager::LoadSegmentationInternal( TiledDatasetDescription& tile
     // initialize the tile cache
 	// (Overrides initial allocation done in LoadTiledDatasetInternal)
     //
-    //for ( int i = 0; i < TILE_CACHE_SIZE; i++ )
+    //for ( int i = 0; i < DEVICE_TILE_CACHE_SIZE; i++ )
     //{
 
     //    int numVoxelsPerTile =
@@ -384,18 +386,18 @@ inline void TileManager::LoadSegmentationInternal( TiledDatasetDescription& tile
     D3D11_BUFFER_DESC bufferDesc;
     ZeroMemory( &bufferDesc, sizeof( D3D11_BUFFER_DESC ) );
 
-    bufferDesc.ByteWidth           = mIdColorMap.shape( 0 ) * sizeof( uchar4 );
+    bufferDesc.ByteWidth           = (UINT) mIdColorMap.shape( 0 ) * sizeof( uchar4 );
     bufferDesc.Usage               = D3D11_USAGE_DEFAULT;
-    bufferDesc.BindFlags           = D3D11_BIND_SHADER_RESOURCE;
-    bufferDesc.StructureByteStride = sizeof( uchar4 );
+    bufferDesc.BindFlags           = (UINT) D3D11_BIND_SHADER_RESOURCE;
+    bufferDesc.StructureByteStride = (UINT) sizeof( uchar4 );
     
     D3D11_SHADER_RESOURCE_VIEW_DESC shaderResourceViewDesc;
     ZeroMemory( &shaderResourceViewDesc, sizeof( D3D11_SHADER_RESOURCE_VIEW_DESC ) );
 
     shaderResourceViewDesc.Format               = DXGI_FORMAT_R8G8B8A8_UNORM;
     shaderResourceViewDesc.ViewDimension        = D3D11_SRV_DIMENSION_BUFFER;
-    shaderResourceViewDesc.Buffer.FirstElement  = 0;
-    shaderResourceViewDesc.Buffer.NumElements   = mIdColorMap.shape( 0 );
+    shaderResourceViewDesc.Buffer.FirstElement  = (UINT) 0;
+    shaderResourceViewDesc.Buffer.NumElements   = (UINT) mIdColorMap.shape( 0 );
 
     MOJO_D3D_SAFE( mD3D11Device->CreateBuffer( &bufferDesc, NULL, &mIdColorMapBuffer ) );
     MOJO_D3D_SAFE( mD3D11Device->CreateShaderResourceView( mIdColorMapBuffer, &shaderResourceViewDesc, &mIdColorMapShaderResourceView ) );
@@ -405,8 +407,8 @@ inline void TileManager::LoadSegmentationInternal( TiledDatasetDescription& tile
         0,
         NULL,
         idColorMap,
-        mIdColorMap.shape( 0 ) * sizeof( uchar4 ),
-        mIdColorMap.shape( 0 ) * sizeof( uchar4 ) );
+        (UINT) mIdColorMap.shape( 0 ) * sizeof( uchar4 ),
+        (UINT) mIdColorMap.shape( 0 ) * sizeof( uchar4 ) );
 
     //
     // initialize all state
@@ -434,8 +436,8 @@ inline void TileManager::LoadSegmentationInternal( TiledDatasetDescription& tile
     memInfoResult = cuMemGetInfo( &freeMemory, &totalMemory );
     RELEASE_ASSERT( memInfoResult == CUDA_SUCCESS );
     Core::Printf( "    After allocating GPU memory:\n",
-                  "        Free memory:  ", freeMemory  / ( 1024 * 1024 ), " MBytes.\n",
-                  "        Total memory: ", totalMemory / ( 1024 * 1024 ), " MBytes.\n" );
+                  "        Free memory:  ", (unsigned int) freeMemory  / ( 1024 * 1024 ), " MBytes.\n",
+                  "        Total memory: ", (unsigned int) totalMemory / ( 1024 * 1024 ), " MBytes.\n" );
 }
 
 }

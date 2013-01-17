@@ -271,7 +271,7 @@ void TileManager::UnloadTileCache()
 
 void TileManager::UpdateTileCacheState()
 {
-	boost::array< Native::TileCacheEntry, TILE_CACHE_SIZE >& tileCache = mTileManager->GetTileCache();
+	boost::array< Native::TileCacheEntry, DEVICE_TILE_CACHE_SIZE >& tileCache = mTileManager->GetTileCache();
 
     if ( mTileCache->Count == tileCache.size() )
     {
