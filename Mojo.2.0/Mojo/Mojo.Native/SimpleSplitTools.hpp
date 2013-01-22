@@ -35,12 +35,12 @@ private:
     const static int large_nhood[];
 
 public:
-    static void DijkstraSearch ( const int* searchArea, const int* searchMask, const int* searchBonus, const int fromIndex, const int width, const int height, const int targetMax, int* dist, int* prev, int* toIndex );
-    static void ApplySmallMask ( const int fromIndex, const int width, const int height, const int targetVal, int* area );
-    static void ApplyLargeMask ( const int fromIndex, const int width, const int height, const int targetVal, int* area );
+    static void DijkstraSearch ( const int* searchArea, const char* searchMask, const char* searchBonus, const int fromIndex, const int width, const int height, const char targetMax, int* dist, int* prev, int* toIndex );
+    static void ApplySmallMask ( const int fromIndex, const int width, const int height, const char targetVal, char* area );
+    static void ApplyLargeMask ( const int fromIndex, const int width, const int height, const char targetVal, char* area );
 
-    static void ApplyCircleMask ( const int fromIndex, const int width, const int height, const int targetVal, float radius, int* area );
-    static void ApplyCircleMask ( const int fromIndex, const int width, const int height, const int targetVal, float radius, unsigned int* area );
+    static void ApplyCircleMask ( const int fromIndex, const int width, const int height, const char targetVal, const float radius, char* area );
+    //static void ApplyCircleMask ( const int fromIndex, const int width, const int height, const int targetVal, const float radius, unsigned int* area );
 
 };
 

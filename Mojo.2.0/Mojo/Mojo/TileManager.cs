@@ -265,7 +265,15 @@ namespace Mojo
             if ( Internal != null )
             {
                 Internal.SaveAndClearFileSystemTileCache( );
-                Internal.Dispose();
+
+                //
+                // TileManager does not have any files to close or output to write
+                // So we can just exit without calling Dispose here
+                // This will save time on exit when deallocating memory is not necessary
+                //
+
+                //Internal.Dispose();
+
                 Internal = null;
             }
         }

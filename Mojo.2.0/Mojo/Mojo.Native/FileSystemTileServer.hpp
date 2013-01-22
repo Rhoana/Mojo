@@ -53,6 +53,7 @@ public:
     virtual void                                                  ReplaceSegmentationLabelCurrentConnectedComponent( int oldId, int newId, float3 pointTileSpace );
 
     virtual void                                                  DrawSplit( float3 pointTileSpace, float radius );
+    virtual void                                                  DrawErase( float3 pointTileSpace, float radius );
     virtual void                                                  DrawRegionB( float3 pointTileSpace, float radius );
     virtual void                                                  DrawRegionA( float3 pointTileSpace, float radius );
     virtual void                                                  DrawRegionValue( float3 pointTileSpace, float radius, int value );
@@ -63,8 +64,9 @@ public:
     virtual void                                                  PrepForSplit( int segId, float3 pointTileSpace );
 	virtual void                                                  FindBoundaryJoinPoints2D( int segId );
 	virtual void                                                  FindBoundaryWithinRegion2D( int segId );
-	virtual void                                                  FindCutBetweenRegions2D( int segId );
-    virtual int                                                   CompleteSplit( int segId );
+	virtual void                                                  FindBoundaryBetweenRegions2D( int segId );
+    virtual int                                                   CompletePointSplit( int segId );
+    virtual int                                                   CompleteDrawSplit( int segId );
 
 	virtual void                                                  UndoChange();
 	virtual void                                                  RedoChange();
@@ -132,13 +134,13 @@ private:
 
     Core::HashMap < std::string, FileSystemTileCacheEntry >       mFileSystemTileCache;
 
-    Core::HashMap< unsigned int, 
-        std::set< int4, Mojo::Core::Int4Comparator > >            mIdTileMap;
+    Mojo::Core::IdTileMap                                         mIdTileMap;
 
     //
     // simple split variables
     //
     std::vector< int3 >                                           mSplitSourcePoints;
+    int                                                           mSplitNPerimiters;
     int3                                                          mSplitWindowStart;
     int3                                                          mSplitWindowNTiles;
     int                                                           mSplitWindowWidth;
@@ -148,9 +150,9 @@ private:
     int*                                                          mSplitStepDist;
     int*                                                          mSplitResultDist;
     int*                                                          mSplitPrev;
-    int*                                                          mSplitBorderTargets;
-    int*                                                          mSplitSearchMask;
-    int*                                                          mSplitDrawArea;
+    char*                                                         mSplitBorderTargets;
+    char*                                                         mSplitSearchMask;
+    char*                                                         mSplitDrawArea;
     unsigned int*                                                 mSplitResultArea;
 
 	FileSystemUndoRedoItem                                        mUndoItem;
@@ -345,6 +347,8 @@ inline bool FileSystemTileServer::TryLoadTileHdf5Internal( int4 tileIndex, std::
         volumeDescription.numBytesPerVoxel = mTiledDatasetDescription.tiledVolumeDescriptions.Get( hdf5Name ).numBytesPerVoxel;
         volumeDescription.numVoxels        = numVoxelsPerTile;
 
+		//Core::Printf( "Loading tile ", tilePath, "...");
+
         hid_t hdf5FileHandle = marray::hdf5::openFile( tilePath );
         marray::Marray< TMarrayType > marray;
         try
@@ -358,6 +362,8 @@ inline bool FileSystemTileServer::TryLoadTileHdf5Internal( int4 tileIndex, std::
             marray::hdf5::load( hdf5FileHandle, hdf5InternalDatasetName, marray );
         }
         marray::hdf5::closeFile( hdf5FileHandle );
+
+		//Core::Printf( "Done.");
 
         RELEASE_ASSERT( marray.dimension() == 2 );
         RELEASE_ASSERT( marray.shape( 0 ) == numVoxelsPerTile.y && marray.shape( 1 ) == numVoxelsPerTile.y );

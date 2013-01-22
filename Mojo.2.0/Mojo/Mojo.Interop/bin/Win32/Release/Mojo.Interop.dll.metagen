@@ -301,6 +301,8 @@ Class Mojo.Interop.TileManager: AutoLayout, AnsiClass, Class, Public, BeforeFiel
     LoadSegmentation(TiledDatasetDescription): PrivateScope, Public, HideBySig
     UnloadSegmentation(): PrivateScope, Public, HideBySig
     IsSegmentationLoaded(): PrivateScope, Public, HideBySig
+    SaveSegmentation(): PrivateScope, Public, HideBySig
+    SaveSegmentationAs(String): PrivateScope, Public, HideBySig
     Update(): PrivateScope, Public, HideBySig
     LoadTiles(TiledDatasetView): PrivateScope, Public, HideBySig
     GetTileCache(): PrivateScope, Public, HideBySig
@@ -311,6 +313,7 @@ Class Mojo.Interop.TileManager: AutoLayout, AnsiClass, Class, Public, BeforeFiel
     ReplaceSegmentationLabelCurrentSlice(Int32, Int32, TiledDatasetView, ValueType Vector3 IsBoxed): PrivateScope, Public, HideBySig
     ReplaceSegmentationLabelCurrentConnectedComponent(Int32, Int32, TiledDatasetView, ValueType Vector3 IsBoxed): PrivateScope, Public, HideBySig
     DrawSplit(TiledDatasetView, ValueType Vector3 IsBoxed, Single): PrivateScope, Public, HideBySig
+    DrawErase(TiledDatasetView, ValueType Vector3 IsBoxed, Single): PrivateScope, Public, HideBySig
     DrawRegionB(TiledDatasetView, ValueType Vector3 IsBoxed, Single): PrivateScope, Public, HideBySig
     DrawRegionA(TiledDatasetView, ValueType Vector3 IsBoxed, Single): PrivateScope, Public, HideBySig
     AddSplitSource(TiledDatasetView, ValueType Vector3 IsBoxed): PrivateScope, Public, HideBySig
@@ -319,8 +322,9 @@ Class Mojo.Interop.TileManager: AutoLayout, AnsiClass, Class, Public, BeforeFiel
     PrepForSplit(Int32, ValueType Vector3 IsBoxed): PrivateScope, Public, HideBySig
     FindBoundaryJoinPoints2D(Int32): PrivateScope, Public, HideBySig
     FindBoundaryWithinRegion2D(Int32): PrivateScope, Public, HideBySig
-    FindCutBetweenRegions2D(Int32): PrivateScope, Public, HideBySig
-    CompleteSplit(Int32): PrivateScope, Public, HideBySig
+    FindBoundaryBetweenRegions2D(Int32): PrivateScope, Public, HideBySig
+    CompletePointSplit(Int32): PrivateScope, Public, HideBySig
+    CompleteDrawSplit(Int32): PrivateScope, Public, HideBySig
     UndoChange(): PrivateScope, Public, HideBySig
     RedoChange(): PrivateScope, Public, HideBySig
     SaveAndClearFileSystemTileCache(): PrivateScope, Public, HideBySig

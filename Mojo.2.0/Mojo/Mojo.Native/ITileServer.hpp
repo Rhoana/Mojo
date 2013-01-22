@@ -38,6 +38,7 @@ public:
     virtual void                                                  ReplaceSegmentationLabelCurrentConnectedComponent( int oldId, int newId, float3 pointTileSpace )        = 0;
 
     virtual void                                                  DrawSplit( float3 pointTileSpace, float radius )                                        = 0;
+    virtual void                                                  DrawErase( float3 pointTileSpace, float radius )                                        = 0;
     virtual void                                                  DrawRegionB( float3 pointTileSpace, float radius )                                      = 0;
     virtual void                                                  DrawRegionA( float3 pointTileSpace, float radius )                                      = 0;
     virtual void                                                  AddSplitSource( float3 pointTileSpace )                                                 = 0;
@@ -46,8 +47,9 @@ public:
     virtual void                                                  PrepForSplit( int segId, float3 pointTileSpace )                                        = 0;
 	virtual void                                                  FindBoundaryJoinPoints2D( int segId )                                                   = 0;
 	virtual void                                                  FindBoundaryWithinRegion2D( int segId )                                                 = 0;
-	virtual void                                                  FindCutBetweenRegions2D( int segId )                                                    = 0;
-    virtual int                                                   CompleteSplit( int segId )                                                              = 0;
+	virtual void                                                  FindBoundaryBetweenRegions2D( int segId )                                                    = 0;
+    virtual int                                                   CompletePointSplit( int segId )                                                         = 0;
+    virtual int                                                   CompleteDrawSplit( int segId )                                                          = 0;
 
 	virtual void                                                  UndoChange() = 0;
 	virtual void                                                  RedoChange() = 0;

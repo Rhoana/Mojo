@@ -46,7 +46,7 @@ const int SimpleSplitTools::large_nhood[] = { 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0
 												0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0,
 												0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0 };
 
-void SimpleSplitTools::ApplySmallMask ( const int fromIndex, const int width, const int height, const int targetVal, int* area )
+void SimpleSplitTools::ApplySmallMask ( const int fromIndex, const int width, const int height, const char targetVal, char* area )
 {
     int nx, ny, ni, ax, ay;
     for ( nx = -small_r; nx <= small_r; ++nx )
@@ -68,7 +68,7 @@ void SimpleSplitTools::ApplySmallMask ( const int fromIndex, const int width, co
     }
 }
 
-void SimpleSplitTools::ApplyLargeMask ( const int fromIndex, const int width, const int height, const int targetVal, int* area )
+void SimpleSplitTools::ApplyLargeMask ( const int fromIndex, const int width, const int height, const char targetVal, char* area )
 {
     int nx, ny, ni, ax, ay;
     for ( nx = -large_r; nx <= large_r; ++nx )
@@ -91,7 +91,7 @@ void SimpleSplitTools::ApplyLargeMask ( const int fromIndex, const int width, co
     }
 }
 
-void SimpleSplitTools::ApplyCircleMask ( const int fromIndex, const int width, const int height, const int targetVal, float radius, int* area )
+void SimpleSplitTools::ApplyCircleMask ( const int fromIndex, const int width, const int height, const char targetVal, float radius, char* area )
 {
     int mask_r = (int) ( radius + 0.5 );
     int mask_wh = mask_r * 2 + 1;
@@ -119,35 +119,35 @@ void SimpleSplitTools::ApplyCircleMask ( const int fromIndex, const int width, c
     }
 }
 
-void SimpleSplitTools::ApplyCircleMask ( const int fromIndex, const int width, const int height, const int targetVal, float radius, unsigned int* area )
-{
-    int mask_r = (int) ( radius + 0.5 );
-    int mask_wh = mask_r * 2 + 1;
-    float dist;
+//void SimpleSplitTools::ApplyCircleMask ( const int fromIndex, const int width, const int height, const int targetVal, float radius, unsigned int* area )
+//{
+//    int mask_r = (int) ( radius + 0.5 );
+//    int mask_wh = mask_r * 2 + 1;
+//    float dist;
+//
+//    int nx, ny, ax, ay;
+//
+//    for ( nx = -mask_r; nx <= mask_r; ++nx )
+//    {
+//        for ( ny = -mask_r; ny <= mask_r; ++ny )
+//        {
+//            dist = sqrt( (float) ( nx * nx + ny * ny ) );
+//
+//            if ( dist <= radius )
+//            {
+//                ax = fromIndex % width + nx;
+//                ay = fromIndex / width + ny;
+//                if ( ax >= 0 && ax < width &&
+//                    ay >= 0 && ay < height )
+//                {
+//                    area[ ax + ay * width ] = targetVal;
+//                }
+//            }
+//        }
+//    }
+//}
 
-    int nx, ny, ax, ay;
-
-    for ( nx = -mask_r; nx <= mask_r; ++nx )
-    {
-        for ( ny = -mask_r; ny <= mask_r; ++ny )
-        {
-            dist = sqrt( (float) ( nx * nx + ny * ny ) );
-
-            if ( dist <= radius )
-            {
-                ax = fromIndex % width + nx;
-                ay = fromIndex / width + ny;
-                if ( ax >= 0 && ax < width &&
-                    ay >= 0 && ay < height )
-                {
-                    area[ ax + ay * width ] = targetVal;
-                }
-            }
-        }
-    }
-}
-
-void SimpleSplitTools::DijkstraSearch ( const int* searchArea, const int* searchMask, const int* searchBonus, const int fromIndex, const int width, const int height, const int targetMax, int* dist, int* prev, int* toIndex )
+void SimpleSplitTools::DijkstraSearch ( const int* searchArea, const char* searchMask, const char* searchBonus, const int fromIndex, const int width, const int height, const char targetMax, int* dist, int* prev, int* toIndex )
 {
 	for ( int i = 0; i < width * height; ++i )
 	{

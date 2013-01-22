@@ -57,6 +57,7 @@ public:
     void                                                    ReplaceSegmentationLabelCurrentConnectedComponent( int oldId, int newId, TiledDatasetView^ tiledDatasetView, Vector3^ pDataSpace );
 
     void                                                    DrawSplit( TiledDatasetView^ tiledDatasetView, Vector3^ pDataSpace, float radius );
+    void                                                    DrawErase( TiledDatasetView^ tiledDatasetView, Vector3^ pDataSpace, float radius );
     void                                                    DrawRegionB( TiledDatasetView^ tiledDatasetView, Vector3^ pDataSpace, float radius );
     void                                                    DrawRegionA( TiledDatasetView^ tiledDatasetView, Vector3^ pDataSpace, float radius );
     void                                                    AddSplitSource( TiledDatasetView^ tiledDatasetView, Vector3^ pDataSpace );
@@ -65,8 +66,9 @@ public:
     void                                                    PrepForSplit( int segId, Vector3^ pDataSpace );
 	void                                                    FindBoundaryJoinPoints2D( int segId );
 	void                                                    FindBoundaryWithinRegion2D( int segId );
-	void                                                    FindCutBetweenRegions2D( int segId );
-    int                                                     CompleteSplit( int segId );
+	void                                                    FindBoundaryBetweenRegions2D( int segId );
+    int                                                     CompletePointSplit( int segId );
+    int                                                     CompleteDrawSplit( int segId );
 
 	void                                                    UndoChange();
 	void                                                    RedoChange();

@@ -130,7 +130,8 @@ void FileSystemTileServer::SaveSegmentation()
     Core::Printf( "Saving idTileMap (temp)." );
 
     unsigned int tileMapEntries = 0;
-    stdext::hash_map< unsigned int, std::set< int4, Mojo::Core::Int4Comparator > >::iterator tileMapIt;
+    stdext::hash_map< unsigned int, Mojo::Core::MojoTileSet >::iterator tileMapIt;
+
     for ( tileMapIt = mIdTileMap.GetHashMap().begin(); tileMapIt != mIdTileMap.GetHashMap().end(); ++tileMapIt )
     {
         tileMapEntries += tileMapIt->second.size();
@@ -144,8 +145,8 @@ void FileSystemTileServer::SaveSegmentation()
     {
         if ( mIdTileMap.GetHashMap().find( segId ) != mIdTileMap.GetHashMap().end() )
         {
-            std::set< int4, Mojo::Core::Int4Comparator > tileSet = mIdTileMap.Get( segId );
-            std::set< int4, Mojo::Core::Int4Comparator >::iterator tileIt;
+            Mojo::Core::MojoTileSet tileSet = mIdTileMap.Get( segId );
+            Mojo::Core::MojoTileSet::iterator tileIt;
             for ( tileIt = tileSet.begin(); tileIt != tileSet.end(); ++tileIt )
             {
                 outputTiles ( mi, 0 ) = segId;
@@ -279,20 +280,20 @@ void FileSystemTileServer::ReplaceSegmentationLabel( int oldId, int newId )
     {
         Core::Printf( "\nReplacing segmentation label ", oldId, " with segmentation label ", newId, "...\n" );
 
-		std::set< int4, Mojo::Core::Int4Comparator > tilesContainingOldId = mIdTileMap.Get( oldId );
-		std::set< int4, Mojo::Core::Int4Comparator > tilesContainingNewId = mIdTileMap.Get( newId );
+		Mojo::Core::MojoTileSet tilesContainingOldId = mIdTileMap.Get( oldId );
+		Mojo::Core::MojoTileSet tilesContainingNewId = mIdTileMap.Get( newId );
 
 		PrepForNextUndoRedoChange();
 		mUndoItem.newId = newId;
 		mUndoItem.oldId = oldId;
 		mUndoItem.idTileMapRemoveOldId.insert( tilesContainingOldId.begin(), tilesContainingOldId.end() );
 		mUndoItem.idTileMapAddNewId.insert( tilesContainingOldId.begin(), tilesContainingOldId.end() );
-		for ( std::set< int4, Mojo::Core::Int4Comparator >::iterator eraseIterator = tilesContainingNewId.begin(); eraseIterator != tilesContainingNewId.end(); ++eraseIterator )
+		for ( Mojo::Core::MojoTileSet::iterator eraseIterator = tilesContainingNewId.begin(); eraseIterator != tilesContainingNewId.end(); ++eraseIterator )
 		{
 			mUndoItem.idTileMapAddNewId.erase( *eraseIterator );
 		}
 
-        for( std::set< int4, Mojo::Core::Int4Comparator >::iterator tileIndexi = tilesContainingOldId.begin(); tileIndexi != tilesContainingOldId.end(); ++tileIndexi )
+        for( Mojo::Core::MojoTileSet::iterator tileIndexi = tilesContainingOldId.begin(); tileIndexi != tilesContainingOldId.end(); ++tileIndexi )
         {
             int4 tileIndex = *tileIndexi;
             //
@@ -393,8 +394,8 @@ void FileSystemTileServer::ReplaceSegmentationLabelCurrentSlice( int oldId, int 
 
         Core::Printf( "\nReplacing segmentation label ", oldId, " conencted to voxel (x", pVoxelSpace.x, ", y", pVoxelSpace.y, " z", pVoxelSpace.z, ") with segmentation label ", newId, " for zslice ", pVoxelSpace.z, "...\n" );
 
-        std::set< int4, Mojo::Core::Int4Comparator > tilesContainingOldId = mIdTileMap.Get( oldId );
-        std::set< int4, Mojo::Core::Int4Comparator > tilesContainingNewId = mIdTileMap.Get( newId );
+        Mojo::Core::MojoTileSet tilesContainingOldId = mIdTileMap.Get( oldId );
+        Mojo::Core::MojoTileSet tilesContainingNewId = mIdTileMap.Get( newId );
 
         Core::HashMap< std::string, Core::VolumeDescription > volumeDescriptions;
 
@@ -655,8 +656,8 @@ void FileSystemTileServer::ReplaceSegmentationLabelCurrentConnectedComponent( in
 
         Core::Printf( "\nReplacing segmentation label ", oldId, " conencted to voxel (x", pVoxelSpace.x, ", y", pVoxelSpace.y, " z", pVoxelSpace.z, ") with segmentation label ", newId, " for zslice ", pVoxelSpace.z, "...\n" );
 
-        std::set< int4, Mojo::Core::Int4Comparator > tilesContainingOldId = mIdTileMap.Get( oldId );
-        std::set< int4, Mojo::Core::Int4Comparator > tilesContainingNewId = mIdTileMap.Get( newId );
+        Mojo::Core::MojoTileSet tilesContainingOldId = mIdTileMap.Get( oldId );
+        Mojo::Core::MojoTileSet tilesContainingNewId = mIdTileMap.Get( newId );
 
         Core::HashMap< std::string, Core::VolumeDescription > volumeDescriptions;
 
@@ -927,6 +928,11 @@ void FileSystemTileServer::DrawSplit( float3 pointTileSpace, float radius )
 	DrawRegionValue( pointTileSpace, radius, REGION_SPLIT );
 }
 
+void FileSystemTileServer::DrawErase( float3 pointTileSpace, float radius )
+{
+	DrawRegionValue( pointTileSpace, radius, 0 );
+}
+
 void FileSystemTileServer::DrawRegionA( float3 pointTileSpace, float radius )
 {
 	DrawRegionValue( pointTileSpace, radius, REGION_A );
@@ -1083,7 +1089,7 @@ void FileSystemTileServer::UpdateSplitTilesBoundingBox( int2 upperLeft, int2 low
                                 splitData[ tileIndex1D ] = mSplitResultArea[ areaIndex1D ];
                                 wQueue[ make_int4( ( mSplitWindowStart.x * numVoxelsPerTile.x + xOffset + tileX ) / 2, ( mSplitWindowStart.y * numVoxelsPerTile.y + yOffset + tileY ) / 2, mSplitWindowStart.z, 1) ] = mSplitResultArea[ areaIndex1D ];
                             }
-                            else if ( mSplitDrawArea[ areaIndex1D ] && splitData[ tileIndex1D ] != mSplitDrawArea[ areaIndex1D ] )
+                            else if ( mSplitResultArea[ areaIndex1D ] == 0 && mSplitDrawArea[ areaIndex1D ] && splitData[ tileIndex1D ] != mSplitDrawArea[ areaIndex1D ] )
                             {
                                 splitData[ tileIndex1D ] = mSplitDrawArea[ areaIndex1D ];
 						        wQueue[ make_int4( ( mSplitWindowStart.x * numVoxelsPerTile.x + xOffset + tileX ) / 2, ( mSplitWindowStart.y * numVoxelsPerTile.y + yOffset + tileY ) / 2, mSplitWindowStart.z, 1) ] = mSplitDrawArea[ areaIndex1D ];
@@ -1324,6 +1330,7 @@ void FileSystemTileServer::ResetSplitState()
 {
 
     mSplitSourcePoints.clear();
+	mSplitNPerimiters = 0;
 
 	//memset( mSplitResultArea, 0, mSplitWindowNPix );
 	//memset( mSplitDrawArea, 0, mSplitWindowNPix );
@@ -1438,9 +1445,9 @@ void FileSystemTileServer::PrepForSplit( int segId, float3 pointTileSpace )
         int minTileY = numTiles.y;
         int maxTileY = 0;
 
-        std::set< int4, Mojo::Core::Int4Comparator > tilesContainingSegId = mIdTileMap.Get( segId );
+        Mojo::Core::MojoTileSet tilesContainingSegId = mIdTileMap.Get( segId );
 
-        for ( std::set< int4, Mojo::Core::Int4Comparator >::iterator tileIterator = tilesContainingSegId.begin(); tileIterator != tilesContainingSegId.end(); ++tileIterator )
+        for ( Mojo::Core::MojoTileSet::iterator tileIterator = tilesContainingSegId.begin(); tileIterator != tilesContainingSegId.end(); ++tileIterator )
         {
             if ( tileIterator->z == pointTileSpace.z && tileIterator->w == 0 )
             {
@@ -1516,9 +1523,9 @@ void FileSystemTileServer::PrepForSplit( int segId, float3 pointTileSpace )
 		mSplitStepDist = new int[ mSplitWindowNPix ];
         mSplitResultDist = new int[ mSplitWindowNPix ];
 		mSplitPrev = new int[ mSplitWindowNPix ];
-		mSplitSearchMask = new int[ mSplitWindowNPix ];
-		mSplitDrawArea = new int[ mSplitWindowNPix ];
-		mSplitBorderTargets = new int[ mSplitWindowNPix ];
+		mSplitSearchMask = new char[ mSplitWindowNPix ];
+		mSplitDrawArea = new char[ mSplitWindowNPix ];
+		mSplitBorderTargets = new char[ mSplitWindowNPix ];
 		mSplitResultArea = new unsigned int[ mSplitWindowNPix ];
 
         LoadSplitDistances( segId );
@@ -1530,7 +1537,7 @@ void FileSystemTileServer::PrepForSplit( int segId, float3 pointTileSpace )
 
 }
 
-int FileSystemTileServer::CompleteSplit( int segId )
+int FileSystemTileServer::CompletePointSplit( int segId )
 {
 	int newId = 0;
 
@@ -1863,8 +1870,8 @@ int FileSystemTileServer::CompleteSplit( int segId )
 		//
 
 		newId = ++mTiledDatasetDescription.maxLabelId;
-        std::set< int4, Mojo::Core::Int4Comparator > tilesContainingOldId = mIdTileMap.Get( segId );
-        std::set< int4, Mojo::Core::Int4Comparator > tilesContainingNewId;
+        Mojo::Core::MojoTileSet tilesContainingOldId = mIdTileMap.Get( segId );
+        Mojo::Core::MojoTileSet tilesContainingNewId;
 
 		mUndoItem.newId = newId;
 		mUndoItem.oldId = segId;
@@ -2024,6 +2031,509 @@ int FileSystemTileServer::CompleteSplit( int segId )
         mIdTileMap.Set( newId, tilesContainingNewId );
 
         Core::Printf( "\nFinished Splitting segmentation label ", segId, " from voxel (x", pVoxelSpace.x, ", y", pVoxelSpace.y, " z", pVoxelSpace.z, ") to new segmentation label ", newId, "...\n" );
+    }
+
+	//
+	// Prep for more splitting
+	//
+	LoadSplitDistances( segId );
+    ResetSplitState();
+
+	return newId;
+
+}
+
+int FileSystemTileServer::CompleteDrawSplit( int segId )
+{
+	int newId = 0;
+
+	if ( mIsSegmentationLoaded && mSplitNPerimiters > 0 )
+    {
+		for ( int perimiter = 1; perimiter < mSplitNPerimiters; ++ perimiter )
+		{
+
+			int3 numVoxelsPerTile = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "IdMap" ).numVoxelsPerTile;
+
+			//
+			// Find a seed point with this perimiter value
+			//
+
+			bool seedFound = false;
+			int seedIndex1D;
+
+			for ( seedIndex1D = 0; seedIndex1D < mSplitWindowNPix; ++seedIndex1D )
+			{
+				if ( mSplitSearchMask[ seedIndex1D ] == perimiter )
+				{
+					seedFound = true;
+					break;
+				}
+			}
+
+			if ( !seedFound )
+			{
+				Core::Printf( "WARNING: Could not find seed point - aborting." );
+				ResetSplitState();
+				return 0;
+			}
+
+			//
+			// Perform a 2D Flood-fill ( no changes yet, just record bits in the UndoItem )
+			//
+
+			int3 pVoxelSpace = 
+				make_int3( seedIndex1D % mSplitWindowWidth + mSplitWindowStart.x * numVoxelsPerTile.x,
+				seedIndex1D / mSplitWindowWidth + mSplitWindowStart.y * numVoxelsPerTile.y,
+				mSplitWindowStart.z );
+
+			int3 numVoxels = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "IdMap" ).numVoxels;
+			int4 numTiles = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "IdMap" ).numTiles;
+
+			Core::Printf( "\nSplitting segmentation label ", segId, " from voxel (x", pVoxelSpace.x, ", y", pVoxelSpace.y, " z", pVoxelSpace.z, ")...\n" );
+
+			Core::HashMap< std::string, Core::VolumeDescription > volumeDescriptions;
+
+			PrepForNextUndoRedoChange();
+
+			std::bitset< TILE_SIZE * TILE_SIZE > *changeBits;
+
+			int4 previousTileIndex;
+			bool tileLoaded = false;
+
+			std::queue< int4 > tileQueue;
+			std::multimap< int4, int4, Mojo::Core::Int4Comparator > sliceQueue;
+			std::queue< int4 > wQueue;
+
+			int* currentIdVolume;
+			int3 currentIdNumVoxels;
+			int4 thisVoxel;
+
+			int nPixChanged = 0;
+			bool invert = false;
+
+			tileQueue.push( make_int4(pVoxelSpace.x, pVoxelSpace.y, pVoxelSpace.z, 0) );
+
+			Core::Printf( "Filling at w=0." );
+
+			while ( tileQueue.size() > 0 || sliceQueue.size() > 0 )
+			{
+				if ( tileQueue.size() > 0 )
+				{
+					//
+					// Keep to the same tile if possible
+					//
+					thisVoxel = tileQueue.front();
+					tileQueue.pop();
+				}
+				else
+				{
+					//
+					// Start on the next tile
+					//
+					thisVoxel = sliceQueue.begin()->second;
+					sliceQueue.erase( sliceQueue.begin() );
+				}
+
+				//
+				// Find the tile for this pixel
+				//
+				int4 tileIndex = make_int4( thisVoxel.x / numVoxelsPerTile.x,
+					thisVoxel.y / numVoxelsPerTile.y,
+					thisVoxel.z / numVoxelsPerTile.z,
+					0);
+
+				//
+				// Load tile if necessary
+				//
+				if ( !tileLoaded || previousTileIndex.x != tileIndex.x ||
+					previousTileIndex.y != tileIndex.y ||
+					previousTileIndex.z != tileIndex.z ||
+					previousTileIndex.w != tileIndex.w )
+				{
+					if ( tileLoaded )
+					{
+						//
+						// Unload the previous tile
+						//
+						UnloadTile( previousTileIndex );
+					}
+
+					//
+					// Load the current tile
+					//
+					volumeDescriptions = LoadTile( tileIndex );
+					previousTileIndex = tileIndex;
+					currentIdVolume = (int*)volumeDescriptions.Get( "IdMap" ).data;
+					currentIdNumVoxels = volumeDescriptions.Get( "IdMap" ).numVoxels;
+					tileLoaded = true;
+
+					//
+					// Get or create the change bitset for this tile
+					//
+					changeBits = &mUndoItem.changePixels.GetHashMap()[ CreateTileString( tileIndex ) ];
+				}
+
+				int tileX = thisVoxel.x % numVoxelsPerTile.x;
+				int tileY = thisVoxel.y % numVoxelsPerTile.y;
+
+				int3 index3D = make_int3( tileX, tileY, 0 );
+				int  index1D = Mojo::Core::Index3DToIndex1D( index3D, currentIdNumVoxels );
+				int  idValue = currentIdVolume[ index1D ];
+
+				bool isSplitBorder = false;
+
+				int areaIndex1D = thisVoxel.x - mSplitWindowStart.x * numVoxelsPerTile.x +
+					(thisVoxel.y - mSplitWindowStart.y * numVoxelsPerTile.y) * mSplitWindowWidth;
+				if ( areaIndex1D >= 0 && areaIndex1D < mSplitWindowNPix )
+				{
+					isSplitBorder = mSplitResultArea[ areaIndex1D ] != 0;
+				}
+
+				if ( idValue == segId && !changeBits->test( index1D ) )
+				{
+					changeBits->set( index1D );
+					wQueue.push( thisVoxel );
+					++nPixChanged;
+
+					if ( !isSplitBorder )
+					{
+						//
+						// Add neighbours to the appropriate queue
+						//
+						if (thisVoxel.x > 0)
+						{
+							if (tileX > 0)
+							{
+								tileQueue.push( make_int4(thisVoxel.x-1, thisVoxel.y, thisVoxel.z, 0) );
+							}
+							else
+							{
+								sliceQueue.insert( std::pair< int4, int4 > (
+									make_int4( tileIndex.x - 1, tileIndex.y, tileIndex.z, tileIndex.w ),
+									make_int4( thisVoxel.x-1, thisVoxel.y, thisVoxel.z, 0 ) ) );
+							}
+						}
+
+						if (thisVoxel.x < numVoxels.x - 1)
+						{
+							if (tileX < numVoxelsPerTile.x - 1)
+							{
+								tileQueue.push( make_int4(thisVoxel.x+1, thisVoxel.y, thisVoxel.z, 0) );
+							}
+							else
+							{
+								sliceQueue.insert( std::pair< int4, int4 > (
+									make_int4( tileIndex.x + 1, tileIndex.y, tileIndex.z, tileIndex.w ),
+									make_int4( thisVoxel.x+1, thisVoxel.y, thisVoxel.z, 0 ) ) );
+							}
+						}
+						if (thisVoxel.y > 0)
+						{
+							if (tileY > 0)
+							{
+								tileQueue.push( make_int4(thisVoxel.x, thisVoxel.y-1, thisVoxel.z, 0) );
+							}
+							else
+							{
+								sliceQueue.insert( std::pair< int4, int4 > (
+									make_int4( tileIndex.x, tileIndex.y - 1, tileIndex.z, tileIndex.w ),
+									make_int4( thisVoxel.x, thisVoxel.y-1, thisVoxel.z, 0 ) ) );
+							}
+						}
+						if (thisVoxel.y < numVoxels.y - 1)
+						{
+							if (tileY < numVoxelsPerTile.y - 1)
+							{
+								tileQueue.push( make_int4(thisVoxel.x, thisVoxel.y+1, thisVoxel.z, 0) );
+							}
+							else
+							{
+								sliceQueue.insert( std::pair< int4, int4 > (
+									make_int4( tileIndex.x, tileIndex.y + 1, tileIndex.z, tileIndex.w ),
+									make_int4( thisVoxel.x, thisVoxel.y+1, thisVoxel.z, 0 ) ) );
+							}
+						}
+					}
+				}
+
+				//
+				// Check for inversion ( only re-label the smallest segment )
+				//
+				if ( tileQueue.size() == 0 && sliceQueue.size() == 0 && nPixChanged > 1 + mSplitLabelCount / 2 && !invert )
+				{
+					//
+					// This fill is too big - find an alternative fill point
+					//
+
+					wQueue = std::queue< int4 >();
+
+					if ( tileLoaded )
+					{
+						//
+						// Unload the previous tile
+						//
+						UnloadTile( previousTileIndex );
+						tileLoaded = false;
+					}
+
+					seedFound = false;
+
+					//
+					// Find a new seed point
+					// (any point next to the border line that hasn't been filled)
+					//
+
+					for ( int xd = 0; !seedFound && xd < mSplitWindowNTiles.x; ++xd )
+					{
+						for (int yd = 0; !seedFound && yd < mSplitWindowNTiles.y; ++yd )
+						{
+							tileIndex = make_int4( mSplitWindowStart.x + xd, mSplitWindowStart.y + yd, mSplitWindowStart.z, 0 );
+							volumeDescriptions = LoadTile( tileIndex );
+							currentIdVolume = (int*)volumeDescriptions.Get( "IdMap" ).data;
+
+							int xOffset = xd * numVoxelsPerTile.x;
+							int yOffset = yd * numVoxelsPerTile.y;
+							int nVoxels = numVoxelsPerTile.x * numVoxelsPerTile.y;
+
+							for ( int tileIndex1D = 0; tileIndex1D < nVoxels; ++tileIndex1D )
+							{
+								int areaX = xOffset + tileIndex1D % numVoxelsPerTile.x;
+								int areaY = yOffset + tileIndex1D / numVoxelsPerTile.x;
+								seedIndex1D = areaX + areaY * mSplitWindowWidth;
+
+								if ( currentIdVolume[ tileIndex1D ] == segId && !mUndoItem.changePixels.GetHashMap()[ CreateTileString( tileIndex ) ].test( tileIndex1D ) && mSplitResultArea[ seedIndex1D ] == 0 )
+								{
+									//
+									// Check neighbours
+									//
+									if ( ( areaX > 0 && mSplitResultArea[ seedIndex1D - 1 ] != 0 ) ||
+										( areaX < mSplitWindowWidth - 1 && mSplitResultArea[ seedIndex1D + 1 ] != 0 ) ||
+										( areaY > 0 && mSplitResultArea[ seedIndex1D - mSplitWindowWidth ] != 0 ) ||
+										( areaY < mSplitWindowHeight - 1 && mSplitResultArea[ seedIndex1D + mSplitWindowWidth ] != 0 )
+										)
+									{
+										seedFound = true;
+										break;
+									}
+								}
+							}
+
+							UnloadTile( tileIndex );
+
+						}
+					}
+
+					//
+					// Reset the Undo Item
+					//
+					mUndoItem = FileSystemUndoRedoItem();
+
+					if ( !seedFound )
+					{
+						Core::Printf( "WARNING: Could not find (inverted) seed point - aborting." );
+						ResetSplitState();
+						return 0;
+					}
+					else
+					{
+						Core::Printf( "Seed found at:", seedIndex1D, "." );
+					}
+
+					//
+					// Use this new seed point
+					//
+					pVoxelSpace = 
+						make_int3( seedIndex1D % mSplitWindowWidth + mSplitWindowStart.x * numVoxelsPerTile.x,
+						seedIndex1D / mSplitWindowWidth + mSplitWindowStart.y * numVoxelsPerTile.y,
+						mSplitWindowStart.z );
+
+					nPixChanged = 0;
+					invert = true;
+
+					tileQueue.push( make_int4(pVoxelSpace.x, pVoxelSpace.y, pVoxelSpace.z, 0) );
+
+					Core::Printf( "Filling (invert) at w=0." );
+
+				}
+			}
+
+			if ( tileLoaded )
+			{
+				//
+				// Unload the previous tile
+				//
+				UnloadTile( previousTileIndex );
+				tileLoaded = false;
+			}
+
+			//
+			// Perform the split at w=0 ( re-label the smallest segment )
+			//
+
+			newId = ++mTiledDatasetDescription.maxLabelId;
+			Mojo::Core::MojoTileSet tilesContainingOldId = mIdTileMap.Get( segId );
+			Mojo::Core::MojoTileSet tilesContainingNewId;
+
+			mUndoItem.newId = newId;
+			mUndoItem.oldId = segId;
+
+			bool tileChanged;
+
+			Core::Printf( "Splitting (invert=", invert, ")." );
+
+			//
+			// Do the split and fill up in w
+			//
+
+			std::swap(tileQueue, wQueue);
+			int currentW = 0;
+
+			tileLoaded = false;
+			tileChanged = false;
+
+			while ( currentW < numTiles.w )
+			{
+				Core::Printf( "Splitting at w=", currentW, "." );
+				while ( tileQueue.size() > 0 )
+				{
+					thisVoxel = tileQueue.front();
+					tileQueue.pop();
+
+					//
+					// Find the tile for this pixel
+					//
+					int4 tileIndex = make_int4( thisVoxel.x / numVoxelsPerTile.x,
+						thisVoxel.y / numVoxelsPerTile.y,
+						thisVoxel.z / numVoxelsPerTile.z,
+						currentW);
+
+					//
+					// Load tile if necessary
+					//
+					if ( !tileLoaded || previousTileIndex.x != tileIndex.x ||
+						previousTileIndex.y != tileIndex.y ||
+						previousTileIndex.z != tileIndex.z ||
+						previousTileIndex.w != tileIndex.w )
+					{
+						if ( tileLoaded )
+						{
+							//
+							// Save and unload the previous tile
+							//
+							if ( tileChanged )
+							{
+								SaveTile( previousTileIndex, volumeDescriptions );
+
+								//
+								// Update the idTileMap
+								//
+
+								//
+								// Add this tile to the newId map
+								//
+								if ( tilesContainingNewId.find( previousTileIndex ) == tilesContainingNewId.end() )
+								{
+									mUndoItem.idTileMapAddNewId.insert ( previousTileIndex );
+								}
+								tilesContainingNewId.insert( previousTileIndex );
+
+								//
+								// Check if we can remove this tile from the oldId map
+								//
+								if ( !TileContainsId( numVoxelsPerTile, currentIdNumVoxels, currentIdVolume, segId ) )
+								{
+									tilesContainingOldId.erase( previousTileIndex );
+									mUndoItem.idTileMapRemoveOldId.insert( previousTileIndex );
+								}
+
+							}
+							UnloadTile( previousTileIndex );
+						}
+
+						//
+						// Load the current tile
+						//
+						volumeDescriptions = LoadTile( tileIndex );
+						previousTileIndex = tileIndex;
+						currentIdVolume = (int*)volumeDescriptions.Get( "IdMap" ).data;
+						currentIdNumVoxels = volumeDescriptions.Get( "IdMap" ).numVoxels;
+						tileLoaded = true;
+						tileChanged = false;
+
+						//
+						// Get or create the change bitset for this tile
+						//
+						changeBits = 
+							&mUndoItem.changePixels.GetHashMap()[ CreateTileString( tileIndex ) ];
+					}
+					int tileX = thisVoxel.x % numVoxelsPerTile.x;
+					int tileY = thisVoxel.y % numVoxelsPerTile.y;
+
+					int3 index3D = make_int3( tileX, tileY, 0 );
+					int  index1D = Mojo::Core::Index3DToIndex1D( index3D, currentIdNumVoxels );
+					int  idValue = currentIdVolume[ index1D ];
+
+					if ( idValue == segId )
+					{
+						currentIdVolume[ index1D ] = newId;
+						changeBits->set( index1D );
+						tileChanged = true;
+
+						//
+						// Add a scaled-down w to the queue
+						//
+						if (currentW < numTiles.w-1) wQueue.push( make_int4(thisVoxel.x / 2, thisVoxel.y / 2, thisVoxel.z, currentW+1) );
+					}
+
+				}
+				std::swap(tileQueue, wQueue);
+				++currentW;
+			}
+
+			if ( tileLoaded )
+			{
+				//
+				// Save and unload the previous tile
+				//
+				if ( tileChanged )
+				{
+					SaveTile( previousTileIndex, volumeDescriptions );
+
+					//
+					// Update the idTileMap
+					//
+
+					//
+					// Add this tile to the newId map
+					//
+					if ( tilesContainingNewId.find( previousTileIndex ) == tilesContainingNewId.end() )
+					{
+						mUndoItem.idTileMapAddNewId.insert ( previousTileIndex );
+					}
+					tilesContainingNewId.insert( previousTileIndex );
+
+					//
+					// Check if we can remove this tile from the oldId map
+					//
+					if ( !TileContainsId( numVoxelsPerTile, currentIdNumVoxels, currentIdVolume, segId ) )
+					{
+						tilesContainingOldId.erase( previousTileIndex );
+						mUndoItem.idTileMapRemoveOldId.insert( previousTileIndex );
+					}
+
+				}
+				UnloadTile( previousTileIndex );
+			}
+
+			//
+			// Update idTileMap
+			//
+			mIdTileMap.Set( segId, tilesContainingOldId );
+			mIdTileMap.Set( newId, tilesContainingNewId );
+
+			Core::Printf( "\nFinished Splitting segmentation label ", segId, " from voxel (x", pVoxelSpace.x, ", y", pVoxelSpace.y, " z", pVoxelSpace.z, ") to new segmentation label ", newId, "...\n" );
+
+		}
     }
 
 	//
@@ -2199,10 +2709,405 @@ void FileSystemTileServer::FindBoundaryJoinPoints2D( int segId )
 }
 
 void FileSystemTileServer::FindBoundaryWithinRegion2D( int segId )
-{}
+{
+	//
+	// Watershed drawn region to highest boundaries
+	//
+	if ( mIsSegmentationLoaded )
+	{
+		Core::Printf( "\nFindBoundaryWithinRegion2D: Splitting label ", segId, ".\n" );
 
-void FileSystemTileServer::FindCutBetweenRegions2D( int segId )
-{}
+		for ( int i = 0; i < mSplitWindowNPix; ++i )
+        {
+			mSplitSearchMask[ i ] = 0;
+            mSplitResultArea[ i ] = 0;
+        }
+
+		mSplitNPerimiters = 0;
+		std::set< int > perimiterSearchSet;
+		std::multimap< int, int > waterPixels;
+
+		for ( int i = 0; i < mSplitWindowNPix; ++i )
+        {
+			int areaX = i % mSplitWindowWidth;
+			int areaY = i / mSplitWindowWidth;
+
+			//
+			// Label perimiter pixels just outside the drawn region and watershed seed pixels just inside the draw region
+			//
+			if ( mSplitDrawArea[ i ] != REGION_SPLIT &&
+				mSplitSearchMask[ i ] == 0 &&
+				mSplitBorderTargets[ i ] != BORDER_TARGET &&
+				( ( areaX > 0 && mSplitDrawArea[ i - 1 ] == REGION_SPLIT ) ||
+				( areaX < mSplitWindowWidth - 1 && mSplitDrawArea[ i + 1 ] == REGION_SPLIT ) ||
+				( areaY > 0 && mSplitDrawArea[ i - mSplitWindowWidth ] == REGION_SPLIT ) ||
+				( areaY < mSplitWindowHeight - 1 && mSplitDrawArea[ i + mSplitWindowWidth ] == REGION_SPLIT ) ) )
+			{
+				//
+				// new perimiter label
+				//
+				++mSplitNPerimiters;
+				perimiterSearchSet.insert( i );
+				Core::Printf( "Added new perimiterLabel=", mSplitNPerimiters, " at ", i, "." );
+
+				while ( perimiterSearchSet.size() > 0 )
+				{
+					int index1D = *perimiterSearchSet.begin();
+					perimiterSearchSet.erase( index1D );
+					//Core::Printf( "Searching around perimiterLabel at ", index1D, "." );
+
+					//
+					// check neighbours
+					//
+					areaX = index1D % mSplitWindowWidth;
+					areaY = index1D / mSplitWindowWidth;
+
+					if ( mSplitDrawArea[ index1D ] != REGION_SPLIT &&
+						mSplitSearchMask[ index1D ] == 0 &&
+						mSplitBorderTargets[ index1D ] != BORDER_TARGET &&
+						( ( areaX > 0 && mSplitDrawArea[ index1D - 1 ] == REGION_SPLIT ) ||
+						( areaX < mSplitWindowWidth - 1 && mSplitDrawArea[ index1D + 1 ] == REGION_SPLIT ) ||
+						( areaY > 0 && mSplitDrawArea[ index1D - mSplitWindowWidth ] == REGION_SPLIT ) ||
+						( areaY < mSplitWindowHeight - 1 && mSplitDrawArea[ index1D + mSplitWindowWidth ] == REGION_SPLIT ) ) )
+					{
+						//
+						// This is a new boundary edge - mark it and check any 8-connected neighbours
+						//
+						mSplitSearchMask[ index1D ] = mSplitNPerimiters;
+
+						//DEBUG
+						//mSplitResultArea[ index1D ] = perimiterLabel + MASK_VALUE;
+
+						//Core::Printf( "New boundary edge - adding neighbours." );
+
+						if ( areaX > 0 )
+							perimiterSearchSet.insert( index1D - 1 );
+						if ( areaX < mSplitWindowWidth - 1)
+							perimiterSearchSet.insert( index1D + 1 );
+						if ( areaY > 0 )
+							perimiterSearchSet.insert( index1D - mSplitWindowWidth );
+						if ( areaY < mSplitWindowHeight - 1)
+							perimiterSearchSet.insert( index1D + mSplitWindowWidth );
+
+						if ( areaX > 0 && areaY > 0)
+							perimiterSearchSet.insert( index1D - 1 - mSplitWindowWidth );
+						if ( areaX > 0 && areaY < mSplitWindowHeight - 1)
+							perimiterSearchSet.insert( index1D - 1 + mSplitWindowWidth );
+						if ( areaX < mSplitWindowWidth - 1 && areaY > 0 )
+							perimiterSearchSet.insert( index1D + 1 - mSplitWindowWidth );
+						if ( areaX < mSplitWindowWidth - 1 && areaY < mSplitWindowHeight - 1 )
+							perimiterSearchSet.insert( index1D + 1 + mSplitWindowWidth );
+
+					}
+					else if ( mSplitDrawArea[ index1D ] == REGION_SPLIT &&
+						mSplitSearchMask[ index1D ] == 0 )
+					{
+						//
+						// Add this pixel to the watershed grow region
+						//
+						waterPixels.insert( std::pair< int, int >( mSplitStepDist[ index1D ], index1D ) );
+						//Core::Printf( "New watershed pixel." );
+					}
+				}
+			}
+        }
+
+		//
+		// Watershed from the perimiters
+		//
+		while ( waterPixels.size() > 0 )
+		{
+			std::multimap< int, int >::iterator mapIt = --waterPixels.end();
+			int index1D = mapIt->second;
+
+			//Core::Printf( "Got new watershed pixel at ", index1D, ", score=", mapIt->first, "." );
+
+			waterPixels.erase( mapIt );
+
+			if ( mSplitDrawArea[ index1D ] == REGION_SPLIT &&
+				mSplitSearchMask[ index1D ] == 0 &&
+				mSplitResultArea[ index1D ] == 0 &&
+				mSplitBorderTargets[ index1D ] != BORDER_TARGET )
+			{
+
+				//
+				// This pixel is a border if any 8-connected neighbours have different labels
+				// otherwise label this pixel the same as its neighbours
+				//
+
+				int areaX = index1D % mSplitWindowWidth;
+				int areaY = index1D / mSplitWindowWidth;
+
+				int minX, maxX, minY, maxY;
+
+				if ( areaX > 0 )
+					minX = areaX - 1;
+				else
+					minX = areaX;
+
+				if ( areaX < mSplitWindowWidth - 1 )
+					maxX = areaX + 1;
+				else
+					maxX = areaX;
+
+				if ( areaY > 0 )
+					minY = areaY - 1;
+				else
+					minY = areaY;
+
+				if ( areaY < mSplitWindowHeight - 1 )
+					maxY = areaY + 1;
+				else
+					maxY = areaY;
+
+				int foundLabel = 0;
+				bool isBorder = false;
+
+				for ( int x = minX; x <= maxX; ++x )
+				{
+					for ( int y = minY; y <= maxY; ++y )
+					{
+						//
+						// only check 4-connected pixels for labels
+						//
+						if ( ( x == areaX && y == areaY ) ||
+							( x != areaX && y != areaY ) )
+							continue;
+
+						int nLabel = mSplitSearchMask[ x + y * mSplitWindowWidth ];
+
+						if ( nLabel != 0 )
+						{
+							if ( foundLabel == 0 )
+							{
+								foundLabel = nLabel;
+							}
+							else if ( foundLabel != nLabel )
+							{
+								isBorder = true;
+								mSplitResultArea[ index1D ] = PATH_RESULT;
+							}
+						}
+					}
+				}
+
+				if ( !isBorder && foundLabel != 0 )
+				{
+					//
+					// label this pixel
+					//
+					mSplitSearchMask[ index1D ] = foundLabel;
+
+					//DEBUG
+					//mSplitResultArea[ index1D ] = foundLabel + MASK_VALUE;
+
+					//
+					// add 4-connected neighbours to the watershed grow region
+					//
+					for ( int x = minX; x <= maxX; ++x )
+					{
+						for ( int y = minY; y <= maxY; ++y )
+						{
+							//
+							// only check 4-connected pixels for labels
+							//
+							if ( ( x == areaX && y == areaY ) ||
+								( x != areaX && y != areaY ) )
+								continue;
+
+							int addIndex1D = x + y * mSplitWindowWidth;
+							if ( mSplitDrawArea[ addIndex1D ] == REGION_SPLIT &&
+								mSplitSearchMask[ addIndex1D ] == 0 &&
+								mSplitResultArea[ addIndex1D ] == 0 &&
+								mSplitBorderTargets[ addIndex1D ] != BORDER_TARGET )
+							{
+								waterPixels.insert( std::pair< int, int >( mSplitStepDist[ addIndex1D ], addIndex1D ) );
+								//Core::Printf( "Added watershed neighbour at ", addIndex1D, "." );
+							}
+						}
+					}
+				}
+			}
+
+		}
+
+		UpdateSplitTiles();
+
+		Core::Printf( "\nFindBoundaryWithinRegion2D: Finished splitting label ", segId, ".\n" );
+
+	}
+}
+
+void FileSystemTileServer::FindBoundaryBetweenRegions2D( int segId )
+{
+	//
+	// Watershed between drawn regions to highest boundaries
+	//
+	if ( mIsSegmentationLoaded )
+	{
+		Core::Printf( "\nFindBoundaryBetweenRegions2D: Splitting label ", segId, ".\n" );
+
+		for ( int i = 0; i < mSplitWindowNPix; ++i )
+        {
+			mSplitSearchMask[ i ] = 0;
+            mSplitResultArea[ i ] = 0;
+        }
+
+		mSplitNPerimiters = 2;
+		std::multimap< int, int > waterPixels;
+
+		for ( int i = 0; i < mSplitWindowNPix; ++i )
+        {
+			int areaX = i % mSplitWindowWidth;
+			int areaY = i / mSplitWindowWidth;
+
+			//
+			// Label perimiter pixels just inside the drawn region and watershed seed pixels just outside the draw region
+			//
+			if ( mSplitDrawArea[ i ] != 0 &&
+				mSplitSearchMask[ i ] == 0 &&
+				mSplitBorderTargets[ i ] != BORDER_TARGET )
+			{
+				if ( ( areaX > 0 && mSplitDrawArea[ i - 1 ] != mSplitDrawArea[ i ] ) ||
+				( areaX < mSplitWindowWidth - 1 && mSplitDrawArea[ i + 1 ] != mSplitDrawArea[ i ] ) ||
+				( areaY > 0 && mSplitDrawArea[ i - mSplitWindowWidth ] != mSplitDrawArea[ i ] ) ||
+				( areaY < mSplitWindowHeight - 1 && mSplitDrawArea[ i + mSplitWindowWidth ] != mSplitDrawArea[ i ] ) )
+				{
+					//
+					// Perimiter - watershed from here
+					//
+					waterPixels.insert( std::pair< int, int >( mSplitStepDist[ i ], i ) );
+				}
+				else
+				{
+					mSplitSearchMask[ i ] = mSplitDrawArea[ i ] == REGION_A ? 1 : 2;
+				}
+			}
+        }
+
+		//
+		// Watershed from the perimiters
+		//
+		while ( waterPixels.size() > 0 )
+		{
+			std::multimap< int, int >::iterator mapIt = --waterPixels.end();
+			int index1D = mapIt->second;
+
+			//Core::Printf( "Got new watershed pixel at ", index1D, ", score=", mapIt->first, "." );
+
+			waterPixels.erase( mapIt );
+
+			if ( mSplitSearchMask[ index1D ] == 0 &&
+				mSplitResultArea[ index1D ] == 0 &&
+				mSplitBorderTargets[ index1D ] != BORDER_TARGET )
+			{
+
+				//
+				// This pixel is a border if any 8-connected neighbours have different labels
+				// otherwise label this pixel the same as its neighbours
+				//
+
+				int areaX = index1D % mSplitWindowWidth;
+				int areaY = index1D / mSplitWindowWidth;
+
+				int minX, maxX, minY, maxY;
+
+				if ( areaX > 0 )
+					minX = areaX - 1;
+				else
+					minX = areaX;
+
+				if ( areaX < mSplitWindowWidth - 1 )
+					maxX = areaX + 1;
+				else
+					maxX = areaX;
+
+				if ( areaY > 0 )
+					minY = areaY - 1;
+				else
+					minY = areaY;
+
+				if ( areaY < mSplitWindowHeight - 1 )
+					maxY = areaY + 1;
+				else
+					maxY = areaY;
+
+				int foundLabel = 0;
+				bool isBorder = false;
+
+				for ( int x = minX; x <= maxX; ++x )
+				{
+					for ( int y = minY; y <= maxY; ++y )
+					{
+						//
+						// only check 4-connected pixels for labels
+						//
+						if ( ( x == areaX && y == areaY ) ||
+							( x != areaX && y != areaY ) )
+							continue;
+
+						int nLabel = mSplitSearchMask[ x + y * mSplitWindowWidth ];
+
+						if ( nLabel != 0 )
+						{
+							if ( foundLabel == 0 )
+							{
+								foundLabel = nLabel;
+							}
+							else if ( foundLabel != nLabel )
+							{
+								isBorder = true;
+								mSplitResultArea[ index1D ] = PATH_RESULT;
+							}
+						}
+					}
+				}
+
+				if ( !isBorder && foundLabel != 0 )
+				{
+					//
+					// label this pixel
+					//
+					mSplitSearchMask[ index1D ] = foundLabel;
+
+					//DEBUG
+					//mSplitResultArea[ index1D ] = foundLabel + MASK_VALUE;
+
+					//
+					// add 4-connected neighbours to the watershed grow region
+					//
+					for ( int x = minX; x <= maxX; ++x )
+					{
+						for ( int y = minY; y <= maxY; ++y )
+						{
+							//
+							// only check 4-connected pixels for labels
+							//
+							if ( ( x == areaX && y == areaY ) ||
+								( x != areaX && y != areaY ) )
+								continue;
+
+							int addIndex1D = x + y * mSplitWindowWidth;
+							if ( mSplitSearchMask[ addIndex1D ] == 0 &&
+								mSplitResultArea[ addIndex1D ] == 0 &&
+								mSplitBorderTargets[ addIndex1D ] != BORDER_TARGET )
+							{
+								waterPixels.insert( std::pair< int, int >( mSplitStepDist[ addIndex1D ], addIndex1D ) );
+								//Core::Printf( "Added watershed neighbour at ", addIndex1D, "." );
+							}
+						}
+					}
+				}
+			}
+
+		}
+
+		UpdateSplitTiles();
+
+		Core::Printf( "\nFindBoundaryBetweenRegions2D: Finished splitting label ", segId, ".\n" );
+
+	}
+}
 
 
 //
@@ -2281,7 +3186,7 @@ void FileSystemTileServer::UndoChange()
         //
         // remove newly added tiles from the "newId" idTileMap
         //
-		for ( std::set< int4, Mojo::Core::Int4Comparator >::iterator eraseIterator = mUndoItem.idTileMapAddNewId.begin(); eraseIterator != mUndoItem.idTileMapAddNewId.end(); ++eraseIterator )
+		for ( Mojo::Core::MojoTileSet::iterator eraseIterator = mUndoItem.idTileMapAddNewId.begin(); eraseIterator != mUndoItem.idTileMapAddNewId.end(); ++eraseIterator )
 		{
 			mIdTileMap.Get( newId ).erase( *eraseIterator );
 		}
@@ -2366,7 +3271,7 @@ void FileSystemTileServer::RedoChange()
         //
         // remove tiles from the "oldId" idTileMap
         //
-		for ( std::set< int4, Mojo::Core::Int4Comparator >::iterator eraseIterator = mRedoItem.idTileMapRemoveOldId.begin(); eraseIterator != mRedoItem.idTileMapRemoveOldId.end(); ++eraseIterator )
+		for ( Mojo::Core::MojoTileSet::iterator eraseIterator = mRedoItem.idTileMapRemoveOldId.begin(); eraseIterator != mRedoItem.idTileMapRemoveOldId.end(); ++eraseIterator )
 		{
 			mIdTileMap.Get( oldId ).erase( *eraseIterator );
 		}

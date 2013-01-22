@@ -162,6 +162,12 @@ void TileManager::DrawSplit( TiledDatasetView^ tiledDatasetView, Vector3^ pDataS
     mTileManager->DrawSplit( pDataSpaceFloat3, radius );
 }
 
+void TileManager::DrawErase( TiledDatasetView^ tiledDatasetView, Vector3^ pDataSpace, float radius )
+{
+    float3 pDataSpaceFloat3 = make_float3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
+    mTileManager->DrawErase( pDataSpaceFloat3, radius );
+}
+
 void TileManager::DrawRegionA( TiledDatasetView^ tiledDatasetView, Vector3^ pDataSpace, float radius )
 {
     float3 pDataSpaceFloat3 = make_float3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
@@ -206,14 +212,19 @@ void TileManager::FindBoundaryWithinRegion2D( int segId )
     mTileManager->FindBoundaryWithinRegion2D( segId );
 }
 
-void TileManager::FindCutBetweenRegions2D( int segId )
+void TileManager::FindBoundaryBetweenRegions2D( int segId )
 {
-    mTileManager->FindCutBetweenRegions2D( segId );
+    mTileManager->FindBoundaryBetweenRegions2D( segId );
 }
 
-int TileManager::CompleteSplit( int segId )
+int TileManager::CompletePointSplit( int segId )
 {
-    return mTileManager->CompleteSplit( segId );
+    return mTileManager->CompletePointSplit( segId );
+}
+
+int TileManager::CompleteDrawSplit( int segId )
+{
+    return mTileManager->CompleteDrawSplit( segId );
 }
 
 void TileManager::ReplaceSegmentationLabelCurrentConnectedComponent( int oldId, int newId, TiledDatasetView^ tiledDatasetView, Vector3^ pDataSpace )

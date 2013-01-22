@@ -317,6 +317,13 @@ void TileManager::DrawSplit( float3 pointTileSpace, float radius )
     ReloadTileCacheOverlayMapOnly();
 }
 
+void TileManager::DrawErase( float3 pointTileSpace, float radius )
+{
+    mTileServer->DrawErase( pointTileSpace, radius );
+
+    ReloadTileCacheOverlayMapOnly();
+}
+
 void TileManager::DrawRegionA( float3 pointTileSpace, float radius )
 {
     mTileServer->DrawRegionA( pointTileSpace, radius );
@@ -369,16 +376,25 @@ void TileManager::FindBoundaryWithinRegion2D( int segId )
     ReloadTileCacheOverlayMapOnly();
 }
 
-void TileManager::FindCutBetweenRegions2D( int segId )
+void TileManager::FindBoundaryBetweenRegions2D( int segId )
 {
-    mTileServer->FindCutBetweenRegions2D( segId );
+    mTileServer->FindBoundaryBetweenRegions2D( segId );
 
     ReloadTileCacheOverlayMapOnly();
 }
 
-int TileManager::CompleteSplit( int segId )
+int TileManager::CompletePointSplit( int segId )
 {
-    int newId = mTileServer->CompleteSplit( segId );
+    int newId = mTileServer->CompletePointSplit( segId );
+
+    ReloadTileCache();
+
+	return newId;
+}
+
+int TileManager::CompleteDrawSplit( int segId )
+{
+    int newId = mTileServer->CompleteDrawSplit( segId );
 
     ReloadTileCache();
 

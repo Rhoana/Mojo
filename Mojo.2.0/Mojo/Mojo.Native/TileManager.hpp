@@ -64,6 +64,7 @@ public:
     void                                                  ReplaceSegmentationLabelCurrentConnectedComponent( int oldId, int newId, float3 pDataSpace );
 
     void                                                  DrawSplit( float3 pointTileSpace, float radius );
+    void                                                  DrawErase( float3 pointTileSpace, float radius );
     void                                                  DrawRegionB( float3 pointTileSpace, float radius );
     void                                                  DrawRegionA( float3 pointTileSpace, float radius );
     void                                                  AddSplitSource( float3 pointTileSpace );
@@ -72,8 +73,9 @@ public:
     void                                                  PrepForSplit( int segId, float3 pointTileSpace );
 	void                                                  FindBoundaryJoinPoints2D( int segId );
 	void                                                  FindBoundaryWithinRegion2D( int segId );
-	void                                                  FindCutBetweenRegions2D( int segId );
-    int                                                   CompleteSplit( int segId );
+	void                                                  FindBoundaryBetweenRegions2D( int segId );
+    int                                                   CompletePointSplit( int segId );
+    int                                                   CompleteDrawSplit( int segId );
 
 	void                                                  UndoChange();
 	void                                                  RedoChange();
