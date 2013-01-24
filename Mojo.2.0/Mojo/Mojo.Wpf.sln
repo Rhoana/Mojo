@@ -3,10 +3,10 @@ Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{0B642C1A-78C9-41F6-B3A8-2DBB380E636E}"
 	ProjectSection(SolutionItems) = preProject
+		AdjustRenderer2D.fx = AdjustRenderer2D.fx
 		Bin\Shaders\DebugRenderer.fx = Bin\Shaders\DebugRenderer.fx
-		Bin\Shaders\Segmenter2D.fx = Bin\Shaders\Segmenter2D.fx
-		Bin\Shaders\SimpleSegmenter2D.fx = Bin\Shaders\SimpleSegmenter2D.fx
-		Bin\Shaders\TileManager2D.fx = Bin\Shaders\TileManager2D.fx
+		Bin\Shaders\MergeRenderer2D.fx = Bin\Shaders\MergeRenderer2D.fx
+		Bin\Shaders\SplitRenderer2D.fx = Bin\Shaders\SplitRenderer2D.fx
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mojo.Wpf", "Mojo.Wpf\Mojo.Wpf.csproj", "{552D7904-F69F-489A-8113-EE7EF753FA99}"

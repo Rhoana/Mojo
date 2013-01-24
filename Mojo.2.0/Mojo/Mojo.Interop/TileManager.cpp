@@ -111,6 +111,16 @@ void TileManager::SaveSegmentationAs( String^ savePath )
     return mTileManager->SaveSegmentationAs( msclr::interop::marshal_as < std::string >( savePath ) );
 }
 
+void TileManager::AutosaveSegmentation()
+{
+    return mTileManager->AutosaveSegmentation();
+}
+
+void TileManager::DeleteTempFiles()
+{
+    return mTileManager->DeleteTempFiles();
+}
+
 void TileManager::Update()
 {
     mTileManager->Update();

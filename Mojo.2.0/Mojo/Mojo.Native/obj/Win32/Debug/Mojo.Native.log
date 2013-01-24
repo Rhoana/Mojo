@@ -1,19 +1,22 @@
-﻿Build started 1/10/2013 11:13:42 AM.
-     1>Project "C:\dev\MojoGit\Mojo.2.0\Mojo\Mojo.Native\Mojo.Native.vcxproj" on node 2 (build target(s)).
+﻿Build started 1/24/2013 2:52:19 PM.
+     1>Project "C:\dev\MojoGit\Mojo.2.0\Mojo\Mojo.Native\Mojo.Native.vcxproj" on node 3 (build target(s)).
      1>InitializeBuildStatus:
          Creating "obj\Win32\Debug\Mojo.Native.unsuccessfulbuild" because "AlwaysCreate" was specified.
        ClCompile:
-         C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\CL.exe /c /I..\ /I..\Sdk\Marray\v1.0\marray\include\ /I..\Sdk\Hdf5\1.8.8\include\ /I..\Sdk\OpenCV\OpenCV2.4\build\include\ /I"..\Sdk\Thrust\thrust-v1.3.0\\" /I"..\Sdk\Cutil\NVIDIA GPU Computing SDK 4.2\C\common\inc\\" /I..\Sdk\Cuda\v4.2\include\ /I..\Sdk\Boost\boost_1_44\ /I"..\Sdk\DirectX\Microsoft DirectX SDK (June 2010)\Include\\" /I..\Sdk\Cuda\v4.2\include /Zi /nologo /W3 /WX- /Od /Oy- /D _ITERATOR_DEBUG_LEVEL=0 /D WIN32 /D _DEBUG /D _LIB /Gm- /EHa /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"obj\Win32\Debug\\" /Fd"obj\Win32\Debug\vc100.pdb" /Gd /TP /analyze- /errorReport:prompt FileSystemTileServer.cpp SimpleSplitTools.cpp TileManager.cpp
-         FileSystemTileServer.cpp
-     1>FileSystemTileServer.cpp(801): warning C4018: '<' : signed/unsigned mismatch
+         c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\CL.exe /c /I..\ /I..\Sdk\Marray\v1.0\marray\include\ /I..\Sdk\Hdf5\1.8.8\include\ /I..\Sdk\OpenCV\OpenCV2.4\build\include\ /I"..\Sdk\Thrust\thrust-v1.3.0\\" /I"..\Sdk\Cutil\NVIDIA GPU Computing SDK 4.2\C\common\inc\\" /I..\Sdk\Cuda\v4.2\include\ /I..\Sdk\Boost\boost_1_44\ /I"..\Sdk\DirectX\Microsoft DirectX SDK (June 2010)\Include\\" /I..\Sdk\Cuda\v4.2\include /Zi /nologo /W3 /WX- /Od /Oy- /D _ITERATOR_DEBUG_LEVEL=0 /D WIN32 /D _DEBUG /D _LIB /Gm- /EHa /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"obj\Win32\Debug\\" /Fd"obj\Win32\Debug\vc100.pdb" /Gd /TP /analyze- /errorReport:prompt SimpleSplitTools.cpp FileSystemTileCacheEntry.cpp FileSystemUndoRedoItem.cpp TileCacheEntry.cpp TiledDatasetView.cpp TiledVolumeDescription.cpp TileManager.cpp FileSystemTileServer.cpp
          SimpleSplitTools.cpp
+         FileSystemTileCacheEntry.cpp
+         FileSystemUndoRedoItem.cpp
+         TileCacheEntry.cpp
+         TiledDatasetView.cpp
+         TiledVolumeDescription.cpp
          TileManager.cpp
+         FileSystemTileServer.cpp
          Generating Code...
        Lib:
-         C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\Lib.exe /OUT:"C:\dev\MojoGit\Mojo.2.0\Mojo\Mojo.Native\bin\Win32\Debug\Mojo.Native.lib" /NOLOGO /VERBOSE obj\Win32\Debug\SimpleSplitTools.obj
+         c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\Lib.exe /OUT:"C:\dev\MojoGit\Mojo.2.0\Mojo\Mojo.Native\bin\Win32\Debug\Mojo.Native.lib" /NOLOGO /VERBOSE obj\Win32\Debug\SimpleSplitTools.obj
          obj\Win32\Debug\FileSystemTileCacheEntry.obj
          obj\Win32\Debug\FileSystemUndoRedoItem.obj
-         obj\Win32\Debug\Segmenter.obj
          obj\Win32\Debug\TileCacheEntry.obj
          obj\Win32\Debug\TiledDatasetView.obj
          obj\Win32\Debug\TiledVolumeDescription.obj
@@ -24,7 +27,6 @@
          Appending obj\Win32\Debug\TiledVolumeDescription.obj
          Appending obj\Win32\Debug\TiledDatasetView.obj
          Appending obj\Win32\Debug\TileCacheEntry.obj
-         Appending obj\Win32\Debug\Segmenter.obj
          Appending obj\Win32\Debug\FileSystemUndoRedoItem.obj
          Appending obj\Win32\Debug\FileSystemTileCacheEntry.obj
          Appending obj\Win32\Debug\SimpleSplitTools.obj
@@ -36,4 +38,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:14.65
+Time Elapsed 00:00:20.07

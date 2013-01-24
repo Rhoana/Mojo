@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Windows;
 using System.Windows.Threading;
 using Mojo.Interop;
@@ -33,21 +34,28 @@ namespace Mojo.Wpf.View
 
             mEngine = new Engine( windowDescriptions );
 
-            if ( Settings.Default.AutoSaveSegmentation )
-            {
-                mEngine.Segmenter.EnableAutoSave( Settings.Default.AutoSaveSegmentationFrequencySeconds, Settings.Default.AutoSaveSegmentationPath );
-            }
-
             mUpdateTimer = new DispatcherTimer( DispatcherPriority.Input ) { Interval = TimeSpan.FromMilliseconds( Settings.Default.TargetFrameTimeMilliseconds ) };
             mUpdateTimer.Tick += TickHandler;
             mUpdateTimer.Start();
 
-            mMainWindow.DataContext = new EngineDataContext( mEngine, new TileManagerDataContext( mEngine.TileManager ), new SegmenterDataContext( mEngine.Segmenter ) );
+            var engineDataContext = new EngineDataContext( mEngine, new TileManagerDataContext( mEngine.TileManager ) );
+
+            if ( Settings.Default.AutoSaveSegmentation )
+            {
+                engineDataContext.EnableAutoSave( Settings.Default.AutoSaveSegmentationFrequencySeconds, Settings.Default.AutoSaveSegmentationPath );
+            }
+
+            mMainWindow.DataContext = engineDataContext;
+
+            mMainWindow.Closing += OnMainWindowClosing;
+
             mMainWindow.Show();
         }
 
         protected override void OnExit( ExitEventArgs e )
         {
+
+            ((EngineDataContext) mMainWindow.DataContext).Dispose();
             mMainWindow.DataContext = null;
 
             mUpdateTimer.Stop();
@@ -68,11 +76,33 @@ namespace Mojo.Wpf.View
             }
 
             base.OnExit( e );
+
         }
 
         private void TickHandler( object sender, EventArgs e )
         {
             mEngine.Update();
         }
+
+        public void OnMainWindowClosing( object sender, CancelEventArgs eventArgs )
+        {
+            if ( mEngine.TileManager.ChangesMade )
+            {
+                var result = MessageBox.Show( "Changes were made to this segmentation. Do you want to save the changes?", "Save Changes?", MessageBoxButton.YesNoCancel, MessageBoxImage.Warning );
+                switch ( result )
+                {
+                    case MessageBoxResult.Yes:
+                        mEngine.TileManager.SaveSegmentation();
+                        break;
+                    case MessageBoxResult.No:
+                        mEngine.TileManager.DiscardChanges();
+                        break;
+                    default:
+                        eventArgs.Cancel = true;
+                        break;
+                }
+            }
+        }
+
     }
 }

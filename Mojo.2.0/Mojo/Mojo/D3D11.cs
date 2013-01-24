@@ -44,11 +44,17 @@ namespace Mojo
 
         public static void Terminate( ref Factory dxgiFactory, ref SlimDX.Direct3D11.Device d3d11Device )
         {
-            d3d11Device.Dispose();
-            d3d11Device = null;
+            if ( d3d11Device != null )
+            {
+                d3d11Device.Dispose();
+                d3d11Device = null;                
+            }
 
-            dxgiFactory.Dispose();
-            dxgiFactory = null;
+            if ( dxgiFactory != null )
+            {
+                dxgiFactory.Dispose();
+                dxgiFactory = null;                
+            }
         }
     }
 }

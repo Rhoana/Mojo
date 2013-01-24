@@ -96,6 +96,16 @@ void TileManager::SaveSegmentationAs( std::string savePath )
     mTileServer->SaveSegmentationAs( savePath );
 }
 
+void TileManager::AutosaveSegmentation()
+{
+    mTileServer->AutosaveSegmentation();
+}
+
+void TileManager::DeleteTempFiles()
+{
+    mTileServer->DeleteTempFiles();
+}
+
 void TileManager::Update()
 {
 }
@@ -186,7 +196,7 @@ void TileManager::LoadTiles( const TiledDatasetView& tiledDatasetView )
 			{
 				if ( volumeDescriptions.GetHashMap().find( "IdMap" ) == volumeDescriptions.GetHashMap().end() )
 				{
-					Core::Printf( "Warning: Segmentation is loaded, but volume description is mising an IdMap." );
+					Core::Printf( "Warning: Segmentation is loaded, but volume description is missing an IdMap." );
 				}
 				else
 				{

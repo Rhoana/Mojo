@@ -33,12 +33,12 @@
         <Mojo.Wpf.ViewModel:EnumBooleanConverter x:Key="EnumBooleanConverter" />
         
     </Window.Resources>
-    
+        
     <DockPanel x:Name="DockPanel" Background="AntiqueWhite" >
 
         <Menu DockPanel.Dock="Top" Focusable="False" Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}" BorderBrush="Gray" BorderThickness="1">
             <MenuItem Header="File" Focusable="False">
-                <MenuItem Name="LoadDatasetMenuItem" Header="Load Dataset…" Command="{Binding Path=LoadDatasetCommand}" Focusable="False">
+                <MenuItem Name="LoadDatasetMenuItem" Header="Load Images…" Command="{Binding Path=LoadDatasetCommand}" Focusable="False">
                     <MenuItem.Icon>
                         <Image Width="16" Height="16" Source="{StaticResource DatasetLoad}"/>
                     </MenuItem.Icon>
@@ -59,14 +59,17 @@
                         <Image Width="16" Height="16" Source="{StaticResource SegmentationSaveAs}"/>
                     </MenuItem.Icon>
                 </MenuItem>
+                <Separator />
+                <MenuItem Name="ExitMenuItem" Header="Exit" InputGestureText="Alt+F4" Focusable="False" Command="{Binding Path=ExitCommand}" >
+                </MenuItem>
             </MenuItem>
-            <MenuItem Header="Edit" Focusable="False" IsEnabled="{Binding Path=SegmenterDataContext.EditMenuIsEnabled}">
-                <MenuItem Name="UndoLastCommitMenuItem" Header="Undo" InputGestureText="Ctrl+Z" Focusable="False" Command="{Binding Path=UndoCommand}" IsEnabled="{Binding Path=Engine.TileManager.SegmentationControlsEnabled}" >
+            <MenuItem Header="Edit" Focusable="False">
+                <MenuItem Name="UndoLastCommitMenuItem" Header="Undo" InputGestureText="Ctrl+Z" Focusable="False" Command="{Binding Path=UndoChangeCommand}" IsEnabled="{Binding Path=Engine.TileManager.SegmentationControlsEnabled}" >
                     <MenuItem.Icon>
                         <Image Width="16" Height="16" Source="{StaticResource SegmentationUndo}"/>
                     </MenuItem.Icon>
                 </MenuItem>
-                <MenuItem Name="RedoLastCommitMenuItem" Header="Redo" InputGestureText="Ctrl+Y" Focusable="False" Command="{Binding Path=RedoCommand}" IsEnabled="{Binding Path=Engine.TileManager.SegmentationControlsEnabled}" >
+                <MenuItem Name="RedoLastCommitMenuItem" Header="Redo" InputGestureText="Ctrl+Y" Focusable="False" Command="{Binding Path=RedoChangeCommand}" IsEnabled="{Binding Path=Engine.TileManager.SegmentationControlsEnabled}" >
                     <MenuItem.Icon>
                         <Image Width="16" Height="16" Source="{StaticResource SegmentationRedo}"/>
                     </MenuItem.Icon>
@@ -83,24 +86,24 @@
                     </MenuItem.Icon>
                 </MenuItem>
                 <Separator />
-                <MenuItem Name="LargerBrushMenuItem" Header="Larger Brush" InputGestureText="=" Focusable="False" Command="{Binding Path=LargerBrushCommand}" IsEnabled="{Binding Path=Engine.TileManager.SegmentationControlsEnabled}" >
+                <MenuItem Name="LargerBrushMenuItem" Header="Larger Brush" InputGestureText="=" Focusable="False" Command="{Binding Path=IncreaseBrushSizeCommand}" IsEnabled="{Binding Path=Engine.TileManager.SegmentationControlsEnabled}" >
                 </MenuItem>
-                <MenuItem Name="SmallerBrushMenuItem" Header="Smaller Brush" InputGestureText="-" Focusable="False" Command="{Binding Path=SmallerBrushCommand}" IsEnabled="{Binding Path=Engine.TileManager.SegmentationControlsEnabled}" >
+                <MenuItem Name="SmallerBrushMenuItem" Header="Smaller Brush" InputGestureText="-" Focusable="False" Command="{Binding Path=DecreaseBrushSizeCommand}" IsEnabled="{Binding Path=Engine.TileManager.SegmentationControlsEnabled}" >
                 </MenuItem>
             </MenuItem>
-            <MenuItem Header="View" Focusable="False" IsEnabled="{Binding Path=SegmenterDataContext.EditMenuIsEnabled}">
-                <MenuItem Name="NextImage" Header="Next Image" InputGestureText="W" Focusable="False" Command="{Binding Path=Engine.TileManager.NextImage}" IsEnabled="{Binding Path=Engine.TileManager.SegmentationControlsEnabled}" >
+            <MenuItem Header="View" Focusable="False">
+                <MenuItem Name="NextImage" Header="Next Image" InputGestureText="W" Focusable="False" Command="{Binding Path=NextImageCommand}" IsEnabled="{Binding Path=Engine.TileManager.SegmentationControlsEnabled}" >
                 </MenuItem>
-                <MenuItem Name="PreviousImage" Header="Previous Image" InputGestureText="S" Focusable="False" Command="{Binding Path=Engine.TileManager.PreviousImage}" IsEnabled="{Binding Path=Engine.TileManager.SegmentationControlsEnabled}" >
+                <MenuItem Name="PreviousImage" Header="Previous Image" InputGestureText="S" Focusable="False" Command="{Binding Path=PreviousImageCommand}" IsEnabled="{Binding Path=Engine.TileManager.SegmentationControlsEnabled}" >
                 </MenuItem>
                 <Separator />
-                <MenuItem Name="ViewSegmentation" Header="Segmentation" InputGestureText="A" Focusable="False" Command="{Binding Path=Engine.TileManager.ToggleShowSegmentation}" IsEnabled="{Binding Path=Engine.TileManager.SegmentationControlsEnabled}" IsCheckable="True" IsChecked="{Binding Path=Engine.TileManager.ShowSegmentation}" >
+                <MenuItem Name="ViewSegmentation" Header="Segmentation" InputGestureText="A" Focusable="False" Command="{Binding Path=ToggleShowSegmentationCommand}" IsEnabled="{Binding Path=Engine.TileManager.SegmentationControlsEnabled}" IsCheckable="True" IsChecked="{Binding Path=Engine.TileManager.ShowSegmentation, Mode=OneWay}" >
                 </MenuItem>
-                <MenuItem Name="ViewBoundaryLines" Header="Boundary Lines" InputGestureText="Q" Focusable="False" Command="{Binding Path=Engine.TileManager.ToggleShowBoundaryLines}" IsEnabled="{Binding Path=Engine.TileManager.SegmentationControlsEnabled}" IsCheckable="True" IsChecked="{Binding Path=Engine.TileManager.ShowBoundaryLines}" >
+                <MenuItem Name="ViewBoundaryLines" Header="Boundary Lines" InputGestureText="Q" Focusable="False" Command="{Binding Path=ToggleShowBoundaryLinesCommand}" IsEnabled="{Binding Path=Engine.TileManager.SegmentationControlsEnabled}" IsCheckable="True" IsChecked="{Binding Path=Engine.TileManager.ShowBoundaryLines, Mode=OneWay}" >
                 </MenuItem>
-                <MenuItem Name="IncreaseSegmentationVisibility" Header="Increase Segmentation Visibility" InputGestureText="E" Focusable="False" Command="{Binding Path=Engine.TileManager.IncreaseSegmentationVisibility}" IsEnabled="{Binding Path=Engine.TileManager.SegmentationControlsEnabled}" >
+                <MenuItem Name="IncreaseSegmentationVisibility" Header="Increase Segmentation Visibility" InputGestureText="E" Focusable="False" Command="{Binding Path=IncreaseSegmentationVisibilityCommand}" IsEnabled="{Binding Path=Engine.TileManager.SegmentationControlsEnabled}" >
                 </MenuItem>
-                <MenuItem Name="DecreaseSegmentationVisibility" Header="Decrease Segmentation Visibility" InputGestureText="D" Focusable="False" Command="{Binding Path=Engine.TileManager.DecreaseSegmentationVisibility}" IsEnabled="{Binding Path=Engine.TileManager.SegmentationControlsEnabled}" >
+                <MenuItem Name="DecreaseSegmentationVisibility" Header="Decrease Segmentation Visibility" InputGestureText="D" Focusable="False" Command="{Binding Path=DecreaseSegmentationVisibilityCommand}" IsEnabled="{Binding Path=Engine.TileManager.SegmentationControlsEnabled}" >
                 </MenuItem>
             </MenuItem>
         </Menu>
@@ -127,13 +130,13 @@
                         </StackPanel>
                     </RadioButton>
                     <Border Width="1" BorderBrush="Gray" BorderThickness="1,0,0,0" Margin="5,5,5,5" />
-                    <Button  Margin="0,5,5,5" IsEnabled="{Binding Path=Engine.TileManager.SegmentationControlsEnabled}" Command="{Binding Path=CommitChangeCommand}" >
+                    <Button  Margin="0,5,5,5" IsEnabled="{Binding Path=Engine.TileManager.SegmentationControlsEnabled}" Command="{Binding Path=Engine.TileManager.CommitChange}" >
                         <StackPanel Orientation="Horizontal" >
                             <Image Width="25" Source="{StaticResource SegmentationCommit}" />
                             <Label Content="Commit Change"/>
                         </StackPanel>
                     </Button>
-                    <Button  Margin="0,5,5,5" IsEnabled="{Binding Path=Engine.TileManager.SegmentationControlsEnabled}" Command="{Binding Path=CancelChangeCommand}" >
+                    <Button  Margin="0,5,5,5" IsEnabled="{Binding Path=Engine.TileManager.SegmentationControlsEnabled}" Command="{Binding Path=Engine.TileManager.CancelChange}" >
                         <StackPanel Orientation="Horizontal" >
                             <Image Width="25" Source="{StaticResource SegmentationCancel}" />
                             <Label Content="Cancel Change"/>
@@ -195,10 +198,12 @@
             </StackPanel>
         </Border>
 
-        <Border DockPanel.Dock="Right" Focusable="False" Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}" BorderBrush="Gray" BorderThickness="1,0,1,0" Width="370">
+        <Border DockPanel.Dock="Right" Focusable="False" Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}" BorderBrush="Gray" BorderThickness="1,0,1,0" Width="200" >
             <DockPanel Focusable="False" IsEnabled="{Binding Path=Engine.TileManager.SegmentationControlsEnabled}" Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}">
-                <Label DockPanel.Dock="Top" Focusable="False" MinHeight="20" Content="Segmentation Labels" />
+                <Label DockPanel.Dock="Top" Focusable="False" MinHeight="20" Content="Labels" />
                 <Grid DockPanel.Dock="Bottom" Focusable="False" Margin="5,5,5,5" Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}">
+                    
+                    <!-- The following causes a VS2010 deisgner error.
                     <Grid.RowDefinitions>
                         <RowDefinition></RowDefinition>
                         <RowDefinition></RowDefinition>
@@ -212,18 +217,19 @@
                         <ColumnDefinition Width="155"></ColumnDefinition>
                         <ColumnDefinition></ColumnDefinition>
                     </Grid.ColumnDefinitions>
+                    -->
 
-                    <Label Grid.Row="1" Grid.ColumnSpan="2" Content="Segmentation Label Name:"/>
+                    <Label Grid.Row="1" Grid.ColumnSpan="2" Content="Label Name:"/>
 
                     <TextBox Name="CreateSegmentationLabelName"   Grid.Row="1" Grid.Column="2"/>
-                    <Button  Name="CreateSegmentationLabelButton" Grid.Row="3" Grid.Column="2" Margin="0,5,0,5" >
+                    <Button  Name="CreateSegmentationLabelButton" Grid.Row="3" Grid.Column="2" Margin="0,5,0,5" Visibility="Hidden" >
                         <StackPanel Orientation="Horizontal">
                             <Image Width="25" Source="{StaticResource SegmentationLabelAdd}"/>
                             <Label Width="150" Content="Add Segmentation Label"/>
                         </StackPanel>
                     </Button>
                     <Border Height="1" Grid.Row="4" Grid.ColumnSpan="2" BorderBrush="Gray" BorderThickness="0,1,0,0" Margin="0,10,0,10" />
-                    <Button Name="RemoveSegmentationLabelButton" Grid.Row="5" Grid.Column="2" Margin="0,5,0,5">
+                    <Button Name="RemoveSegmentationLabelButton" Grid.Row="5" Grid.Column="2" Margin="0,5,0,5" Visibility="Hidden" >
                         <StackPanel Orientation="Horizontal">
                             <Image Width="25" Source="{StaticResource SegmentationLabelRemove}"/>
                             <Label Width="150" Content="Remove Segmentation Label"/>

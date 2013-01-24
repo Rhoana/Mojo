@@ -36,48 +36,48 @@ tile_num_pixels_x             = 512
 ##output_tile_volume_file       = 'C:\\dev\\datasets\\challengeCubeFirstTenSlices2\\mojo\\ids\\tiledVolumeDescription.xml'
 
 
-original_input_color_map_path = 'C:\\dev\\datasets\\conn\\main_dataset\\5K_cube\\diced_xy=512_z=32_xyOv=128_zOv=12_dwnSmp=1\\res_from_0ct15_PF\\FS=1\\cmap.mat'
-original_input_ids_path       = 'C:\\dev\\datasets\\conn\\main_dataset\\5K_cube\\diced_xy=512_z=32_xyOv=128_zOv=12_dwnSmp=1\\res_from_0ct15_PF\\FS=1\\stitched\\labels_grow'
-##original_input_ids_path       = 'C:\\dev\\datasets\\conn\\main_dataset\\5K_cube\\diced_xy=512_z=32_xyOv=128_zOv=12_dwnSmp=1\\res_from_0ct15_PF\\FS=1\\stitched\\labels\\'
-
-color_map_variable_name       = 'cmap'
-##ids_variable_name             = 'i_L'
-ids_upscale_factor            = 1
-
-output_tile_colors_path       = 'C:\\dev\\datasets\\challengeCubeV2x20G\\mojo\\ids\\debug\\tiles\\colors'
-output_pyramid_colors_path    = 'C:\\dev\\datasets\\challengeCubeV2x20G\\mojo\\ids\\debug\\pyramid\\colors'
-
-output_tile_ids_path          = 'C:\\dev\\datasets\\challengeCubeV2x20G\\mojo\\ids\\tiles'
-output_pyramid_ids_path       = 'C:\\dev\\datasets\\challengeCubeV2x20G\\mojo\\ids\\pyramid'
-
-output_id_tile_map_path       = 'C:\\dev\\datasets\\challengeCubeV2x20G\\mojo\\idTileMap'
-output_id_color_map_path      = 'C:\\dev\\datasets\\challengeCubeV2x20G\\mojo\\idColorMap'
-output_id_counts_path      = 'C:\\dev\\datasets\\challengeCubeV2x20G\\mojo\\idCounts'
-
-output_tile_volume_file       = 'C:\\dev\\datasets\\challengeCubeV2x20G\\mojo\\ids\\tiledVolumeDescription.xml'
-
-nimages_to_process            = 20
-
-
-##original_input_color_map_path = 'C:\\dev\\datasets\\conn\\main_dataset\\ac3train\\res_from_sept_30_minotrC_PF\\FS=1\\cube_coloring\\cmap.mat'
-##original_input_ids_path       = 'C:\\dev\\datasets\\conn\\main_dataset\\ac3train\\res_from_sept_30_minotrC_PF\\FS=1\\stitched\\labels_grow'
+##original_input_color_map_path = 'C:\\dev\\datasets\\conn\\main_dataset\\5K_cube\\diced_xy=512_z=32_xyOv=128_zOv=12_dwnSmp=1\\res_from_0ct15_PF\\FS=1\\cmap.mat'
+##original_input_ids_path       = 'C:\\dev\\datasets\\conn\\main_dataset\\5K_cube\\diced_xy=512_z=32_xyOv=128_zOv=12_dwnSmp=1\\res_from_0ct15_PF\\FS=1\\stitched\\labels_grow'
+####original_input_ids_path       = 'C:\\dev\\datasets\\conn\\main_dataset\\5K_cube\\diced_xy=512_z=32_xyOv=128_zOv=12_dwnSmp=1\\res_from_0ct15_PF\\FS=1\\stitched\\labels\\'
 ##
 ##color_map_variable_name       = 'cmap'
+####ids_variable_name             = 'i_L'
 ##ids_upscale_factor            = 1
 ##
-##output_tile_colors_path       = 'C:\\dev\\datasets\\ac3x10\\mojo\\ids\\debug\\tiles\\colors'
-##output_pyramid_colors_path    = 'C:\\dev\\datasets\\ac3x10\\mojo\\ids\\debug\\pyramid\\colors'
+##output_tile_colors_path       = 'C:\\dev\\datasets\\challengeCubeV2x20G\\mojo\\ids\\debug\\tiles\\colors'
+##output_pyramid_colors_path    = 'C:\\dev\\datasets\\challengeCubeV2x20G\\mojo\\ids\\debug\\pyramid\\colors'
 ##
-##output_tile_ids_path          = 'C:\\dev\\datasets\\ac3x10\\mojo\\ids\\tiles'
-##output_pyramid_ids_path       = 'C:\\dev\\datasets\\ac3x10\\mojo\\ids\\pyramid'
+##output_tile_ids_path          = 'C:\\dev\\datasets\\challengeCubeV2x20G\\mojo\\ids\\tiles'
+##output_pyramid_ids_path       = 'C:\\dev\\datasets\\challengeCubeV2x20G\\mojo\\ids\\pyramid'
 ##
-##output_id_tile_map_path       = 'C:\\dev\\datasets\\ac3x10\\mojo\\idTileMap'
-##output_id_color_map_path      = 'C:\\dev\\datasets\\ac3x10\\mojo\\idColorMap'
-##output_id_counts_path         = 'C:\\dev\\datasets\\ac3x10\\mojo\\idCounts'
+##output_id_tile_map_path       = 'C:\\dev\\datasets\\challengeCubeV2x20G\\mojo\\idTileMap'
+##output_id_color_map_path      = 'C:\\dev\\datasets\\challengeCubeV2x20G\\mojo\\idColorMap'
+##output_id_counts_path      = 'C:\\dev\\datasets\\challengeCubeV2x20G\\mojo\\idCounts'
 ##
-##output_tile_volume_file       = 'C:\\dev\\datasets\\ac3x10\\mojo\\ids\\tiledVolumeDescription.xml'
+##output_tile_volume_file       = 'C:\\dev\\datasets\\challengeCubeV2x20G\\mojo\\ids\\tiledVolumeDescription.xml'
 ##
-##nimages_to_process            = 10
+##nimages_to_process            = 20
+
+
+original_input_color_map_path = 'C:\\dev\\datasets\\conn\\main_dataset\\ac3train\\res_from_sept_30_minotrC_PF\\FS=1\\cube_coloring\\cmap.mat'
+original_input_ids_path       = 'C:\\dev\\datasets\\conn\\main_dataset\\ac3train\\res_from_sept_30_minotrC_PF\\FS=1\\stitched\\labels_grow'
+
+color_map_variable_name       = 'cmap'
+ids_upscale_factor            = 1
+
+#output_tile_colors_path       = 'C:\\dev\\datasets\\ac3x10\\mojo\\ids\\debug\\tiles\\colors'
+#output_pyramid_colors_path    = 'C:\\dev\\datasets\\ac3x10\\mojo\\ids\\debug\\pyramid\\colors'
+
+output_tile_ids_path          = 'C:\\dev\\datasets\\ac3x10\\mojo\\ids\\tiles'
+#output_pyramid_ids_path       = 'C:\\dev\\datasets\\ac3x10\\mojo\\ids\\pyramid'
+
+output_id_tile_map_path       = 'C:\\dev\\datasets\\ac3x10\\mojo\\idTileMap'
+output_id_color_map_path      = 'C:\\dev\\datasets\\ac3x10\\mojo\\idColorMap'
+output_id_counts_path         = 'C:\\dev\\datasets\\ac3x10\\mojo\\idCounts'
+
+output_tile_volume_file       = 'C:\\dev\\datasets\\ac3x10\\mojo\\ids\\tiledVolumeDescription.xml'
+
+nimages_to_process            = 10
 
 
 def mkdir_safe( dir_to_make ):
@@ -94,6 +94,7 @@ def save_hdf5( file_path, dataset_name, array ):
     
     hdf5             = h5py.File( file_path, 'w' )
     dataset          = hdf5.create_dataset( dataset_name, data=array, chunks=True, compression='gzip' )
+    #dataset          = hdf5.create_dataset( dataset_name, data=array )
     hdf5.close()
 
     print file_path
@@ -177,25 +178,25 @@ for file in files:
     
     while current_image_num_pixels_y > tile_num_pixels_y / 2 or current_image_num_pixels_x > tile_num_pixels_x / 2:
 
-        current_pyramid_ids_path = output_pyramid_ids_path  + '\\' + 'w=' + '%08d' % ( tile_index_w )
-        current_pyramid_ids_name = current_pyramid_ids_path + '\\' + 'z=' + '%08d' % ( tile_index_z ) + '.hdf5'
+        #current_pyramid_ids_path = output_pyramid_ids_path  + '\\' + 'w=' + '%08d' % ( tile_index_w )
+        #current_pyramid_ids_name = current_pyramid_ids_path + '\\' + 'z=' + '%08d' % ( tile_index_z ) + '.hdf5'
         current_tile_ids_path    = output_tile_ids_path     + '\\' + 'w=' + '%08d' % ( tile_index_w ) + '\\' + 'z=' + '%08d' % ( tile_index_z )
     
-        current_pyramid_colors_path = output_pyramid_colors_path  + '\\' + 'w=' + '%08d' % ( tile_index_w )
-        current_pyramid_colors_name = current_pyramid_colors_path + '\\' + 'z=' + '%08d' % ( tile_index_z ) + '.png'
-        current_tile_colors_path    = output_tile_colors_path     + '\\' + 'w=' + '%08d' % ( tile_index_w ) + '\\' + 'z=' + '%08d' % ( tile_index_z )
+        #current_pyramid_colors_path = output_pyramid_colors_path  + '\\' + 'w=' + '%08d' % ( tile_index_w )
+        #current_pyramid_colors_name = current_pyramid_colors_path + '\\' + 'z=' + '%08d' % ( tile_index_z ) + '.png'
+        #current_tile_colors_path    = output_tile_colors_path     + '\\' + 'w=' + '%08d' % ( tile_index_w ) + '\\' + 'z=' + '%08d' % ( tile_index_z )
 
         mkdir_safe( current_tile_ids_path )
-        mkdir_safe( current_pyramid_ids_path )
-        mkdir_safe( current_tile_colors_path )
-        mkdir_safe( current_pyramid_colors_path )
+        #mkdir_safe( current_pyramid_ids_path )
+        #mkdir_safe( current_tile_colors_path )
+        #mkdir_safe( current_pyramid_colors_path )
 
         current_ids = original_ids[ ::ids_stride, ::ids_stride ]
-        save_hdf5( current_pyramid_ids_name, 'IdMap', current_ids )
+        #save_hdf5( current_pyramid_ids_name, 'IdMap', current_ids )
                     
         current_colors       = id_color_map[ current_ids ]
         current_colors_image = PIL.Image.fromarray( current_colors )
-        save_image( current_pyramid_colors_name, current_colors_image )
+        #save_image( current_pyramid_colors_name, current_colors_image )
         
         num_tiles_y = int( math.ceil( float( current_image_num_pixels_y ) / tile_num_pixels_y ) )
         num_tiles_x = int( math.ceil( float( current_image_num_pixels_x ) / tile_num_pixels_x ) )
@@ -207,7 +208,7 @@ for file in files:
                 x = tile_index_x * tile_num_pixels_x
                 
                 current_tile_ids_name    = current_tile_ids_path    + '\\' + 'y=' + '%08d' % ( tile_index_y ) + ','  + 'x=' + '%08d' % ( tile_index_x ) + '.hdf5'
-                current_tile_colors_name = current_tile_colors_path + '\\' + 'y=' + '%08d' % ( tile_index_y ) + ','  + 'x=' + '%08d' % ( tile_index_x ) + '.png'
+                #current_tile_colors_name = current_tile_colors_path + '\\' + 'y=' + '%08d' % ( tile_index_y ) + ','  + 'x=' + '%08d' % ( tile_index_x ) + '.png'
 
                 tile_ids                                                                   = numpy.zeros( ( tile_num_pixels_y, tile_num_pixels_x ), numpy.uint32 )
                 tile_ids_non_padded                                                        = current_ids[ y : y + tile_num_pixels_y, x : x + tile_num_pixels_x ]
@@ -216,7 +217,7 @@ for file in files:
 
                 tile_colors       = id_color_map[ tile_ids ]
                 tile_colors_image = PIL.Image.fromarray( tile_colors )
-                save_image( current_tile_colors_name, tile_colors_image )
+                #save_image( current_tile_colors_name, tile_colors_image )
 
                 #tile_index      = ( tile_index_x, tile_index_y, tile_index_z, tile_index_w )                
                 unique_tile_ids = numpy.unique( tile_ids )

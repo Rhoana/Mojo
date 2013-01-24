@@ -108,6 +108,8 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AdjustSegmentationRenderingStrategy.cs" />
+    <Compile Include="AdjustSegmentationTool.cs" />
     <Compile Include="Camera.cs" />
     <Compile Include="Constants.cs" />
     <Compile Include="NullRenderingStrategy.cs" />
@@ -121,21 +123,15 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
-    <Compile Include="SegmentationLabelDescription.cs" />
     <Compile Include="Engine.cs" />
     <Compile Include="Console.cs" />
     <Compile Include="LinqUtil.cs" />
     <Compile Include="MathUtil.cs" />
     <Compile Include="D3D11RenderingPane.cs" />
-    <Compile Include="Segmenter.cs" />
     <Compile Include="D3D11HwndDescription.cs" />
-    <Compile Include="Segmenter2DRenderingStrategy.cs" />
-    <Compile Include="Segmenter2DUserInputHandler.cs" />
-    <Compile Include="SegmenterImageStackLoadDescription.cs" />
-    <Compile Include="SegmenterImageStackLoader.cs" />
-    <Compile Include="SegmenterImageStackSaveDescription.cs" />
-    <Compile Include="SimpleSegmenterRenderingStrategy.cs" />
-    <Compile Include="SimpleSegmenterTool.cs" />
+    <Compile Include="SegmentationLabelDescription.cs" />
+    <Compile Include="SplitSegmentationRenderingStrategy.cs" />
+    <Compile Include="SplitSegmentationTool.cs" />
     <Compile Include="StreamUtil.cs" />
     <Compile Include="TileManager.cs" />
     <Compile Include="MergeSegmentationRenderingStrategy.cs" />

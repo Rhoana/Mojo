@@ -22,7 +22,8 @@ original_input_images_path = 'C:\\dev\\datasets\\ac3x10\\images'
 output_tile_image_path     = 'C:\\dev\\datasets\\ac3x10\\mojo\\images\\tiles'
 output_pyramid_image_path  = 'C:\\dev\\datasets\\ac3x10\\mojo\\images\\pyramid'
 output_tile_volume_file    = 'C:\\dev\\datasets\\ac3x10\\mojo\\images\\tiledVolumeDescription.xml'
-output_image_extension     = '.tif'
+input_image_extension      = '.tif'
+output_image_extension     = '.png'
 image_resize_filter        = PIL.Image.ANTIALIAS
 
 #original_input_images_path = 'C:\\dev\\datasets\\challengeCubeV2x20\\images'
@@ -74,7 +75,7 @@ def mkdir_safe( dir_to_make ):
         os.system( execute_string )
                 
         
-files = sorted( glob.glob( original_input_images_path + '\\*' + output_image_extension ) )
+files = sorted( glob.glob( original_input_images_path + '\\*' + input_image_extension ) )
 
 tile_index_z = 0
 

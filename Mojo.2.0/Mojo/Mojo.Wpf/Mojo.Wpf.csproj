@@ -140,7 +140,6 @@
     <Compile Include="ViewModel\EngineDataContext.cs" />
     <Compile Include="ViewModel\TileManagerDataContext.cs" />
     <Compile Include="ViewModel\RelayCommand.cs" />
-    <Compile Include="ViewModel\SegmenterDataContext.cs" />
     <Compile Include="View\D3D11RenderingPaneHost.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -171,6 +170,7 @@
     <None Include="Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
     </None>
   </ItemGroup>
   <ItemGroup>

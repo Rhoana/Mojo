@@ -3,7 +3,7 @@ using SlimDX;
 
 namespace Mojo
 {
-    public class SimpleSegmenterTool : ToolBase
+    public class SplitSegmentationTool : ToolBase
     {
         private readonly TileManager mTileManager;
         private readonly Engine mEngine;
@@ -11,7 +11,7 @@ namespace Mojo
         private int newId = 0;
         private bool mCurrentlyDrawing = false;
 
-        public SimpleSegmenterTool( TileManager tileManager, Engine engine )
+        public SplitSegmentationTool( TileManager tileManager, Engine engine )
             : base( tileManager, engine )
         {
             mTileManager = tileManager;
@@ -37,36 +37,32 @@ namespace Mojo
 
             switch ( keyEventArgs.Key )
             {
+                case System.Windows.Input.Key.Q:
+                    mTileManager.ToggleShowBoundaryLines();
+                    break;
                 case System.Windows.Input.Key.A:
                     mTileManager.ToggleShowSegmentation();
                     break;
                 case System.Windows.Input.Key.E:
-                    mTileManager.SegmentationVisibilityRatio = System.Math.Min( mTileManager.SegmentationVisibilityRatio + 0.1f, 1.0f );
+                    mTileManager.IncreaseSegmentationVisibility();
                     break;
                 case System.Windows.Input.Key.D:
-                    mTileManager.SegmentationVisibilityRatio = System.Math.Max( mTileManager.SegmentationVisibilityRatio - 0.1f, 0f );
+                    mTileManager.DecreaseSegmentationVisibility();
                     break;
                 case System.Windows.Input.Key.Z:
                     if ( keyEventArgs.KeyboardDevice.Modifiers == System.Windows.Input.ModifierKeys.Control )
-                        mTileManager.Internal.UndoChange();
+                        mTileManager.UndoChange();
                     break;
                 case System.Windows.Input.Key.Y:
                     if ( keyEventArgs.KeyboardDevice.Modifiers == System.Windows.Input.ModifierKeys.Control )
-                        mTileManager.Internal.RedoChange();
+                        mTileManager.RedoChange();
                     break;
                 case System.Windows.Input.Key.Tab:
-                    if ( mTileManager.CurrentSplitMode == SplitMode.JoinPoints )
-                    {
-                        mTileManager.Internal.CompletePointSplit( mTileManager.SelectedSegmentId );
-                    }
-                    else
-                    {
-                        mTileManager.Internal.CompleteDrawSplit( mTileManager.SelectedSegmentId );
-                    }
+                    mTileManager.CommmitChange();
                     break;
 
                 case System.Windows.Input.Key.Escape:
-                    mTileManager.Internal.ResetSplitState();
+                    mTileManager.CancelChange();
                     break;
 
                 //Base class will move the view - make sure we prep for splitting again
@@ -84,16 +80,10 @@ namespace Mojo
                     break;
 
                 case System.Windows.Input.Key.OemComma:
-                    if ( mTileManager.DrawSize > 4 )
-                    {
-                        mTileManager.DrawSize -= 2;
-                    }
+                    mTileManager.DecreaseBrushSize();
                     break;
                 case System.Windows.Input.Key.OemPeriod:
-                    if ( mTileManager.DrawSize < 16 )
-                    {
-                        mTileManager.DrawSize += 2;
-                    }
+                    mTileManager.IncreaseBrushSize();
                     break;
 
             }
@@ -215,6 +205,7 @@ namespace Mojo
                         //
                         mTileManager.Internal.ReplaceSegmentationLabelCurrentSlice( clickedId, mTileManager.SelectedSegmentId, mTileManager.TiledDatasetView, p );
                         mTileManager.Internal.PrepForSplit( mTileManager.SelectedSegmentId, p );
+                        mTileManager.ChangesMade = true;
                     }
                 }
             }
@@ -268,12 +259,12 @@ namespace Mojo
                         {
                             if ( mouseEventArgs.Button == MouseButtons.Left )
                             {
-                                mTileManager.Internal.DrawErase( mTileManager.TiledDatasetView, p, mTileManager.DrawSize );
+                                mTileManager.Internal.DrawErase( mTileManager.TiledDatasetView, p, mTileManager.BrushSize );
                                 mEngine.QuickRender();
                             }
                             else if ( mouseEventArgs.Button == MouseButtons.Right )
                             {
-                                mTileManager.Internal.DrawSplit( mTileManager.TiledDatasetView, p, mTileManager.DrawSize );
+                                mTileManager.Internal.DrawSplit( mTileManager.TiledDatasetView, p, mTileManager.BrushSize );
                                 mEngine.QuickRender();
                             }
                         }
@@ -281,12 +272,12 @@ namespace Mojo
                         {
                             if ( mouseEventArgs.Button == MouseButtons.Left )
                             {
-                                mTileManager.Internal.DrawRegionA( mTileManager.TiledDatasetView, p, mTileManager.DrawSize );
+                                mTileManager.Internal.DrawRegionA( mTileManager.TiledDatasetView, p, mTileManager.BrushSize );
                                 mEngine.QuickRender();
                             }
                             else if ( mouseEventArgs.Button == MouseButtons.Right )
                             {
-                                mTileManager.Internal.DrawRegionB( mTileManager.TiledDatasetView, p, mTileManager.DrawSize );
+                                mTileManager.Internal.DrawRegionB( mTileManager.TiledDatasetView, p, mTileManager.BrushSize );
                                 mEngine.QuickRender();
                             }
                         }

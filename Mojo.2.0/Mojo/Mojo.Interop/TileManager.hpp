@@ -41,6 +41,8 @@ public:
 
     void                                                    SaveSegmentation();
     void                                                    SaveSegmentationAs( String^ savePath );
+    void                                                    AutosaveSegmentation();
+    void                                                    DeleteTempFiles();
 
     void                                                    Update();
 

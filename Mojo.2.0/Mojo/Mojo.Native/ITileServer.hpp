@@ -27,6 +27,8 @@ public:
 
     virtual void                                                  SaveSegmentation()                                                                      = 0;
     virtual void                                                  SaveSegmentationAs( std::string savePath )                                              = 0;
+    virtual void                                                  AutosaveSegmentation()                                                                  = 0;
+    virtual void                                                  DeleteTempFiles()                                                                       = 0;
 
     virtual int                                                   GetTileCountForId( int segId )                                                          = 0;
 
