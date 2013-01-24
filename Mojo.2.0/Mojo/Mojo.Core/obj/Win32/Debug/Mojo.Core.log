@@ -1,12 +1,25 @@
-﻿Build started 12/21/2012 12:04:26 PM.
+﻿Build started 1/24/2013 2:48:08 PM.
      1>Project "C:\dev\MojoGit\Mojo.2.0\Mojo\Mojo.Core\Mojo.Core.vcxproj" on node 2 (build target(s)).
-     1>InitializeBuildStatus:
+     1>PrepareForBuild:
+         Creating directory "bin\Win32\Debug\".
+       InitializeBuildStatus:
          Creating "obj\Win32\Debug\Mojo.Core.unsuccessfulbuild" because "AlwaysCreate" was specified.
        ClCompile:
-         C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\CL.exe /c /I..\Sdk\OpenCV\OpenCV2.4\build\include\ /I"..\Sdk\Thrust\thrust-v1.3.0\\" /I"..\Sdk\Cutil\NVIDIA GPU Computing SDK 4.2\C\common\inc\\" /I..\Sdk\Cuda\v4.2\include\ /I..\Sdk\Boost\boost_1_44\ /I"..\Sdk\DirectX\Microsoft DirectX SDK (June 2010)\Include\\" /I..\Sdk\Cuda\v4.2\include /Zi /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _DEBUG /D _LIB /Gm- /EHa /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"obj\Win32\Debug\\" /Fd"obj\Win32\Debug\vc100.pdb" /Gd /TP /analyze- /errorReport:prompt SegmenterState.cpp
+         c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\CL.exe /c /I..\Sdk\OpenCV\OpenCV2.4\build\include\ /I"..\Sdk\Thrust\thrust-v1.3.0\\" /I"..\Sdk\Cutil\NVIDIA GPU Computing SDK 4.2\C\common\inc\\" /I..\Sdk\Cuda\v4.2\include\ /I..\Sdk\Boost\boost_1_44\ /I"..\Sdk\DirectX\Microsoft DirectX SDK (June 2010)\Include\\" /I..\Sdk\Cuda\v4.2\include /Zi /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _DEBUG /D _LIB /Gm- /EHa /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"obj\Win32\Debug\\" /Fd"obj\Win32\Debug\vc100.pdb" /Gd /TP /analyze- /errorReport:prompt HostVectorMap.cpp Cuda.cpp D3D11CudaTextureMap.cpp DeviceVectorMap.cpp Index.cpp PrimitiveMap.cpp Printf.cpp SegmenterState.cpp Thrust.cpp ToString.cpp VolumeDescription.cpp
+         HostVectorMap.cpp
+         Cuda.cpp
+         D3D11CudaTextureMap.cpp
+         DeviceVectorMap.cpp
+         Index.cpp
+         PrimitiveMap.cpp
+         Printf.cpp
          SegmenterState.cpp
+         Thrust.cpp
+         ToString.cpp
+         VolumeDescription.cpp
+         Generating Code...
        Lib:
-         C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\Lib.exe /OUT:"C:\dev\MojoGit\Mojo.2.0\Mojo\Mojo.Core\bin\Win32\Debug\Mojo.Core.lib" /NOLOGO /VERBOSE obj\Win32\Debug\HostVectorMap.obj
+         c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\Lib.exe /OUT:"C:\dev\MojoGit\Mojo.2.0\Mojo\Mojo.Core\bin\Win32\Debug\Mojo.Core.lib" /NOLOGO /VERBOSE obj\Win32\Debug\HostVectorMap.obj
          obj\Win32\Debug\Cuda.obj
          obj\Win32\Debug\D3D11CudaTextureMap.obj
          obj\Win32\Debug\DeviceVectorMap.obj
@@ -36,4 +49,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:08.07
+Time Elapsed 00:00:20.03

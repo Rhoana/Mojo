@@ -20,14 +20,17 @@ namespace Mojo
 
             switch ( keyEventArgs.Key )
             {
+                case System.Windows.Input.Key.Q:
+                    mTileManager.ToggleShowBoundaryLines();
+                    break;
                 case System.Windows.Input.Key.A:
                     mTileManager.ToggleShowSegmentation();
                     break;
                 case System.Windows.Input.Key.E:
-                    mTileManager.SegmentationVisibilityRatio = System.Math.Min( mTileManager.SegmentationVisibilityRatio + 0.1f, 1.0f );
+                    mTileManager.IncreaseSegmentationVisibility();
                     break;
                 case System.Windows.Input.Key.D:
-                    mTileManager.SegmentationVisibilityRatio = System.Math.Max( mTileManager.SegmentationVisibilityRatio - 0.1f, 0f );
+                    mTileManager.DecreaseSegmentationVisibility();
                     break;
                 case System.Windows.Input.Key.Z:
                     if ( keyEventArgs.KeyboardDevice.Modifiers == System.Windows.Input.ModifierKeys.Control )
@@ -104,6 +107,7 @@ namespace Mojo
                         {
                             mTileManager.Internal.ReplaceSegmentationLabel( clickedId, newId );
                         }
+                        mTileManager.ChangesMade = true;
                     }
                 }
             }

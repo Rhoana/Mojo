@@ -8,7 +8,7 @@ using TinyText;
 
 namespace Mojo
 {
-    public class SimpleSegmenterRenderingStrategy : NotifyPropertyChanged, IRenderingStrategy
+    public class SplitSegmentationRenderingStrategy : NotifyPropertyChanged, IRenderingStrategy
     {
         private const int POSITION_SLOT = 0;
         private const int POSITION_NUM_BYTES_PER_COMPONENT = 4;
@@ -44,12 +44,12 @@ namespace Mojo
             }
         }
 
-        public SimpleSegmenterRenderingStrategy( SlimDX.Direct3D11.Device device, DeviceContext deviceContext, TileManager tileManager )
+        public SplitSegmentationRenderingStrategy( SlimDX.Direct3D11.Device device, DeviceContext deviceContext, TileManager tileManager )
         {
             mTileManager = tileManager;
             mDebugRenderer = new DebugRenderer( device );
 
-            mEffect = EffectUtil.CompileEffect( device, @"Shaders\SimpleSegmenter2D.fx" );
+            mEffect = EffectUtil.CompileEffect( device, @"Shaders\SplitRenderer2D.fx" );
 
             var positionTexcoordInputElements = new[]
                                                 {
@@ -268,12 +268,13 @@ namespace Mojo
             }
             mEffect.GetVariableByName( "gTransform" ).AsMatrix().SetMatrix( camera.GetLookAtMatrix() * camera.GetProjectionMatrix() );
             mEffect.GetVariableByName( "gSegmentationRatio" ).AsScalar().Set( mTileManager.SegmentationVisibilityRatio );
+            mEffect.GetVariableByName( "gBoundaryLinesVisible" ).AsScalar().Set( mTileManager.ShowBoundaryLines );
             mEffect.GetVariableByName( "gSelectedSegmentId" ).AsScalar().Set( mTileManager.SelectedSegmentId );
             mEffect.GetVariableByName( "gMouseOverSegmentId" ).AsScalar().Set( mTileManager.MouseOverSegmentId );
 
             mEffect.GetVariableByName( "gMouseOverX" ).AsScalar().Set( ( mTileManager.MouseOverX - tileMinExtentX ) / tileCacheEntry.ExtentDataSpace.X );
             mEffect.GetVariableByName( "gMouseOverY" ).AsScalar().Set( ( mTileManager.MouseOverY - tileMinExtentY ) / tileCacheEntry.ExtentDataSpace.Y );
-            mEffect.GetVariableByName( "gMouseHighlightSize" ).AsScalar().Set( mTileManager.DrawSize );
+            mEffect.GetVariableByName( "gMouseHighlightSize" ).AsScalar().Set( mTileManager.BrushSize );
 
             mPass.Apply( deviceContext );
             deviceContext.Draw( QUAD_NUM_VERTICES, 0 );

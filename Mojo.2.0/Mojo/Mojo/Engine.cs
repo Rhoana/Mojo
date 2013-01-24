@@ -38,7 +38,6 @@ namespace Mojo
         private SlimDX.Direct3D11.Device mD3D11Device;
 
         public TileManager TileManager { get; private set; }
-        public Segmenter Segmenter { get; private set; }
 
         public ObservableDictionary<ViewerMode, ObservableDictionary<ToolMode, ITool>> Tools { get; private set; }
         public ObservableDictionary<ViewerMode, ObservableDictionary<ToolMode, IRenderingStrategy>> RenderingStrategies { get; private set; }
@@ -84,7 +83,6 @@ namespace Mojo
             Thrust.Initialize();
 
             TileManager = new TileManager( new Interop.TileManager( mD3D11Device, mD3D11Device.ImmediateContext, Constants.ConstParameters ) );
-            Segmenter = new Segmenter( new Interop.Segmenter( mD3D11Device, mD3D11Device.ImmediateContext, Constants.ConstParameters ) );
 
             Tools = new ObservableDictionary<ViewerMode, ObservableDictionary<ToolMode, ITool>>
                     {
@@ -95,7 +93,7 @@ namespace Mojo
                                 { ToolMode.Null, new NullTool() },
                                 { ToolMode.AdjustSegmentation, new NullTool() },
                                 { ToolMode.MergeSegmentation, new MergeSegmentationTool( TileManager, this ) },
-                                { ToolMode.SplitSegmentation, new SimpleSegmenterTool( TileManager, this ) }
+                                { ToolMode.SplitSegmentation, new SplitSegmentationTool( TileManager, this ) }
                             }
                             }
                     };
@@ -109,7 +107,7 @@ namespace Mojo
                                               { ToolMode.Null, new NullRenderingStrategy( mD3D11Device, mD3D11Device.ImmediateContext ) },
                                               { ToolMode.AdjustSegmentation, new NullRenderingStrategy( mD3D11Device, mD3D11Device.ImmediateContext ) },
                                               { ToolMode.MergeSegmentation, new MergeSegmentationRenderingStrategy( mD3D11Device, mD3D11Device.ImmediateContext, TileManager ) },
-                                              { ToolMode.SplitSegmentation, new SimpleSegmenterRenderingStrategy( mD3D11Device, mD3D11Device.ImmediateContext, TileManager ) }
+                                              { ToolMode.SplitSegmentation, new SplitSegmentationRenderingStrategy( mD3D11Device, mD3D11Device.ImmediateContext, TileManager ) }
                                           }
                                           }
                                   };
@@ -143,12 +141,6 @@ namespace Mojo
             RenderingStrategies.Internal.Values.ToList().ForEach( renderingStrategies => renderingStrategies.Internal.Values.ToList().ForEach( renderingStrategy => renderingStrategy.Dispose() ) );
             RenderingStrategies.Internal.Clear();
 
-            if ( Segmenter != null )
-            {
-                Segmenter.Dispose();
-                Segmenter = null;
-            }
-
             if ( TileManager != null )
             {
                 TileManager.Dispose();
@@ -162,11 +154,31 @@ namespace Mojo
             Console.WriteLine( "\nMojo terminating...\n" );
         }
 
+        public void NextImage()
+        {
+            var centerDataSpace = TileManager.TiledDatasetView.CenterDataSpace;
+            if ( centerDataSpace.Z < TileManager.TiledDatasetDescription.TiledVolumeDescriptions.Get( "SourceMap" ).NumVoxelsZ - 1 )
+            {
+                centerDataSpace.Z += 1f;
+                TileManager.TiledDatasetView.CenterDataSpace = centerDataSpace;
+                Update();
+            }
+        }
+
+        public void PreviousImage()
+        {
+            var centerDataSpace = TileManager.TiledDatasetView.CenterDataSpace;
+            if ( centerDataSpace.Z > 0 )
+            {
+                centerDataSpace.Z -= 1f;
+                TileManager.TiledDatasetView.CenterDataSpace = centerDataSpace;
+                Update();
+            }
+        }
+
         public void Update()
         {
             TileManager.Update();
-            //Segmenter.Update();
-
             Viewers.Internal.ToList().ForEach( viewer => viewer.Value.D3D11RenderingPane.Render() );
         }
 

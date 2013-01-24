@@ -42,6 +42,8 @@ public:
 
     virtual void                                                  SaveSegmentation();
     virtual void                                                  SaveSegmentationAs( std::string savePath );
+    virtual void                                                  AutosaveSegmentation();
+    virtual void                                                  DeleteTempFiles();
 
     virtual int                                                   GetTileCountForId( int segId );
 
@@ -81,6 +83,8 @@ private:
     template < typename TCudaType >
 	void                                                          LoadSegmentationInternal( TiledDatasetDescription& tiledDatasetDescription );
     void                                                          UnloadSegmentationInternal();
+
+	void                                                          SaveIdTileMapToTemp();
 
     Core::VolumeDescription                                       LoadTileImage( int4 tileIndex, std::string imageName );
     Core::VolumeDescription                                       LoadTileHdf5( int4 tileIndex, std::string hdf5Name, std::string hdf5InternalDatasetName );
@@ -347,7 +351,7 @@ inline bool FileSystemTileServer::TryLoadTileHdf5Internal( int4 tileIndex, std::
         volumeDescription.numBytesPerVoxel = mTiledDatasetDescription.tiledVolumeDescriptions.Get( hdf5Name ).numBytesPerVoxel;
         volumeDescription.numVoxels        = numVoxelsPerTile;
 
-		//Core::Printf( "Loading tile ", tilePath, "...");
+		Core::Printf( "Loading tile ", tilePath, "...");
 
         hid_t hdf5FileHandle = marray::hdf5::openFile( tilePath );
         marray::Marray< TMarrayType > marray;
@@ -363,7 +367,7 @@ inline bool FileSystemTileServer::TryLoadTileHdf5Internal( int4 tileIndex, std::
         }
         marray::hdf5::closeFile( hdf5FileHandle );
 
-		//Core::Printf( "Done.");
+		Core::Printf( "Done.");
 
         RELEASE_ASSERT( marray.dimension() == 2 );
         RELEASE_ASSERT( marray.shape( 0 ) == numVoxelsPerTile.y && marray.shape( 1 ) == numVoxelsPerTile.y );

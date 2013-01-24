@@ -1,12 +1,10 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Microsoft.Xml.Serialization.GeneratedAssembly;
 using Mojo.Interop;
 using Mojo.Xml;
-using SlimDX;
 using SlimDX.DXGI;
 
 namespace Mojo
@@ -137,6 +135,16 @@ namespace Mojo
             }
         }
 
+        public void IncreaseSegmentationVisibility()
+        {
+            SegmentationVisibilityRatio = System.Math.Min( SegmentationVisibilityRatio + 0.1f, 1.0f );
+        }
+
+        public void DecreaseSegmentationVisibility()
+        {
+            SegmentationVisibilityRatio = System.Math.Max( SegmentationVisibilityRatio - 0.1f, 0f );
+        }
+
         private bool mShowBoundaryLines = true;
         public bool ShowBoundaryLines
         {
@@ -151,6 +159,14 @@ namespace Mojo
                     mShowBoundaryLines = value;
                     OnPropertyChanged( "ShowBoundaryLines" );
                 }
+            }
+        }
+
+        public void ToggleShowBoundaryLines()
+        {
+            if ( SegmentationLoaded )
+            {
+                ShowBoundaryLines = !ShowBoundaryLines;
             }
         }
 
@@ -210,17 +226,33 @@ namespace Mojo
             }
         }
 
-        private float mDrawSize = 10;
-        public float DrawSize
+        private float mBrushSize = 10;
+        public float BrushSize
         {
             get
             {
-                return mDrawSize;
+                return mBrushSize;
             }
             set
             {
-                mDrawSize = value;
-                OnPropertyChanged( "DrawSize" );
+                mBrushSize = value;
+                OnPropertyChanged( "BrushSize" );
+            }
+        }
+
+        public void IncreaseBrushSize()
+        {
+            if ( BrushSize < 16 )
+            {
+                BrushSize += 2;
+            }
+        }
+
+        public void DecreaseBrushSize()
+        {
+            if ( BrushSize > 4 )
+            {
+                BrushSize -= 2;
             }
         }
 
@@ -252,6 +284,50 @@ namespace Mojo
             }
         }
 
+        private bool mChangesMade = false;
+        public bool ChangesMade
+        {
+            get { return mChangesMade; }
+            set
+            {
+                if ( mChangesMade != value )
+                {
+                    mChangesMade = value;
+                    OnPropertyChanged( "ChangesMade" );
+                }
+            }
+        }
+
+        public void CommmitChange()
+        {
+            if ( CurrentSplitMode == SplitMode.JoinPoints )
+            {
+                Internal.CompletePointSplit( SelectedSegmentId );
+            }
+            else
+            {
+                Internal.CompleteDrawSplit( SelectedSegmentId );
+            }
+            ChangesMade = true;
+        }
+
+        public void CancelChange()
+        {
+            Internal.ResetSplitState();
+        }
+
+        public void UndoChange()
+        {
+            Internal.UndoChange();
+            ChangesMade = true;
+        }
+
+        public void RedoChange()
+        {
+            Internal.RedoChange();
+            ChangesMade = true;
+        }
+
         public TileManager( Interop.TileManager tileManager )
         {
             Internal = tileManager;
@@ -262,20 +338,17 @@ namespace Mojo
         {
             UnloadTiledDataset();
 
-            if ( Internal != null )
-            {
-                Internal.SaveAndClearFileSystemTileCache( );
+            //
+            // TileManager does not have any files to close or output to write
+            // So we can just exit without calling Dispose here
+            // This will save time on exit when deallocating memory is not necessary
+            //
 
-                //
-                // TileManager does not have any files to close or output to write
-                // So we can just exit without calling Dispose here
-                // This will save time on exit when deallocating memory is not necessary
-                //
-
-                //Internal.Dispose();
-
-                Internal = null;
-            }
+            //if ( Internal != null )
+            //{
+            //    Internal.Dispose();
+            //    Internal = null;
+            //}
         }
 
         public void Update()
@@ -365,6 +438,7 @@ namespace Mojo
 
             UpdateView();
 
+            ChangesMade = false;
         }
 
         public void LoadSegmentation( string segmentationRootDirectory )
@@ -378,17 +452,20 @@ namespace Mojo
 
             var idMapRootDirectory = Path.Combine( segmentationRootDirectory, Constants.ID_MAP_ROOT_DIRECTORY_NAME );
             var tempIdMapRootDirectory = Path.Combine( segmentationRootDirectory, Constants.TEMP_ID_MAP_ROOT_DIRECTORY_NAME );
+            var autosaveIdMapRootDirectory = Path.Combine( segmentationRootDirectory, Constants.AUTOSAVE_ID_MAP_ROOT_DIRECTORY_NAME );
 
             var idMapTiledVolumeDescriptionPath = Path.Combine( segmentationRootDirectory, Constants.ID_MAP_TILED_VOLUME_DESCRIPTION_NAME );
 
             var idTileMapPath = Path.Combine( segmentationRootDirectory, Constants.ID_TILE_MAP_PATH );
             var tempIdTileMapPath = Path.Combine( segmentationRootDirectory, Constants.TEMP_ID_TILE_MAP_PATH );
+            var autosaveIdTileMapPath = Path.Combine( segmentationRootDirectory, Constants.AUTOSAVE_ID_TILE_MAP_PATH );
             var idColorMapPath = Path.Combine( segmentationRootDirectory, Constants.ID_COLOR_MAP_PATH );
 
             Release.Assert( Directory.Exists( idMapRootDirectory ) );
 
             var idMapTiledVolumeDescription = GetTiledVolumeDescription( idMapRootDirectory, idMapTiledVolumeDescriptionPath );
             var tempIdMapTiledVolumeDescription = GetTiledVolumeDescription( tempIdMapRootDirectory, idMapTiledVolumeDescriptionPath );
+            var autosaveIdMapTiledVolumeDescription = GetTiledVolumeDescription( autosaveIdMapRootDirectory, idMapTiledVolumeDescriptionPath );
 
             //var idTileMapXml = XmlReader.ReadFromFile<idTileMap, idTileMapSerializer>( idTileMapPath );
 
@@ -398,9 +475,11 @@ namespace Mojo
 
             TiledDatasetDescription.TiledVolumeDescriptions.Set( "IdMap", idMapTiledVolumeDescription );
             TiledDatasetDescription.TiledVolumeDescriptions.Set( "TempIdMap", tempIdMapTiledVolumeDescription );
+            TiledDatasetDescription.TiledVolumeDescriptions.Set( "AutosaveIdMap", autosaveIdMapTiledVolumeDescription );
             TiledDatasetDescription.Paths.Set( "IdColorMap", idColorMapPath );
             TiledDatasetDescription.Paths.Set( "IdTileMap", idTileMapPath );
             TiledDatasetDescription.Paths.Set( "TempIdTileMap", tempIdTileMapPath );
+            TiledDatasetDescription.Paths.Set( "AutosaveIdTileMap", autosaveIdTileMapPath );
 
             //TiledDatasetDescription.IdTileMap = idTileMap;
             //TiledDatasetDescription.MaxLabelId = idTileMap.Keys.Max();
@@ -411,6 +490,7 @@ namespace Mojo
 
             UpdateView();
 
+            ChangesMade = false;
         }
 
         private static TiledVolumeDescription GetTiledVolumeDescription( string mapRootDirectory, string tiledVolumeDescriptionPath )
@@ -445,6 +525,7 @@ namespace Mojo
             {
                 TiledDatasetDescription = tiledDatasetDescription;
             }
+            ChangesMade = false;
         }
 
         public void LoadSegmentation( TiledDatasetDescription tiledDatasetDescription )
@@ -456,7 +537,8 @@ namespace Mojo
                 {
                     TiledDatasetDescription = tiledDatasetDescription;                    
                 }
-            }            
+            }
+            ChangesMade = false;
         }
 
         public void UnloadTiledDataset()
@@ -475,6 +557,7 @@ namespace Mojo
                     TiledDatasetDescription = new TiledDatasetDescription();
                 }
             }
+            ChangesMade = false;
         }
 
         public void UnloadSegmentation()
@@ -485,6 +568,7 @@ namespace Mojo
             }
 
             SegmentationControlsEnabled = false;
+            ChangesMade = false;
         }
 
         public void SaveSegmentation()
@@ -493,6 +577,7 @@ namespace Mojo
             {
                 Internal.SaveSegmentation();
             }
+            ChangesMade = false;
         }
 
         public void SaveSegmentationAs( string savePath )
@@ -500,6 +585,25 @@ namespace Mojo
             if ( Internal != null && SegmentationLoaded )
             {
                 Internal.SaveSegmentationAs( savePath );
+            }
+            ChangesMade = false;
+        }
+
+        public void AutoSaveSegmentation()
+        {
+            if ( Internal != null && SegmentationLoaded )
+            {
+                Internal.AutosaveSegmentation();
+            }
+        }
+
+        public void DiscardChanges()
+        {
+            if ( Internal != null && SegmentationLoaded )
+            {
+                Internal.DeleteTempFiles();
+                UnloadSegmentation();
+                LoadSegmentation( TiledDatasetDescription );
             }
         }
 

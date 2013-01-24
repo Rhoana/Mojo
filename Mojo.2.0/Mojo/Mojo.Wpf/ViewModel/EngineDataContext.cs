@@ -1,6 +1,8 @@
 ﻿using System;
 using System.IO;
 using System.Collections.Generic;
+using System.Windows;
+using System.Windows.Threading;
 using Mojo.Interop;
 using SlimDX;
 
@@ -11,12 +13,35 @@ namespace Mojo.Wpf.ViewModel
         public Engine Engine { get; private set; }
 
         public TileManagerDataContext TileManagerDataContext { get; private set; }
-        public SegmenterDataContext SegmenterDataContext { get; private set; }
 
+        //
+        // File menu commands
+        //
         public RelayCommand LoadDatasetCommand { get; private set; }
         public RelayCommand LoadSegmentationCommand { get; private set; }
         public RelayCommand SaveSegmentationCommand { get; private set; }
         public RelayCommand SaveSegmentationAsCommand { get; private set; }
+        public RelayCommand ExitCommand { get; private set; }
+
+        //
+        // Edit menu commands
+        //
+        public RelayCommand UndoChangeCommand { get; private set; }
+        public RelayCommand RedoChangeCommand { get; private set; }
+        public RelayCommand CommitChangeCommand { get; private set; }
+        public RelayCommand CancelChangeCommand { get; private set; }
+        public RelayCommand IncreaseBrushSizeCommand { get; private set; }
+        public RelayCommand DecreaseBrushSizeCommand { get; private set; }
+
+        //
+        // View menu commands
+        //
+        public RelayCommand NextImageCommand { get; private set; }
+        public RelayCommand PreviousImageCommand { get; private set; }
+        public RelayCommand ToggleShowSegmentationCommand { get; private set; }
+        public RelayCommand ToggleShowBoundaryLinesCommand { get; private set; }
+        public RelayCommand IncreaseSegmentationVisibilityCommand { get; private set; }
+        public RelayCommand DecreaseSegmentationVisibilityCommand { get; private set; }
 
         public class MergeModeItem
         {
@@ -33,20 +58,42 @@ namespace Mojo.Wpf.ViewModel
         public List<MergeModeItem> MergeModes { get; private set; }
         public List<SplitModeItem> SplitModes { get; private set; }
 
-        public EngineDataContext( Engine engine, TileManagerDataContext tileManagerDataContext, SegmenterDataContext segmenterDataContext )
+        public EngineDataContext( Engine engine, TileManagerDataContext tileManagerDataContext )
         {
             Engine = engine;
 
             TileManagerDataContext = tileManagerDataContext;
-            SegmenterDataContext = segmenterDataContext;
 
+            //
+            // File menu commands
+            //
             LoadDatasetCommand = new RelayCommand( param => LoadDataset() );
             LoadSegmentationCommand = new RelayCommand( param => LoadSegmentation(), param => Engine.TileManager.TiledDatasetLoaded );
             SaveSegmentationCommand = new RelayCommand( param => SaveSegmentation(), param => Engine.TileManager.SegmentationLoaded );
             SaveSegmentationAsCommand = new RelayCommand( param => SaveSegmentationAs(), param => Engine.TileManager.SegmentationLoaded );
+            ExitCommand = new RelayCommand( param => Application.Current.MainWindow.Close() );
+
+            //
+            // Edit menu commands
+            //
+            UndoChangeCommand = new RelayCommand( param => Engine.TileManager.UndoChange(), param => Engine.TileManager.SegmentationLoaded );
+            RedoChangeCommand = new RelayCommand( param => Engine.TileManager.RedoChange(), param => Engine.TileManager.SegmentationLoaded );
+            CommitChangeCommand = new RelayCommand( param => Engine.TileManager.CommmitChange(), param => Engine.TileManager.SegmentationLoaded );
+            CancelChangeCommand = new RelayCommand( param => Engine.TileManager.CancelChange(), param => Engine.TileManager.SegmentationLoaded );
+            IncreaseBrushSizeCommand = new RelayCommand( param => Engine.TileManager.IncreaseBrushSize(), param => Engine.TileManager.SegmentationLoaded );
+            DecreaseBrushSizeCommand = new RelayCommand( param => Engine.TileManager.DecreaseBrushSize(), param => Engine.TileManager.SegmentationLoaded );
+
+            //
+            // View menu commands
+            //
+            NextImageCommand = new RelayCommand( param => Engine.NextImage(), param => Engine.TileManager.TiledDatasetLoaded );
+            PreviousImageCommand = new RelayCommand( param => Engine.PreviousImage(), param => Engine.TileManager.TiledDatasetLoaded );
+            ToggleShowSegmentationCommand = new RelayCommand( param => Engine.TileManager.ToggleShowSegmentation(), param => Engine.TileManager.SegmentationLoaded );
+            ToggleShowBoundaryLinesCommand = new RelayCommand( param => Engine.TileManager.ToggleShowBoundaryLines(), param => Engine.TileManager.SegmentationLoaded );
+            IncreaseSegmentationVisibilityCommand = new RelayCommand( param => Engine.TileManager.IncreaseSegmentationVisibility(), param => Engine.TileManager.SegmentationLoaded );
+            DecreaseSegmentationVisibilityCommand = new RelayCommand( param => Engine.TileManager.DecreaseSegmentationVisibility(), param => Engine.TileManager.SegmentationLoaded );
 
             TileManagerDataContext.StateChanged += StateChangedHandler;
-            SegmenterDataContext.StateChanged += StateChangedHandler;
 
             MergeModes = new List<MergeModeItem>
             {
@@ -64,16 +111,14 @@ namespace Mojo.Wpf.ViewModel
 
             OnPropertyChanged( "MergeModes" );
             OnPropertyChanged( "SplitModes" );
+
+            mAutoSaveTimer.Tick += AutoSave;
+
         }
 
         public void Dispose()
         {
-            if ( SegmenterDataContext != null )
-            {
-                SegmenterDataContext.StateChanged -= StateChangedHandler;
-                SegmenterDataContext.Dispose();
-                SegmenterDataContext = null;
-            }
+            mAutoSaveTimer.Tick -= AutoSave;
 
             if ( TileManagerDataContext != null )
             {
@@ -92,12 +137,10 @@ namespace Mojo.Wpf.ViewModel
         public void Refresh()
         {
             TileManagerDataContext.Refresh();
-            SegmenterDataContext.Refresh();
 
             LoadSegmentationCommand.RaiseCanExecuteChanged();
 
             OnPropertyChanged( "TileManagerDataContext" );
-            OnPropertyChanged( "SegmenterDataContext" );
         }
 
         private void StateChangedHandler( object sender, EventArgs e )
@@ -217,6 +260,31 @@ namespace Mojo.Wpf.ViewModel
 
                 Engine.TileManager.SaveSegmentationAs( folderBrowserDialog.SelectedPath );
             }
+        }
+
+        private string mAutoSavePath;
+        private readonly DispatcherTimer mAutoSaveTimer = new DispatcherTimer( DispatcherPriority.Input );
+
+        public void EnableAutoSave( int autoSaveSegmentationFrequencySeconds, string autoSaveSegmentationPath )
+        {
+            mAutoSavePath = autoSaveSegmentationPath;
+            mAutoSaveTimer.Interval = TimeSpan.FromSeconds( autoSaveSegmentationFrequencySeconds );
+
+            mAutoSaveTimer.Start();
+
+            Console.WriteLine( "Auto-saving turned on. Auto-saving every {0} seconds.", autoSaveSegmentationFrequencySeconds );
+        }
+
+        public void DisableAutoSave()
+        {
+            mAutoSaveTimer.Stop();
+
+            Console.WriteLine( "Auto-saving turned off." );
+        }
+
+        public void AutoSave( object sender, EventArgs eventArgs )
+        {
+            Engine.TileManager.AutoSaveSegmentation();
         }
 
     }

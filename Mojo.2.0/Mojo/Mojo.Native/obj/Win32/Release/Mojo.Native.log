@@ -1,4 +1,4 @@
-﻿Build started 1/22/2013 6:01:30 PM.
+﻿Build started 1/24/2013 2:42:21 PM.
      1>Project "C:\dev\MojoGit\Mojo.2.0\Mojo\Mojo.Native\Mojo.Native.vcxproj" on node 2 (build target(s)).
      1>InitializeBuildStatus:
          Creating "obj\Win32\Release\Mojo.Native.unsuccessfulbuild" because "AlwaysCreate" was specified.
@@ -14,4 +14,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:01.17
+Time Elapsed 00:00:00.63

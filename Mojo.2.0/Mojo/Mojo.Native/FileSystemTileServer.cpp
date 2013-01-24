@@ -99,6 +99,11 @@ void FileSystemTileServer::LoadSegmentation( TiledDatasetDescription& tiledDatas
         break;
     }
 
+	//
+	// Make sure there are not temp files hanging around from last time
+	//
+	DeleteTempFiles();
+
     //Core::Printf( "FileSystemTileServer::LoadSegmentation Returning." );
 
 }
@@ -113,22 +118,8 @@ bool FileSystemTileServer::IsSegmentationLoaded()
     return mIsSegmentationLoaded;
 }
 
-void FileSystemTileServer::SaveSegmentation()
+void FileSystemTileServer::SaveIdTileMapToTemp()
 {
-    //
-    // save any tile changes (to temp directory)
-    //
-
-    Core::Printf( "Saving tiles (temp)." );
-
-    SaveAndClearFileSystemTileCache();
-
-    //
-    // save the idTileMap (to temp directory)
-    //
-
-    Core::Printf( "Saving idTileMap (temp)." );
-
     unsigned int tileMapEntries = 0;
     stdext::hash_map< unsigned int, Mojo::Core::MojoTileSet >::iterator tileMapIt;
 
@@ -177,6 +168,25 @@ void FileSystemTileServer::SaveSegmentation()
     hid_t hdf5FileHandle = marray::hdf5::createFile( mTiledDatasetDescription.paths.Get( "TempIdTileMap" ) );
     marray::hdf5::save( hdf5FileHandle, "IdTileMap", outputTiles );
     marray::hdf5::closeFile( hdf5FileHandle );
+}
+
+
+void FileSystemTileServer::SaveSegmentation()
+{
+    //
+    // save any tile changes (to temp directory)
+    //
+
+    Core::Printf( "Saving tiles (temp)." );
+
+    FlushFileSystemTileCacheChanges();
+
+    //
+    // save the idTileMap (to temp directory)
+    //
+
+	Core::Printf( "Saving idTileMap (temp)." );
+	SaveIdTileMapToTemp();
 
     //
     // move changed tiles to the save directory
@@ -240,6 +250,7 @@ void FileSystemTileServer::SaveSegmentation()
 
     Core::Printf( "Replacing idTileMap." );
 
+    boost::filesystem::path tempIdTileMapPath = boost::filesystem::path( mTiledDatasetDescription.paths.Get( "TempIdTileMap" ) );
     boost::filesystem::path idTileMapPath = boost::filesystem::path( mTiledDatasetDescription.paths.Get( "IdTileMap" ) );
     boost::filesystem::remove( idTileMapPath );
     boost::filesystem::rename( tempIdTileMapPath, idTileMapPath );
@@ -255,14 +266,177 @@ void FileSystemTileServer::SaveSegmentationAs( std::string savePath )
     //
 
     //
-    // copy all (temp and normal) tiles to the new directory
+    // save the idTileMap (to temp directory)
     //
 
     //
-    // save the i
+    // copy all (temp and normal) tiles to the new directory
     //
+
     Core::Printf( "Segmentation saved to: \"", savePath, "\" (disabled)." );
 }
+
+void FileSystemTileServer::AutosaveSegmentation()
+{
+	//
+    // save any tile changes (to temp directory)
+    //
+
+    Core::Printf( "Autosaving tiles (temp)." );
+
+    FlushFileSystemTileCacheChanges();
+
+    //
+    // save the idTileMap (to temp directory)
+    //
+
+	Core::Printf( "Autosaving idTileMap (temp)." );
+
+	SaveIdTileMapToTemp();
+
+    //
+    // move changed tiles to the autosave directory
+    //
+
+    Core::Printf( "Autosave copying all modified tiles." );
+
+    int4 numTiles = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "SourceMap" ).numTiles;
+
+    //size_t shape[] = { numTiles.w, numTiles.z, numTiles.y, numTiles.x };
+    //mTileCachePageTable = marray::Marray< int >( shape, shape + 4 );
+
+    TiledVolumeDescription tempVolumeDesctiption = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "TempIdMap" );
+    TiledVolumeDescription autosaveVolumeDesctiption = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "AutosaveIdMap" );
+
+    for ( int w = 0; w < numTiles.w; w++ )
+    {
+        //Core::Printf( "Saving w=", w, "." );
+        for ( int z = 0; z < numTiles.z; z++ )
+        {
+            for ( int y = 0; y < numTiles.y; y++ )
+            {
+                for ( int x = 0; x < numTiles.x; x++ )
+                {
+                    std::string tempTilePathString = Core::ToString(
+                        tempVolumeDesctiption.imageDataDirectory, "\\",
+                        "w=", Core::ToStringZeroPad( w, 8 ), "\\",
+                        "z=", Core::ToStringZeroPad( z, 8 ), "\\",
+                        "y=", Core::ToStringZeroPad( y, 8 ), ",",
+                        "x=", Core::ToStringZeroPad( x, 8 ), ".",
+                        tempVolumeDesctiption.fileExtension );
+
+                    boost::filesystem::path tempTilePath = boost::filesystem::path( tempTilePathString );
+
+                    std::string autosaveTilePathString = Core::ToString(
+                        autosaveVolumeDesctiption.imageDataDirectory, "\\",
+                        "w=", Core::ToStringZeroPad( w, 8 ), "\\",
+                        "z=", Core::ToStringZeroPad( z, 8 ), "\\",
+                        "y=", Core::ToStringZeroPad( y, 8 ), ",",
+                        "x=", Core::ToStringZeroPad( x, 8 ), ".",
+                        autosaveVolumeDesctiption.fileExtension );
+
+                    boost::filesystem::path autosaveTilePath = boost::filesystem::path( autosaveTilePathString );
+
+					if ( boost::filesystem::exists( autosaveTilePath ) )
+					{
+                        boost::filesystem::remove( autosaveTilePath );
+					}
+					else
+					{
+						boost::filesystem::create_directories( autosaveTilePath.parent_path() );
+					}
+
+					if ( boost::filesystem::exists( tempTilePath ) )
+                    {
+						boost::filesystem::copy_file( tempTilePath, autosaveTilePath );
+                    }
+                }
+            }
+        }
+    }
+
+    //
+    // move idTileMap to the save directory
+    //
+
+    Core::Printf( "Autosave copying idTileMap." );
+
+    boost::filesystem::path tempIdTileMapPath = boost::filesystem::path( mTiledDatasetDescription.paths.Get( "TempIdTileMap" ) );
+    boost::filesystem::path autosaveIdTileMapPath = boost::filesystem::path( mTiledDatasetDescription.paths.Get( "AutosaveIdTileMap" ) );
+
+	if ( boost::filesystem::exists( autosaveIdTileMapPath ) )
+	{
+		boost::filesystem::remove( autosaveIdTileMapPath );
+	}
+	else
+	{
+		boost::filesystem::create_directories( autosaveIdTileMapPath.parent_path() );
+	}
+
+	boost::filesystem::copy_file( tempIdTileMapPath, autosaveIdTileMapPath );
+
+    Core::Printf( "Segmentation autosaved." );
+
+}
+
+void FileSystemTileServer::DeleteTempFiles()
+{
+    //
+    // Delete tile files
+    //
+
+    Core::Printf( "Deleting temp files." );
+
+    int4 numTiles = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "SourceMap" ).numTiles;
+
+    TiledVolumeDescription tempVolumeDesctiption = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "TempIdMap" );
+    TiledVolumeDescription autosaveVolumeDesctiption = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "IdMap" );
+
+    for ( int w = 0; w < numTiles.w; w++ )
+    {
+        //Core::Printf( "Saving w=", w, "." );
+        for ( int z = 0; z < numTiles.z; z++ )
+        {
+            for ( int y = 0; y < numTiles.y; y++ )
+            {
+                for ( int x = 0; x < numTiles.x; x++ )
+                {
+                    std::string tempTilePathString = Core::ToString(
+                        tempVolumeDesctiption.imageDataDirectory, "\\",
+                        "w=", Core::ToStringZeroPad( w, 8 ), "\\",
+                        "z=", Core::ToStringZeroPad( z, 8 ), "\\",
+                        "y=", Core::ToStringZeroPad( y, 8 ), ",",
+                        "x=", Core::ToStringZeroPad( x, 8 ), ".",
+                        tempVolumeDesctiption.fileExtension );
+
+                    boost::filesystem::path tempTilePath = boost::filesystem::path( tempTilePathString );
+
+					if ( boost::filesystem::exists( tempTilePath ) )
+                    {
+						boost::filesystem::remove( tempTilePath );
+                    }
+                }
+            }
+        }
+    }
+
+    //
+    // delete temp idTileMap
+    //
+
+    Core::Printf( "Autosave copying idTileMap." );
+
+    boost::filesystem::path tempIdTileMapPath = boost::filesystem::path( mTiledDatasetDescription.paths.Get( "TempIdTileMap" ) );
+
+	if ( boost::filesystem::exists( tempIdTileMapPath ) )
+	{
+		boost::filesystem::remove( tempIdTileMapPath );
+	}
+
+    Core::Printf( "Temp files deleted." );
+
+}
+
 
 int FileSystemTileServer::GetTileCountForId( int segId )
 {

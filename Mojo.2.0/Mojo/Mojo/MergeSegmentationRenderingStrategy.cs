@@ -49,7 +49,7 @@ namespace Mojo
             mTileManager = tileManager;
             mDebugRenderer = new DebugRenderer( device );
 
-            mEffect = EffectUtil.CompileEffect( device, @"Shaders\TileManager2D.fx" );
+            mEffect = EffectUtil.CompileEffect( device, @"Shaders\MergeRenderer2D.fx" );
 
             var positionTexcoordInputElements = new[]
                                                 {
@@ -258,6 +258,7 @@ namespace Mojo
             }
             mEffect.GetVariableByName( "gTransform" ).AsMatrix().SetMatrix( camera.GetLookAtMatrix() * camera.GetProjectionMatrix() );
             mEffect.GetVariableByName( "gSegmentationRatio" ).AsScalar().Set( mTileManager.SegmentationVisibilityRatio );
+            mEffect.GetVariableByName( "gBoundaryLinesVisible" ).AsScalar().Set( mTileManager.ShowBoundaryLines );
             mEffect.GetVariableByName( "gSelectedSegmentId" ).AsScalar().Set( mTileManager.SelectedSegmentId );
             mEffect.GetVariableByName( "gMouseOverSegmentId" ).AsScalar().Set( mTileManager.MouseOverSegmentId );
 

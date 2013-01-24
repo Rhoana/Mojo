@@ -23,8 +23,6 @@
     <ClInclude Include="ObservableDictionary.hpp" />
     <ClInclude Include="NotifyPropertyChanged.hpp" />
     <ClInclude Include="PrimitiveMap.hpp" />
-    <ClInclude Include="Segmenter.hpp" />
-    <ClInclude Include="SegmenterImageStackLoader.hpp" />
     <ClInclude Include="Thrust.hpp" />
     <ClInclude Include="TileCacheEntry.hpp" />
     <ClInclude Include="TiledDatasetDescription.hpp" />
@@ -38,8 +36,6 @@
     <ClCompile Include="Cuda.cpp" />
     <ClCompile Include="NotifyPropertyChanged.cpp" />
     <ClCompile Include="PrimitiveMap.cpp" />
-    <ClCompile Include="Segmenter.cpp" />
-    <ClCompile Include="SegmenterImageStackLoader.cpp" />
     <ClCompile Include="Thrust.cpp" />
     <ClCompile Include="TileCacheEntry.cpp" />
     <ClCompile Include="TiledDatasetDescription.cpp" />

@@ -2,11 +2,9 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClInclude Include="Cuda.hpp" />
-    <ClInclude Include="Segmenter.hpp" />
     <ClInclude Include="VolumeDescription.hpp" />
     <ClInclude Include="NotifyPropertyChanged.hpp" />
     <ClInclude Include="Thrust.hpp" />
-    <ClInclude Include="SegmenterImageStackLoader.hpp" />
     <ClInclude Include="TileManager.hpp" />
     <ClInclude Include="TiledVolumeDescription.hpp" />
     <ClInclude Include="TiledDatasetDescription.hpp" />
@@ -17,11 +15,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Cuda.cpp" />
-    <ClCompile Include="Segmenter.cpp" />
     <ClCompile Include="VolumeDescription.cpp" />
     <ClCompile Include="NotifyPropertyChanged.cpp" />
     <ClCompile Include="Thrust.cpp" />
-    <ClCompile Include="SegmenterImageStackLoader.cpp" />
     <ClCompile Include="TileManager.cpp" />
     <ClCompile Include="TiledVolumeDescription.cpp" />
     <ClCompile Include="TiledDatasetDescription.cpp" />

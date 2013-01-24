@@ -47,6 +47,8 @@ public:
 
     void                                                  SaveSegmentation();
     void                                                  SaveSegmentationAs( std::string savePath );
+    void                                                  AutosaveSegmentation();
+    void                                                  DeleteTempFiles();
 
     void                                                  Update();
 
