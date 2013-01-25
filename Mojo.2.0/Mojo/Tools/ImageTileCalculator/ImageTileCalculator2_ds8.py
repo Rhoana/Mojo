@@ -25,22 +25,22 @@ tile_num_pixels_x = 512
 ##output_image_extension     = '.tif'
 ##image_resize_filter        = PIL.Image.ANTIALIAS
 
-original_input_images_path = 'C:\\dev\\datasets\\conn\\main_dataset\\cube2\\input_images'
-output_tile_image_path     = 'C:\\dev\\datasets\\Cube2x1124\\mojo\\images\\tiles'
-#output_pyramid_image_path  = 'C:\\dev\\datasets\\Cube2\\mojo\\images\\pyramid'
-output_tile_volume_file    = 'C:\\dev\\datasets\\Cube2x1124\\mojo\\images\\tiledVolumeDescription.xml'
+##original_input_images_path = 'C:\\dev\\datasets\\conn\\main_dataset\\cube2\\input_images'
+##output_tile_image_path     = 'C:\\dev\\datasets\\Cube2\\mojo\\images\\tiles'
+###output_pyramid_image_path  = 'C:\\dev\\datasets\\Cube2\\mojo\\images\\pyramid'
+##output_tile_volume_file    = 'C:\\dev\\datasets\\Cube2\\mojo\\images\\tiledVolumeDescription.xml'
+##output_image_extension     = '.tif'
+##image_resize_filter        = PIL.Image.ANTIALIAS
+
+original_input_images_path = 'C:\\dev\\datasets\\conn\\main_dataset\\5k_cube\\input_images'
+output_tile_image_path     = 'C:\\dev\\datasets\\Cube1_ds8\\mojo\\images\\tiles'
+output_pyramid_image_path  = 'C:\\dev\\datasets\\Cube1_ds8\\mojo\\images\\pyramid'
+output_tile_volume_file    = 'C:\\dev\\datasets\\Cube1_ds8\\mojo\\images\\tiledVolumeDescription.xml'
+input_image_extension     = '.tiff'
 output_image_extension     = '.tif'
 image_resize_filter        = PIL.Image.ANTIALIAS
 
-##nimages_to_process            = 50
-nimages_to_process            = 1124
-
-#original_input_images_path = 'C:\\dev\\datasets\\challengeCubeV2x20\\images'
-#output_tile_image_path     = 'C:\\dev\\datasets\\challengeCubeV2x20\\mojo\\images\\tiles'
-#output_pyramid_image_path  = 'C:\\dev\\datasets\\challengeCubeV2x20\\mojo\\images\\pyramid'
-#output_tile_volume_file    = 'C:\\dev\\datasets\\challengeCubeV2x20\\mojo\\images\\tiledVolumeDescription.xml'
-#output_image_extension     = '.png'
-#image_resize_filter        = PIL.Image.ANTIALIAS
+nimages_to_process            = 999
 
 #original_input_images_path = 'C:\\dev\\datasets\\challengeCubeFirstTenSlices2\\images'
 #output_tile_image_path     = 'C:\\dev\\datasets\\challengeCubeFirstTenSlices2\\mojo\\images\\tiles'
@@ -84,7 +84,7 @@ def mkdir_safe( dir_to_make ):
         os.system( execute_string )
                 
         
-files = sorted( glob.glob( original_input_images_path + '\\*' + output_image_extension ) )
+files = sorted( glob.glob( original_input_images_path + '\\*' + input_image_extension ) )
 
 tile_index_z = 0
 
@@ -93,6 +93,10 @@ for file in files:
 
     ( original_image_num_pixels_x, original_image_num_pixels_y ) = original_image.size
 
+    ## Downsample by 8x
+    original_image_num_pixels_y = original_image_num_pixels_y / 8
+    original_image_num_pixels_x = original_image_num_pixels_x / 8
+    
     current_image_num_pixels_y = original_image_num_pixels_y
     current_image_num_pixels_x = original_image_num_pixels_x
     current_tile_data_space_y  = tile_num_pixels_y

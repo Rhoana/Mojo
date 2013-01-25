@@ -125,7 +125,7 @@ void FileSystemTileServer::SaveIdTileMapToTemp()
 
     for ( tileMapIt = mIdTileMap.GetHashMap().begin(); tileMapIt != mIdTileMap.GetHashMap().end(); ++tileMapIt )
     {
-        tileMapEntries += tileMapIt->second.size();
+        tileMapEntries += (unsigned int) tileMapIt->second.size();
     }
 
     size_t shape[] = { tileMapEntries, 5 };
@@ -278,105 +278,137 @@ void FileSystemTileServer::SaveSegmentationAs( std::string savePath )
 
 void FileSystemTileServer::AutosaveSegmentation()
 {
-	//
-    // save any tile changes (to temp directory)
-    //
-
-    Core::Printf( "Autosaving tiles (temp)." );
-
-    FlushFileSystemTileCacheChanges();
-
-    //
-    // save the idTileMap (to temp directory)
-    //
-
-	Core::Printf( "Autosaving idTileMap (temp)." );
-
-	SaveIdTileMapToTemp();
-
-    //
-    // move changed tiles to the autosave directory
-    //
-
-    Core::Printf( "Autosave copying all modified tiles." );
-
-    int4 numTiles = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "SourceMap" ).numTiles;
-
-    //size_t shape[] = { numTiles.w, numTiles.z, numTiles.y, numTiles.x };
-    //mTileCachePageTable = marray::Marray< int >( shape, shape + 4 );
-
-    TiledVolumeDescription tempVolumeDesctiption = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "TempIdMap" );
-    TiledVolumeDescription autosaveVolumeDesctiption = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "AutosaveIdMap" );
-
-    for ( int w = 0; w < numTiles.w; w++ )
+    if ( mIsSegmentationLoaded )
     {
-        //Core::Printf( "Saving w=", w, "." );
-        for ( int z = 0; z < numTiles.z; z++ )
+        bool success = false;
+        int attempts = 0;
+
+        while ( !success && attempts < 2 )
         {
-            for ( int y = 0; y < numTiles.y; y++ )
+
+            ++attempts;
+
+            try
             {
-                for ( int x = 0; x < numTiles.x; x++ )
+
+	            //
+                // save any tile changes (to temp directory)
+                //
+
+                Core::Printf( "Autosaving tiles (temp)." );
+
+                FlushFileSystemTileCacheChanges();
+
+                //
+                // save the idTileMap (to temp directory)
+                //
+
+	            Core::Printf( "Autosaving idTileMap (temp)." );
+
+	            SaveIdTileMapToTemp();
+
+                //
+                // move changed tiles to the autosave directory
+                //
+
+                Core::Printf( "Autosave copying all modified tiles." );
+
+                int4 numTiles = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "SourceMap" ).numTiles;
+
+                //size_t shape[] = { numTiles.w, numTiles.z, numTiles.y, numTiles.x };
+                //mTileCachePageTable = marray::Marray< int >( shape, shape + 4 );
+
+                TiledVolumeDescription tempVolumeDesctiption = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "TempIdMap" );
+                TiledVolumeDescription autosaveVolumeDesctiption = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "AutosaveIdMap" );
+
+                for ( int w = 0; w < numTiles.w; w++ )
                 {
-                    std::string tempTilePathString = Core::ToString(
-                        tempVolumeDesctiption.imageDataDirectory, "\\",
-                        "w=", Core::ToStringZeroPad( w, 8 ), "\\",
-                        "z=", Core::ToStringZeroPad( z, 8 ), "\\",
-                        "y=", Core::ToStringZeroPad( y, 8 ), ",",
-                        "x=", Core::ToStringZeroPad( x, 8 ), ".",
-                        tempVolumeDesctiption.fileExtension );
-
-                    boost::filesystem::path tempTilePath = boost::filesystem::path( tempTilePathString );
-
-                    std::string autosaveTilePathString = Core::ToString(
-                        autosaveVolumeDesctiption.imageDataDirectory, "\\",
-                        "w=", Core::ToStringZeroPad( w, 8 ), "\\",
-                        "z=", Core::ToStringZeroPad( z, 8 ), "\\",
-                        "y=", Core::ToStringZeroPad( y, 8 ), ",",
-                        "x=", Core::ToStringZeroPad( x, 8 ), ".",
-                        autosaveVolumeDesctiption.fileExtension );
-
-                    boost::filesystem::path autosaveTilePath = boost::filesystem::path( autosaveTilePathString );
-
-					if ( boost::filesystem::exists( autosaveTilePath ) )
-					{
-                        boost::filesystem::remove( autosaveTilePath );
-					}
-					else
-					{
-						boost::filesystem::create_directories( autosaveTilePath.parent_path() );
-					}
-
-					if ( boost::filesystem::exists( tempTilePath ) )
+                    //Core::Printf( "Saving w=", w, "." );
+                    for ( int z = 0; z < numTiles.z; z++ )
                     {
-						boost::filesystem::copy_file( tempTilePath, autosaveTilePath );
+                        for ( int y = 0; y < numTiles.y; y++ )
+                        {
+                            for ( int x = 0; x < numTiles.x; x++ )
+                            {
+                                std::string tempTilePathString = Core::ToString(
+                                    tempVolumeDesctiption.imageDataDirectory, "\\",
+                                    "w=", Core::ToStringZeroPad( w, 8 ), "\\",
+                                    "z=", Core::ToStringZeroPad( z, 8 ), "\\",
+                                    "y=", Core::ToStringZeroPad( y, 8 ), ",",
+                                    "x=", Core::ToStringZeroPad( x, 8 ), ".",
+                                    tempVolumeDesctiption.fileExtension );
+
+                                boost::filesystem::path tempTilePath = boost::filesystem::path( tempTilePathString );
+
+                                std::string autosaveTilePathString = Core::ToString(
+                                    autosaveVolumeDesctiption.imageDataDirectory, "\\",
+                                    "w=", Core::ToStringZeroPad( w, 8 ), "\\",
+                                    "z=", Core::ToStringZeroPad( z, 8 ), "\\",
+                                    "y=", Core::ToStringZeroPad( y, 8 ), ",",
+                                    "x=", Core::ToStringZeroPad( x, 8 ), ".",
+                                    autosaveVolumeDesctiption.fileExtension );
+
+                                boost::filesystem::path autosaveTilePath = boost::filesystem::path( autosaveTilePathString );
+
+					            if ( boost::filesystem::exists( autosaveTilePath ) )
+					            {
+                                    boost::filesystem::remove( autosaveTilePath );
+					            }
+					            else
+					            {
+						            boost::filesystem::create_directories( autosaveTilePath.parent_path() );
+					            }
+
+					            if ( boost::filesystem::exists( tempTilePath ) )
+                                {
+						            boost::filesystem::copy_file( tempTilePath, autosaveTilePath );
+                                }
+                            }
+                        }
                     }
                 }
+
+                //
+                // move idTileMap to the save directory
+                //
+
+                Core::Printf( "Autosave copying idTileMap." );
+
+                boost::filesystem::path tempIdTileMapPath = boost::filesystem::path( mTiledDatasetDescription.paths.Get( "TempIdTileMap" ) );
+                boost::filesystem::path autosaveIdTileMapPath = boost::filesystem::path( mTiledDatasetDescription.paths.Get( "AutosaveIdTileMap" ) );
+
+	            if ( boost::filesystem::exists( autosaveIdTileMapPath ) )
+	            {
+		            boost::filesystem::remove( autosaveIdTileMapPath );
+	            }
+	            else
+	            {
+		            boost::filesystem::create_directories( autosaveIdTileMapPath.parent_path() );
+	            }
+
+	            boost::filesystem::copy_file( tempIdTileMapPath, autosaveIdTileMapPath );
+
+                Core::Printf( "Segmentation autosaved." );
+
+                success = true;
+            }
+            catch ( std::bad_alloc e )
+            {
+                Core::Printf( "WARNING: std::bad_alloc Error while trying to autosave - reducing tile cache size." );
+                ReduceCacheSize();
+            }
+            catch ( ... )
+            {
+                Core::Printf( "WARNING: Unexpected error while trying to autosave - attempting to continue." );
+                ReduceCacheSize();
             }
         }
+
+        if ( !success )
+        {
+            Core::Printf( "ERROR: Unable to autosave - possibly out of memory." );
+        }
     }
-
-    //
-    // move idTileMap to the save directory
-    //
-
-    Core::Printf( "Autosave copying idTileMap." );
-
-    boost::filesystem::path tempIdTileMapPath = boost::filesystem::path( mTiledDatasetDescription.paths.Get( "TempIdTileMap" ) );
-    boost::filesystem::path autosaveIdTileMapPath = boost::filesystem::path( mTiledDatasetDescription.paths.Get( "AutosaveIdTileMap" ) );
-
-	if ( boost::filesystem::exists( autosaveIdTileMapPath ) )
-	{
-		boost::filesystem::remove( autosaveIdTileMapPath );
-	}
-	else
-	{
-		boost::filesystem::create_directories( autosaveIdTileMapPath.parent_path() );
-	}
-
-	boost::filesystem::copy_file( tempIdTileMapPath, autosaveIdTileMapPath );
-
-    Core::Printf( "Segmentation autosaved." );
-
 }
 
 void FileSystemTileServer::DeleteTempFiles()
@@ -440,7 +472,7 @@ void FileSystemTileServer::DeleteTempFiles()
 
 int FileSystemTileServer::GetTileCountForId( int segId )
 {
-    return mIdTileMap.Get( segId ).size();
+    return (int) mIdTileMap.Get( segId ).size();
 }
 
 
@@ -1237,7 +1269,7 @@ void FileSystemTileServer::UpdateSplitTilesBoundingBox( int2 upperLeft, int2 low
                 if ( minX < maxX && minY < maxY )
                 {
 				    ++tileCount;
-				    Core::Printf( "Copying result tile ", tileCount, "." );
+				    //Core::Printf( "Copying result tile ", tileCount, "." );
 
 				    int4 tileIndex = make_int4( mSplitWindowStart.x + xd, mSplitWindowStart.y + yd, mSplitWindowStart.z, 0 );
 				    volumeDescriptions = LoadTile( tileIndex );
@@ -1249,9 +1281,9 @@ void FileSystemTileServer::UpdateSplitTilesBoundingBox( int2 upperLeft, int2 low
 				    // Copy result values into the tile
 				    //
 
-                    for ( int tileY = minY; tileY < maxY; ++tileY )
+                    for ( int tileY = minY; tileY <= maxY; ++tileY )
                     {
-                        for ( int tileX = minX; tileX < maxX; ++tileX )
+                        for ( int tileX = minX; tileX <= maxX; ++tileX )
                         {
                             int tileIndex1D = tileX + tileY * numVoxelsPerTile.x;
                             int areaIndex1D = xOffset + tileX + ( yOffset + tileY ) * mSplitWindowWidth;
@@ -1388,7 +1420,7 @@ void FileSystemTileServer::ResetSplitTiles()
 			{
 
 				++tileCount;
-				Core::Printf( "Copying result tile ", tileCount, "." );
+				//Core::Printf( "Copying result tile ", tileCount, "." );
 
 				int4 tileIndex = make_int4( mSplitWindowStart.x + xd, mSplitWindowStart.y + yd, mSplitWindowStart.z, 0 );
 				volumeDescriptions = LoadTile( tileIndex );
@@ -1542,7 +1574,7 @@ void FileSystemTileServer::LoadSplitDistances( int segId )
         {
 
             ++tileCount;
-            Core::Printf( "Loading distance tile ", tileCount, "." );
+            //Core::Printf( "Loading distance tile ", tileCount, "." );
 
             int4 tileIndex = make_int4( mSplitWindowStart.x + xd, mSplitWindowStart.y + yd, mSplitWindowStart.z, 0 );
             volumeDescriptions = LoadTile( tileIndex );
@@ -1607,106 +1639,134 @@ void FileSystemTileServer::PrepForSplit( int segId, float3 pointTileSpace )
 
     if ( mIsSegmentationLoaded )
     {
+        bool success = false;
+        int attempts = 0;
 
-        Core::Printf( "\nPreparing for split of segment ", segId, " at x=", pointTileSpace.x, ", y=", pointTileSpace.y, ", z=", pointTileSpace.z, ".\n" );
-
-        int3 numVoxels = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "IdMap" ).numVoxels;
-        int3 numVoxelsPerTile = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "IdMap" ).numVoxelsPerTile;
-        int4 numTiles = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "IdMap" ).numTiles;
-
-        int minTileX = numTiles.x;
-        int maxTileX = 0;
-        int minTileY = numTiles.y;
-        int maxTileY = 0;
-
-        Mojo::Core::MojoTileSet tilesContainingSegId = mIdTileMap.Get( segId );
-
-        for ( Mojo::Core::MojoTileSet::iterator tileIterator = tilesContainingSegId.begin(); tileIterator != tilesContainingSegId.end(); ++tileIterator )
+        while ( !success && attempts < 2 )
         {
-            if ( tileIterator->z == pointTileSpace.z && tileIterator->w == 0 )
+            ++attempts;
+
+            try
             {
-                //Include this tile
-                minTileX = MIN( minTileX, tileIterator->x );
-                maxTileX = MAX( maxTileX, tileIterator->x );
-                minTileY = MIN( minTileY, tileIterator->y );
-                maxTileY = MAX( maxTileY, tileIterator->y );
+
+                Core::Printf( "\nPreparing for split of segment ", segId, " at x=", pointTileSpace.x, ", y=", pointTileSpace.y, ", z=", pointTileSpace.z, ".\n" );
+
+                int3 numVoxels = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "IdMap" ).numVoxels;
+                int3 numVoxelsPerTile = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "IdMap" ).numVoxelsPerTile;
+                int4 numTiles = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "IdMap" ).numTiles;
+
+                int minTileX = numTiles.x;
+                int maxTileX = 0;
+                int minTileY = numTiles.y;
+                int maxTileY = 0;
+
+                Mojo::Core::MojoTileSet tilesContainingSegId = mIdTileMap.Get( segId );
+
+                for ( Mojo::Core::MojoTileSet::iterator tileIterator = tilesContainingSegId.begin(); tileIterator != tilesContainingSegId.end(); ++tileIterator )
+                {
+                    if ( tileIterator->z == pointTileSpace.z && tileIterator->w == 0 )
+                    {
+                        //Include this tile
+                        minTileX = MIN( minTileX, tileIterator->x );
+                        maxTileX = MAX( maxTileX, tileIterator->x );
+                        minTileY = MIN( minTileY, tileIterator->y );
+                        maxTileY = MAX( maxTileY, tileIterator->y );
+                    }
+                }
+
+                if ( minTileX > maxTileX || minTileY > maxTileY )
+		        {
+			        //
+			        // No tile in this z section - ignore
+			        //
+			        return;
+		        }
+
+                // Restrict search tiles to max 2 tiles away from clicked location
+                if ( minTileX < ( (int) pointTileSpace.x ) - 2 )
+                    minTileX = ( (int) pointTileSpace.x ) - 2;
+                if ( maxTileX > ( (int) pointTileSpace.x ) + 2 )
+                    maxTileX = ( (int) pointTileSpace.x ) + 2;
+
+                if ( minTileY < ( (int) pointTileSpace.y ) - 2 )
+                    minTileY = ( (int) pointTileSpace.y ) - 2;
+                if ( maxTileY > ( (int) pointTileSpace.y ) + 2 )
+                    maxTileY = ( (int) pointTileSpace.y ) + 2;
+
+                //
+                // Calculate sizes
+                //
+                mSplitWindowStart = make_int3( minTileX, minTileY, (int) pointTileSpace.z );
+                mSplitWindowNTiles = make_int3( ( maxTileX - minTileX + 1 ), ( maxTileY - minTileY + 1 ), 1 );
+
+                Core::Printf( "mSplitWindowStart=", mSplitWindowStart.x, ":", mSplitWindowStart.y, ":", mSplitWindowStart.z, ".\n" );
+                Core::Printf( "mSplitWindowSize=", mSplitWindowNTiles.x, ":", mSplitWindowNTiles.y, ":", mSplitWindowNTiles.z, ".\n" );
+
+		        mSplitWindowWidth = numVoxelsPerTile.x * mSplitWindowNTiles.x;
+		        mSplitWindowHeight = numVoxelsPerTile.y * mSplitWindowNTiles.y;
+		        mSplitWindowNPix = mSplitWindowWidth * mSplitWindowHeight;
+
+                Core::Printf( "mSplitWindowWidth=", mSplitWindowWidth, ", mSplitWindowHeight=", mSplitWindowHeight, ", nPix=", mSplitWindowNPix, ".\n" );
+
+		        mSplitLabelCount = 0;
+
+                //
+                // Allocate working space (free if necessary)
+                //
+
+                if ( mSplitStepDist != 0 )
+                    delete[] mSplitStepDist;
+
+                if ( mSplitResultDist != 0 )
+                    delete[] mSplitResultDist;
+
+                if ( mSplitPrev != 0 )
+                    delete[] mSplitPrev;
+
+                if ( mSplitSearchMask != 0 )
+                    delete[] mSplitSearchMask;
+
+                if ( mSplitDrawArea != 0 )
+                    delete[] mSplitDrawArea;
+
+		        if ( mSplitBorderTargets != 0 )
+			        delete[] mSplitBorderTargets;
+
+                if ( mSplitResultArea != 0 )
+                    delete[] mSplitResultArea;
+
+		        mSplitStepDist = new int[ mSplitWindowNPix ];
+                mSplitResultDist = new int[ mSplitWindowNPix ];
+		        mSplitPrev = new int[ mSplitWindowNPix ];
+		        mSplitSearchMask = new char[ mSplitWindowNPix ];
+		        mSplitDrawArea = new char[ mSplitWindowNPix ];
+		        mSplitBorderTargets = new char[ mSplitWindowNPix ];
+		        mSplitResultArea = new unsigned int[ mSplitWindowNPix ];
+
+                LoadSplitDistances( segId );
+
+                ResetSplitState();
+
+                Core::Printf( "\nFinished preparing for split of segment ", segId, " at z=", pointTileSpace.z, ".\n" );
+
+                success = true;
+            }
+            catch ( std::bad_alloc e )
+            {
+                Core::Printf( "WARNING: std::bad_alloc Error while preparing for split - reducing tile cache size." );
+                ReduceCacheSize();
+            }
+            catch ( ... )
+            {
+                Core::Printf( "WARNING: Unexpected error while preparing for split - attempting to continue." );
+                ReduceCacheSize();
             }
         }
 
-        if ( minTileX > maxTileX || minTileY > maxTileY )
-		{
-			//
-			// No tile in this z section - ignore
-			//
-			return;
-		}
-
-        // Restrict search tiles to max 2 tiles away from clicked location
-        if ( minTileX < ( (int) pointTileSpace.x ) - 2 )
-            minTileX = ( (int) pointTileSpace.x ) - 2;
-        if ( maxTileX > ( (int) pointTileSpace.x ) + 2 )
-            maxTileX = ( (int) pointTileSpace.x ) + 2;
-
-        if ( minTileY < ( (int) pointTileSpace.y ) - 2 )
-            minTileY = ( (int) pointTileSpace.y ) - 2;
-        if ( maxTileY > ( (int) pointTileSpace.y ) + 2 )
-            maxTileY = ( (int) pointTileSpace.y ) + 2;
-
-        //
-        // Calculate sizes
-        //
-        mSplitWindowStart = make_int3( minTileX, minTileY, (int) pointTileSpace.z );
-        mSplitWindowNTiles = make_int3( ( maxTileX - minTileX + 1 ), ( maxTileY - minTileY + 1 ), 1 );
-
-        Core::Printf( "mSplitWindowStart=", mSplitWindowStart.x, ":", mSplitWindowStart.y, ":", mSplitWindowStart.z, ".\n" );
-        Core::Printf( "mSplitWindowSize=", mSplitWindowNTiles.x, ":", mSplitWindowNTiles.y, ":", mSplitWindowNTiles.z, ".\n" );
-
-		mSplitWindowWidth = numVoxelsPerTile.x * mSplitWindowNTiles.x;
-		mSplitWindowHeight = numVoxelsPerTile.y * mSplitWindowNTiles.y;
-		mSplitWindowNPix = mSplitWindowWidth * mSplitWindowHeight;
-
-        Core::Printf( "mSplitWindowWidth=", mSplitWindowWidth, ", mSplitWindowHeight=", mSplitWindowHeight, ", nPix=", mSplitWindowNPix, ".\n" );
-
-		mSplitLabelCount = 0;
-
-        //
-        // Allocate working space (free if necessary)
-        //
-
-        if ( mSplitStepDist != 0 )
-            delete[] mSplitStepDist;
-
-        if ( mSplitResultDist != 0 )
-            delete[] mSplitResultDist;
-
-        if ( mSplitPrev != 0 )
-            delete[] mSplitPrev;
-
-        if ( mSplitSearchMask != 0 )
-            delete[] mSplitSearchMask;
-
-        if ( mSplitDrawArea != 0 )
-            delete[] mSplitDrawArea;
-
-		if ( mSplitBorderTargets != 0 )
-			delete[] mSplitBorderTargets;
-
-        if ( mSplitResultArea != 0 )
-            delete[] mSplitResultArea;
-
-		mSplitStepDist = new int[ mSplitWindowNPix ];
-        mSplitResultDist = new int[ mSplitWindowNPix ];
-		mSplitPrev = new int[ mSplitWindowNPix ];
-		mSplitSearchMask = new char[ mSplitWindowNPix ];
-		mSplitDrawArea = new char[ mSplitWindowNPix ];
-		mSplitBorderTargets = new char[ mSplitWindowNPix ];
-		mSplitResultArea = new unsigned int[ mSplitWindowNPix ];
-
-        LoadSplitDistances( segId );
-
-        ResetSplitState();
-
-        Core::Printf( "\nFinished preparing for split of segment ", segId, " at z=", pointTileSpace.z, ".\n" );
+        if ( !success )
+        {
+            Core::Printf( "ERROR: Unable to prep for split - possibly out of memory." );
+        }
     }
 
 }
@@ -2728,11 +2788,11 @@ void FileSystemTileServer::FindBoundaryJoinPoints2D( int segId )
 	//
     if ( mIsSegmentationLoaded && mSplitSourcePoints.size() > 0 )
     {
-		Core::Printf( "\nFinding Split line for segment ", segId, " with ", mSplitSourcePoints.size(), " split segments.\n" );
+		Core::Printf( "\nFinding Split line for segment ", segId, " with ", (unsigned int) mSplitSourcePoints.size(), " split segments.\n" );
 
         int3 numVoxelsPerTile = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "IdMap" ).numVoxelsPerTile;
 
-        int nSources = mSplitSourcePoints.size();
+        int nSources = (int) mSplitSourcePoints.size();
         int* sourceLinks = new int[ nSources ];
         int* sourceLocations = new int[ nSources ];
 

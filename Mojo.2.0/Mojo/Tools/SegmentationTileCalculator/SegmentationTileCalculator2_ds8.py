@@ -36,47 +36,47 @@ tile_num_pixels_x             = 512
 ##output_tile_volume_file       = 'C:\\dev\\datasets\\challengeCubeFirstTenSlices2\\mojo\\ids\\tiledVolumeDescription.xml'
 
 
-original_input_color_map_path = 'C:\\dev\\datasets\\conn\\main_dataset\\cube2\\diced_xy=512_z=32_xyOv=128_zOv=12_dwnSmp=1\\res_from_Nov29_PF\\FS=1\\cmap2.mat'
-original_input_ids_path       = 'C:\\dev\\datasets\\conn\\main_dataset\\cube2\\diced_xy=512_z=32_xyOv=128_zOv=12_dwnSmp=1\\res_from_Nov29_PF\\FS=1\\stitched\\labels_grow'
-#original_input_color_map_path = 'C:\\dev\\datasets\\conn\\main_dataset\\cube2\\diced_xy=512_z=32_xyOv=128_zOv=12_dwnSmp=1\\res_from_Nov29_PF\\FS=1\\cmap.mat'
-##original_input_ids_path       = 'C:\\dev\\datasets\\conn\\main_dataset\\cube2\\diced_xy=512_z=32_xyOv=128_zOv=12_dwnSmp=1\\res_from_Nov29_PF\\FS=1\\stitched\\labels\\'
-
-color_map_variable_name       = 'cmap'
-##ids_variable_name             = 'i_L'
-ids_upscale_factor            = 1
-
-#output_tile_colors_path       = 'C:\\dev\\datasets\\Cube2seg\\mojo\\ids\\debug\\tiles\\colors'
-#output_pyramid_colors_path    = 'C:\\dev\\datasets\\Cube2seg\\mojo\\ids\\debug\\pyramid\\colors'
-
-output_tile_ids_path          = 'C:\\dev\\datasets\\Cube2x1124\\mojo\\ids\\tiles'
-#output_pyramid_ids_path       = 'C:\\dev\\datasets\\Cube2seg\\mojo\\ids\\pyramid'
-
-output_id_tile_map_path       = 'C:\\dev\\datasets\\Cube2x1124\\mojo\\idTileMap'
-output_id_color_map_path      = 'C:\\dev\\datasets\\Cube2x1124\\mojo\\idColorMap'
-output_id_counts_path      = 'C:\\dev\\datasets\\Cube2x1124\\mojo\\idCounts'
-
-output_tile_volume_file       = 'C:\\dev\\datasets\\Cube2x1124\\mojo\\ids\\tiledVolumeDescription.xml'
-
-##nimages_to_process            = 50
-nimages_to_process            = 1124
-
-
-##original_input_color_map_path = 'C:\\dev\\datasets\\conn\\main_dataset\\5K_cube\\diced_xy=512_z=32_xyOv=128_zOv=12_dwnSmp=1\\res_from_0ct15_PF\\FS=1\\cmap.mat'
-##original_input_ids_path       = 'C:\\dev\\datasets\\conn\\main_dataset\\5K_cube\\diced_xy=512_z=32_xyOv=128_zOv=12_dwnSmp=1\\res_from_0ct15_PF\\FS=1\\stitched\\labels_grow'
-######original_input_ids_path       = 'C:\\dev\\datasets\\conn\\main_dataset\\5K_cube\\diced_xy=512_z=32_xyOv=128_zOv=12_dwnSmp=1\\res_from_0ct15_PF\\FS=1\\stitched\\labels\\'
+##original_input_color_map_path = 'C:\\dev\\datasets\\conn\\main_dataset\\cube2\\diced_xy=512_z=32_xyOv=128_zOv=12_dwnSmp=1\\res_from_Nov29_PF\\FS=1\\cmap2.mat'
+##original_input_ids_path       = 'C:\\dev\\datasets\\conn\\main_dataset\\cube2\\diced_xy=512_z=32_xyOv=128_zOv=12_dwnSmp=1\\res_from_Nov29_PF\\FS=1\\stitched\\labels_grow'
+###original_input_color_map_path = 'C:\\dev\\datasets\\conn\\main_dataset\\cube2\\diced_xy=512_z=32_xyOv=128_zOv=12_dwnSmp=1\\res_from_Nov29_PF\\FS=1\\cmap.mat'
+####original_input_ids_path       = 'C:\\dev\\datasets\\conn\\main_dataset\\cube2\\diced_xy=512_z=32_xyOv=128_zOv=12_dwnSmp=1\\res_from_Nov29_PF\\FS=1\\stitched\\labels\\'
 ##
 ##color_map_variable_name       = 'cmap'
+####ids_variable_name             = 'i_L'
 ##ids_upscale_factor            = 1
 ##
-##output_tile_ids_path          = 'C:\\dev\\datasets\\challengeCubeV2x20_nocompression\\mojo\\ids\\tiles'
+###output_tile_colors_path       = 'C:\\dev\\datasets\\Cube2seg\\mojo\\ids\\debug\\tiles\\colors'
+###output_pyramid_colors_path    = 'C:\\dev\\datasets\\Cube2seg\\mojo\\ids\\debug\\pyramid\\colors'
 ##
-##output_id_tile_map_path       = 'C:\\dev\\datasets\\challengeCubeV2x20_nocompression\\mojo\\idTileMap'
-##output_id_color_map_path      = 'C:\\dev\\datasets\\challengeCubeV2x20_nocompression\\mojo\\idColorMap'
-##output_id_counts_path         = 'C:\\dev\\datasets\\challengeCubeV2x20_nocompression\\mojo\\idCounts'
-####
-##output_tile_volume_file       = 'C:\\dev\\datasets\\challengeCubeV2x20G\\mojo\\ids\\tiledVolumeDescription.xml'
+##output_tile_ids_path          = 'C:\\dev\\datasets\\Cube2x50\\mojo\\ids\\tiles'
+###output_pyramid_ids_path       = 'C:\\dev\\datasets\\Cube2seg\\mojo\\ids\\pyramid'
 ##
-##nimages_to_process            = 20
+##output_id_tile_map_path       = 'C:\\dev\\datasets\\Cube2x50\\mojo\\idTileMap'
+##output_id_color_map_path      = 'C:\\dev\\datasets\\Cube2x50\\mojo\\idColorMap'
+##output_id_counts_path      = 'C:\\dev\\datasets\\Cube2x50\\mojo\\idCounts'
+##
+##output_tile_volume_file       = 'C:\\dev\\datasets\\Cube2x50\\mojo\\ids\\tiledVolumeDescription.xml'
+##
+##nimages_to_process            = 50
+###nimages_to_process            = 1124
+
+
+original_input_color_map_path = 'C:\\dev\\datasets\\conn\\main_dataset\\5K_cube\\diced_xy=512_z=32_xyOv=128_zOv=12_dwnSmp=1\\res_from_0ct15_PF\\FS=1\\cmap.mat'
+original_input_ids_path       = 'C:\\dev\\datasets\\conn\\main_dataset\\5K_cube\\diced_xy=512_z=32_xyOv=128_zOv=12_dwnSmp=1\\res_from_0ct15_PF\\FS=1\\stitched\\labels_grow'
+####original_input_ids_path       = 'C:\\dev\\datasets\\conn\\main_dataset\\5K_cube\\diced_xy=512_z=32_xyOv=128_zOv=12_dwnSmp=1\\res_from_0ct15_PF\\FS=1\\stitched\\labels\\'
+
+color_map_variable_name       = 'cmap'
+ids_upscale_factor            = 1
+
+output_tile_ids_path          = 'C:\\dev\\datasets\\Cube1_ds8\\mojo\\ids\\tiles'
+
+output_id_tile_map_path       = 'C:\\dev\\datasets\\Cube1_ds8\\mojo\\idTileMap'
+output_id_color_map_path      = 'C:\\dev\\datasets\\Cube1_ds8\\mojo\\idColorMap'
+output_id_counts_path         = 'C:\\dev\\datasets\\Cube1_ds8\\mojo\\idCounts'
+##
+output_tile_volume_file       = 'C:\\dev\\datasets\\Cube1_ds8\\mojo\\ids\\tiledVolumeDescription.xml'
+
+nimages_to_process            = 999
 
 
 ##original_input_color_map_path = 'C:\\dev\\datasets\\conn\\main_dataset\\ac3train\\res_from_sept_30_minotrC_PF\\FS=1\\cube_coloring\\cmap.mat'
@@ -186,7 +186,10 @@ for file in files:
     current_image_counts = numpy.bincount( original_ids.flatten() )
     current_image_counts_ids = numpy.nonzero( current_image_counts )[0]
     id_counts[ current_image_counts_ids ] = id_counts[ current_image_counts_ids ] + current_image_counts [ current_image_counts_ids ]
-    
+
+    ## Downsample by 8x
+    original_ids = original_ids[ ::8, ::8 ]
+
     ( original_image_num_pixels_x, original_image_num_pixels_y ) = original_ids.shape
 
     current_image_num_pixels_y = original_image_num_pixels_y

@@ -9,17 +9,17 @@ namespace Mojo.Wpf.View
         {
             InitializeComponent();
 
-            SegmentationLabelesListBox.SelectionChanged += SegmentationLabelListBoxSelectionChangedHandler;
+            //SegmentationLabelesListBox.SelectionChanged += SegmentationLabelListBoxSelectionChangedHandler;
         }
 
         public void Dispose()
         {
-            SegmentationLabelesListBox.SelectionChanged -= SegmentationLabelListBoxSelectionChangedHandler;
+            //SegmentationLabelesListBox.SelectionChanged -= SegmentationLabelListBoxSelectionChangedHandler;
         }
 
         private void SegmentationLabelListBoxSelectionChangedHandler( object sender, SelectionChangedEventArgs e )
         {
-            SegmentationLabelesListBox.ScrollIntoView( SegmentationLabelesListBox.SelectedItem );
+            //SegmentationLabelesListBox.ScrollIntoView( SegmentationLabelesListBox.SelectedItem );
         }
     }
 }

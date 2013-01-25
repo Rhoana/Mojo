@@ -54,7 +54,7 @@
                         <Image Width="16" Height="16" Source="{StaticResource SegmentationSave}"/>
                     </MenuItem.Icon>
                 </MenuItem>
-                <MenuItem Name="SaveSegmentationAsMenuItem" Header="Save Segmentation As…" Focusable="False" Command="{Binding Path=SaveSegmentationAsCommand}" IsEnabled="{Binding Path=Engine.TileManager.SegmentationControlsEnabled}" >
+                <MenuItem Name="SaveSegmentationAsMenuItem" Header="Save Segmentation As…" Focusable="False" Command="{Binding Path=SaveSegmentationAsCommand}" IsEnabled="False" >
                     <MenuItem.Icon>
                         <Image Width="16" Height="16" Source="{StaticResource SegmentationSaveAs}"/>
                     </MenuItem.Icon>
@@ -236,6 +236,7 @@
                         </StackPanel>
                     </Button>
                 </Grid>
+                <!-- causes runtime error
                 <ListBox x:Name="SegmentationLabelesListBox" Focusable="False" ItemsSource="{Binding Path=Engine.Segmenter.DatasetDescription.SegmentationLabelDescriptions.Internal}" SelectedItem="{Binding Path=SegmenterDataContext.CurrentSegmentationLabel}" >
                     <ListBox.ItemTemplate>
                         <DataTemplate>
@@ -243,6 +244,7 @@
                         </DataTemplate>
                     </ListBox.ItemTemplate>
                 </ListBox>
+                -->
             </DockPanel>
         </Border>
 

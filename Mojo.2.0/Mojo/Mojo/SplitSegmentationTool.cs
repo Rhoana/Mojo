@@ -80,9 +80,11 @@ namespace Mojo
                     break;
 
                 case System.Windows.Input.Key.OemComma:
+                case System.Windows.Input.Key.OemMinus:
                     mTileManager.DecreaseBrushSize();
                     break;
                 case System.Windows.Input.Key.OemPeriod:
+                case System.Windows.Input.Key.OemPlus:
                     mTileManager.IncreaseBrushSize();
                     break;
 
@@ -119,6 +121,33 @@ namespace Mojo
                     if ( clickedId == mTileManager.SelectedSegmentId && mTileManager.CurrentSplitMode != SplitMode.JoinPoints )
                     {
                         mCurrentlyDrawing = true;
+
+                        if ( mTileManager.CurrentSplitMode == SplitMode.DrawSplit )
+                        {
+                            if ( mouseEventArgs.Button == MouseButtons.Left )
+                            {
+                                mTileManager.Internal.DrawSplit( mTileManager.TiledDatasetView, p, mTileManager.BrushSize );
+                                mEngine.QuickRender();
+                            }
+                            else if ( mouseEventArgs.Button == MouseButtons.Right )
+                            {
+                                mTileManager.Internal.DrawErase( mTileManager.TiledDatasetView, p, mTileManager.BrushSize );
+                                mEngine.QuickRender();
+                            }
+                        }
+                        else if ( mTileManager.CurrentSplitMode == SplitMode.DrawRegions )
+                        {
+                            if ( mouseEventArgs.Button == MouseButtons.Left )
+                            {
+                                mTileManager.Internal.DrawRegionA( mTileManager.TiledDatasetView, p, mTileManager.BrushSize );
+                                mEngine.QuickRender();
+                            }
+                            else if ( mouseEventArgs.Button == MouseButtons.Right )
+                            {
+                                mTileManager.Internal.DrawRegionB( mTileManager.TiledDatasetView, p, mTileManager.BrushSize );
+                                mEngine.QuickRender();
+                            }
+                        }
                     }
                 }
             }
@@ -203,7 +232,19 @@ namespace Mojo
                         //
                         // Merge with the clicked segment in 2D ( try this out to see if it makes sense )
                         //
-                        mTileManager.Internal.ReplaceSegmentationLabelCurrentSlice( clickedId, mTileManager.SelectedSegmentId, mTileManager.TiledDatasetView, p );
+                        if ( mTileManager.CurrentMergeMode == MergeMode.Fill2D )
+                        {
+                            mTileManager.Internal.ReplaceSegmentationLabelCurrentSlice( clickedId, newId, mTileManager.TiledDatasetView, p );
+                        }
+                        else if ( mTileManager.CurrentMergeMode == MergeMode.Fill3D )
+                        {
+                            mTileManager.Internal.ReplaceSegmentationLabelCurrentConnectedComponent( clickedId, newId, mTileManager.TiledDatasetView, p );
+                        }
+                        else
+                        {
+                            mTileManager.Internal.ReplaceSegmentationLabel( clickedId, newId );
+                        }
+                        mTileManager.ChangesMade = true;
                         mTileManager.Internal.PrepForSplit( mTileManager.SelectedSegmentId, p );
                         mTileManager.ChangesMade = true;
                     }
@@ -259,12 +300,12 @@ namespace Mojo
                         {
                             if ( mouseEventArgs.Button == MouseButtons.Left )
                             {
-                                mTileManager.Internal.DrawErase( mTileManager.TiledDatasetView, p, mTileManager.BrushSize );
+                                mTileManager.Internal.DrawSplit( mTileManager.TiledDatasetView, p, mTileManager.BrushSize );
                                 mEngine.QuickRender();
                             }
                             else if ( mouseEventArgs.Button == MouseButtons.Right )
                             {
-                                mTileManager.Internal.DrawSplit( mTileManager.TiledDatasetView, p, mTileManager.BrushSize );
+                                mTileManager.Internal.DrawErase( mTileManager.TiledDatasetView, p, mTileManager.BrushSize );
                                 mEngine.QuickRender();
                             }
                         }

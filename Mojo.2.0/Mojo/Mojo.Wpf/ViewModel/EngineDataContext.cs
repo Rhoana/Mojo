@@ -284,7 +284,11 @@ namespace Mojo.Wpf.ViewModel
 
         public void AutoSave( object sender, EventArgs eventArgs )
         {
-            Engine.TileManager.AutoSaveSegmentation();
+            if ( Engine.TileManager.ChangesMade )
+            {
+                Engine.TileManager.AutoSaveSegmentation();
+                Engine.TileManager.AutoChangesMade = false;
+            }
         }
 
     }

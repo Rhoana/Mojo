@@ -284,6 +284,20 @@ namespace Mojo
             }
         }
 
+        private bool mAutoChangesMade = false;
+        public bool AutoChangesMade
+        {
+            get { return mAutoChangesMade; }
+            set
+            {
+                if ( mAutoChangesMade != value )
+                {
+                    mAutoChangesMade = value;
+                    OnPropertyChanged( "AutoChangesMade" );
+                }
+            }
+        }
+
         private bool mChangesMade = false;
         public bool ChangesMade
         {
@@ -295,6 +309,7 @@ namespace Mojo
                     mChangesMade = value;
                     OnPropertyChanged( "ChangesMade" );
                 }
+                AutoChangesMade = value;
             }
         }
 

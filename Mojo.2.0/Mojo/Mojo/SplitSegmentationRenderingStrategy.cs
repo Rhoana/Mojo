@@ -269,6 +269,8 @@ namespace Mojo
             mEffect.GetVariableByName( "gTransform" ).AsMatrix().SetMatrix( camera.GetLookAtMatrix() * camera.GetProjectionMatrix() );
             mEffect.GetVariableByName( "gSegmentationRatio" ).AsScalar().Set( mTileManager.SegmentationVisibilityRatio );
             mEffect.GetVariableByName( "gBoundaryLinesVisible" ).AsScalar().Set( mTileManager.ShowBoundaryLines );
+            mEffect.GetVariableByName( "gBrushVisible" ).AsScalar().Set( mTileManager.CurrentSplitMode != SplitMode.JoinPoints );
+            mEffect.GetVariableByName( "gCrosshairVisible" ).AsScalar().Set( mTileManager.CurrentSplitMode == SplitMode.JoinPoints );
             mEffect.GetVariableByName( "gSelectedSegmentId" ).AsScalar().Set( mTileManager.SelectedSegmentId );
             mEffect.GetVariableByName( "gMouseOverSegmentId" ).AsScalar().Set( mTileManager.MouseOverSegmentId );
 

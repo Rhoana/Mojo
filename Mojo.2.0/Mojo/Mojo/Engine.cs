@@ -161,6 +161,7 @@ namespace Mojo
             {
                 centerDataSpace.Z += 1f;
                 TileManager.TiledDatasetView.CenterDataSpace = centerDataSpace;
+                TileManager.UpdateView();
                 Update();
             }
         }
@@ -172,6 +173,7 @@ namespace Mojo
             {
                 centerDataSpace.Z -= 1f;
                 TileManager.TiledDatasetView.CenterDataSpace = centerDataSpace;
+                TileManager.UpdateView();
                 Update();
             }
         }
