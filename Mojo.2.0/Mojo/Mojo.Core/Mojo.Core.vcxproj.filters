@@ -22,7 +22,6 @@
     <ClInclude Include="Index.hpp" />
     <ClInclude Include="Stl.hpp" />
     <ClInclude Include="Comparator.hpp" />
-    <ClInclude Include="IdTileMap.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="VolumeDescription.cpp" />

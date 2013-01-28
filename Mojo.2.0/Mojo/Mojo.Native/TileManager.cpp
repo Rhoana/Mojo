@@ -393,18 +393,18 @@ void TileManager::FindBoundaryBetweenRegions2D( int segId )
     ReloadTileCacheOverlayMapOnly();
 }
 
-int TileManager::CompletePointSplit( int segId )
+int TileManager::CompletePointSplit( int segId, float3 pointTileSpace )
 {
-    int newId = mTileServer->CompletePointSplit( segId );
+    int newId = mTileServer->CompletePointSplit( segId, pointTileSpace );
 
     ReloadTileCache();
 
 	return newId;
 }
 
-int TileManager::CompleteDrawSplit( int segId )
+int TileManager::CompleteDrawSplit( int segId, float3 pointTileSpace )
 {
-    int newId = mTileServer->CompleteDrawSplit( segId );
+    int newId = mTileServer->CompleteDrawSplit( segId, pointTileSpace );
 
     ReloadTileCache();
 

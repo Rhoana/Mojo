@@ -27,8 +27,10 @@ tile_num_pixels_x             = 512
 ##nimages_to_process            = 1124
 
 
-original_input_color_map_path = 'C:\\dev\\datasets\\conn\\main_dataset\\ac3train\\res_from_sept_30_minotrC_PF\\FS=1\\cube_coloring\\cmap.mat'
-original_input_ids_path       = 'C:\\dev\\datasets\\conn\\main_dataset\\ac3train\\res_from_sept_30_minotrC_PF\\FS=1\\stitched\\labels_grow'
+##original_input_color_map_path = 'C:\\dev\\datasets\\conn\\main_dataset\\ac3train\\res_from_sept_30_minotrC_PF\\FS=1\\cube_coloring\\cmap.mat'
+##original_input_ids_path       = 'C:\\dev\\datasets\\conn\\main_dataset\\ac3train\\res_from_sept_30_minotrC_PF\\FS=1\\stitched\\labels_grow'
+original_input_color_map_path = 'C:\\dev\\datasets\\conn\\main_dataset\\ac3train\\diced_xy=512_z=32_xyOv=128_zOv=12_dwnSmp=1\\res_from_sept_30_minotrC_PF\\FS=1\\cube_coloring\\cmap.mat'
+original_input_ids_path       = 'C:\\dev\\datasets\\conn\\main_dataset\\ac3train\\diced_xy=512_z=32_xyOv=128_zOv=12_dwnSmp=1\\res_from_sept_30_minotrC_PF\\FS=1\\stitched\\labels_grow'
 
 output_path                    = 'C:\\dev\\datasets\\ac3x20\\mojo'
 
@@ -78,7 +80,7 @@ def save_image( file_path, image ):
 color_map_mat_dict   = scipy.io.loadmat( original_input_color_map_path )
 id_color_map         = color_map_mat_dict[ 'cmap' ]
 files                = sorted( glob.glob( original_input_ids_path + '\\*.png' ) )
-id_counts            = numpy.zeros( id_color_map.shape[0], dtype=numpy.int64 );
+id_counts            = numpy.zeros( id_color_map.shape[0], dtype=numpy.uint32 );
 id_tile_list         = [];
 tile_index_z         = 0
 
@@ -102,7 +104,7 @@ for file in files:
 
     current_image_counts = numpy.bincount( original_ids.flatten() )
     current_image_counts_ids = numpy.nonzero( current_image_counts )[0]
-    id_counts[ current_image_counts_ids ] = id_counts[ current_image_counts_ids ] + current_image_counts [ current_image_counts_ids ]
+    id_counts[ current_image_counts_ids ] = id_counts[ current_image_counts_ids ] + numpy.uint32( current_image_counts [ current_image_counts_ids ] )
     
     ( original_image_num_pixels_x, original_image_num_pixels_y ) = original_ids.shape
 
@@ -201,7 +203,7 @@ hdf5             = h5py.File( output_seg_info_file, 'w' )
 #dataset          = hdf5.create_dataset( dataset_name, data=array, chunks=True, compression='gzip' )
 #dataset          = hdf5.create_dataset( dataset_name, data=array )
 
-hdf5['idMax'] = numpy.int32( max_id );
+hdf5['idMax'] = numpy.uint32( max_id );
 hdf5['idColorMap'] = id_color_map
 hdf5['idVoxelCountMap'] = id_counts
 

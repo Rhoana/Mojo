@@ -69,8 +69,8 @@ public:
 	void                                                    FindBoundaryJoinPoints2D( int segId );
 	void                                                    FindBoundaryWithinRegion2D( int segId );
 	void                                                    FindBoundaryBetweenRegions2D( int segId );
-    int                                                     CompletePointSplit( int segId );
-    int                                                     CompleteDrawSplit( int segId );
+    int                                                     CompletePointSplit( int segId, Vector3^ pDataSpace );
+    int                                                     CompleteDrawSplit( int segId, Vector3^ pDataSpace );
 
 	void                                                    UndoChange();
 	void                                                    RedoChange();

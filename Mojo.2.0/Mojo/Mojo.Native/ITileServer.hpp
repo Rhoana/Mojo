@@ -3,6 +3,8 @@
 #include "Mojo.Core/HashMap.hpp"
 #include "Mojo.Core/VolumeDescription.hpp"
 
+#include <marray/marray.hxx>
+
 #include "TiledDatasetDescription.hpp"
 
 namespace Mojo
@@ -49,13 +51,16 @@ public:
     virtual void                                                  PrepForSplit( int segId, float3 pointTileSpace )                                        = 0;
 	virtual void                                                  FindBoundaryJoinPoints2D( int segId )                                                   = 0;
 	virtual void                                                  FindBoundaryWithinRegion2D( int segId )                                                 = 0;
-	virtual void                                                  FindBoundaryBetweenRegions2D( int segId )                                                    = 0;
-    virtual int                                                   CompletePointSplit( int segId )                                                         = 0;
-    virtual int                                                   CompleteDrawSplit( int segId )                                                          = 0;
+	virtual void                                                  FindBoundaryBetweenRegions2D( int segId )                                               = 0;
+    virtual int                                                   CompletePointSplit( int segId, float3 pointTileSpace )                                  = 0;
+    virtual int                                                   CompleteDrawSplit( int segId, float3 pointTileSpace )                                   = 0;
 
 	virtual void                                                  UndoChange() = 0;
 	virtual void                                                  RedoChange() = 0;
     virtual void                                                  SaveAndClearFileSystemTileCache()                                                       = 0;
+
+    virtual marray::Marray< unsigned char >                       GetIdColorMap()                                                                         = 0;
+
 };
 
 }

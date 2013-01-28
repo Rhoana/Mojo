@@ -5,8 +5,8 @@
 
 #include "Mojo.Core/Comparator.hpp"
 #include "Mojo.Core/HashMap.hpp"
-#include "Mojo.Core/IdTileMap.hpp"
 #include "Mojo.Core/VolumeDescription.hpp"
+#include "FileSystemIdMaps.hpp"
 #include "Constants.hpp"
 
 namespace Mojo
@@ -20,8 +20,8 @@ struct FileSystemUndoRedoItem
 
     int                                                                 oldId;
     int                                                                 newId;
-	Mojo::Core::MojoTileSet                                             idTileMapAddNewId;
-	Mojo::Core::MojoTileSet                                             idTileMapRemoveOldId;
+    FileSystemTileSet                                                   idTileMapAddNewId;
+	FileSystemTileSet                                                   idTileMapRemoveOldId;
 	Core::HashMap< std::string,
 		std::bitset< TILE_SIZE * TILE_SIZE > >
 		                                                                changePixels;

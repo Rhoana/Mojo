@@ -76,8 +76,8 @@ public:
 	void                                                  FindBoundaryJoinPoints2D( int segId );
 	void                                                  FindBoundaryWithinRegion2D( int segId );
 	void                                                  FindBoundaryBetweenRegions2D( int segId );
-    int                                                   CompletePointSplit( int segId );
-    int                                                   CompleteDrawSplit( int segId );
+    int                                                   CompletePointSplit( int segId, float3 pointTileSpace );
+    int                                                   CompleteDrawSplit( int segId, float3 pointTileSpace );
 
 	void                                                  UndoChange();
 	void                                                  RedoChange();
@@ -377,9 +377,7 @@ inline void TileManager::LoadSegmentationInternal( TiledDatasetDescription& tile
 	//
     // load the id color map
     //
-    hid_t hdf5FileHandle = marray::hdf5::openFile( mTiledDatasetDescription.paths.Get( "IdColorMap" ) );
-    marray::hdf5::load( hdf5FileHandle, "IdColorMap", mIdColorMap );
-    marray::hdf5::closeFile( hdf5FileHandle );
+    mIdColorMap = mTileServer->GetIdColorMap();
 
     uchar4* idColorMap = new uchar4[ mIdColorMap.shape( 0 ) ];
 

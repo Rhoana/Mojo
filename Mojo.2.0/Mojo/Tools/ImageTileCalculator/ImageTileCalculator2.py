@@ -25,15 +25,22 @@ tile_num_pixels_x = 512
 ##output_image_extension     = '.tif'
 ##image_resize_filter        = PIL.Image.ANTIALIAS
 
-original_input_images_path = 'C:\\dev\\datasets\\conn\\main_dataset\\cube2\\input_images'
-output_tile_image_path     = 'C:\\dev\\datasets\\Cube2x1124\\mojo\\images\\tiles'
-#output_pyramid_image_path  = 'C:\\dev\\datasets\\Cube2\\mojo\\images\\pyramid'
-output_tile_volume_file    = 'C:\\dev\\datasets\\Cube2x1124\\mojo\\images\\tiledVolumeDescription.xml'
+original_input_images_path = 'C:\\dev\\datasets\\conn\\main_dataset\\ac3train\\input_images'
+output_tile_image_path     = 'C:\\dev\\datasets\\ac3x20\\mojo\\images\\tiles'
+output_tile_volume_file    = 'C:\\dev\\datasets\\ac3x20\\mojo\\images\\tiledVolumeDescription.xml'
 output_image_extension     = '.tif'
 image_resize_filter        = PIL.Image.ANTIALIAS
+nimages_to_process         = 20
 
-##nimages_to_process            = 50
-nimages_to_process            = 1124
+##original_input_images_path = 'C:\\dev\\datasets\\conn\\main_dataset\\cube2\\input_images'
+##output_tile_image_path     = 'C:\\dev\\datasets\\Cube2x1124\\mojo\\images\\tiles'
+###output_pyramid_image_path  = 'C:\\dev\\datasets\\Cube2\\mojo\\images\\pyramid'
+##output_tile_volume_file    = 'C:\\dev\\datasets\\Cube2x1124\\mojo\\images\\tiledVolumeDescription.xml'
+##output_image_extension     = '.tif'
+##image_resize_filter        = PIL.Image.ANTIALIAS
+
+####nimages_to_process            = 50
+##nimages_to_process            = 1124
 
 #original_input_images_path = 'C:\\dev\\datasets\\challengeCubeV2x20\\images'
 #output_tile_image_path     = 'C:\\dev\\datasets\\challengeCubeV2x20\\mojo\\images\\tiles'

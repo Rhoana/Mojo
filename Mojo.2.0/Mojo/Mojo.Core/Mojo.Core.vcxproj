@@ -22,7 +22,6 @@
     <ClInclude Include="ID3D11CudaTexture.hpp" />
     <ClInclude Include="D3D11.hpp" />
     <ClInclude Include="ForEach.hpp" />
-    <ClInclude Include="IdTileMap.hpp" />
     <ClInclude Include="Index.hpp" />
     <ClInclude Include="OpenCV.hpp" />
     <ClInclude Include="PrimitiveMap.hpp" />

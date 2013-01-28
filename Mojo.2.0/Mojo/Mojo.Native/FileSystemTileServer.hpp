@@ -67,13 +67,15 @@ public:
 	virtual void                                                  FindBoundaryJoinPoints2D( int segId );
 	virtual void                                                  FindBoundaryWithinRegion2D( int segId );
 	virtual void                                                  FindBoundaryBetweenRegions2D( int segId );
-    virtual int                                                   CompletePointSplit( int segId );
-    virtual int                                                   CompleteDrawSplit( int segId );
+    virtual int                                                   CompletePointSplit( int segId, float3 pointTileSpace );
+    virtual int                                                   CompleteDrawSplit( int segId, float3 pointTileSpace );
 
 	virtual void                                                  UndoChange();
 	virtual void                                                  RedoChange();
     virtual void                                                  FlushFileSystemTileCacheChanges();
     virtual void                                                  SaveAndClearFileSystemTileCache();
+
+    virtual marray::Marray< unsigned char >                       GetIdColorMap();
 
 private:
     template < typename TCudaType >
@@ -83,8 +85,6 @@ private:
     template < typename TCudaType >
 	void                                                          LoadSegmentationInternal( TiledDatasetDescription& tiledDatasetDescription );
     void                                                          UnloadSegmentationInternal();
-
-	void                                                          SaveIdTileMapToTemp();
 
     Core::VolumeDescription                                       LoadTileImage( int4 tileIndex, std::string imageName );
     Core::VolumeDescription                                       LoadTileHdf5( int4 tileIndex, std::string hdf5Name, std::string hdf5InternalDatasetName );
@@ -138,7 +138,7 @@ private:
 
     Core::HashMap < std::string, FileSystemTileCacheEntry >       mFileSystemTileCache;
 
-    Mojo::Core::IdTileMap                                         mIdTileMap;
+    FileSystemIdMaps                                              mIdMaps;
 
     //
     // simple split variables
@@ -175,27 +175,13 @@ inline void FileSystemTileServer::LoadSegmentationInternal( TiledDatasetDescript
 {
     mTiledDatasetDescription = tiledDatasetDescription;
 
-    //Core::Printf( "Loading idTileMap..." );
+    Core::Printf( "Loading idMaps..." );
 
-    marray::Marray< unsigned int > rawIdTileMap;
-    hid_t hdf5FileHandle = marray::hdf5::openFile( mTiledDatasetDescription.paths.Get( "IdTileMap" ) );
-    marray::hdf5::load( hdf5FileHandle, "IdTileMap", rawIdTileMap );
-    marray::hdf5::closeFile( hdf5FileHandle );
+    mIdMaps = FileSystemIdMaps( mTiledDatasetDescription.paths.Get( "IdMaps" ) );
 
-    mIdTileMap.GetHashMap().clear();
-    mTiledDatasetDescription.maxLabelId = 0;
+    Core::Printf( "Loaded." );
 
-    unsigned int i;
-    for ( i = 0; i < rawIdTileMap.shape( 0 ); i++ )
-    {
-        mIdTileMap.GetHashMap()[ rawIdTileMap( i, 0 ) ].insert( make_int4( rawIdTileMap( i, 4 ), rawIdTileMap( i, 3 ), rawIdTileMap( i, 2 ), rawIdTileMap( i, 1 ) ) );
-        if ( rawIdTileMap( i, 0 ) > mTiledDatasetDescription.maxLabelId )
-        {
-            mTiledDatasetDescription.maxLabelId = rawIdTileMap( i, 0 );
-        }
-    }
-
-    //Core::Printf( "Loaded ", i, " entries into the idTileMap." );
+    mTiledDatasetDescription.maxLabelId = mIdMaps.GetMaxId();
 
     mIsSegmentationLoaded    = true;
 

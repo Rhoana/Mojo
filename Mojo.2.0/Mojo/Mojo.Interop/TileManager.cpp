@@ -227,14 +227,16 @@ void TileManager::FindBoundaryBetweenRegions2D( int segId )
     mTileManager->FindBoundaryBetweenRegions2D( segId );
 }
 
-int TileManager::CompletePointSplit( int segId )
+int TileManager::CompletePointSplit( int segId, Vector3^ pDataSpace )
 {
-    return mTileManager->CompletePointSplit( segId );
+    float3 pDataSpaceFloat3 = make_float3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
+    return mTileManager->CompletePointSplit( segId, pDataSpaceFloat3 );
 }
 
-int TileManager::CompleteDrawSplit( int segId )
+int TileManager::CompleteDrawSplit( int segId, Vector3^ pDataSpace )
 {
-    return mTileManager->CompleteDrawSplit( segId );
+    float3 pDataSpaceFloat3 = make_float3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
+    return mTileManager->CompleteDrawSplit( segId, pDataSpaceFloat3 );
 }
 
 void TileManager::ReplaceSegmentationLabelCurrentConnectedComponent( int oldId, int newId, TiledDatasetView^ tiledDatasetView, Vector3^ pDataSpace )
