@@ -128,8 +128,8 @@ void FileSystemTileServer::SaveSegmentation()
 
     FlushFileSystemTileCacheChanges();
 
-	Core::Printf( "Saving idMaps." );
-    mIdMaps.Save();
+	Core::Printf( "Saving idIndex." );
+    mIdIndex.SaveAs( mTiledDatasetDescription.paths.Get( "TempIdIndex" ) );
 
     //
     // move changed tiles to the save directory
@@ -143,6 +143,7 @@ void FileSystemTileServer::SaveSegmentation()
     //mTileCachePageTable = marray::Marray< int >( shape, shape + 4 );
 
     TiledVolumeDescription tempVolumeDesctiption = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "TempIdMap" );
+
     TiledVolumeDescription saveVolumeDesctiption = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "IdMap" );
 
     for ( int w = 0; w < numTiles.w; w++ )
@@ -186,6 +187,18 @@ void FileSystemTileServer::SaveSegmentation()
             }
         }
     }
+
+    //
+    // move the idIndex file
+    //
+    
+    Core::Printf( "Replacing idIndex." );
+
+    boost::filesystem::path idIndexPath = boost::filesystem::path( mTiledDatasetDescription.paths.Get( "IdIndex" ) );
+    boost::filesystem::path tempIdIndexPath = boost::filesystem::path( mTiledDatasetDescription.paths.Get( "TempIdIndex" ) );
+
+    boost::filesystem::remove( idIndexPath );
+    boost::filesystem::rename( tempIdIndexPath, idIndexPath );
 
     Core::Printf( "Segmentation saved." );
 
@@ -360,6 +373,9 @@ void FileSystemTileServer::DeleteTempFiles()
     // delete temp idTileMap
     //
 
+    boost::filesystem::path tempIdIndexPath = boost::filesystem::path( mTiledDatasetDescription.paths.Get( "TempIdIndex" ) );
+    boost::filesystem::remove( tempIdIndexPath );
+
     Core::Printf( "Temp files deleted." );
 
 }
@@ -367,7 +383,7 @@ void FileSystemTileServer::DeleteTempFiles()
 
 int FileSystemTileServer::GetTileCountForId( int segId )
 {
-    return (int) mIdMaps.GetTileCount( segId );
+    return (int) mIdIndex.GetTileCount( segId );
 }
 
 
@@ -381,8 +397,8 @@ void FileSystemTileServer::ReplaceSegmentationLabel( int oldId, int newId )
     {
         Core::Printf( "\nReplacing segmentation label ", oldId, " with segmentation label ", newId, "...\n" );
 
-        FileSystemTileSet tilesContainingOldId = mIdMaps.GetTiles( oldId );
-		FileSystemTileSet tilesContainingNewId = mIdMaps.GetTiles( newId );
+        FileSystemTileSet tilesContainingOldId = mIdIndex.GetTiles( oldId );
+		FileSystemTileSet tilesContainingNewId = mIdIndex.GetTiles( newId );
 
 		PrepForNextUndoRedoChange();
 		mUndoItem.newId = newId;
@@ -455,13 +471,13 @@ void FileSystemTileServer::ReplaceSegmentationLabel( int oldId, int newId )
         // add all the tiles containing old id to the list of tiles corresponding to the new id
         //
         tilesContainingNewId.insert( tilesContainingOldId.begin(), tilesContainingOldId.end() );
-        mIdMaps.SetTiles( newId, tilesContainingNewId );
+        mIdIndex.SetTiles( newId, tilesContainingNewId );
 
         //
         // completely remove old id from our id tile map, since the old id is no longer present in the segmentation 
         //
         tilesContainingOldId.clear();
-        mIdMaps.SetTiles( oldId, tilesContainingOldId );
+        mIdIndex.SetTiles( oldId, tilesContainingOldId );
 
         Core::Printf( "\nFinished replacing segmentation label ", oldId, " with segmentation label ", newId, ".\n" );
     }
@@ -497,8 +513,8 @@ void FileSystemTileServer::ReplaceSegmentationLabelCurrentSlice( int oldId, int 
 
         Core::Printf( "\nReplacing segmentation label ", oldId, " conencted to voxel (x", pVoxelSpace.x, ", y", pVoxelSpace.y, " z", pVoxelSpace.z, ") with segmentation label ", newId, " for zslice ", pVoxelSpace.z, "...\n" );
 
-        FileSystemTileSet tilesContainingOldId = mIdMaps.GetTiles( oldId );
-        FileSystemTileSet tilesContainingNewId = mIdMaps.GetTiles( newId );
+        FileSystemTileSet tilesContainingOldId = mIdIndex.GetTiles( oldId );
+        FileSystemTileSet tilesContainingNewId = mIdIndex.GetTiles( newId );
 
         Core::HashMap< std::string, Core::VolumeDescription > volumeDescriptions;
 
@@ -737,8 +753,8 @@ void FileSystemTileServer::ReplaceSegmentationLabelCurrentSlice( int oldId, int 
         //
 		// Update idTileMap
 		//
-        mIdMaps.SetTiles( oldId, tilesContainingOldId );
-        mIdMaps.SetTiles( newId, tilesContainingNewId );
+        mIdIndex.SetTiles( oldId, tilesContainingOldId );
+        mIdIndex.SetTiles( newId, tilesContainingNewId );
 
         Core::Printf( "\nFinished replacing segmentation label ", oldId, " conencted to voxel (x", pVoxelSpace.x, ", y", pVoxelSpace.y, " z", pVoxelSpace.z, ") with segmentation label ", newId, " for zslice ", pVoxelSpace.z, ".\n" );
     }
@@ -759,8 +775,8 @@ void FileSystemTileServer::ReplaceSegmentationLabelCurrentConnectedComponent( in
 
         Core::Printf( "\nReplacing segmentation label ", oldId, " conencted to voxel (x", pVoxelSpace.x, ", y", pVoxelSpace.y, " z", pVoxelSpace.z, ") with segmentation label ", newId, " for zslice ", pVoxelSpace.z, "...\n" );
 
-        FileSystemTileSet tilesContainingOldId = mIdMaps.GetTiles( oldId );
-        FileSystemTileSet tilesContainingNewId = mIdMaps.GetTiles( newId );
+        FileSystemTileSet tilesContainingOldId = mIdIndex.GetTiles( oldId );
+        FileSystemTileSet tilesContainingNewId = mIdIndex.GetTiles( newId );
 
         Core::HashMap< std::string, Core::VolumeDescription > volumeDescriptions;
 
@@ -1014,8 +1030,8 @@ void FileSystemTileServer::ReplaceSegmentationLabelCurrentConnectedComponent( in
         //
 		// Update idTileMap
 		//
-        mIdMaps.SetTiles( oldId, tilesContainingOldId );
-        mIdMaps.SetTiles( newId, tilesContainingNewId );
+        mIdIndex.SetTiles( oldId, tilesContainingOldId );
+        mIdIndex.SetTiles( newId, tilesContainingNewId );
 
         Core::Printf( "\nFinished replacing segmentation label ", oldId, " conencted to voxel (x", pVoxelSpace.x, ", y", pVoxelSpace.y, " z", pVoxelSpace.z, ") with segmentation label ", newId, " for zslice ", pVoxelSpace.z, ".\n" );
     }
@@ -1557,7 +1573,7 @@ void FileSystemTileServer::PrepForSplit( int segId, float3 pointTileSpace )
                 int minTileY = numTiles.y;
                 int maxTileY = 0;
 
-                FileSystemTileSet tilesContainingSegId = mIdMaps.GetTiles( segId );
+                FileSystemTileSet tilesContainingSegId = mIdIndex.GetTiles( segId );
 
                 for ( FileSystemTileSet::iterator tileIterator = tilesContainingSegId.begin(); tileIterator != tilesContainingSegId.end(); ++tileIterator )
                 {
@@ -2000,9 +2016,9 @@ int FileSystemTileServer::CompletePointSplit( int segId, float3 pointTileSpace )
 		// Perform the split at w=0 ( re-label the smallest segment )
 		//
 
-        newId = mIdMaps.AddNewId();
+        newId = mIdIndex.AddNewId();
         mTiledDatasetDescription.maxLabelId = newId;
-        FileSystemTileSet tilesContainingOldId = mIdMaps.GetTiles( segId );
+        FileSystemTileSet tilesContainingOldId = mIdIndex.GetTiles( segId );
         FileSystemTileSet tilesContainingNewId;
 
 		mUndoItem.newId = newId;
@@ -2159,8 +2175,8 @@ int FileSystemTileServer::CompletePointSplit( int segId, float3 pointTileSpace )
         //
 		// Update idTileMap
 		//
-        mIdMaps.SetTiles( segId, tilesContainingOldId );
-        mIdMaps.SetTiles( newId, tilesContainingNewId );
+        mIdIndex.SetTiles( segId, tilesContainingOldId );
+        mIdIndex.SetTiles( newId, tilesContainingNewId );
 
         Core::Printf( "\nFinished Splitting segmentation label ", segId, " from voxel (x", pVoxelSpace.x, ", y", pVoxelSpace.y, " z", pVoxelSpace.z, ") to new segmentation label ", newId, "...\n" );
     }
@@ -2502,9 +2518,9 @@ int FileSystemTileServer::CompleteDrawSplit( int segId, float3 pointTileSpace )
 			// Perform the split at w=0 ( re-label the smallest segment )
 			//
 
-            newId = mIdMaps.AddNewId();
+            newId = mIdIndex.AddNewId();
             mTiledDatasetDescription.maxLabelId = newId;
-            FileSystemTileSet tilesContainingOldId = mIdMaps.GetTiles( segId );
+            FileSystemTileSet tilesContainingOldId = mIdIndex.GetTiles( segId );
 			FileSystemTileSet tilesContainingNewId;
 
 			mUndoItem.newId = newId;
@@ -2661,8 +2677,8 @@ int FileSystemTileServer::CompleteDrawSplit( int segId, float3 pointTileSpace )
 			//
 			// Update idTileMap
 			//
-			mIdMaps.SetTiles( segId, tilesContainingOldId );
-			mIdMaps.SetTiles( newId, tilesContainingNewId );
+			mIdIndex.SetTiles( segId, tilesContainingOldId );
+			mIdIndex.SetTiles( newId, tilesContainingNewId );
 
 			Core::Printf( "\nFinished Splitting segmentation label ", segId, " from voxel (x", pVoxelSpace.x, ", y", pVoxelSpace.y, " z", pVoxelSpace.z, ") to new segmentation label ", newId, "...\n" );
 
@@ -3319,19 +3335,19 @@ void FileSystemTileServer::UndoChange()
         //
         // remove newly added tiles from the "newId" idTileMap
         //
-        FileSystemTileSet newTiles = mIdMaps.GetTiles( newId );
+        FileSystemTileSet newTiles = mIdIndex.GetTiles( newId );
 		for ( FileSystemTileSet::iterator eraseIterator = mUndoItem.idTileMapAddNewId.begin(); eraseIterator != mUndoItem.idTileMapAddNewId.end(); ++eraseIterator )
 		{
 			newTiles.erase( *eraseIterator );
 		}
-        mIdMaps.SetTiles( newId, newTiles );
+        mIdIndex.SetTiles( newId, newTiles );
 
 		//
 		// put removed tiles back into the "oldId" idTileMap (create a new idTileMap if necessary)
 		//
-        FileSystemTileSet oldTiles = mIdMaps.GetTiles( oldId );
+        FileSystemTileSet oldTiles = mIdIndex.GetTiles( oldId );
         oldTiles.insert( mUndoItem.idTileMapRemoveOldId.begin(), mUndoItem.idTileMapRemoveOldId.end() );
-        mIdMaps.SetTiles( oldId, oldTiles );
+        mIdIndex.SetTiles( oldId, oldTiles );
 
         Core::Printf( "\nUndo operation complete: changed segmentation label ", newId, " back to segmentation label ", oldId, ".\n" );
 
@@ -3405,19 +3421,19 @@ void FileSystemTileServer::RedoChange()
         //
         // add tiles to the "newId" idTileMap (create a new idTileMap if necessary)
         //
-        FileSystemTileSet newTiles = mIdMaps.GetTiles( newId );
+        FileSystemTileSet newTiles = mIdIndex.GetTiles( newId );
         newTiles.insert( mRedoItem.idTileMapAddNewId.begin(), mRedoItem.idTileMapAddNewId.end() );
-        mIdMaps.SetTiles( newId, newTiles );
+        mIdIndex.SetTiles( newId, newTiles );
 
         //
         // remove tiles from the "oldId" idTileMap
         //
-        FileSystemTileSet oldTiles = mIdMaps.GetTiles( oldId );
+        FileSystemTileSet oldTiles = mIdIndex.GetTiles( oldId );
 		for ( FileSystemTileSet::iterator eraseIterator = mRedoItem.idTileMapRemoveOldId.begin(); eraseIterator != mRedoItem.idTileMapRemoveOldId.end(); ++eraseIterator )
 		{
 			oldTiles.erase( *eraseIterator );
 		}
-        mIdMaps.SetTiles( oldId, oldTiles );
+        mIdIndex.SetTiles( oldId, oldTiles );
 
         Core::Printf( "\nRedo operation complete: changed segmentation label ", oldId, " back to segmentation label ", newId, ".\n" );
 
@@ -3540,7 +3556,7 @@ void FileSystemTileServer::UnloadSegmentationInternal()
     //
     // release id maps
     //
-    mIdMaps = FileSystemIdMaps();
+    mIdIndex = FileSystemIdIndex();
     mTiledDatasetDescription.maxLabelId = 0;
 
     mIsSegmentationLoaded    = false;
@@ -3827,7 +3843,7 @@ void FileSystemTileServer::SaveAndClearFileSystemTileCache( )
 
 marray::Marray< unsigned char > FileSystemTileServer::GetIdColorMap()
 {
-    return mIdMaps.GetIdColorMap();
+    return mIdIndex.GetIdColorMap();
 }
 
 

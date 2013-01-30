@@ -12,37 +12,39 @@ import h5py
 import lxml
 import lxml.etree
 import glob
+import sqlite3
 
 
 tile_num_pixels_y             = 512
 tile_num_pixels_x             = 512
 
 
-original_input_color_map_path = 'C:\\dev\\datasets\\conn\\main_dataset\\cube2\\diced_xy=512_z=32_xyOv=128_zOv=12_dwnSmp=1\\res_from_Nov29_PF\\FS=1\\cmap2.mat'
-original_input_ids_path       = 'C:\\dev\\datasets\\conn\\main_dataset\\cube2\\diced_xy=512_z=32_xyOv=128_zOv=12_dwnSmp=1\\res_from_Nov29_PF\\FS=1\\stitched\\labels_grow'
-
-output_path                    = 'C:\\dev\\datasets\\Cube2x1124\\mojo'
-
-##nimages_to_process            = 50
-nimages_to_process            = 1124
+##original_input_color_map_path = 'C:\\dev\\datasets\\conn\\main_dataset\\cube2\\diced_xy=512_z=32_xyOv=128_zOv=12_dwnSmp=1\\res_from_Nov29_PF\\FS=1\\cmap2.mat'
+##original_input_ids_path       = 'C:\\dev\\datasets\\conn\\main_dataset\\cube2\\diced_xy=512_z=32_xyOv=128_zOv=12_dwnSmp=1\\res_from_Nov29_PF\\FS=1\\stitched\\labels_grow'
+##
+##output_path                    = 'C:\\dev\\datasets\\Cube2x1124\\mojo'
+##
+####nimages_to_process            = 50
+##nimages_to_process            = 1124
 
 
 ##original_input_color_map_path = 'C:\\dev\\datasets\\conn\\main_dataset\\ac3train\\res_from_sept_30_minotrC_PF\\FS=1\\cube_coloring\\cmap.mat'
 ##original_input_ids_path       = 'C:\\dev\\datasets\\conn\\main_dataset\\ac3train\\res_from_sept_30_minotrC_PF\\FS=1\\stitched\\labels_grow'
 
-##original_input_color_map_path = 'C:\\dev\\datasets\\conn\\main_dataset\\ac3train\\diced_xy=512_z=32_xyOv=128_zOv=12_dwnSmp=1\\res_from_sept_30_minotrC_PF\\FS=1\\cube_coloring\\cmap.mat'
-##original_input_ids_path       = 'C:\\dev\\datasets\\conn\\main_dataset\\ac3train\\diced_xy=512_z=32_xyOv=128_zOv=12_dwnSmp=1\\res_from_sept_30_minotrC_PF\\FS=1\\stitched\\labels_grow'
-##
-##output_path                    = 'C:\\dev\\datasets\\ac3x20\\mojo'
-##
-##nimages_to_process            = 20
+original_input_color_map_path = 'C:\\dev\\datasets\\conn\\main_dataset\\ac3train\\diced_xy=512_z=32_xyOv=128_zOv=12_dwnSmp=1\\res_from_sept_30_minotrC_PF\\FS=1\\cube_coloring\\cmap.mat'
+original_input_ids_path       = 'C:\\dev\\datasets\\conn\\main_dataset\\ac3train\\diced_xy=512_z=32_xyOv=128_zOv=12_dwnSmp=1\\res_from_sept_30_minotrC_PF\\FS=1\\stitched\\labels_grow'
+
+output_path                    = 'C:\\dev\\datasets\\ac3x20\\mojo'
+
+nimages_to_process            = 20
 
 
 output_ids_path                = output_path + '\\ids'
 output_tile_ids_path           = output_ids_path + '\\tiles'
 
 output_tile_volume_file       = output_ids_path + '\\tiledVolumeDescription.xml'
-output_seg_info_file          = output_ids_path + '\\idIndex.hdf5'
+output_seg_info_file          = output_ids_path + '\\idInfo.hdf5'
+output_tile_index_file        = output_ids_path + '\\idTileIndex.db'
 
 color_map_variable_name       = 'cmap'
 ids_upscale_factor            = 1
@@ -192,45 +194,37 @@ id_tile_list = numpy.array( sorted( id_tile_list ), numpy.uint32 )
 max_id = numpy.max( [ id_tile_list[ 0, -1 ], id_color_map.shape[0] - 1, id_counts.shape[0] - 1 ] )
 print 'Got id max of:'
 print id_tile_list[ -1, 0 ]
-print id_color_map.shape[0]
-print id_counts.shape[0]
+print id_color_map.shape[0] - 1
+print id_counts.shape[0] - 1
 
 ## Write all segment info to a single file
     
-print 'Writing idMaps file'
-
 hdf5             = h5py.File( output_seg_info_file, 'w' )
 
-#dataset          = hdf5.create_dataset( dataset_name, data=array, chunks=True, compression='gzip' )
-#dataset          = hdf5.create_dataset( dataset_name, data=array )
+print 'Writing idInfo file (hdf5)'
 
 hdf5['idMax'] = numpy.uint32( max_id );
 hdf5['idColorMap'] = id_color_map
 hdf5['idVoxelCountMap'] = id_counts
 
-start_index = 0
-end_index = 0
-
-#print 'Saving segment tile map for segment:'
-
-for segid in xrange(0, max_id+1):
-    
-    while end_index < id_tile_list.shape[0] and id_tile_list[ end_index, 0 ] == segid:
-        end_index = end_index + 1
-        
-    if start_index == end_index:
-        continue
-
-    ## Get all tile entries for this segment id
-    seg_tiles = id_tile_list[ start_index:end_index, 1: ]
-    dataset_name = '/idTileMap/' + str( segid )
-    #print dataset_name
-    hdf5[dataset_name] = seg_tiles
-    
-    start_index = end_index
-
 hdf5.close()
 
+print 'Writing idTileIndex file (sqlite)'
+
+con = sqlite3.connect(output_tile_index_file)
+
+cur = con.cursor()
+
+cur.execute('DROP TABLE IF EXISTS idTileMap')
+cur.execute('CREATE TABLE idTileMap (id int, w int, z int, y int, x int)')
+cur.execute('CREATE INDEX idTileMapIndex ON idTileMap (id)')
+
+for entry_index in xrange(0, id_tile_list.shape[0]):
+    cur.execute("INSERT INTO idTileMap VALUES({0}, {1}, {2}, {3}, {4})".format(*id_tile_list[entry_index, :]))
+
+con.commit()
+
+con.close()
 
 #Output TiledVolumeDescription xml file
 

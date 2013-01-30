@@ -20,7 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Constants.hpp" />
-    <ClInclude Include="FileSystemIdMaps.hpp" />
+    <ClInclude Include="FileSystemIdIndex.hpp" />
     <ClInclude Include="SimpleSplitTools.hpp" />
     <ClInclude Include="FileSystemTileCacheEntry.hpp" />
     <ClInclude Include="FileSystemUndoRedoItem.hpp" />
@@ -33,7 +33,7 @@
     <ClInclude Include="FileSystemTileServer.hpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="FileSystemIdMaps.cpp" />
+    <ClCompile Include="FileSystemIdIndex.cpp" />
     <ClCompile Include="SimpleSplitTools.cpp" />
     <ClCompile Include="FileSystemTileCacheEntry.cpp" />
     <ClCompile Include="FileSystemUndoRedoItem.cpp" />

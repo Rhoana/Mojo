@@ -11,13 +11,6 @@ import glob
 tile_num_pixels_y = 512
 tile_num_pixels_x = 512
 
-##original_input_images_path = 'D:\\dev\\datasets\\challengeCubeV2x1000\\images'
-##output_tile_image_path     = 'D:\\dev\\datasets\\challengeCubeV2x1000\\mojo\\images\\tiles'
-##output_pyramid_image_path  = 'D:\\dev\\datasets\\challengeCubeV2x1000\\mojo\\images\\pyramid'
-##output_tile_volume_file    = 'D:\\dev\\datasets\\challengeCubeV2x1000\\mojo\\images\\tiledVolumeDescription.xml'
-##output_image_extension     = '.png'
-##image_resize_filter        = PIL.Image.ANTIALIAS
-
 ##original_input_images_path = 'C:\\dev\\datasets\\ac3x10\\images'
 ##output_tile_image_path     = 'C:\\dev\\datasets\\ac3x10\\mojo\\images\\tiles'
 ##output_pyramid_image_path  = 'C:\\dev\\datasets\\ac3x10\\mojo\\images\\pyramid'
@@ -34,52 +27,12 @@ nimages_to_process         = 20
 
 ##original_input_images_path = 'C:\\dev\\datasets\\conn\\main_dataset\\cube2\\input_images'
 ##output_tile_image_path     = 'C:\\dev\\datasets\\Cube2x1124\\mojo\\images\\tiles'
-###output_pyramid_image_path  = 'C:\\dev\\datasets\\Cube2\\mojo\\images\\pyramid'
 ##output_tile_volume_file    = 'C:\\dev\\datasets\\Cube2x1124\\mojo\\images\\tiledVolumeDescription.xml'
 ##output_image_extension     = '.tif'
 ##image_resize_filter        = PIL.Image.ANTIALIAS
 
 ####nimages_to_process            = 50
 ##nimages_to_process            = 1124
-
-#original_input_images_path = 'C:\\dev\\datasets\\challengeCubeV2x20\\images'
-#output_tile_image_path     = 'C:\\dev\\datasets\\challengeCubeV2x20\\mojo\\images\\tiles'
-#output_pyramid_image_path  = 'C:\\dev\\datasets\\challengeCubeV2x20\\mojo\\images\\pyramid'
-#output_tile_volume_file    = 'C:\\dev\\datasets\\challengeCubeV2x20\\mojo\\images\\tiledVolumeDescription.xml'
-#output_image_extension     = '.png'
-#image_resize_filter        = PIL.Image.ANTIALIAS
-
-#original_input_images_path = 'C:\\dev\\datasets\\challengeCubeFirstTenSlices2\\images'
-#output_tile_image_path     = 'C:\\dev\\datasets\\challengeCubeFirstTenSlices2\\mojo\\images\\tiles'
-#output_pyramid_image_path  = 'C:\\dev\\datasets\\challengeCubeFirstTenSlices2\\mojo\\images\\pyramid'
-#output_tile_volume_file    = 'C:\\dev\\datasets\\challengeCubeFirstTenSlices2\\mojo\\images\\tiledVolumeDescription.xml'
-#output_image_extension     = '.png'
-#image_resize_filter        = PIL.Image.ANTIALIAS
-
-##original_input_images_path = 'C:\\Users\\mike\\Documents\\Work\\Data\\2012.MIA\\datasets\\verenaTestOutput\\colors'
-##output_tile_image_path     = 'C:\\Users\\mike\\Documents\\Work\\Data\\2012.MIA\\datasets\\verenaTestOutput\\mojo\\colors\\tiles'
-##output_pyramid_image_path  = 'C:\\Users\\mike\\Documents\\Work\\Data\\2012.MIA\\datasets\\verenaTestOutput\\mojo\\colors\\pyramid'
-##output_image_extension     = '.tif'
-##image_resize_filter        = PIL.Image.NEAREST
-
-##original_input_images_path = 'C:\\Users\\mike\\Documents\\Work\\Data\\2012.MIA\\datasets\\verenaTestOutput\\ids'
-##output_tile_image_path     = 'C:\\Users\\mike\\Documents\\Work\\Data\\2012.MIA\\datasets\\verenaTestOutput\\mojo\\ids\\tiles'
-##output_pyramid_image_path  = 'C:\\Users\\mike\\Documents\\Work\\Data\\2012.MIA\\datasets\\verenaTestOutput\\mojo\\ids\\pyramid'
-##output_image_extension     = '.tif'
-##image_resize_filter        = PIL.Image.NEAREST
-
-##original_input_images_path = 'C:\\Users\\mike\\Documents\\Work\\Data\\2012.MIA\\datasets\\verenaTestOutput\\images'
-##output_tile_image_path     = 'C:\\Users\\mike\\Documents\\Work\\Data\\2012.MIA\\datasets\\verenaTestOutput\\mojo\\images\\tiles'
-##output_pyramid_image_path  = 'C:\\Users\\mike\\Documents\\Work\\Data\\2012.MIA\\datasets\\verenaTestOutput\\mojo\\images\\pyramid'
-##output_image_extension     = '.png'
-##image_resize_filter        = PIL.Image.ANTIALIAS
-
-##original_input_images_path = 'C:\\Users\\mike\\Documents\\Work\\Data\\2012.MIA\\datasets\\verenaTestOutput\\probabilities'
-##output_tile_image_path     = 'C:\\Users\\mike\\Documents\\Work\\Data\\2012.MIA\\datasets\\verenaTestOutput\\mojo\\probabilities\\tiles'
-##output_pyramid_image_path  = 'C:\\Users\\mike\\Documents\\Work\\Data\\2012.MIA\\datasets\\verenaTestOutput\\mojo\\probabilities\\pyramid'
-##output_image_extension     = '.tif'
-##image_resize_filter        = PIL.Image.ANTIALIAS
-
 
 
 def mkdir_safe( dir_to_make ):

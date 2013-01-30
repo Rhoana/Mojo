@@ -17,15 +17,15 @@ typedef std::set< int4, Mojo::Core::Int4Comparator, boost::fast_pool_allocator< 
 typedef Core::HashMap< unsigned int, FileSystemTileSet >                                   FileSystemIdTileMap;
 typedef stdext::hash_map< unsigned int, FileSystemTileSet >                                FileSystemIdTileMapDirect;
 
-class FileSystemIdMaps
+class FileSystemIdIndex
 {
 
 public:
-	FileSystemIdMaps();
-	FileSystemIdMaps( std::string idMapsPath );
-	~FileSystemIdMaps();
+	FileSystemIdIndex();
+	FileSystemIdIndex( std::string idIndexFilePath );
+	~FileSystemIdIndex();
 
-	void                                              Save();
+	//void                                              Save();
 	void                                              SaveAs( std::string newIdMapsPath );
 	void                                              Close();
 
@@ -41,11 +41,11 @@ public:
 	void                                              SetVoxelCount ( unsigned int segid, unsigned long voxelCount );
                                                
 private:                                       
-	std::string                                       mIdMapsPath;
-	hid_t                                             mIdMapsHdf5FileHandle;
+	std::string                                       mIdIndexPath;
+	hid_t                                             mIdIndexHdf5FileHandle;
 	hid_t                                             mIdTileMapGroupHandle;
 	marray::Marray< unsigned int >                    mIdMax;
-    //marray::Marray< unsigned char >                   mIdColorMap;
+    marray::Marray< unsigned char >                   mIdColorMap;
 	marray::Marray< unsigned int >                    mIdVoxelCountMap;
 	FileSystemIdTileMap                               mCacheIdTileMap;
 

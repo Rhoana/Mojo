@@ -133,7 +133,8 @@ namespace Mojo
 
         //public static readonly string ID_TILE_MAP_PATH = @"idTileMap\idTileMap.hdf5";
         //public static readonly string ID_COLOR_MAP_PATH = @"idColorMap\idColorMap.hdf5";
-        public static readonly string ID_MAPS_PATH = @"ids\idMaps.hdf5";
+        public static readonly string ID_INDEX_PATH = @"ids\idIndex.hdf5";
+        public static readonly string TEMP_ID_INDEX_PATH = @"temp\idIndex.hdf5";
 
         public static readonly string TEMP_ID_MAP_ROOT_DIRECTORY_NAME = @"temp\ids\tiles";
         //public static readonly string TEMP_ID_TILE_MAP_PATH = @"temp\idTileMap\idTileMap.hdf5";

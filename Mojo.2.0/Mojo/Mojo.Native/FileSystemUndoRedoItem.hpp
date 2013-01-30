@@ -6,7 +6,7 @@
 #include "Mojo.Core/Comparator.hpp"
 #include "Mojo.Core/HashMap.hpp"
 #include "Mojo.Core/VolumeDescription.hpp"
-#include "FileSystemIdMaps.hpp"
+#include "FileSystemIdIndex.hpp"
 #include "Constants.hpp"
 
 namespace Mojo

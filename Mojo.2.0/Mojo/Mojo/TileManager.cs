@@ -493,8 +493,11 @@ namespace Mojo
             //TiledDatasetDescription.Paths.Set( "TempIdTileMap", tempIdTileMapPath );
             //TiledDatasetDescription.Paths.Set( "AutosaveIdTileMap", autosaveIdTileMapPath );
 
-            var idMapsPath = Path.Combine( segmentationRootDirectory, Constants.ID_MAPS_PATH );
-            TiledDatasetDescription.Paths.Set( "IdMaps", idMapsPath );
+            var idIndexPath = Path.Combine( segmentationRootDirectory, Constants.ID_INDEX_PATH );
+            TiledDatasetDescription.Paths.Set( "IdIndex", idIndexPath );
+
+            var tempIdIndexPath = Path.Combine( segmentationRootDirectory, Constants.TEMP_ID_INDEX_PATH );
+            TiledDatasetDescription.Paths.Set( "TempIdIndex", tempIdIndexPath );
 
             //TiledDatasetDescription.IdTileMap = idTileMap;
             //TiledDatasetDescription.MaxLabelId = idTileMap.Keys.Max();
