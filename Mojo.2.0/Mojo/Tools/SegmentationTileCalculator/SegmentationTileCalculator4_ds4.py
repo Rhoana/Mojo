@@ -19,6 +19,12 @@ tile_num_pixels_y             = 512
 tile_num_pixels_x             = 512
 
 
+original_input_color_map_path = 'C:\\dev\\datasets\\conn\\main_dataset\\5K_cube\\diced_xy=512_z=32_xyOv=128_zOv=12_dwnSmp=1\\res_from_0ct15_PF\\FS=1\\cmap.mat'
+original_input_ids_path       = 'C:\\dev\\datasets\\conn\\main_dataset\\5K_cube\\diced_xy=512_z=32_xyOv=128_zOv=12_dwnSmp=1\\res_from_0ct15_PF\\FS=1\\stitched\\labels_grow'
+output_path                    = 'C:\\dev\\datasets\\Cube1_ds4\\mojo'
+nimages_to_process            = 999
+
+
 ##original_input_color_map_path = 'C:\\dev\\datasets\\conn\\main_dataset\\cube2\\diced_xy=512_z=32_xyOv=128_zOv=12_dwnSmp=1\\res_from_Nov29_PF\\FS=1\\cmap2.mat'
 ##original_input_ids_path       = 'C:\\dev\\datasets\\conn\\main_dataset\\cube2\\diced_xy=512_z=32_xyOv=128_zOv=12_dwnSmp=1\\res_from_Nov29_PF\\FS=1\\stitched\\labels_grow'
 ##output_path                    = 'C:\\dev\\datasets\\Cube2x1124\\mojo'
@@ -28,10 +34,10 @@ tile_num_pixels_x             = 512
 
 ##original_input_color_map_path = 'C:\\dev\\datasets\\conn\\main_dataset\\ac3train\\res_from_sept_30_minotrC_PF\\FS=1\\cube_coloring\\cmap.mat'
 ##original_input_ids_path       = 'C:\\dev\\datasets\\conn\\main_dataset\\ac3train\\res_from_sept_30_minotrC_PF\\FS=1\\stitched\\labels_grow'
-original_input_color_map_path = 'C:\\dev\\datasets\\conn\\main_dataset\\ac3train\\diced_xy=512_z=32_xyOv=128_zOv=12_dwnSmp=1\\res_from_sept_30_minotrC_PF\\FS=1\\cube_coloring\\cmap.mat'
-original_input_ids_path       = 'C:\\dev\\datasets\\conn\\main_dataset\\ac3train\\diced_xy=512_z=32_xyOv=128_zOv=12_dwnSmp=1\\res_from_sept_30_minotrC_PF\\FS=1\\stitched\\labels_grow'
-output_path                    = 'C:\\dev\\datasets\\ac3x20\\mojo'
-nimages_to_process            = 20
+##original_input_color_map_path = 'C:\\dev\\datasets\\conn\\main_dataset\\ac3train\\diced_xy=512_z=32_xyOv=128_zOv=12_dwnSmp=1\\res_from_sept_30_minotrC_PF\\FS=1\\cube_coloring\\cmap.mat'
+##original_input_ids_path       = 'C:\\dev\\datasets\\conn\\main_dataset\\ac3train\\diced_xy=512_z=32_xyOv=128_zOv=12_dwnSmp=1\\res_from_sept_30_minotrC_PF\\FS=1\\stitched\\labels_grow'
+##output_path                    = 'C:\\dev\\datasets\\ac3x20\\mojo'
+##nimages_to_process            = 20
 
 
 output_ids_path                = output_path + '\\ids'
@@ -103,6 +109,9 @@ for file in files:
     current_image_counts = numpy.bincount( original_ids.flatten() )
     current_image_counts_ids = numpy.nonzero( current_image_counts )[0]
     id_counts[ current_image_counts_ids ] = id_counts[ current_image_counts_ids ] + numpy.uint32( current_image_counts [ current_image_counts_ids ] )
+    
+    ## Downsample by 4x
+    original_ids = original_ids[ ::4, ::4 ]
     
     ( original_image_num_pixels_x, original_image_num_pixels_y ) = original_ids.shape
 

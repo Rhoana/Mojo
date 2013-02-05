@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{0B642C1A-78C9-41F6-B3A8-2DBB380E636E}"
 	ProjectSection(SolutionItems) = preProject
-		AdjustRenderer2D.fx = AdjustRenderer2D.fx
+		Bin\Shaders\AdjustRenderer2D.fx = Bin\Shaders\AdjustRenderer2D.fx
 		Bin\Shaders\DebugRenderer.fx = Bin\Shaders\DebugRenderer.fx
 		Bin\Shaders\MergeRenderer2D.fx = Bin\Shaders\MergeRenderer2D.fx
 		Bin\Shaders\SplitRenderer2D.fx = Bin\Shaders\SplitRenderer2D.fx

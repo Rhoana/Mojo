@@ -92,9 +92,14 @@
                 </MenuItem>
             </MenuItem>
             <MenuItem Header="View" Focusable="False">
-                <MenuItem Name="NextImage" Header="Next Image" InputGestureText="W" Focusable="False" Command="{Binding Path=NextImageCommand}" IsEnabled="{Binding Path=Engine.TileManager.SegmentationControlsEnabled}" >
+                <MenuItem Name="NextImage" Header="Next Image" InputGestureText="W" Focusable="False" Command="{Binding Path=NextImageCommand}" IsEnabled="{Binding Path=Engine.TileManager.NavigationControlsEnabled}" >
                 </MenuItem>
-                <MenuItem Name="PreviousImage" Header="Previous Image" InputGestureText="S" Focusable="False" Command="{Binding Path=PreviousImageCommand}" IsEnabled="{Binding Path=Engine.TileManager.SegmentationControlsEnabled}" >
+                <MenuItem Name="PreviousImage" Header="Previous Image" InputGestureText="S" Focusable="False" Command="{Binding Path=PreviousImageCommand}" IsEnabled="{Binding Path=Engine.TileManager.NavigationControlsEnabled}" >
+                </MenuItem>
+                <Separator />
+                <MenuItem Name="ZoomIn" Header="Zoom In" InputGestureText="X" Focusable="False" Command="{Binding Path=ZoomInCommand}" IsEnabled="{Binding Path=Engine.TileManager.NavigationControlsEnabled}" >
+                </MenuItem>
+                <MenuItem Name="ZoomOut" Header="Zoom Out" InputGestureText="C" Focusable="False" Command="{Binding Path=ZoomOutCommand}" IsEnabled="{Binding Path=Engine.TileManager.NavigationControlsEnabled}" >
                 </MenuItem>
                 <Separator />
                 <MenuItem Name="ViewSegmentation" Header="Segmentation" InputGestureText="A" Focusable="False" Command="{Binding Path=ToggleShowSegmentationCommand}" IsEnabled="{Binding Path=Engine.TileManager.SegmentationControlsEnabled}" IsCheckable="True" IsChecked="{Binding Path=Engine.TileManager.ShowSegmentation, Mode=OneWay}" >
@@ -130,13 +135,13 @@
                         </StackPanel>
                     </RadioButton>
                     <Border Width="1" BorderBrush="Gray" BorderThickness="1,0,0,0" Margin="5,5,5,5" />
-                    <Button  Margin="0,5,5,5" IsEnabled="{Binding Path=Engine.TileManager.SegmentationControlsEnabled}" Command="{Binding Path=Engine.TileManager.CommitChange}" >
+                    <Button  Margin="0,5,5,5" IsEnabled="{Binding Path=Engine.TileManager.SegmentationControlsEnabled}" Command="{Binding Path=CommitChangeCommand}" >
                         <StackPanel Orientation="Horizontal" >
                             <Image Width="25" Source="{StaticResource SegmentationCommit}" />
                             <Label Content="Commit Change"/>
                         </StackPanel>
                     </Button>
-                    <Button  Margin="0,5,5,5" IsEnabled="{Binding Path=Engine.TileManager.SegmentationControlsEnabled}" Command="{Binding Path=Engine.TileManager.CancelChange}" >
+                    <Button  Margin="0,5,5,5" IsEnabled="{Binding Path=Engine.TileManager.SegmentationControlsEnabled}" Command="{Binding Path=CancelChangeCommand}" >
                         <StackPanel Orientation="Horizontal" >
                             <Image Width="25" Source="{StaticResource SegmentationCancel}" />
                             <Label Content="Cancel Change"/>
@@ -182,6 +187,10 @@
                     SelectedValuePath="SplitMode"
                     SelectedValue="{Binding Path=Engine.TileManager.CurrentSplitMode, Mode=TwoWay}">
                 </ComboBox>
+
+                <CheckBox Margin="5,5,5,5" VerticalAlignment="Center" IsChecked="{Binding Path=Engine.TileManager.JoinSplits3D}">
+                    3D Splits
+                </CheckBox>
 
             </StackPanel>
         </Border>

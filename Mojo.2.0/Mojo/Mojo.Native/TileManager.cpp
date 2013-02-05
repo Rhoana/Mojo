@@ -303,7 +303,8 @@ int TileManager::GetSegmentationLabelId( const TiledDatasetView& tiledDatasetVie
 
 int4 TileManager::GetSegmentationLabelColor( int id )
 {
-    return make_int4( mIdColorMap( id, 0 ), mIdColorMap( id, 1 ), mIdColorMap( id, 2 ), 255 );
+    int index = id % mIdColorMap.shape( 0 );
+    return make_int4( mIdColorMap( index, 0 ), mIdColorMap( index, 1 ), mIdColorMap( index, 2 ), 255 );
 }
 
 void TileManager::ReplaceSegmentationLabel( int oldId, int newId )
@@ -397,18 +398,57 @@ int TileManager::CompletePointSplit( int segId, float3 pointTileSpace )
 {
     int newId = mTileServer->CompletePointSplit( segId, pointTileSpace );
 
+    mTileServer->PrepForSplit( segId, pointTileSpace );
+
     ReloadTileCache();
 
 	return newId;
 }
 
-int TileManager::CompleteDrawSplit( int segId, float3 pointTileSpace )
+int TileManager::CompleteDrawSplit( int segId, float3 pointTileSpace, bool join3D, int splitStartZ )
 {
-    int newId = mTileServer->CompleteDrawSplit( segId, pointTileSpace );
+    int newId = mTileServer->CompleteDrawSplit( segId, pointTileSpace, join3D, splitStartZ );
+
+    mTileServer->PrepForSplit( segId, pointTileSpace );
 
     ReloadTileCache();
 
 	return newId;
+}
+
+void TileManager::RecordSplitState( int segId, float3 pointTileSpace )
+{
+    mTileServer->RecordSplitState( segId, pointTileSpace );
+}
+
+void TileManager::PredictSplit( int segId, float3 pointTileSpace, float radius )
+{
+    mTileServer->PredictSplit( segId, pointTileSpace, radius );
+
+    ReloadTileCacheOverlayMapOnly();
+}
+
+void TileManager::ResetAdjustState()
+{
+    mTileServer->ResetAdjustState();
+
+    ReloadTileCacheOverlayMapOnly();
+}
+
+void TileManager::PrepForAdjust( int segId, float3 pointTileSpace )
+{
+    mTileServer->PrepForAdjust( segId, pointTileSpace );
+
+    ReloadTileCacheOverlayMapOnly();
+}
+
+void TileManager::CommitAdjustChange( int segId, float3 pointTileSpace )
+{
+    mTileServer->CommitAdjustChange( segId, pointTileSpace );
+
+    mTileServer->PrepForAdjust( segId, pointTileSpace );
+
+    ReloadTileCache();
 }
 
 void TileManager::ReplaceSegmentationLabelCurrentConnectedComponent( int oldId, int newId, float3 pDataSpace )

@@ -58,6 +58,20 @@ namespace Mojo
             }
         }
 
+        private bool mNavigationControlsEnabled = false;
+        public bool NavigationControlsEnabled
+        {
+            get
+            {
+                return mNavigationControlsEnabled;
+            }
+            set
+            {
+                mNavigationControlsEnabled = value;
+                OnPropertyChanged( "NavigationControlsEnabled" );
+            }
+        }
+
         private TiledDatasetDescription mTiledDatasetDescription;
         public TiledDatasetDescription TiledDatasetDescription
         {
@@ -171,6 +185,42 @@ namespace Mojo
             }
         }
 
+        private bool mJoinSplits3D = true;
+        public bool JoinSplits3D
+        {
+            get
+            {
+                return mJoinSplits3D;
+            }
+            set
+            {
+                mJoinSplits3D = value;
+                OnPropertyChanged( "JoinSplits3D" );
+            }
+        }
+
+        public void ToggleJoinSplits3D()
+        {
+            if ( SegmentationLoaded )
+            {
+                JoinSplits3D = !JoinSplits3D;
+            }
+        }
+
+        private float mSplitStartZ = 0;
+        public float SplitStartZ
+        {
+            get
+            {
+                return mSplitStartZ;
+            }
+            set
+            {
+                mSplitStartZ = value;
+                OnPropertyChanged( "SplitStartZ" );
+            }
+        }
+
         private int mSelectedSegmentId = 0;
         public int SelectedSegmentId
         {
@@ -180,6 +230,10 @@ namespace Mojo
             }
             set
             {
+                if ( mSelectedSegmentId != value )
+                {
+                    SplitStartZ = TiledDatasetView.CenterDataSpace.Z;
+                }
                 mSelectedSegmentId = value;
                 OnPropertyChanged( "SelectedSegmentId" );
             }
@@ -243,7 +297,7 @@ namespace Mojo
 
         public void IncreaseBrushSize()
         {
-            if ( BrushSize < 16 )
+            if ( BrushSize < 32 )
             {
                 BrushSize += 2;
             }
@@ -251,7 +305,7 @@ namespace Mojo
 
         public void DecreaseBrushSize()
         {
-            if ( BrushSize > 4 )
+            if ( BrushSize > 2 )
             {
                 BrushSize -= 2;
             }
@@ -271,7 +325,7 @@ namespace Mojo
             }
         }
 
-        private SplitMode mCurrentSplitMode = SplitMode.JoinPoints;
+        private SplitMode mCurrentSplitMode = SplitMode.DrawSplit;
         public SplitMode CurrentSplitMode
         {
             get { return mCurrentSplitMode; }
@@ -314,7 +368,7 @@ namespace Mojo
             }
         }
 
-        public void CommmitChange()
+        public void CommmitSplitChange()
         {
             if ( CurrentSplitMode == SplitMode.JoinPoints )
             {
@@ -322,14 +376,25 @@ namespace Mojo
             }
             else
             {
-                Internal.CompleteDrawSplit( SelectedSegmentId, new Vector3( mMouseOverX, mMouseOverY, mTiledDatasetView.CenterDataSpace.Z ) );
+                Internal.CompleteDrawSplit( SelectedSegmentId, new Vector3( mMouseOverX, mMouseOverY, mTiledDatasetView.CenterDataSpace.Z ), mJoinSplits3D, (int) mSplitStartZ );
             }
             ChangesMade = true;
         }
 
-        public void CancelChange()
+        public void CancelSplitChange()
         {
             Internal.ResetSplitState();
+        }
+
+        public void CommmitAdjustChange()
+        {
+            Internal.CommitAdjustChange( SelectedSegmentId, new Vector3( mMouseOverX, mMouseOverY, mTiledDatasetView.CenterDataSpace.Z ) );
+            ChangesMade = true;
+        }
+
+        public void CancelAdjustChange()
+        {
+            Internal.ResetAdjustState();
         }
 
         public void UndoChange()
@@ -379,6 +444,16 @@ namespace Mojo
         public void UpdateView()
         {
             OnPropertyChanged( "TiledDatasetView" );
+            OnPropertyChanged( "SegmentationControlsEnabled" );
+            OnPropertyChanged( "NavigationControlsEnabled" );
+            OnPropertyChanged( "ShowSegmentation" );
+            OnPropertyChanged( "SegmentationVisibilityRatio" );
+            OnPropertyChanged( "ShowBoundaryLines" );
+            OnPropertyChanged( "SelectedSegmentId" );
+            OnPropertyChanged( "MouseOverSegmentId" );
+            OnPropertyChanged( "CurrentMergeMode" );
+            OnPropertyChanged( "CurrentSplitMode" );
+            OnPropertyChanged( "JoinSplits3D" );
         }
 
         public void LoadTiledDataset( string datasetRootDirectory )
@@ -452,6 +527,8 @@ namespace Mojo
 
             LoadTiledDataset( tiledDatasetDescription );
 
+            NavigationControlsEnabled = true;
+
             UpdateView();
 
             ChangesMade = false;
@@ -493,11 +570,14 @@ namespace Mojo
             //TiledDatasetDescription.Paths.Set( "TempIdTileMap", tempIdTileMapPath );
             //TiledDatasetDescription.Paths.Set( "AutosaveIdTileMap", autosaveIdTileMapPath );
 
-            var idIndexPath = Path.Combine( segmentationRootDirectory, Constants.ID_INDEX_PATH );
-            TiledDatasetDescription.Paths.Set( "IdIndex", idIndexPath );
+            var idInfoPath = Path.Combine( segmentationRootDirectory, Constants.ID_INFO_PATH );
+            TiledDatasetDescription.Paths.Set( "IdInfo", idInfoPath );
 
-            var tempIdIndexPath = Path.Combine( segmentationRootDirectory, Constants.TEMP_ID_INDEX_PATH );
-            TiledDatasetDescription.Paths.Set( "TempIdIndex", tempIdIndexPath );
+            var idTileIndexPath = Path.Combine( segmentationRootDirectory, Constants.ID_TILE_INDEX_PATH );
+            TiledDatasetDescription.Paths.Set( "IdTileIndex", idTileIndexPath );
+
+            var tempIdInfoPath = Path.Combine( segmentationRootDirectory, Constants.TEMP_ID_INFO_PATH );
+            TiledDatasetDescription.Paths.Set( "TempIdInfo", tempIdInfoPath );
 
             //TiledDatasetDescription.IdTileMap = idTileMap;
             //TiledDatasetDescription.MaxLabelId = idTileMap.Keys.Max();
@@ -575,6 +655,7 @@ namespace Mojo
                     TiledDatasetDescription = new TiledDatasetDescription();
                 }
             }
+            NavigationControlsEnabled = false;
             ChangesMade = false;
         }
 

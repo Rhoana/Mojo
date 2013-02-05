@@ -21,10 +21,15 @@ struct FileSystemUndoRedoItem
     int                                                                 oldId;
     int                                                                 newId;
     FileSystemTileSet                                                   idTileMapAddNewId;
-	FileSystemTileSet                                                   idTileMapRemoveOldId;
+
+	Core::HashMap< int, FileSystemTileSet >                             idTileMapRemoveOldIdSets;
+
 	Core::HashMap< std::string,
 		std::bitset< TILE_SIZE * TILE_SIZE > >
 		                                                                changePixels;
+	Core::HashMap< std::string,
+		std::set< int2, Core::Int2Comparator > >
+		                                                                changeSets;
 };
 
 }

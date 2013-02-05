@@ -17,6 +17,7 @@
 #include "TiledDatasetDescription.hpp"
 #include "FileSystemTileCacheEntry.hpp"
 #include "FileSystemUndoRedoItem.hpp"
+#include "FileSystemSplitState.hpp"
 #include "Constants.hpp"
 
 namespace Mojo
@@ -59,6 +60,7 @@ public:
     virtual void                                                  DrawRegionB( float3 pointTileSpace, float radius );
     virtual void                                                  DrawRegionA( float3 pointTileSpace, float radius );
     virtual void                                                  DrawRegionValue( float3 pointTileSpace, float radius, int value );
+
     virtual void                                                  AddSplitSource( float3 pointTileSpace );
     virtual void                                                  RemoveSplitSource();
     virtual void                                                  LoadSplitDistances( int segId );
@@ -68,7 +70,14 @@ public:
 	virtual void                                                  FindBoundaryWithinRegion2D( int segId );
 	virtual void                                                  FindBoundaryBetweenRegions2D( int segId );
     virtual int                                                   CompletePointSplit( int segId, float3 pointTileSpace );
-    virtual int                                                   CompleteDrawSplit( int segId, float3 pointTileSpace );
+    virtual int                                                   CompleteDrawSplit( int segId, float3 pointTileSpace, bool join3D, int splitStartZ );
+
+    virtual void                                                  RecordSplitState( int segId, float3 pointTileSpace );
+    virtual void                                                  PredictSplit( int segId, float3 pointTileSpace, float radius );
+
+    virtual void                                                  ResetAdjustState();
+    virtual void                                                  PrepForAdjust( int segId, float3 pointTileSpace );
+    virtual void                                                  CommitAdjustChange( int segId, float3 pointTileSpace );
 
 	virtual void                                                  UndoChange();
 	virtual void                                                  RedoChange();
@@ -125,10 +134,9 @@ private:
     void                                                          UnloadTileImageInternal( Core::VolumeDescription& volumeDescription );
     void                                                          UnloadTileHdf5Internal( Core::VolumeDescription& volumeDescription );
 
-	void                                                          UpdateSplitTiles();
-	void                                                          UpdateSplitTilesBoundingBox( int2 upperLeft, int2 lowerRight );
-	void                                                          UpdateSplitTilesHover();
-	void                                                          ResetSplitTiles();
+	void                                                          UpdateOverlayTiles();
+	void                                                          UpdateOverlayTilesBoundingBox( int2 upperLeft, int2 lowerRight );
+	void                                                          ResetOverlayTiles();
 	void                                                          PrepForNextUndoRedoChange();
 
     Core::PrimitiveMap                                            mConstParameters;
@@ -159,8 +167,20 @@ private:
     char*                                                         mSplitDrawArea;
     unsigned int*                                                 mSplitResultArea;
 
-	FileSystemUndoRedoItem                                        mUndoItem;
-	FileSystemUndoRedoItem                                        mRedoItem;
+
+    float2                                                        mCentroid;
+    int                                                           mPrevSplitId;
+    int                                                           mPrevSplitZ;
+    std::vector< float2 >                                         mPrevSplitLine;
+    std::vector< std::pair< float2, int >>                        mPrevSplitCentroids;
+
+    std::map< int, FileSystemSplitState >                         mSplitStates;
+
+    std::deque< FileSystemUndoRedoItem >                          mUndoDeque;
+	std::deque< FileSystemUndoRedoItem >                          mRedoDeque;
+
+    FileSystemUndoRedoItem*                                       mNextUndoItem;
+
 };
 
 template < typename TCudaType >
@@ -177,7 +197,7 @@ inline void FileSystemTileServer::LoadSegmentationInternal( TiledDatasetDescript
 
     Core::Printf( "Loading idMaps..." );
 
-    mIdIndex = FileSystemIdIndex( mTiledDatasetDescription.paths.Get( "IdIndex" ) );
+    mIdIndex = FileSystemIdIndex( mTiledDatasetDescription.paths.Get( "IdInfo" ), mTiledDatasetDescription.paths.Get( "IdTileIndex" ) );
 
     Core::Printf( "Loaded." );
 

@@ -92,6 +92,8 @@ void TileManager::UnloadSegmentation()
 {
     mTileManager->UnloadSegmentation();
 
+    mTileServer->UnloadSegmentation();
+
     UnloadIdColorMap();
     LoadIdColorMap();
 }
@@ -233,10 +235,39 @@ int TileManager::CompletePointSplit( int segId, Vector3^ pDataSpace )
     return mTileManager->CompletePointSplit( segId, pDataSpaceFloat3 );
 }
 
-int TileManager::CompleteDrawSplit( int segId, Vector3^ pDataSpace )
+int TileManager::CompleteDrawSplit( int segId, Vector3^ pDataSpace, bool join3D, int splitStartZ )
 {
     float3 pDataSpaceFloat3 = make_float3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
-    return mTileManager->CompleteDrawSplit( segId, pDataSpaceFloat3 );
+    return mTileManager->CompleteDrawSplit( segId, pDataSpaceFloat3, join3D, splitStartZ );
+}
+
+void TileManager::RecordSplitState( int segId, Vector3^ pDataSpace )
+{
+    float3 pDataSpaceFloat3 = make_float3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
+    mTileManager->RecordSplitState( segId, pDataSpaceFloat3 );
+}
+
+void TileManager::PredictSplit( int segId, Vector3^ pDataSpace, float radius )
+{
+    float3 pDataSpaceFloat3 = make_float3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
+    mTileManager->PredictSplit( segId, pDataSpaceFloat3, radius );
+}
+
+void TileManager::ResetAdjustState()
+{
+    mTileManager->ResetAdjustState();
+}
+
+void TileManager::PrepForAdjust( int segId, Vector3^ pDataSpace )
+{
+    float3 pDataSpaceFloat3 = make_float3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
+    mTileManager->PrepForAdjust( segId, pDataSpaceFloat3 );
+}
+
+void TileManager::CommitAdjustChange( int segId, Vector3^ pDataSpace )
+{
+    float3 pDataSpaceFloat3 = make_float3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
+    mTileManager->CommitAdjustChange( segId, pDataSpaceFloat3 );
 }
 
 void TileManager::ReplaceSegmentationLabelCurrentConnectedComponent( int oldId, int newId, TiledDatasetView^ tiledDatasetView, Vector3^ pDataSpace )

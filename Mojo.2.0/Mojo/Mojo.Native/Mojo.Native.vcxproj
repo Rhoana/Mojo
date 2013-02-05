@@ -21,6 +21,7 @@
   <ItemGroup>
     <ClInclude Include="Constants.hpp" />
     <ClInclude Include="FileSystemIdIndex.hpp" />
+    <ClInclude Include="FileSystemSplitState.hpp" />
     <ClInclude Include="SimpleSplitTools.hpp" />
     <ClInclude Include="FileSystemTileCacheEntry.hpp" />
     <ClInclude Include="FileSystemUndoRedoItem.hpp" />
@@ -34,6 +35,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="FileSystemIdIndex.cpp" />
+    <ClCompile Include="FileSystemSplitState.cpp" />
     <ClCompile Include="SimpleSplitTools.cpp" />
     <ClCompile Include="FileSystemTileCacheEntry.cpp" />
     <ClCompile Include="FileSystemUndoRedoItem.cpp" />
@@ -218,7 +220,7 @@
       <ExceptionHandling>Async</ExceptionHandling>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
       <ObjectFileName>$(IntDir)</ObjectFileName>
-      <AdditionalIncludeDirectories>..\;..\Sdk\Marray\v1.0\marray\include\;..\Sdk\Hdf5\1.8.8\include\;..\Sdk\OpenCV\OpenCV2.4\build\include\;..\Sdk\Thrust\thrust-v1.3.0\;..\Sdk\Cutil\NVIDIA GPU Computing SDK 4.2\C\common\inc\;..\Sdk\Cuda\v4.2\include\;..\Sdk\Boost\boost_1_44\;..\Sdk\DirectX\Microsoft DirectX SDK (June 2010)\Include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\;..\Sdk\SQLite\sqlite-amalgamation-3071502\;..\;..\Sdk\Marray\v1.0\marray\include\;..\Sdk\Hdf5\1.8.8\include\;..\Sdk\OpenCV\OpenCV2.4\build\include\;..\Sdk\Thrust\thrust-v1.3.0\;..\Sdk\Cutil\NVIDIA GPU Computing SDK 4.2\C\common\inc\;..\Sdk\Cuda\v4.2\include\;..\Sdk\Boost\boost_1_44\;..\Sdk\DirectX\Microsoft DirectX SDK (June 2010)\Include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
     </ClCompile>
     <Link>

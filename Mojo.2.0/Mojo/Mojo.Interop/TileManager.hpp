@@ -62,6 +62,7 @@ public:
     void                                                    DrawErase( TiledDatasetView^ tiledDatasetView, Vector3^ pDataSpace, float radius );
     void                                                    DrawRegionB( TiledDatasetView^ tiledDatasetView, Vector3^ pDataSpace, float radius );
     void                                                    DrawRegionA( TiledDatasetView^ tiledDatasetView, Vector3^ pDataSpace, float radius );
+
     void                                                    AddSplitSource( TiledDatasetView^ tiledDatasetView, Vector3^ pDataSpace );
     void                                                    RemoveSplitSource();
     void                                                    ResetSplitState();
@@ -70,7 +71,13 @@ public:
 	void                                                    FindBoundaryWithinRegion2D( int segId );
 	void                                                    FindBoundaryBetweenRegions2D( int segId );
     int                                                     CompletePointSplit( int segId, Vector3^ pDataSpace );
-    int                                                     CompleteDrawSplit( int segId, Vector3^ pDataSpace );
+    int                                                     CompleteDrawSplit( int segId, Vector3^ pDataSpace, bool join3D, int splitStartZ );
+    void                                                    RecordSplitState( int segId, Vector3^ pDataSpace );
+    void                                                    PredictSplit( int segId, Vector3^ pDataSpace, float radius );
+
+    void                                                    ResetAdjustState();
+    void                                                    PrepForAdjust( int segId, Vector3^ pDataSpace );
+    void                                                    CommitAdjustChange( int segId, Vector3^ pDataSpace );
 
 	void                                                    UndoChange();
 	void                                                    RedoChange();

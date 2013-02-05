@@ -45,6 +45,7 @@ public:
     virtual void                                                  DrawErase( float3 pointTileSpace, float radius )                                        = 0;
     virtual void                                                  DrawRegionB( float3 pointTileSpace, float radius )                                      = 0;
     virtual void                                                  DrawRegionA( float3 pointTileSpace, float radius )                                      = 0;
+
     virtual void                                                  AddSplitSource( float3 pointTileSpace )                                                 = 0;
     virtual void                                                  RemoveSplitSource()                                                                     = 0;
     virtual void                                                  ResetSplitState()                                                                       = 0;
@@ -53,7 +54,14 @@ public:
 	virtual void                                                  FindBoundaryWithinRegion2D( int segId )                                                 = 0;
 	virtual void                                                  FindBoundaryBetweenRegions2D( int segId )                                               = 0;
     virtual int                                                   CompletePointSplit( int segId, float3 pointTileSpace )                                  = 0;
-    virtual int                                                   CompleteDrawSplit( int segId, float3 pointTileSpace )                                   = 0;
+    virtual int                                                   CompleteDrawSplit( int segId, float3 pointTileSpace, bool join3D, int splitStartZ )     = 0;
+
+    virtual void                                                  RecordSplitState( int segId, float3 pointTileSpace )                                   = 0;
+    virtual void                                                  PredictSplit( int segId, float3 pointTileSpace, float radius )                                   = 0;
+
+    virtual void                                                  ResetAdjustState()                                                                      = 0;
+    virtual void                                                  PrepForAdjust( int segId, float3 pointTileSpace )                                       = 0;
+    virtual void                                                  CommitAdjustChange( int segId, float3 pointTileSpace )                                  = 0;
 
 	virtual void                                                  UndoChange() = 0;
 	virtual void                                                  RedoChange() = 0;

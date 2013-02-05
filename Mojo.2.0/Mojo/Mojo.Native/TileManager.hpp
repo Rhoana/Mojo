@@ -69,6 +69,7 @@ public:
     void                                                  DrawErase( float3 pointTileSpace, float radius );
     void                                                  DrawRegionB( float3 pointTileSpace, float radius );
     void                                                  DrawRegionA( float3 pointTileSpace, float radius );
+
     void                                                  AddSplitSource( float3 pointTileSpace );
     void                                                  RemoveSplitSource();
     void                                                  ResetSplitState();
@@ -77,7 +78,13 @@ public:
 	void                                                  FindBoundaryWithinRegion2D( int segId );
 	void                                                  FindBoundaryBetweenRegions2D( int segId );
     int                                                   CompletePointSplit( int segId, float3 pointTileSpace );
-    int                                                   CompleteDrawSplit( int segId, float3 pointTileSpace );
+    int                                                   CompleteDrawSplit( int segId, float3 pointTileSpace, bool join3D, int splitStartZ );
+    void                                                  RecordSplitState( int segId, float3 pointTileSpace );
+    void                                                  PredictSplit( int segId, float3 pointTileSpace, float radius );
+
+    void                                                  ResetAdjustState();
+    void                                                  PrepForAdjust( int segId, float3 pointTileSpace );
+    void                                                  CommitAdjustChange( int segId, float3 pointTileSpace );
 
 	void                                                  UndoChange();
 	void                                                  RedoChange();

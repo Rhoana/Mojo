@@ -38,8 +38,11 @@ namespace Mojo.Wpf.ViewModel
         //
         public RelayCommand NextImageCommand { get; private set; }
         public RelayCommand PreviousImageCommand { get; private set; }
+        public RelayCommand ZoomInCommand { get; private set; }
+        public RelayCommand ZoomOutCommand { get; private set; }
         public RelayCommand ToggleShowSegmentationCommand { get; private set; }
         public RelayCommand ToggleShowBoundaryLinesCommand { get; private set; }
+        public RelayCommand ToggleJoinSplits3DCommand { get; private set; }
         public RelayCommand IncreaseSegmentationVisibilityCommand { get; private set; }
         public RelayCommand DecreaseSegmentationVisibilityCommand { get; private set; }
 
@@ -78,8 +81,8 @@ namespace Mojo.Wpf.ViewModel
             //
             UndoChangeCommand = new RelayCommand( param => Engine.TileManager.UndoChange(), param => Engine.TileManager.SegmentationLoaded );
             RedoChangeCommand = new RelayCommand( param => Engine.TileManager.RedoChange(), param => Engine.TileManager.SegmentationLoaded );
-            CommitChangeCommand = new RelayCommand( param => Engine.TileManager.CommmitChange(), param => Engine.TileManager.SegmentationLoaded );
-            CancelChangeCommand = new RelayCommand( param => Engine.TileManager.CancelChange(), param => Engine.TileManager.SegmentationLoaded );
+            CommitChangeCommand = new RelayCommand( param => Engine.CommitChange(), param => Engine.TileManager.SegmentationLoaded );
+            CancelChangeCommand = new RelayCommand( param => Engine.CancelChange(), param => Engine.TileManager.SegmentationLoaded );
             IncreaseBrushSizeCommand = new RelayCommand( param => Engine.TileManager.IncreaseBrushSize(), param => Engine.TileManager.SegmentationLoaded );
             DecreaseBrushSizeCommand = new RelayCommand( param => Engine.TileManager.DecreaseBrushSize(), param => Engine.TileManager.SegmentationLoaded );
 
@@ -88,8 +91,11 @@ namespace Mojo.Wpf.ViewModel
             //
             NextImageCommand = new RelayCommand( param => Engine.NextImage(), param => Engine.TileManager.TiledDatasetLoaded );
             PreviousImageCommand = new RelayCommand( param => Engine.PreviousImage(), param => Engine.TileManager.TiledDatasetLoaded );
+            ZoomInCommand = new RelayCommand( param => Engine.ZoomIn(), param => Engine.TileManager.TiledDatasetLoaded );
+            ZoomOutCommand = new RelayCommand( param => Engine.ZoomOut(), param => Engine.TileManager.TiledDatasetLoaded );
             ToggleShowSegmentationCommand = new RelayCommand( param => Engine.TileManager.ToggleShowSegmentation(), param => Engine.TileManager.SegmentationLoaded );
             ToggleShowBoundaryLinesCommand = new RelayCommand( param => Engine.TileManager.ToggleShowBoundaryLines(), param => Engine.TileManager.SegmentationLoaded );
+            ToggleJoinSplits3DCommand = new RelayCommand( param => Engine.TileManager.ToggleJoinSplits3D(), param => Engine.TileManager.SegmentationLoaded );
             IncreaseSegmentationVisibilityCommand = new RelayCommand( param => Engine.TileManager.IncreaseSegmentationVisibility(), param => Engine.TileManager.SegmentationLoaded );
             DecreaseSegmentationVisibilityCommand = new RelayCommand( param => Engine.TileManager.DecreaseSegmentationVisibility(), param => Engine.TileManager.SegmentationLoaded );
 
@@ -98,15 +104,15 @@ namespace Mojo.Wpf.ViewModel
             MergeModes = new List<MergeModeItem>
             {
               new MergeModeItem() { MergeMode = MergeMode.Fill2D, DisplayName = "2D Region Fill" },
-              new MergeModeItem() { MergeMode = MergeMode.Fill3D, DisplayName = "3D Region Fill" },
+              new MergeModeItem() { MergeMode = MergeMode.Fill3D, DisplayName = "3D Region Fill (slow)" },
               new MergeModeItem() { MergeMode = MergeMode.GlobalReplace, DisplayName = "Global Replace" }
             };
 
             SplitModes = new List<SplitModeItem>
             {
-                new SplitModeItem() { SplitMode = SplitMode.JoinPoints, DisplayName = "Points" },
                 new SplitModeItem() { SplitMode = SplitMode.DrawSplit, DisplayName = "Draw Split Line" },
-                new SplitModeItem() { SplitMode = SplitMode.DrawRegions, DisplayName = "Draw Regions" }
+                new SplitModeItem() { SplitMode = SplitMode.DrawRegions, DisplayName = "Draw Regions" },
+                new SplitModeItem() { SplitMode = SplitMode.JoinPoints, DisplayName = "Points (2D only)" }
             };
 
             OnPropertyChanged( "MergeModes" );
@@ -125,12 +131,6 @@ namespace Mojo.Wpf.ViewModel
                 TileManagerDataContext.StateChanged -= StateChangedHandler;
                 TileManagerDataContext.Dispose();
                 TileManagerDataContext = null;
-            }
-
-            if ( Engine != null )
-            {
-                Engine.Dispose();
-                Engine = null;
             }
         }
 

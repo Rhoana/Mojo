@@ -52,17 +52,20 @@ namespace Mojo
                 case System.Windows.Input.Key.Z:
                     if ( keyEventArgs.KeyboardDevice.Modifiers == System.Windows.Input.ModifierKeys.Control )
                         mTileManager.UndoChange();
+                        mTileManager.Internal.PrepForSplit( mTileManager.SelectedSegmentId, p );
                     break;
                 case System.Windows.Input.Key.Y:
                     if ( keyEventArgs.KeyboardDevice.Modifiers == System.Windows.Input.ModifierKeys.Control )
                         mTileManager.RedoChange();
+                        mTileManager.Internal.PrepForSplit( mTileManager.SelectedSegmentId, p );
                     break;
                 case System.Windows.Input.Key.Tab:
-                    mTileManager.CommmitChange();
+                    mTileManager.CommmitSplitChange();
+                    keyEventArgs.Handled = true;
                     break;
 
                 case System.Windows.Input.Key.Escape:
-                    mTileManager.CancelChange();
+                    mTileManager.CancelSplitChange();
                     break;
 
                 //Base class will move the view - make sure we prep for splitting again
@@ -70,21 +73,31 @@ namespace Mojo
                     if ( mTileManager.SelectedSegmentId != 0 )
                     {
                         mTileManager.Internal.PrepForSplit( mTileManager.SelectedSegmentId, p );
+                        if ( mTileManager.JoinSplits3D )
+                        {
+                            mTileManager.Internal.PredictSplit( mTileManager.SelectedSegmentId, p, mTileManager.BrushSize );
+                        }
                     }
                     break;
                 case System.Windows.Input.Key.S:
                     if ( mTileManager.SelectedSegmentId != 0 )
                     {
                         mTileManager.Internal.PrepForSplit( mTileManager.SelectedSegmentId, p );
+                        if ( mTileManager.JoinSplits3D )
+                        {
+                            mTileManager.Internal.PredictSplit( mTileManager.SelectedSegmentId, p, mTileManager.BrushSize );
+                        }
                     }
                     break;
 
                 case System.Windows.Input.Key.OemComma:
                 case System.Windows.Input.Key.OemMinus:
+                case System.Windows.Input.Key.Subtract:
                     mTileManager.DecreaseBrushSize();
                     break;
                 case System.Windows.Input.Key.OemPeriod:
                 case System.Windows.Input.Key.OemPlus:
+                case System.Windows.Input.Key.Add:
                     mTileManager.IncreaseBrushSize();
                     break;
 
@@ -225,6 +238,7 @@ namespace Mojo
                     if ( clickedId > 0 && clickedId == mTileManager.SelectedSegmentId && mTileManager.CurrentSplitMode == SplitMode.JoinPoints )
                     {
                         mTileManager.Internal.AddSplitSource( mTileManager.TiledDatasetView, p );
+                        mTileManager.Internal.DrawRegionB( mTileManager.TiledDatasetView, p, 4 );
                         mTileManager.Internal.FindBoundaryJoinPoints2D( clickedId );
                     }
                     else if ( clickedId > 0 && mTileManager.SelectedSegmentId > 0 )

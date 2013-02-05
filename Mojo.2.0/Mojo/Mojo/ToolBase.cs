@@ -44,18 +44,22 @@ namespace Mojo
                 case Key.Left:
                     centerDataSpace.X += Constants.ARROW_KEY_STEP / dataSpaceUnitWidthNumPixels;
                     mTileManager.TiledDatasetView.CenterDataSpace = centerDataSpace;
+                    keyEventArgs.Handled = true;
                     break;
                 case Key.Right:
                     centerDataSpace.X -= Constants.ARROW_KEY_STEP / dataSpaceUnitWidthNumPixels;
                     mTileManager.TiledDatasetView.CenterDataSpace = centerDataSpace;
+                    keyEventArgs.Handled = true;
                     break;
                 case Key.Up:
                     centerDataSpace.Y += Constants.ARROW_KEY_STEP / dataSpaceUnitWidthNumPixels;
                     mTileManager.TiledDatasetView.CenterDataSpace = centerDataSpace;
+                    keyEventArgs.Handled = true;
                     break;
                 case Key.Down:
                     centerDataSpace.Y -= Constants.ARROW_KEY_STEP / dataSpaceUnitWidthNumPixels;
                     mTileManager.TiledDatasetView.CenterDataSpace = centerDataSpace;
+                    keyEventArgs.Handled = true;
                     break;
 
                 case Key.W:
@@ -63,6 +67,13 @@ namespace Mojo
                     break;
                 case Key.S:
                     mEngine.PreviousImage();
+                    break;
+
+                case Key.X:
+                    mEngine.ZoomOut();
+                    break;
+                case Key.C:
+                    mEngine.ZoomIn();
                     break;
 
             }

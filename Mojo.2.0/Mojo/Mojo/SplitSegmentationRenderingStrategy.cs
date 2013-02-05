@@ -259,11 +259,6 @@ namespace Mojo
                 if ( tileCacheEntry.D3D11CudaTextures.Internal.ContainsKey( "OverlayMap" ) )
                 {
                     mEffect.GetVariableByName( "gOverlayTexture3D" ).AsResource().SetResource( tileCacheEntry.D3D11CudaTextures.Get( "OverlayMap" ) );
-                    mTinyTextContext.Print( viewport, "Got Splits!", 10, 50 );
-                }
-                else
-                {
-                    mTinyTextContext.Print( viewport, "No Splits.", 10, 70 );
                 }
             }
             mEffect.GetVariableByName( "gTransform" ).AsMatrix().SetMatrix( camera.GetLookAtMatrix() * camera.GetProjectionMatrix() );

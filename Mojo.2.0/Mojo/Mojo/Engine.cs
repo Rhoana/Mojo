@@ -91,7 +91,7 @@ namespace Mojo
                             new ObservableDictionary< ToolMode, ITool >
                             {
                                 { ToolMode.Null, new NullTool() },
-                                { ToolMode.AdjustSegmentation, new NullTool() },
+                                { ToolMode.AdjustSegmentation, new AdjustSegmentationTool( TileManager, this ) },
                                 { ToolMode.MergeSegmentation, new MergeSegmentationTool( TileManager, this ) },
                                 { ToolMode.SplitSegmentation, new SplitSegmentationTool( TileManager, this ) }
                             }
@@ -105,7 +105,7 @@ namespace Mojo
                                           new ObservableDictionary< ToolMode, IRenderingStrategy >
                                           {
                                               { ToolMode.Null, new NullRenderingStrategy( mD3D11Device, mD3D11Device.ImmediateContext ) },
-                                              { ToolMode.AdjustSegmentation, new NullRenderingStrategy( mD3D11Device, mD3D11Device.ImmediateContext ) },
+                                              { ToolMode.AdjustSegmentation, new AdjustSegmentationRenderingStrategy( mD3D11Device, mD3D11Device.ImmediateContext, TileManager ) },
                                               { ToolMode.MergeSegmentation, new MergeSegmentationRenderingStrategy( mD3D11Device, mD3D11Device.ImmediateContext, TileManager ) },
                                               { ToolMode.SplitSegmentation, new SplitSegmentationRenderingStrategy( mD3D11Device, mD3D11Device.ImmediateContext, TileManager ) }
                                           }
@@ -159,6 +159,13 @@ namespace Mojo
             var centerDataSpace = TileManager.TiledDatasetView.CenterDataSpace;
             if ( centerDataSpace.Z < TileManager.TiledDatasetDescription.TiledVolumeDescriptions.Get( "SourceMap" ).NumVoxelsZ - 1 )
             {
+                if ( CurrentToolMode == ToolMode.SplitSegmentation && TileManager.JoinSplits3D )
+                {
+                    //
+                    // Record split state for 3D splitting
+                    //
+                    TileManager.Internal.RecordSplitState( TileManager.SelectedSegmentId, centerDataSpace );
+                }
                 centerDataSpace.Z += 1f;
                 TileManager.TiledDatasetView.CenterDataSpace = centerDataSpace;
                 TileManager.UpdateView();
@@ -171,11 +178,50 @@ namespace Mojo
             var centerDataSpace = TileManager.TiledDatasetView.CenterDataSpace;
             if ( centerDataSpace.Z > 0 )
             {
+                if ( CurrentToolMode == ToolMode.SplitSegmentation && TileManager.JoinSplits3D )
+                {
+                    //
+                    // Record split state for 3D splitting
+                    //
+                    TileManager.Internal.RecordSplitState( TileManager.SelectedSegmentId, centerDataSpace );
+                }
                 centerDataSpace.Z -= 1f;
                 TileManager.TiledDatasetView.CenterDataSpace = centerDataSpace;
                 TileManager.UpdateView();
                 Update();
             }
+        }
+
+        public void ZoomIn()
+        {
+            var extentDataSpace = TileManager.TiledDatasetView.ExtentDataSpace;
+            var changeBy = (float) Constants.MAGNIFICATION_STEP;
+
+            //
+            // Decrease the view extent
+            //
+            extentDataSpace.X /= changeBy;
+            extentDataSpace.Y /= changeBy;
+
+            TileManager.TiledDatasetView.ExtentDataSpace = extentDataSpace;
+
+            QuickRender();
+        }
+
+        public void ZoomOut()
+        {
+            var extentDataSpace = TileManager.TiledDatasetView.ExtentDataSpace;
+            var changeBy = (float) Constants.MAGNIFICATION_STEP;
+
+            //
+            // Increase the view extent
+            //
+            extentDataSpace.X *= changeBy;
+            extentDataSpace.Y *= changeBy;
+
+            TileManager.TiledDatasetView.ExtentDataSpace = extentDataSpace;
+
+            QuickRender();
         }
 
         public void Update()
@@ -190,6 +236,30 @@ namespace Mojo
             // Render the tiles we have now without loading anything else
             //
             Viewers.Internal.ToList().ForEach( viewer => viewer.Value.D3D11RenderingPane.Render() );
+        }
+
+        public void CommitChange()
+        {
+            if ( CurrentToolMode == ToolMode.AdjustSegmentation )
+            {
+                TileManager.CommmitAdjustChange();
+            }
+            else if ( CurrentToolMode == ToolMode.SplitSegmentation )
+            {
+                TileManager.CommmitSplitChange();
+            }
+        }
+
+        public void CancelChange()
+        {
+            if ( CurrentToolMode == ToolMode.AdjustSegmentation )
+            {
+                TileManager.CancelAdjustChange();
+            }
+            else if ( CurrentToolMode == ToolMode.SplitSegmentation )
+            {
+                TileManager.CancelSplitChange();
+            }
         }
     }
 }
