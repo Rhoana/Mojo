@@ -233,8 +233,13 @@ Class Mojo.Interop.TileManager: AutoLayout, AnsiClass, Class, Public, BeforeFiel
     FindBoundaryJoinPoints2D(Int32): PrivateScope, Public, HideBySig
     FindBoundaryWithinRegion2D(Int32): PrivateScope, Public, HideBySig
     FindBoundaryBetweenRegions2D(Int32): PrivateScope, Public, HideBySig
-    CompletePointSplit(Int32): PrivateScope, Public, HideBySig
-    CompleteDrawSplit(Int32): PrivateScope, Public, HideBySig
+    CompletePointSplit(Int32, ValueType Vector3 IsBoxed): PrivateScope, Public, HideBySig
+    CompleteDrawSplit(Int32, ValueType Vector3 IsBoxed, Boolean(HasFieldMarshal), Int32): PrivateScope, Public, HideBySig
+    RecordSplitState(Int32, ValueType Vector3 IsBoxed): PrivateScope, Public, HideBySig
+    PredictSplit(Int32, ValueType Vector3 IsBoxed, Single): PrivateScope, Public, HideBySig
+    ResetAdjustState(): PrivateScope, Public, HideBySig
+    PrepForAdjust(Int32, ValueType Vector3 IsBoxed): PrivateScope, Public, HideBySig
+    CommitAdjustChange(Int32, ValueType Vector3 IsBoxed): PrivateScope, Public, HideBySig
     UndoChange(): PrivateScope, Public, HideBySig
     RedoChange(): PrivateScope, Public, HideBySig
     SaveAndClearFileSystemTileCache(): PrivateScope, Public, HideBySig

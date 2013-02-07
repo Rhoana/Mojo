@@ -20,7 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Constants.hpp" />
-    <ClInclude Include="FileSystemIdIndex.hpp" />
+    <ClInclude Include="FileSystemSegmentInfoManager.hpp" />
     <ClInclude Include="FileSystemSplitState.hpp" />
     <ClInclude Include="SimpleSplitTools.hpp" />
     <ClInclude Include="FileSystemTileCacheEntry.hpp" />
@@ -34,7 +34,7 @@
     <ClInclude Include="FileSystemTileServer.hpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="FileSystemIdIndex.cpp" />
+    <ClCompile Include="FileSystemSegmentInfoManager.cpp" />
     <ClCompile Include="FileSystemSplitState.cpp" />
     <ClCompile Include="SimpleSplitTools.cpp" />
     <ClCompile Include="FileSystemTileCacheEntry.cpp" />

@@ -1,4 +1,4 @@
-#include "FileSystemIdIndex.hpp"
+#include "FileSystemSegmentInfoManager.hpp"
 
 #include "Mojo.Core/Boost.hpp"
 
@@ -7,25 +7,25 @@ namespace Mojo
 namespace Native
 {
 
-FileSystemIdIndex::FileSystemIdIndex()
+FileSystemSegmentInfoManager::FileSystemSegmentInfoManager()
 {
     mIsDBOpen = false;
 }
 
-FileSystemIdIndex::FileSystemIdIndex( std::string idInfoFilePath, std::string idTileIndexDBFilePath )
+FileSystemSegmentInfoManager::FileSystemSegmentInfoManager( std::string colorMapFilePath, std::string idTileIndexDBFilePath )
 {
-    mIdInfoPath = idInfoFilePath;
+    mColorMapPath = colorMapFilePath;
     mIdTileIndexDBPath = idTileIndexDBFilePath;
     mIsDBOpen = false;
 
-    mIdIndexHdf5FileHandle = marray::hdf5::openFile( mIdInfoPath );
-    marray::hdf5::load( mIdIndexHdf5FileHandle, "idMax", mIdMax );
-    marray::hdf5::load( mIdIndexHdf5FileHandle, "idColorMap", mIdColorMap );
-    marray::hdf5::load( mIdIndexHdf5FileHandle, "idVoxelCountMap", mIdVoxelCountMap );
-    marray::hdf5::closeFile( mIdIndexHdf5FileHandle );
+    mColorMapHdf5FileHandle = marray::hdf5::openFile( mColorMapPath );
+    marray::hdf5::load( mColorMapHdf5FileHandle, "idMax", mIdMax );
+    marray::hdf5::load( mColorMapHdf5FileHandle, "idColorMap", mIdColorMap );
+    marray::hdf5::load( mColorMapHdf5FileHandle, "idVoxelCountMap", mIdVoxelCountMap );
+    marray::hdf5::closeFile( mColorMapHdf5FileHandle );
 }
 
-void FileSystemIdIndex::CloseDB()
+void FileSystemSegmentInfoManager::CloseDB()
 {
     if ( mIsDBOpen )
     {
@@ -35,7 +35,7 @@ void FileSystemIdIndex::CloseDB()
     }
 }
 
-void FileSystemIdIndex::OpenDB()
+void FileSystemSegmentInfoManager::OpenDB()
 {
     //
     // Open the SQLite database
@@ -50,9 +50,41 @@ void FileSystemIdIndex::OpenDB()
         }
         else
         {
-            Core::Printf( "Opened SQLite database ", mIdTileIndexDBPath, "." );
+
+			Core::Printf( "Opened SQLite database ", mIdTileIndexDBPath, "." );
             mIsDBOpen = true;
+
+			//
+			// SQLite PRAGMAS for faster operation
+			//
+			std::string query;
+			std::stringstream converter;
+
+			converter << "PRAGMA main.cache_size=10000;\n";
+			converter << "PRAGMA main.locking_mode=EXCLUSIVE;\n";
+			converter << "PRAGMA main.synchronous=OFF;\n";
+			converter << "PRAGMA main.journal_mode=WAL;\n";
+			converter << "PRAGMA count_changes=OFF;\n";
+			converter << "PRAGMA main.temp_store=MEMORY";
+
+			int sqlReturn;
+			char *sqlError = NULL;
+
+			query = converter.str();
+			sqlReturn = sqlite3_exec( mIdTileIndexDB, query.c_str(), NULL, NULL, &sqlError); 
+
+			if ( sqlReturn != SQLITE_OK )
+			{
+				Core::Printf( "ERROR: Unable to execute PRAGMA statements in database (", sqlReturn, "): ", std::string( sqlError ) );
+			}
+
+			//
+			// TODO:Load the Segment Info
+			//
+			mSegmentMultiIndex.
+
         }
+
     }
 }
 
@@ -63,10 +95,10 @@ static int callback(void *unused, int argc, char **argv, char **colName)
 }
 
 
-void FileSystemIdIndex::Save()
+void FileSystemSegmentInfoManager::Save()
 {
 
-    std::string newPath = mIdInfoPath + ".temp";
+    std::string newPath = mColorMapPath + ".temp";
 
     boost::filesystem::path tempidInfoPath = boost::filesystem::path( newPath );
     if ( !boost::filesystem::exists( tempidInfoPath ) )
@@ -92,9 +124,11 @@ void FileSystemIdIndex::Save()
     int numDeletes = 0;
     int numInserts = 0;
 
+	converter << "BEGIN TRANSACTION;\n";
+
     for ( FileSystemIdTileMapDirect::iterator idIt = mCacheIdTileMap.GetHashMap().begin(); idIt != mCacheIdTileMap.GetHashMap().end(); ++idIt )
     {
-        FileSystemTileSet oldTiles = LoadTiles( idIt->first );
+        FileSystemTileSet oldTiles = LoadTileSet( idIt->first );
 
         for ( FileSystemTileSet::iterator oldTileIt = oldTiles.begin(); oldTileIt != oldTiles.end(); ++oldTileIt )
         {
@@ -116,6 +150,8 @@ void FileSystemIdIndex::Save()
 
     }
 
+	converter << "END TRANSACTION;\n";
+
     Core::Printf( "Removing ", numDeletes, " and adding ", numInserts, " tile index entries." );
 
     int sqlReturn;
@@ -135,19 +171,19 @@ void FileSystemIdIndex::Save()
 
     Core::Printf( "Replacing idInfo file." );
 
-    boost::filesystem::path idInfoPath = boost::filesystem::path( mIdInfoPath );
+    boost::filesystem::path idColorMapPath = boost::filesystem::path( mColorMapPath );
 
-    boost::filesystem::remove( idInfoPath );
-    boost::filesystem::rename( tempidInfoPath, idInfoPath );
+    boost::filesystem::remove( idColorMapPath );
+    boost::filesystem::rename( tempidInfoPath, idColorMapPath );
 
 }
 
-marray::Marray< unsigned char > FileSystemIdIndex::GetIdColorMap()
+marray::Marray< unsigned char > FileSystemSegmentInfoManager::GetIdColorMap()
 {
     return mIdColorMap;
 }
                                                
-FileSystemTileSet FileSystemIdIndex::GetTiles( unsigned int segid )
+FileSystemTileSet FileSystemSegmentInfoManager::GetTiles( unsigned int segid )
 {
 
     if ( mCacheIdTileMap.GetHashMap().find( segid ) != mCacheIdTileMap.GetHashMap().end() )
@@ -156,11 +192,11 @@ FileSystemTileSet FileSystemIdIndex::GetTiles( unsigned int segid )
     }
     else
     {
-        return LoadTiles( segid );
+        return LoadTileSet( segid );
     }
 }
 
-FileSystemTileSet FileSystemIdIndex::LoadTiles( unsigned int segid )
+FileSystemTileSet FileSystemSegmentInfoManager::LoadTileSet( unsigned int segid )
 {
     //
     // Load the tile id map from the SQLite DB
@@ -204,22 +240,22 @@ FileSystemTileSet FileSystemIdIndex::LoadTiles( unsigned int segid )
     return tileSet;
 }
 
-unsigned int FileSystemIdIndex::GetTileCount ( unsigned int segid )
+unsigned int FileSystemSegmentInfoManager::GetTileCount ( unsigned int segid )
 {
     return GetTiles( segid ).size();
 }
 
-unsigned int FileSystemIdIndex::GetVoxelCount ( unsigned int segid )
+unsigned int FileSystemSegmentInfoManager::GetVoxelCount ( unsigned int segid )
 {
     return mIdVoxelCountMap( segid );
 }
                                                
-unsigned int FileSystemIdIndex::GetMaxId()
+unsigned int FileSystemSegmentInfoManager::GetMaxId()
 {
     return mIdMax( 0 );
 }
 
-unsigned int FileSystemIdIndex::AddNewId()
+unsigned int FileSystemSegmentInfoManager::AddNewId()
 {
     mIdMax( 0 ) = mIdMax( 0 ) + 1;
 
@@ -230,12 +266,12 @@ unsigned int FileSystemIdIndex::AddNewId()
     return mIdMax( 0 );
 }
                                                
-void FileSystemIdIndex::SetTiles( unsigned int segid, FileSystemTileSet tiles )
+void FileSystemSegmentInfoManager::SetTiles( unsigned int segid, FileSystemTileSet tiles )
 {
     mCacheIdTileMap.GetHashMap()[ segid ] = tiles;
 }
 
-void FileSystemIdIndex::SetVoxelCount ( unsigned int segid, unsigned long voxelCount )
+void FileSystemSegmentInfoManager::SetVoxelCount ( unsigned int segid, unsigned long voxelCount )
 {
     mIdVoxelCountMap( segid ) = voxelCount;
 }

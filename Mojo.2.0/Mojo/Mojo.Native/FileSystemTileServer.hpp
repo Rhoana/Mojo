@@ -146,7 +146,7 @@ private:
 
     Core::HashMap < std::string, FileSystemTileCacheEntry >       mFileSystemTileCache;
 
-    FileSystemIdIndex                                             mIdIndex;
+    FileSystemSegmentInfoManager                                  mSegmentInfoManager;
 
     //
     // simple split variables
@@ -197,11 +197,13 @@ inline void FileSystemTileServer::LoadSegmentationInternal( TiledDatasetDescript
 
     Core::Printf( "Loading idMaps..." );
 
-    mIdIndex = FileSystemIdIndex( mTiledDatasetDescription.paths.Get( "IdInfo" ), mTiledDatasetDescription.paths.Get( "IdTileIndex" ) );
+    mSegmentInfoManager = FileSystemSegmentInfoManager( mTiledDatasetDescription.paths.Get( "IdInfo" ), mTiledDatasetDescription.paths.Get( "IdTileIndex" ) );
+
+	mSegmentInfoManager.OpenDB();
 
     Core::Printf( "Loaded." );
 
-    mTiledDatasetDescription.maxLabelId = mIdIndex.GetMaxId();
+    mTiledDatasetDescription.maxLabelId = mSegmentInfoManager.GetMaxId();
 
     mIsSegmentationLoaded    = true;
 
