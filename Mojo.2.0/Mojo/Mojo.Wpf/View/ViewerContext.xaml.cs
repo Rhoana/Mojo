@@ -110,7 +110,7 @@ namespace Mojo.Wpf.View
         private void SizeChangedHandler( object sender, SizeChangedEventArgs e )
         {
             SetSize( e.PreviousSize, e.NewSize );
-            AquireKeyboardFocusAndLogicalFocus();
+            //AquireKeyboardFocusAndLogicalFocus();
         }
 
         private void AquireKeyboardFocusAndLogicalFocus()

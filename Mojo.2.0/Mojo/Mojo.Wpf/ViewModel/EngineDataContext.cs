@@ -28,6 +28,7 @@ namespace Mojo.Wpf.ViewModel
         //
         public RelayCommand UndoChangeCommand { get; private set; }
         public RelayCommand RedoChangeCommand { get; private set; }
+        public RelayCommand ToggleJoinSplits3DCommand { get; private set; }
         public RelayCommand CommitChangeCommand { get; private set; }
         public RelayCommand CancelChangeCommand { get; private set; }
         public RelayCommand IncreaseBrushSizeCommand { get; private set; }
@@ -42,9 +43,17 @@ namespace Mojo.Wpf.ViewModel
         public RelayCommand ZoomOutCommand { get; private set; }
         public RelayCommand ToggleShowSegmentationCommand { get; private set; }
         public RelayCommand ToggleShowBoundaryLinesCommand { get; private set; }
-        public RelayCommand ToggleJoinSplits3DCommand { get; private set; }
         public RelayCommand IncreaseSegmentationVisibilityCommand { get; private set; }
         public RelayCommand DecreaseSegmentationVisibilityCommand { get; private set; }
+
+        //
+        // Segment list commands
+        //
+        public RelayCommand FirstSegmentPageCommand { get; private set; }
+        public RelayCommand PreviousSegmentPageCommand { get; private set; }
+        public RelayCommand NextSegmentPageCommand { get; private set; }
+        public RelayCommand LastSegmentPageCommand { get; private set; }
+
 
         public class MergeModeItem
         {
@@ -60,6 +69,11 @@ namespace Mojo.Wpf.ViewModel
 
         public List<MergeModeItem> MergeModes { get; private set; }
         public List<SplitModeItem> SplitModes { get; private set; }
+
+        public int CurrentSegmentListPage { get; private set; }
+        public int TotalSegmentListPages { get; private set; }
+        public object SelectedSegmentListViewItem { get; set; }
+        public PagedSegmentListView PagedSegmentListView { get; private set; }
 
         public EngineDataContext( Engine engine, TileManagerDataContext tileManagerDataContext )
         {
@@ -99,6 +113,14 @@ namespace Mojo.Wpf.ViewModel
             IncreaseSegmentationVisibilityCommand = new RelayCommand( param => Engine.TileManager.IncreaseSegmentationVisibility(), param => Engine.TileManager.SegmentationLoaded );
             DecreaseSegmentationVisibilityCommand = new RelayCommand( param => Engine.TileManager.DecreaseSegmentationVisibility(), param => Engine.TileManager.SegmentationLoaded );
 
+            //
+            // Segment list commands
+            //
+            FirstSegmentPageCommand = new RelayCommand( param => PagedSegmentListView.MoveToFirstPage(), param => Engine.TileManager.SegmentationLoaded );
+            PreviousSegmentPageCommand = new RelayCommand( param => PagedSegmentListView.MoveToPreviousPage(), param => Engine.TileManager.SegmentationLoaded );
+            NextSegmentPageCommand = new RelayCommand( param => PagedSegmentListView.MoveToNextPage(), param => Engine.TileManager.SegmentationLoaded );
+            LastSegmentPageCommand = new RelayCommand( param => PagedSegmentListView.MoveToLastPage(), param => Engine.TileManager.SegmentationLoaded );
+
             TileManagerDataContext.StateChanged += StateChangedHandler;
 
             MergeModes = new List<MergeModeItem>
@@ -119,6 +141,57 @@ namespace Mojo.Wpf.ViewModel
             OnPropertyChanged( "SplitModes" );
 
             mAutoSaveTimer.Tick += AutoSave;
+
+            //Segment list
+            PagedSegmentListView = new PagedSegmentListView(
+            new List<object>
+                {
+                    new { Id = 1, Color = "#aabbcc", Size = 7, Locked = false },
+                    new { Id = 2, Color = "#aa00cc", Size = 7, Locked = false },
+                    new { Id = 3, Color = "#cc33ff", Size = 7, Locked = true },
+                    new { Id = 4, Color = "#2de", Size = 7, Locked = false },
+                    new { Id = 5, Color = "#0babe0", Size = 7, Locked = false },
+                    new { Id = 6, Color = "#fade00", Size = 7, Locked = false },
+                    new { Id = 7, Color = "#235", Size = 7, Locked = false },
+                    new { Id = 11, Color = "#711", Size = 7, Locked = false },
+                    new { Id = 22, Color = "#314", Size = 7, Locked = true },
+                    new { Id = 385475, Color = "#002", Size = 7, Locked = false },
+                    new { Id = 14, Color = "#aabbcc", Size = 7, Locked = false },
+                    new { Id = 234, Color = "#aa00cc", Size = 7, Locked = false },
+                    new { Id = 334, Color = "#cc33ff", Size = 7, Locked = false },
+                    new { Id = 434, Color = "#2de", Size = 7, Locked = false },
+                    new { Id = 543, Color = "#0babe0", Size = 7, Locked = false },
+                    new { Id = 643, Color = "#fade00", Size = 7, Locked = false },
+                    new { Id = 743, Color = "#235", Size = 7, Locked = false },
+                    new { Id = 1143, Color = "#711", Size = 7, Locked = false },
+                    new { Id = 2243, Color = "#314", Size = 7, Locked = false },
+                    new { Id = 38547543, Color = "#002", Size = 7, Locked = false },
+                    new { Id = 189, Color = "#aabbcc", Size = 7, Locked = false },
+                    new { Id = 289, Color = "#aa00cc", Size = 7, Locked = false },
+                    new { Id = 389, Color = "#cc33ff", Size = 7, Locked = false },
+                    new { Id = 489, Color = "#2de", Size = 7, Locked = true },
+                    new { Id = 589, Color = "#0babe0", Size = 7, Locked = false },
+                    new { Id = 689, Color = "#fade00", Size = 7, Locked = false },
+                    new { Id = 789, Color = "#235", Size = 7, Locked = false },
+                    new { Id = 1189, Color = "#711", Size = 7, Locked = false },
+                    new { Id = 2289, Color = "#314", Size = 7, Locked = false },
+                    new { Id = 38547589, Color = "#002", Size = 7, Locked = false },
+                },
+                6 );
+
+            OnPropertyChanged( "PagedSegmentListView" );
+
+            SelectedSegmentListViewItem = PagedSegmentListView.GetItemAt(4);
+            OnPropertyChanged( "SelectedSegmentListViewItem" );
+
+
+            TotalSegmentListPages = 2;// PagedSegmentListView.PageCount;
+            CurrentSegmentListPage = 1;// PagedSegmentListView.CurrentPage;
+
+            OnPropertyChanged( "TotalSegmentListPages" );
+            OnPropertyChanged( "CurrentSegmentListPage" );
+
+            mSegmentListResizeTimer.Tick += ResizeSegmentList;
 
         }
 
@@ -289,6 +362,23 @@ namespace Mojo.Wpf.ViewModel
                 Engine.TileManager.AutoSaveSegmentation();
                 Engine.TileManager.AutoChangesMade = false;
             }
+        }
+
+        private readonly DispatcherTimer mSegmentListResizeTimer = new DispatcherTimer();
+
+        public void SegmentListSizeChanged( object sender, SizeChangedEventArgs e )
+        {
+            mSegmentListResizeTimer.Stop();
+            mSegmentListResizeTimer.Interval = TimeSpan.FromSeconds( 0.5 );
+            mSegmentListResizeTimer.Start();
+            PagedSegmentListView.SetItemsPerPage( (int) ( e.NewSize.Height - 5 ) / 30 - 1 );
+        }
+
+        public void ResizeSegmentList( object sender, EventArgs eventArgs )
+        {
+            mSegmentListResizeTimer.Stop();
+            PagedSegmentListView.Refresh();
+            OnPropertyChanged( "PagedSegmentListView" );
         }
 
     }

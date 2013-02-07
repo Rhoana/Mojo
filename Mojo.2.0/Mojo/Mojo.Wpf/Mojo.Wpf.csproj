@@ -138,6 +138,7 @@
     </ApplicationDefinition>
     <Compile Include="ViewModel\EnumBooleanConverter.cs" />
     <Compile Include="ViewModel\EngineDataContext.cs" />
+    <Compile Include="ViewModel\PagedSegmentListView.cs" />
     <Compile Include="ViewModel\TileManagerDataContext.cs" />
     <Compile Include="ViewModel\RelayCommand.cs" />
     <Compile Include="View\D3D11RenderingPaneHost.cs">

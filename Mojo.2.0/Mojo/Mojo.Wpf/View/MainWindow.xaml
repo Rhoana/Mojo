@@ -75,6 +75,9 @@
                     </MenuItem.Icon>
                 </MenuItem>
                 <Separator />
+                <MenuItem Name="MenuJoin3DSplits" Header="3D Splits" Focusable="False" Command="{Binding Path=ToggleJoinSplits3DCommand}" IsEnabled="{Binding Path=Engine.TileManager.SegmentationControlsEnabled}" IsCheckable="True" IsChecked="{Binding Path=Engine.TileManager.JoinSplits3D, Mode=OneWay}" >
+                </MenuItem>
+                <Separator />
                 <MenuItem Name="CommitChangeMenuItem" Header="Commit Change" InputGestureText="Tab" Focusable="False" Command="{Binding Path=CommitChangeCommand}" IsEnabled="{Binding Path=Engine.TileManager.SegmentationControlsEnabled}" >
                     <MenuItem.Icon>
                         <Image Width="16" Height="16" Source="{StaticResource SegmentationCommit}"/>
@@ -210,121 +213,82 @@
             </StackPanel>
         </Border>
 
-        <Border DockPanel.Dock="Right" Focusable="False" Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}" BorderBrush="Gray" BorderThickness="1,0,1,0" Width="200" >
-            <DockPanel Focusable="False" Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}">
+        <Grid VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="250" />
+            </Grid.ColumnDefinitions>
 
-                <StackPanel DockPanel.Dock="Top" Orientation="Horizontal">
-                    <Label DockPanel.Dock="Left" Focusable="False" MinHeight="20" Content="Segment List" />
-                </StackPanel>
+            <Mojo.Wpf.View:ViewerContext Grid.Column="0" x:Name="TileManager2DViewerContext" Viewer="{Binding Path=Engine.Viewers.Internal[TileManager2D]}" />
 
-                <Grid DockPanel.Dock="Top" Focusable="False" Margin="5,5,5,5">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
-                    </Grid.RowDefinitions>
-                    <StackPanel Orientation="Horizontal" Grid.Row="0">
-                        <Label Grid.Row="0" Margin="2">
+            <GridSplitter Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Stretch" Width="5" ShowsPreview="False" />
+
+            <Border Grid.Column="1" Focusable="False" Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}" BorderBrush="Gray" BorderThickness="1,0,1,0" Margin="5,0,0,0">
+                <DockPanel Focusable="False" Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}">
+
+                    <StackPanel DockPanel.Dock="Top" Orientation="Horizontal">
+                        <Label DockPanel.Dock="Left" Focusable="False" MinHeight="20" Content="Segment List" >
+                        </Label>
+                        <Label DockPanel.Dock="Left" Focusable="False" MinHeight="20">
                             <Label.Content>
-                                <Binding Path="CurrentPage">
-                                    <Binding.StringFormat>Current Page: {0}</Binding.StringFormat>
-                                </Binding>
+                                <MultiBinding StringFormat="Page {0} of {1}">
+                                    <Binding Path="CurrentSegmentListPage"/>
+                                    <Binding Path="TotalSegmentListPages"/>
+                                </MultiBinding>
                             </Label.Content>
                         </Label>
-                        <Button Content="&lt;" Click="OnPreviousClicked" Width="30" Margin="5"/>
-                        <Button Content="&gt;" Click="OnNextClicked" Width="30" Margin="5"/>
                     </StackPanel>
-                    <DataGrid ItemsSource="{Binding}" Grid.Row="1">
-                        <DataGrid.Columns>
-                            <DataGridTextColumn Header="Color" Width="*" Binding="{Binding Color}"/>
-                            <DataGridTextColumn Header="Id" Width="*" Binding="{Binding Id}"/>
-                            <DataGridTextColumn Header="Voxels" Width="*" Binding="{Binding Size}"/>
-                        </DataGrid.Columns>
-                    </DataGrid>
-                </Grid>
-                
-                <Grid DockPanel.Dock="Top" Focusable="False" Margin="5,5,5,5">
-                        <Grid.RowDefinitions>
-                        <RowDefinition/>
-                        <RowDefinition/>
-                        <RowDefinition/>
-                        <RowDefinition/>
-                    </Grid.RowDefinitions>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                    </Grid.ColumnDefinitions>
 
-                    <Label Grid.Row="0" Grid.Column="0" Content="Color"/>
-                    <Label Grid.Row="0" Grid.Column="1" Content="Id"/>
-                    <Label Grid.Row="0" Grid.Column="2" Content="Voxels"/>
+                    <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" HorizontalAlignment="Center" >
+                        <Button Content="&lt;&lt;" Command="{Binding Path=FirstSegmentPageCommand}" Width="30" Margin="5"/>
+                        <Button Content="&lt;" Command="{Binding Path=PreviousSegmentPageCommand}" Width="30" Margin="5"/>
+                        <Button Content="&gt;" Command="{Binding Path=NextSegmentPageCommand}" Width="30" Margin="5"/>
+                        <Button Content="&gt;&gt;" Command="{Binding Path=LastSegmentPageCommand}" Width="30" Margin="5"/>
+                    </StackPanel>
 
-                    <Rectangle  Margin="5,5,5,5" Height="20" Name="RowRectangle" Stroke="Black" Width="50" Fill="{Binding Path=TileManagerDataContext.SelectedSegmentBrush}" Grid.Column="0" Grid.Row="1">
-                    </Rectangle>
+                    <ListView ItemsSource="{Binding Path=PagedSegmentListView}" Name="SegmentList" SizeChanged="SegmentList_SizeChanged" SelectionChanged="SegmentList_SelectionChanged" >
 
-                    <TextBlock Margin="5,5,5,5" TextBlock.FontSize="16"
-                        Grid.Column="1"
-                        Grid.Row="1"
-                        Grid.RowSpan="1"> 5678
-                    </TextBlock>
+                        <ListView.View>
+                            <GridView AllowsColumnReorder="False">
 
-                    <TextBlock Margin="5,5,5,5" TextBlock.FontSize="16"
-                        Background="Green"
-                        Grid.Column="3"
-                        Grid.Row="1"
-                        Grid.ColumnSpan="1"> 10k
-                    </TextBlock>
+                                <GridViewColumn Header="Lock">
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Grid Background="{Binding Color}" >
+                                                <CheckBox Background="{Binding Color}" Height="20" Width="50" Margin="5,5,5,5" Name="SegmentLockCheckBox" Tag="{Binding Id}" IsChecked="{Binding Locked, Mode=OneWay}" Command="{Binding Path=LockSegmentCommand}" />
+                                            </Grid>
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
 
-                </Grid>
-                
-                <Grid DockPanel.Dock="Bottom" Focusable="False" Margin="5,5,5,5" Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}">
-                        <!-- The following causes a VS2010 deisgner error.
-                    <Grid.RowDefinitions>
-                        <RowDefinition></RowDefinition>
-                        <RowDefinition></RowDefinition>
-                        <RowDefinition></RowDefinition>
-                        <RowDefinition></RowDefinition>
-                        <RowDefinition></RowDefinition>
-                        <RowDefinition MinHeight="20"></RowDefinition>
-                    </Grid.RowDefinitions>
+                                <GridViewColumn Header="Id">
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Grid HorizontalAlignment="Stretch">
+                                                <Label Content="{Binding Id}" />
+                                            </Grid>
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
 
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="155"></ColumnDefinition>
-                        <ColumnDefinition></ColumnDefinition>
-                    </Grid.ColumnDefinitions>
-                    -->
+                                <GridViewColumn Header="Size">
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Grid HorizontalAlignment="Stretch">
+                                                <Label Content="{Binding Size}" />
+                                            </Grid>
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
 
-                    <Label Grid.Row="1" Grid.ColumnSpan="2" Content="Label Name:"/>
+                            </GridView>
+                        </ListView.View>
+                    </ListView>
 
-                    <TextBox Name="CreateSegmentationLabelName"   Grid.Row="1" Grid.Column="2"/>
-                    <Button  Name="CreateSegmentationLabelButton" Grid.Row="3" Grid.Column="2" Margin="0,5,0,5" Visibility="Hidden" >
-                        <StackPanel Orientation="Horizontal">
-                            <Image Width="25" Source="{StaticResource SegmentationLabelAdd}"/>
-                            <Label Width="150" Content="Add Segmentation Label"/>
-                        </StackPanel>
-                    </Button>
-                    <Border Height="1" Grid.Row="4" Grid.ColumnSpan="2" BorderBrush="Gray" BorderThickness="0,1,0,0" Margin="0,10,0,10" />
-                    <Button Name="RemoveSegmentationLabelButton" Grid.Row="5" Grid.Column="2" Margin="0,5,0,5" Visibility="Hidden" >
-                        <StackPanel Orientation="Horizontal">
-                            <Image Width="25" Source="{StaticResource SegmentationLabelRemove}"/>
-                            <Label Width="150" Content="Remove Segmentation Label"/>
-                        </StackPanel>
-                    </Button>
-                </Grid>
-                
-                <!-- causes runtime error
-                <ListBox x:Name="SegmentationLabelesListBox" Focusable="False" ItemsSource="{Binding Path=Engine.Segmenter.DatasetDescription.SegmentationLabelDescriptions.Internal}" SelectedItem="{Binding Path=SegmenterDataContext.CurrentSegmentationLabel}" >
-                    <ListBox.ItemTemplate>
-                        <DataTemplate>
-                            <TextBlock Text="{Binding Path=Value.Name}"/>
-                        </DataTemplate>
-                    </ListBox.ItemTemplate>
-                </ListBox>
-                -->
-            </DockPanel>
-        </Border>
-
-        <Mojo.Wpf.View:ViewerContext x:Name="TileManager2DViewerContext" Viewer="{Binding Path=Engine.Viewers.Internal[TileManager2D]}" />
+                </DockPanel>
+            </Border>
+            
+        </Grid>
         
     </DockPanel>
                 
