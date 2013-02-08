@@ -131,17 +131,12 @@ namespace Mojo
         public static readonly string OPTICAL_FLOW_FORWARD_MAP_ROOT_DIRECTORY_NAME = @"opticalflow\forward\tiles";
         public static readonly string OPTICAL_FLOW_BACKWARD_MAP_ROOT_DIRECTORY_NAME = @"opticalflow\backward\tiles";
 
-        //public static readonly string ID_TILE_MAP_PATH = @"idTileMap\idTileMap.hdf5";
-        //public static readonly string ID_COLOR_MAP_PATH = @"idColorMap\idColorMap.hdf5";
-        public static readonly string ID_INFO_PATH = @"ids\idInfo.hdf5";
-        public static readonly string TEMP_ID_INFO_PATH = @"temp\idInfo.hdf5";
-        public static readonly string ID_TILE_INDEX_PATH = @"ids\idTileIndex.db";
+        public static readonly string COLOR_MAP_PATH = @"ids\colorMap.hdf5";
+        public static readonly string SEGMENT_INFO_PATH = @"ids\segmentInfo.db";
 
         public static readonly string TEMP_ID_MAP_ROOT_DIRECTORY_NAME = @"temp\ids\tiles";
-        //public static readonly string TEMP_ID_TILE_MAP_PATH = @"temp\idTileMap\idTileMap.hdf5";
 
         public static readonly string AUTOSAVE_ID_MAP_ROOT_DIRECTORY_NAME = @"autosave\ids\tiles";
-        //public static readonly string AUTOSAVE_ID_TILE_MAP_PATH = @"autosave\idTileMap\idTileMap.hdf5";
 
     }
 }

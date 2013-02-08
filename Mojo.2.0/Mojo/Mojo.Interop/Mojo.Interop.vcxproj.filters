@@ -12,6 +12,7 @@
     <ClInclude Include="PrimitiveMap.hpp" />
     <ClInclude Include="TileCacheEntry.hpp" />
     <ClInclude Include="TiledDatasetView.hpp" />
+    <ClInclude Include="SegmentInfo.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Cuda.cpp" />
@@ -25,5 +26,6 @@
     <ClCompile Include="PrimitiveMap.cpp" />
     <ClCompile Include="TileCacheEntry.cpp" />
     <ClCompile Include="TiledDatasetView.cpp" />
+    <ClCompile Include="SegmentInfo.cpp" />
   </ItemGroup>
 </Project>

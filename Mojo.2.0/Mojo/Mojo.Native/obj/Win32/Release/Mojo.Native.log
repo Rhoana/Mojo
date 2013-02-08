@@ -1,11 +1,27 @@
-﻿Build started 2/6/2013 11:43:06 PM.
+﻿Build started 2/7/2013 8:21:14 PM.
      1>Project "C:\dev\MojoGit\Mojo.2.0\Mojo\Mojo.Native\Mojo.Native.vcxproj" on node 2 (build target(s)).
      1>InitializeBuildStatus:
          Creating "obj\Win32\Release\Mojo.Native.unsuccessfulbuild" because "AlwaysCreate" was specified.
        ClCompile:
-         All outputs are up-to-date.
+         C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\CL.exe /c /I..\ /I"..\Sdk\SQLite\sqlite-amalgamation-3071502\\" /I..\ /I..\Sdk\Marray\v1.0\marray\include\ /I..\Sdk\Hdf5\1.8.8\include\ /I..\Sdk\OpenCV\OpenCV2.4\build\include\ /I"..\Sdk\Thrust\thrust-v1.3.0\\" /I"..\Sdk\Cutil\NVIDIA GPU Computing SDK 4.2\C\common\inc\\" /I..\Sdk\Cuda\v4.2\include\ /I..\Sdk\Boost\boost_1_44\ /I"..\Sdk\DirectX\Microsoft DirectX SDK (June 2010)\Include\\" /I..\Sdk\Cuda\v4.2\include /Zi /nologo /W3 /WX- /O2 /Oi /Oy- /GL /D WIN32 /D NDEBUG /D _LIB /Gm- /EHa /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"obj\Win32\Release\\" /Fd"obj\Win32\Release\vc100.pdb" /Gd /TP /analyze- /errorReport:prompt FileSystemSegmentInfoManager.cpp FileSystemTileServer.cpp FileSystemUndoRedoItem.cpp SegmentInfo.cpp TileManager.cpp
+         FileSystemSegmentInfoManager.cpp
+         FileSystemTileServer.cpp
+         FileSystemUndoRedoItem.cpp
+         SegmentInfo.cpp
+         TileManager.cpp
        Lib:
-         All outputs are up-to-date.
+         C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\Lib.exe /OUT:"C:\dev\MojoGit\Mojo.2.0\Mojo\Mojo.Native\bin\Win32\Release\Mojo.Native.lib" /NOLOGO /LTCG obj\Win32\Release\FileSystemSegmentInfoManager.obj
+         obj\Win32\Release\FileSystemSplitState.obj
+         obj\Win32\Release\SegmentInfo.obj
+         obj\Win32\Release\SimpleSplitTools.obj
+         obj\Win32\Release\FileSystemTileCacheEntry.obj
+         obj\Win32\Release\FileSystemUndoRedoItem.obj
+         obj\Win32\Release\TileCacheEntry.obj
+         obj\Win32\Release\TiledDatasetView.obj
+         obj\Win32\Release\TiledVolumeDescription.obj
+         obj\Win32\Release\TileManager.obj
+         obj\Win32\Release\FileSystemTileServer.obj
+         C:\dev\MojoGit\Mojo.2.0\Mojo\Mojo.Core\bin\Win32\Release\Mojo.Core.lib
          Mojo.Native.vcxproj -> C:\dev\MojoGit\Mojo.2.0\Mojo\Mojo.Native\bin\Win32\Release\Mojo.Native.lib
        FinalizeBuildStatus:
          Deleting file "obj\Win32\Release\Mojo.Native.unsuccessfulbuild".
@@ -14,4 +30,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:00.92
+Time Elapsed 00:00:21.10

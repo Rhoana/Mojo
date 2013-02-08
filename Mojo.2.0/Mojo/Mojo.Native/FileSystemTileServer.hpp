@@ -197,7 +197,7 @@ inline void FileSystemTileServer::LoadSegmentationInternal( TiledDatasetDescript
 
     Core::Printf( "Loading idMaps..." );
 
-    mSegmentInfoManager = FileSystemSegmentInfoManager( mTiledDatasetDescription.paths.Get( "IdInfo" ), mTiledDatasetDescription.paths.Get( "IdTileIndex" ) );
+    mSegmentInfoManager = FileSystemSegmentInfoManager( mTiledDatasetDescription.paths.Get( "ColorMap" ), mTiledDatasetDescription.paths.Get( "SegmentInfo" ) );
 
 	mSegmentInfoManager.OpenDB();
 

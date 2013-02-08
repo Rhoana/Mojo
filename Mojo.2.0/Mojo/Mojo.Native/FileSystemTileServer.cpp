@@ -195,14 +195,6 @@ void FileSystemTileServer::SaveSegmentation()
 	Core::Printf( "Saving idInfo and idTileIndex." );
     mSegmentInfoManager.Save();
 
-    //Core::Printf( "Replacing idIndex." );
-
-    //boost::filesystem::path idIndexPath = boost::filesystem::path( mTiledDatasetDescription.paths.Get( "IdInfo" ) );
-    //boost::filesystem::path tempIdIndexPath = boost::filesystem::path( mTiledDatasetDescription.paths.Get( "TempIdInfo" ) );
-
-    //boost::filesystem::remove( idIndexPath );
-    //boost::filesystem::rename( tempIdIndexPath, idIndexPath );
-
     Core::Printf( "Segmentation saved." );
 
 }
@@ -344,42 +336,11 @@ void FileSystemTileServer::DeleteTempFiles()
     TiledVolumeDescription tempVolumeDesctiption = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "TempIdMap" );
     TiledVolumeDescription autosaveVolumeDesctiption = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "IdMap" );
 
-    for ( int w = 0; w < numTiles.w; w++ )
+    boost::filesystem::path tempFolder = boost::filesystem::path( tempVolumeDesctiption.imageDataDirectory );
+    if ( boost::filesystem::exists( tempFolder ) )
     {
-        //Core::Printf( "Saving w=", w, "." );
-        for ( int z = 0; z < numTiles.z; z++ )
-        {
-            for ( int y = 0; y < numTiles.y; y++ )
-            {
-                for ( int x = 0; x < numTiles.x; x++ )
-                {
-                    std::string tempTilePathString = Core::ToString(
-                        tempVolumeDesctiption.imageDataDirectory, "\\",
-                        "w=", Core::ToStringZeroPad( w, 8 ), "\\",
-                        "z=", Core::ToStringZeroPad( z, 8 ), "\\",
-                        "y=", Core::ToStringZeroPad( y, 8 ), ",",
-                        "x=", Core::ToStringZeroPad( x, 8 ), ".",
-                        tempVolumeDesctiption.fileExtension );
-
-                    boost::filesystem::path tempTilePath = boost::filesystem::path( tempTilePathString );
-
-					if ( boost::filesystem::exists( tempTilePath ) )
-                    {
-						boost::filesystem::remove( tempTilePath );
-                    }
-                }
-            }
-        }
+        boost::filesystem::remove( tempFolder );
     }
-
-    //
-    // delete temp idTileMap
-    //
-
-    boost::filesystem::path tempIdIndexPath = boost::filesystem::path( mTiledDatasetDescription.paths.Get( "TempIdInfo" ) );
-    boost::filesystem::remove( tempIdIndexPath );
-
-    Core::Printf( "Temp files deleted." );
 
 }
 

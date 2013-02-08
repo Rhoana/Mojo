@@ -19,9 +19,7 @@ FileSystemSegmentInfoManager::FileSystemSegmentInfoManager( std::string colorMap
     mIsDBOpen = false;
 
     mColorMapHdf5FileHandle = marray::hdf5::openFile( mColorMapPath );
-    marray::hdf5::load( mColorMapHdf5FileHandle, "idMax", mIdMax );
     marray::hdf5::load( mColorMapHdf5FileHandle, "idColorMap", mIdColorMap );
-    marray::hdf5::load( mColorMapHdf5FileHandle, "idVoxelCountMap", mIdVoxelCountMap );
     marray::hdf5::closeFile( mColorMapHdf5FileHandle );
 }
 
@@ -65,7 +63,7 @@ void FileSystemSegmentInfoManager::OpenDB()
 			converter << "PRAGMA main.synchronous=OFF;\n";
 			converter << "PRAGMA main.journal_mode=WAL;\n";
 			converter << "PRAGMA count_changes=OFF;\n";
-			converter << "PRAGMA main.temp_store=MEMORY";
+			converter << "PRAGMA main.temp_store=MEMORY;\n";
 
 			int sqlReturn;
 			char *sqlError = NULL;
@@ -79,9 +77,57 @@ void FileSystemSegmentInfoManager::OpenDB()
 			}
 
 			//
-			// TODO:Load the Segment Info
+			// Get mIdMax
 			//
-			mSegmentMultiIndex.
+            sqlite3_stmt* statement = NULL;
+            converter.str("");
+            converter << "SELECT MAX(id) FROM segmentInfo;";
+            query = converter.str();
+
+            sqlReturn = sqlite3_prepare_v2(mIdTileIndexDB, query.c_str(), query.size(), &statement, NULL); 
+
+            if ( sqlReturn )
+            {
+                Core::Printf( "Error preparing SQLite3 query (", sqlReturn, "): ", sqlite3_errmsg( mIdTileIndexDB ) );
+            }
+            else
+            {
+                if ( sqlite3_step( statement ) == SQLITE_ROW )
+                {
+                    mIdMax = sqlite3_column_int(statement, 0);
+                }
+                Core::Printf( "Found max id of ", mIdMax, "." );
+            }
+
+            sqlite3_finalize(statement);
+
+			//
+			// Load the Segment Info
+			//
+            converter.str("");
+            converter << "SELECT id, name, size, confidence FROM segmentInfo WHERE size > 0 ORDER BY id;";
+            query = converter.str();
+
+            sqlReturn = sqlite3_prepare_v2(mIdTileIndexDB, query.c_str(), query.size(), &statement, NULL); 
+
+            if ( sqlReturn )
+            {
+                Core::Printf( "Error preparing SQLite3 query (", sqlReturn, "): ", sqlite3_errmsg( mIdTileIndexDB ) );
+            }
+            else
+            {
+                while ( sqlite3_step( statement ) == SQLITE_ROW )
+                {
+                    mSegmentMultiIndex.push_back( SegmentInfo(
+                        sqlite3_column_int(statement, 0),
+                        std::string( reinterpret_cast<const char*>( sqlite3_column_text(statement, 1) ) ),
+                        sqlite3_column_int(statement, 2),
+                        sqlite3_column_int(statement, 3) ) );
+                }
+                Core::Printf( "Read ", mSegmentMultiIndex.size(), " segment info entries from db." );
+            }
+
+            sqlite3_finalize(statement);
 
         }
 
@@ -109,9 +155,7 @@ void FileSystemSegmentInfoManager::Save()
     Core::Printf("Saving idInfo (temp).");
 
     hid_t newIdMapsFile = marray::hdf5::createFile( newPath );
-    marray::hdf5::save( newIdMapsFile, "idMax", mIdMax );
     marray::hdf5::save( newIdMapsFile, "idColorMap", mIdColorMap );
-    marray::hdf5::save( newIdMapsFile, "idVoxelCountMap", mIdVoxelCountMap );
     marray::hdf5::closeFile( newIdMapsFile );
 
     Core::Printf( "Saving idTileIndex." );
@@ -123,6 +167,8 @@ void FileSystemSegmentInfoManager::Save()
 
     int numDeletes = 0;
     int numInserts = 0;
+
+    SegmentMultiIndexById& idIndex = mSegmentMultiIndex.get<id>();
 
 	converter << "BEGIN TRANSACTION;\n";
 
@@ -147,6 +193,10 @@ void FileSystemSegmentInfoManager::Save()
                 ++numInserts;
             }
         }
+
+        SegmentInfo changedInfo = *idIndex.find( idIt->first );
+
+        converter << "INSERT or REPLACE INTO segmentInfo (id, name, size, confidence) VALUES (" << changedInfo.id << ",\"" << changedInfo.name << "\"," << changedInfo.size << "," << changedInfo.confidence << ");\n";
 
     }
 
@@ -212,7 +262,7 @@ FileSystemTileSet FileSystemSegmentInfoManager::LoadTileSet( unsigned int segid 
 
     OpenDB();
 
-    converter << "SELECT w, z, y, x FROM idTileIndex WHERE id = " << segid;
+    converter << "SELECT w, z, y, x FROM idTileIndex WHERE id = " << segid << ";";
     query = converter.str();
 
     sqlReturn = sqlite3_prepare_v2(mIdTileIndexDB, query.c_str(), query.size(), &statement, NULL); 
@@ -247,23 +297,27 @@ unsigned int FileSystemSegmentInfoManager::GetTileCount ( unsigned int segid )
 
 unsigned int FileSystemSegmentInfoManager::GetVoxelCount ( unsigned int segid )
 {
-    return mIdVoxelCountMap( segid );
+    return mSegmentMultiIndex.get<id>().find( segid )->size;
 }
                                                
 unsigned int FileSystemSegmentInfoManager::GetMaxId()
 {
-    return mIdMax( 0 );
+    return mIdMax;
 }
 
 unsigned int FileSystemSegmentInfoManager::AddNewId()
 {
-    mIdMax( 0 ) = mIdMax( 0 ) + 1;
+    ++mIdMax;
 
-    size_t shape[] = { mIdMax( 0 ) + 1 };
-    mIdVoxelCountMap.resize( shape, shape + 1 );
-    mIdVoxelCountMap( mIdMax(0) ) = 0;
+    std::string name;
+    std::stringstream converter;
 
-    return mIdMax( 0 );
+    converter << "segment" << mIdMax;
+    name = converter.str();
+
+    mSegmentMultiIndex.push_back( SegmentInfo( mIdMax, name, 0, 0 ) );
+
+    return mIdMax;
 }
                                                
 void FileSystemSegmentInfoManager::SetTiles( unsigned int segid, FileSystemTileSet tiles )
@@ -271,9 +325,74 @@ void FileSystemSegmentInfoManager::SetTiles( unsigned int segid, FileSystemTileS
     mCacheIdTileMap.GetHashMap()[ segid ] = tiles;
 }
 
-void FileSystemSegmentInfoManager::SetVoxelCount ( unsigned int segid, unsigned long voxelCount )
+void FileSystemSegmentInfoManager::SetVoxelCount ( unsigned int segid, long voxelCount )
 {
-    mIdVoxelCountMap( segid ) = voxelCount;
+    SegmentMultiIndexById& idIndex = mSegmentMultiIndex.get<id>();
+    SegmentMultiIndexById::iterator segIt = idIndex.find( segid );
+    SegmentInfo segInfo = *segIt;
+
+    segInfo.size = voxelCount;
+    
+    bool success = idIndex.replace( segIt, segInfo );
+
+    if ( !success )
+    {
+        Core::Printf( "WARNING: Could not update voxel count for id  ", segid, " to size ", voxelCount, "." );
+    }
+
+}
+
+void FileSystemSegmentInfoManager::SortById( bool reverse )
+{
+    mSegmentMultiIndex.get<0>().rearrange( mSegmentMultiIndex.get<id>().begin() );
+    if ( reverse )
+    {
+        mSegmentMultiIndex.get<0>().reverse();
+    }
+}
+
+void FileSystemSegmentInfoManager::SortByName( bool reverse )
+{
+    mSegmentMultiIndex.get<0>().rearrange( mSegmentMultiIndex.get<name>().begin() );
+    if ( reverse )
+    {
+        mSegmentMultiIndex.get<0>().reverse();
+    }
+}
+
+void FileSystemSegmentInfoManager::SortBySize( bool reverse )
+{
+    mSegmentMultiIndex.get<0>().rearrange( mSegmentMultiIndex.get<size>().begin() );
+    if ( reverse )
+    {
+        mSegmentMultiIndex.get<0>().reverse();
+    }
+}
+
+void FileSystemSegmentInfoManager::SortByConfidence( bool reverse )
+{
+    mSegmentMultiIndex.get<0>().rearrange( mSegmentMultiIndex.get<confidence>().begin() );
+    if ( reverse )
+    {
+        mSegmentMultiIndex.get<0>().reverse();
+    }
+}
+
+std::list< SegmentInfo > FileSystemSegmentInfoManager::GetSegmentInfoRange( unsigned int startIndex, unsigned int endIndex )
+{
+    std::list< SegmentInfo > segmentInfoPage;
+
+    if ( endIndex > mSegmentMultiIndex.size() )
+    {
+        endIndex = mSegmentMultiIndex.size();
+    }
+
+    for ( unsigned int i = startIndex; i < endIndex; ++i )
+    {
+        segmentInfoPage.push_back( mSegmentMultiIndex[ i ] );
+    }
+
+    return segmentInfoPage;
 }
 
 

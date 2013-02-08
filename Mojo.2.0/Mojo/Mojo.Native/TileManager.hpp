@@ -18,6 +18,7 @@
 #include "TiledDatasetView.hpp"
 #include "TileCacheEntry.hpp"
 #include "ITileServer.hpp"
+#include "SegmentInfo.hpp"
 
 struct ID3D11Device;
 struct ID3D11DeviceContext;
@@ -57,6 +58,12 @@ public:
     boost::array< TileCacheEntry,
         DEVICE_TILE_CACHE_SIZE >&                         GetTileCache();
     ID3D11ShaderResourceView*                             GetIdColorMap();
+
+    void                                                  SortById( bool reverse );
+    void                                                  SortByName( bool reverse );
+    void                                                  SortBySize( bool reverse );
+    void                                                  SortByConfidence( bool reverse );
+    std::list< SegmentInfo >&                             GetSegmentInfoRange( int begin, int end );
 
     int                                                   GetSegmentationLabelId( const TiledDatasetView& tiledDatasetView, float3 pDataSpace );
     int4                                                  GetSegmentationLabelColor( int id );

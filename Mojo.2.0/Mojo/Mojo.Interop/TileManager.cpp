@@ -6,6 +6,7 @@
 #include "Mojo.Core/Cuda.hpp"
 #include "Mojo.Core/ForEach.hpp"
 #include "Mojo.Core/ID3D11CudaTexture.hpp"
+#include "Mojo.Core/Stl.hpp"
 
 #include "Mojo.Native/FileSystemTileServer.hpp"
 
@@ -139,6 +140,37 @@ Collections::Generic::IList< TileCacheEntry^ >^ TileManager::GetTileCache()
 
     return mTileCache;
 }
+
+void SortById( bool reverse )
+{
+}
+
+void SortByName( bool reverse )
+{
+}
+
+void SortBySize( bool reverse )
+{
+}
+
+void SortByConfidence( bool reverse )
+{
+}
+
+Collections::Generic::IList< SegmentInfo^ >^ TileManager::GetSegmentInfoRange( int begin, int end )
+{
+    std::list< Native::SegmentInfo > segmentInfoPage = mTileManager->GetSegmentInfoRange( begin, end );
+
+    Collections::Generic::List< SegmentInfo^ >^ interopSegmentInfoPage = gcnew Collections::Generic::List< SegmentInfo^ >();
+
+	for ( std::list< Native::SegmentInfo >::iterator segIt = segmentInfoPage.begin(); segIt != segmentInfoPage.end(); ++segIt )
+	{
+        interopSegmentInfoPage->Add( gcnew SegmentInfo( *segIt ) );
+	}
+
+    return interopSegmentInfoPage;
+}
+
 
 SlimDX::Direct3D11::ShaderResourceView^ TileManager::GetIdColorMap()
 {

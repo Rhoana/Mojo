@@ -10,6 +10,7 @@
 #include "TiledDatasetDescription.hpp"
 #include "TileCacheEntry.hpp"
 #include "TiledDatasetView.hpp"
+#include "SegmentInfo.hpp"
 
 #using <SlimDX.dll>
 
@@ -50,6 +51,12 @@ public:
 
     Collections::Generic::IList< TileCacheEntry^ >^         GetTileCache();
     SlimDX::Direct3D11::ShaderResourceView^                 GetIdColorMap();
+
+    void                                                    SortById( bool reverse );
+    void                                                    SortByName( bool reverse );
+    void                                                    SortBySize( bool reverse );
+    void                                                    SortByConfidence( bool reverse );
+    Collections::Generic::IList< SegmentInfo^ >^            GetSegmentInfoRange( int begin, int end );
 
     int                                                     GetSegmentationLabelId( TiledDatasetView^ tiledDatasetView, Vector3^ pDataSpace );
     Vector3                                                 GetSegmentationLabelColor( int id );
@@ -96,6 +103,7 @@ private:
 
     Collections::Generic::IList< TileCacheEntry^ >^         mTileCache;
     SlimDX::Direct3D11::ShaderResourceView^                 mIdColorMap;
+
 };
 
 }

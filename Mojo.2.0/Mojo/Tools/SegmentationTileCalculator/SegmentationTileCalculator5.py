@@ -100,7 +100,8 @@ tile_index_z         = 0
 color_map = numpy.zeros( (ncolors + 1, 3), dtype=numpy.uint8 );
 for color_i in xrange( 1, ncolors + 1 ):
     rand_vals = numpy.random.rand(3);
-    color_map[ color_i ] = [ x*255 for x in colorsys.hsv_to_rgb( rand_vals[0], rand_vals[1] * 0.5 + 0.5, rand_vals[2] * 0.5 + 0.5 ) ];
+    #color_map[ color_i ] = [ x*255 for x in colorsys.hsv_to_rgb( rand_vals[0], rand_vals[1] * 0.5 + 0.5, rand_vals[2] * 0.5 + 0.5 ) ];
+    color_map[ color_i ] = [ rand_vals[0]*255, rand_vals[1]*255, rand_vals[2]*255 ];
 
 for file in files:
 
