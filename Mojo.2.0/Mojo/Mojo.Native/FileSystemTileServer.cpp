@@ -339,13 +339,13 @@ void FileSystemTileServer::DeleteTempFiles()
     boost::filesystem::path tempFolder = boost::filesystem::path( tempVolumeDesctiption.imageDataDirectory );
     if ( boost::filesystem::exists( tempFolder ) )
     {
-        boost::filesystem::remove( tempFolder );
+		boost::filesystem::remove_all( tempFolder );
     }
 
 }
 
 
-int FileSystemTileServer::GetTileCountForId( int segId )
+int FileSystemTileServer::GetTileCountForId( unsigned int segId )
 {
     return (int) mSegmentInfoManager.GetTileCount( segId );
 }
@@ -355,7 +355,7 @@ int FileSystemTileServer::GetTileCountForId( int segId )
 // Edit Methods
 //
 
-void FileSystemTileServer::ReplaceSegmentationLabel( int oldId, int newId )
+void FileSystemTileServer::ReplaceSegmentationLabel( unsigned int oldId, unsigned int newId )
 {
 	if ( oldId != newId && mIsSegmentationLoaded )
     {
@@ -462,7 +462,7 @@ bool FileSystemTileServer::TileContainsId ( int3 numVoxelsPerTile, int3 currentI
     return found;
 }
 
-void FileSystemTileServer::ReplaceSegmentationLabelCurrentSlice( int oldId, int newId, float3 pointTileSpace )
+void FileSystemTileServer::ReplaceSegmentationLabelCurrentSlice( unsigned int oldId, unsigned int newId, float3 pointTileSpace )
 {
     if ( oldId != newId && mIsSegmentationLoaded )
     {
@@ -724,7 +724,7 @@ void FileSystemTileServer::ReplaceSegmentationLabelCurrentSlice( int oldId, int 
     }
 }
 
-void FileSystemTileServer::ReplaceSegmentationLabelCurrentConnectedComponent( int oldId, int newId, float3 pointTileSpace )
+void FileSystemTileServer::ReplaceSegmentationLabelCurrentConnectedComponent( unsigned int oldId, unsigned int newId, float3 pointTileSpace )
 {
     if ( oldId != newId && mIsSegmentationLoaded )
     {
@@ -1462,7 +1462,7 @@ void FileSystemTileServer::ResetAdjustState()
 
 }
 
-void FileSystemTileServer::LoadSplitDistances( int segId )
+void FileSystemTileServer::LoadSplitDistances( unsigned int segId )
 {
     //
     // Load distances
@@ -1549,7 +1549,7 @@ void FileSystemTileServer::LoadSplitDistances( int segId )
 
 }
 
-void FileSystemTileServer::PrepForSplit( int segId, float3 pointTileSpace )
+void FileSystemTileServer::PrepForSplit( unsigned int segId, float3 pointTileSpace )
 {
     //
     // Find the size of this segment and load the bounding box of tiles
@@ -1689,7 +1689,7 @@ void FileSystemTileServer::PrepForSplit( int segId, float3 pointTileSpace )
 
 }
 
-void FileSystemTileServer::PrepForAdjust( int segId, float3 pointTileSpace )
+void FileSystemTileServer::PrepForAdjust( unsigned int segId, float3 pointTileSpace )
 {
     //
     // Find the size of this segment and load the bounding box of tiles
@@ -1844,7 +1844,7 @@ void FileSystemTileServer::PrepForAdjust( int segId, float3 pointTileSpace )
 
 }
 
-void FileSystemTileServer::RecordSplitState( int segId, float3 pointTileSpace )
+void FileSystemTileServer::RecordSplitState( unsigned int segId, float3 pointTileSpace )
 {
     if ( mIsSegmentationLoaded )
     {
@@ -1890,7 +1890,7 @@ void FileSystemTileServer::RecordSplitState( int segId, float3 pointTileSpace )
     }
 }
 
-void FileSystemTileServer::PredictSplit( int segId, float3 pointTileSpace, float radius )
+void FileSystemTileServer::PredictSplit( unsigned int segId, float3 pointTileSpace, float radius )
 {
     if ( mIsSegmentationLoaded )
     {
@@ -1958,7 +1958,7 @@ void FileSystemTileServer::PredictSplit( int segId, float3 pointTileSpace, float
     }
 }
 
-int FileSystemTileServer::CompletePointSplit( int segId, float3 pointTileSpace )
+int FileSystemTileServer::CompletePointSplit( unsigned int segId, float3 pointTileSpace )
 {
 	int newId = 0;
 
@@ -2483,7 +2483,7 @@ int FileSystemTileServer::CompletePointSplit( int segId, float3 pointTileSpace )
 
 }
 
-int FileSystemTileServer::CompleteDrawSplit( int segId, float3 pointTileSpace, bool join3D, int splitStartZ )
+int FileSystemTileServer::CompleteDrawSplit( unsigned int segId, float3 pointTileSpace, bool join3D, int splitStartZ )
 {
 	int newId = 0;
 
@@ -3159,7 +3159,7 @@ int FileSystemTileServer::CompleteDrawSplit( int segId, float3 pointTileSpace, b
 
 }
 
-void FileSystemTileServer::CommitAdjustChange( int segId, float3 pointTileSpace )
+void FileSystemTileServer::CommitAdjustChange( unsigned int segId, float3 pointTileSpace )
 {
 	if ( mIsSegmentationLoaded )
     {
@@ -3484,7 +3484,7 @@ void FileSystemTileServer::CommitAdjustChange( int segId, float3 pointTileSpace 
     }
 }
 
-void FileSystemTileServer::FindBoundaryJoinPoints2D( int segId )
+void FileSystemTileServer::FindBoundaryJoinPoints2D( unsigned int segId )
 {
 	//
 	// Find a splitting line that links all the given points
@@ -3646,7 +3646,7 @@ void FileSystemTileServer::FindBoundaryJoinPoints2D( int segId )
 	}
 }
 
-void FileSystemTileServer::FindBoundaryWithinRegion2D( int segId )
+void FileSystemTileServer::FindBoundaryWithinRegion2D( unsigned int segId )
 {
 	//
 	// Watershed drawn region to highest boundaries
@@ -3876,7 +3876,7 @@ void FileSystemTileServer::FindBoundaryWithinRegion2D( int segId )
 	}
 }
 
-void FileSystemTileServer::FindBoundaryBetweenRegions2D( int segId )
+void FileSystemTileServer::FindBoundaryBetweenRegions2D( unsigned int segId )
 {
 	//
 	// Watershed between drawn regions to highest boundaries
@@ -4745,6 +4745,40 @@ marray::Marray< unsigned char > FileSystemTileServer::GetIdColorMap()
     return mSegmentInfoManager.GetIdColorMap();
 }
 
+void FileSystemTileServer::SortSegmentInfoById( bool reverse )
+{
+	mSegmentInfoManager.SortSegmentInfoById( reverse );
+}
+
+void FileSystemTileServer::SortSegmentInfoByName( bool reverse )
+{
+	mSegmentInfoManager.SortSegmentInfoByName( reverse );
+}
+
+void FileSystemTileServer::SortSegmentInfoBySize( bool reverse )
+{
+	mSegmentInfoManager.SortSegmentInfoBySize( reverse );
+}
+
+void FileSystemTileServer::SortSegmentInfoByConfidence( bool reverse )
+{
+	mSegmentInfoManager.SortSegmentInfoByConfidence( reverse );
+}
+
+void FileSystemTileServer::LockSegmentLabel( unsigned int segId )
+{
+	mSegmentInfoManager.LockSegmentLabel( segId );
+}
+
+void FileSystemTileServer::UnlockSegmentLabel( unsigned int segId )
+{
+	mSegmentInfoManager.UnlockSegmentLabel( segId );
+}
+
+std::list< SegmentInfo > FileSystemTileServer::GetSegmentInfoRange( int begin, int end )
+{
+	return mSegmentInfoManager.GetSegmentInfoRange( begin, end );
+}
 
 }
 }

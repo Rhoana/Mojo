@@ -6,6 +6,10 @@ namespace Mojo
         {
         }
 
+        public void SelectSegment( uint segmentId )
+        {
+        }
+
         public void OnKeyDown( System.Windows.Input.KeyEventArgs keyEventArgs, int width, int height )
         {
         }

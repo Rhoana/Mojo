@@ -8,7 +8,6 @@ namespace Mojo
         private readonly TileManager mTileManager;
         private readonly Engine mEngine;
 
-        private int newId = 0;
         private bool mCurrentlyDrawing = false;
 
         public AdjustSegmentationTool( TileManager tileManager, Engine engine )
@@ -22,6 +21,17 @@ namespace Mojo
         {
             if ( mTileManager.SelectedSegmentId != 0 )
             {
+                var centerDataSpace = mTileManager.TiledDatasetView.CenterDataSpace;
+                var p = new Vector3( centerDataSpace.X, centerDataSpace.Y, centerDataSpace.Z );
+                mTileManager.Internal.PrepForAdjust( mTileManager.SelectedSegmentId, p );
+            }
+        }
+
+        public override void SelectSegment( uint segmentId )
+        {
+            if ( mTileManager.SelectedSegmentId != segmentId )
+            {
+                mTileManager.SelectedSegmentId = segmentId;
                 var centerDataSpace = mTileManager.TiledDatasetView.CenterDataSpace;
                 var p = new Vector3( centerDataSpace.X, centerDataSpace.Y, centerDataSpace.Z );
                 mTileManager.Internal.PrepForAdjust( mTileManager.SelectedSegmentId, p );
@@ -171,7 +181,6 @@ namespace Mojo
                     //
                     // Select this segment
                     //
-                    newId = clickedId;
                     mTileManager.SelectedSegmentId = clickedId;
                     mTileManager.Internal.PrepForAdjust( clickedId, p );
                 }
@@ -205,16 +214,7 @@ namespace Mojo
 
                 var p = new Vector3( x, y, z );
 
-                int segmentId = mTileManager.Internal.GetSegmentationLabelId( mTileManager.TiledDatasetView, p );
-
-                if ( segmentId > 0 )
-                {
-                    mTileManager.MouseOverSegmentId = segmentId;
-                }
-                else
-                {
-                    mTileManager.MouseOverSegmentId = 0;
-                }
+                mTileManager.MouseOverSegmentId = mTileManager.Internal.GetSegmentationLabelId( mTileManager.TiledDatasetView, p );
 
                 if ( mTileManager.SelectedSegmentId != 0 )
                 {

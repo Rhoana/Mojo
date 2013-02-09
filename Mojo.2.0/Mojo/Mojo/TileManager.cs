@@ -190,7 +190,7 @@ namespace Mojo
         {
             get
             {
-                return mJoinSplits3D;
+                return SegmentationLoaded && mJoinSplits3D;
             }
             set
             {
@@ -221,8 +221,8 @@ namespace Mojo
             }
         }
 
-        private int mSelectedSegmentId = 0;
-        public int SelectedSegmentId
+        private uint mSelectedSegmentId = 0;
+        public uint SelectedSegmentId
         {
             get
             {
@@ -239,8 +239,8 @@ namespace Mojo
             }
         }
 
-        private int mMouseOverSegmentId = 0;
-        public int MouseOverSegmentId
+        private uint mMouseOverSegmentId = 0;
+        public uint MouseOverSegmentId
         {
             get
             {
@@ -378,6 +378,7 @@ namespace Mojo
             {
                 Internal.CompleteDrawSplit( SelectedSegmentId, new Vector3( mMouseOverX, mMouseOverY, mTiledDatasetView.CenterDataSpace.Z ), mJoinSplits3D, (int) mSplitStartZ );
             }
+            SplitStartZ = TiledDatasetView.CenterDataSpace.Z;
             ChangesMade = true;
         }
 

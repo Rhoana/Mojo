@@ -42,4 +42,5 @@ namespace Mojo.Wpf.ViewModel
             return Enum.Parse( targetType, parameterString );                
         }
     }
+
 }

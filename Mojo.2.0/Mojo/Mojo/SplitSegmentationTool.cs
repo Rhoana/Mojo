@@ -8,7 +8,6 @@ namespace Mojo
         private readonly TileManager mTileManager;
         private readonly Engine mEngine;
 
-        private int newId = 0;
         private bool mCurrentlyDrawing = false;
 
         public SplitSegmentationTool( TileManager tileManager, Engine engine )
@@ -22,6 +21,17 @@ namespace Mojo
         {
             if ( mTileManager.SelectedSegmentId != 0 )
             {
+                var centerDataSpace = mTileManager.TiledDatasetView.CenterDataSpace;
+                var p = new Vector3( centerDataSpace.X, centerDataSpace.Y, centerDataSpace.Z );
+                mTileManager.Internal.PrepForSplit( mTileManager.SelectedSegmentId, p );
+            }
+        }
+
+        public override void SelectSegment( uint segmentId )
+        {
+            if ( mTileManager.SelectedSegmentId != segmentId )
+            {
+                mTileManager.SelectedSegmentId = segmentId;
                 var centerDataSpace = mTileManager.TiledDatasetView.CenterDataSpace;
                 var p = new Vector3( centerDataSpace.X, centerDataSpace.Y, centerDataSpace.Z );
                 mTileManager.Internal.PrepForSplit( mTileManager.SelectedSegmentId, p );
@@ -212,24 +222,11 @@ namespace Mojo
                     //Select this segment
                     if ( clickedId > 0 )
                     {
-                        if ( newId == clickedId )
-                        {
-                            //Unselect this segment
-                            //newId = 0;
-                            //mTileManager.SelectedSegmentId = 0;
-
-                            //Load 2D segment at full res for path finding
-                            //mTileManager.Internal.ResetSplitState();
-                        }
-                        else
+                        if ( clickedId != mTileManager.SelectedSegmentId )
                         {
                             //Select this segment
-                            newId = clickedId;
                             mTileManager.SelectedSegmentId = clickedId;
-
-                            //Load 2D segment at full res for path finding
                             mTileManager.Internal.PrepForSplit( clickedId, p );
-
                         }
                     }
                 }
@@ -241,26 +238,25 @@ namespace Mojo
                         mTileManager.Internal.DrawRegionB( mTileManager.TiledDatasetView, p, 4 );
                         mTileManager.Internal.FindBoundaryJoinPoints2D( clickedId );
                     }
-                    else if ( clickedId > 0 && mTileManager.SelectedSegmentId > 0 )
+                    else if ( clickedId > 0 && mTileManager.SelectedSegmentId > 0 && clickedId != mTileManager.SelectedSegmentId )
                     {
                         //
                         // Merge with the clicked segment in 2D ( try this out to see if it makes sense )
                         //
-                        if ( mTileManager.CurrentMergeMode == MergeMode.Fill2D )
+                        switch ( mTileManager.CurrentMergeMode )
                         {
-                            mTileManager.Internal.ReplaceSegmentationLabelCurrentSlice( clickedId, newId, mTileManager.TiledDatasetView, p );
-                        }
-                        else if ( mTileManager.CurrentMergeMode == MergeMode.Fill3D )
-                        {
-                            mTileManager.Internal.ReplaceSegmentationLabelCurrentConnectedComponent( clickedId, newId, mTileManager.TiledDatasetView, p );
-                        }
-                        else
-                        {
-                            mTileManager.Internal.ReplaceSegmentationLabel( clickedId, newId );
+                            case MergeMode.Fill2D:
+                                mTileManager.Internal.ReplaceSegmentationLabelCurrentSlice( clickedId, mTileManager.SelectedSegmentId, mTileManager.TiledDatasetView, p );
+                                break;
+                            case MergeMode.Fill3D:
+                                mTileManager.Internal.ReplaceSegmentationLabelCurrentConnectedComponent( clickedId, mTileManager.SelectedSegmentId, mTileManager.TiledDatasetView, p );
+                                break;
+                            default:
+                                mTileManager.Internal.ReplaceSegmentationLabel( clickedId, mTileManager.SelectedSegmentId );
+                                break;
                         }
                         mTileManager.ChangesMade = true;
                         mTileManager.Internal.PrepForSplit( mTileManager.SelectedSegmentId, p );
-                        mTileManager.ChangesMade = true;
                     }
                 }
             }
@@ -291,18 +287,9 @@ namespace Mojo
 
                 var p = new Vector3( x, y, z );
 
-                int segmentId = mTileManager.Internal.GetSegmentationLabelId( mTileManager.TiledDatasetView, p );
+                mTileManager.MouseOverSegmentId = mTileManager.Internal.GetSegmentationLabelId( mTileManager.TiledDatasetView, p );
 
-                if ( segmentId > 0 )
-                {
-                    mTileManager.MouseOverSegmentId = segmentId;
-                }
-                else
-                {
-                    mTileManager.MouseOverSegmentId = 0;
-                }
-
-                if ( segmentId > 0 && segmentId == mTileManager.SelectedSegmentId )
+                if ( mTileManager.MouseOverSegmentId > 0 && mTileManager.MouseOverSegmentId == mTileManager.SelectedSegmentId )
                 {
                     //Make a hover circle
                     mTileManager.MouseOverX = x;

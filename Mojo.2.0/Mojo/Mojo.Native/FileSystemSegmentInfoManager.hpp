@@ -51,8 +51,8 @@ typedef boost::multi_index_container<
         ordered_non_unique< tag<name>, member< SegmentInfo, std::string, &SegmentInfo::name > >,
 	    // index by size
 	    ordered_non_unique< tag<size>, member< SegmentInfo, long, &SegmentInfo::size > >,
-	    // index by locked
-	    ordered_non_unique< tag<confidence>, member< SegmentInfo, char, &SegmentInfo::confidence > >
+	    // index by confidence
+	    ordered_non_unique< tag<confidence>, member< SegmentInfo, int, &SegmentInfo::confidence > >
   > 
 > SegmentMultiIndex;
 
@@ -83,10 +83,12 @@ public:
 	void                                              SetTiles( unsigned int segid, FileSystemTileSet tiles );
 	void                                              SetVoxelCount ( unsigned int segid, long voxelCount );
 
-    void                                              SortById( bool reverse );
-    void                                              SortByName( bool reverse );
-    void                                              SortBySize( bool reverse );
-    void                                              SortByConfidence( bool reverse );
+    void                                              SortSegmentInfoById( bool reverse );
+    void                                              SortSegmentInfoByName( bool reverse );
+    void                                              SortSegmentInfoBySize( bool reverse );
+    void                                              SortSegmentInfoByConfidence( bool reverse );
+    void                                              LockSegmentLabel( unsigned int segId );
+    void                                              UnlockSegmentLabel( unsigned int segId );
 
     std::list< SegmentInfo >                          GetSegmentInfoRange( unsigned int startIndex, unsigned int endIndex );
                                                

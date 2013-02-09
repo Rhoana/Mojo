@@ -141,20 +141,34 @@ Collections::Generic::IList< TileCacheEntry^ >^ TileManager::GetTileCache()
     return mTileCache;
 }
 
-void SortById( bool reverse )
+void TileManager::SortSegmentInfoById( bool reverse )
 {
+	mTileManager->SortSegmentInfoById( reverse );
 }
 
-void SortByName( bool reverse )
+void TileManager::SortSegmentInfoByName( bool reverse )
 {
+	mTileManager->SortSegmentInfoByName( reverse );
 }
 
-void SortBySize( bool reverse )
+void TileManager::SortSegmentInfoBySize( bool reverse )
 {
+	mTileManager->SortSegmentInfoBySize( reverse );
 }
 
-void SortByConfidence( bool reverse )
+void TileManager::SortSegmentInfoByConfidence( bool reverse )
 {
+	mTileManager->SortSegmentInfoByConfidence( reverse );
+}
+
+void TileManager::LockSegmentLabel( unsigned int segId )
+{
+	mTileManager->LockSegmentLabel( segId );
+}
+
+void TileManager::UnlockSegmentLabel( unsigned int segId )
+{
+	mTileManager->UnlockSegmentLabel( segId );
 }
 
 Collections::Generic::IList< SegmentInfo^ >^ TileManager::GetSegmentInfoRange( int begin, int end )
@@ -163,9 +177,20 @@ Collections::Generic::IList< SegmentInfo^ >^ TileManager::GetSegmentInfoRange( i
 
     Collections::Generic::List< SegmentInfo^ >^ interopSegmentInfoPage = gcnew Collections::Generic::List< SegmentInfo^ >();
 
+	std::ostringstream colorConverter;
+	colorConverter << std::setfill( '0' ) << std::hex;
+
 	for ( std::list< Native::SegmentInfo >::iterator segIt = segmentInfoPage.begin(); segIt != segmentInfoPage.end(); ++segIt )
 	{
-        interopSegmentInfoPage->Add( gcnew SegmentInfo( *segIt ) );
+		int4 color = mTileManager->GetSegmentationLabelColor( segIt->id );
+
+		colorConverter.str("");
+		colorConverter << std::setw( 1 ) << "#";
+		colorConverter << std::setw( 2 ) << color.x;
+		colorConverter << std::setw( 2 ) << color.y;
+		colorConverter << std::setw( 2 ) << color.z;
+
+        interopSegmentInfoPage->Add( gcnew SegmentInfo( *segIt, colorConverter.str() ) );
 	}
 
     return interopSegmentInfoPage;
@@ -177,27 +202,33 @@ SlimDX::Direct3D11::ShaderResourceView^ TileManager::GetIdColorMap()
     return mIdColorMap;
 }
 
-int TileManager::GetSegmentationLabelId( TiledDatasetView^ tiledDatasetView, Vector3^ pDataSpace )
+unsigned int TileManager::GetSegmentationLabelId( TiledDatasetView^ tiledDatasetView, Vector3^ pDataSpace )
 {
     float3 pDataSpaceFloat3 = make_float3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
     return mTileManager->GetSegmentationLabelId( tiledDatasetView->ToNative(), pDataSpaceFloat3 );
 }
 
-Vector3 TileManager::GetSegmentationLabelColor( int id )
+Vector3 TileManager::GetSegmentationLabelColor( unsigned int segId )
 {
-    int4 color = mTileManager->GetSegmentationLabelColor( id );
+    int4 color = mTileManager->GetSegmentationLabelColor( segId );
     return Vector3( (float)color.x, (float)color.y, (float)color.z );
 }
 
-void TileManager::ReplaceSegmentationLabel( int oldId, int newId )
+void TileManager::ReplaceSegmentationLabel( unsigned int oldId, unsigned int newId )
 {
     mTileManager->ReplaceSegmentationLabel( oldId, newId );
 }
 
-void TileManager::ReplaceSegmentationLabelCurrentSlice( int oldId, int newId, TiledDatasetView^ tiledDatasetView, Vector3^ pDataSpace )
+void TileManager::ReplaceSegmentationLabelCurrentSlice( unsigned int oldId, unsigned int newId, TiledDatasetView^ tiledDatasetView, Vector3^ pDataSpace )
 {
     float3 pDataSpaceFloat3 = make_float3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
     mTileManager->ReplaceSegmentationLabelCurrentSlice( oldId, newId, pDataSpaceFloat3  );
+}
+
+void TileManager::ReplaceSegmentationLabelCurrentConnectedComponent( unsigned int oldId, unsigned int newId, TiledDatasetView^ tiledDatasetView, Vector3^ pDataSpace )
+{
+    float3 pDataSpaceFloat3 = make_float3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
+    mTileManager->ReplaceSegmentationLabelCurrentConnectedComponent( oldId, newId, pDataSpaceFloat3  );
 }
 
 void TileManager::DrawSplit( TiledDatasetView^ tiledDatasetView, Vector3^ pDataSpace, float radius )
@@ -240,46 +271,46 @@ void TileManager::ResetSplitState()
     mTileManager->ResetSplitState();
 }
 
-void TileManager::PrepForSplit( int segId, Vector3^ pDataSpace )
+void TileManager::PrepForSplit( unsigned int segId, Vector3^ pDataSpace )
 {
     float3 pDataSpaceFloat3 = make_float3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
     mTileManager->PrepForSplit( segId, pDataSpaceFloat3 );
 }
 
-void TileManager::FindBoundaryJoinPoints2D( int segId )
+void TileManager::FindBoundaryJoinPoints2D( unsigned int segId )
 {
     mTileManager->FindBoundaryJoinPoints2D( segId );
 }
 
-void TileManager::FindBoundaryWithinRegion2D( int segId )
+void TileManager::FindBoundaryWithinRegion2D( unsigned int segId )
 {
     mTileManager->FindBoundaryWithinRegion2D( segId );
 }
 
-void TileManager::FindBoundaryBetweenRegions2D( int segId )
+void TileManager::FindBoundaryBetweenRegions2D( unsigned int segId )
 {
     mTileManager->FindBoundaryBetweenRegions2D( segId );
 }
 
-int TileManager::CompletePointSplit( int segId, Vector3^ pDataSpace )
+int TileManager::CompletePointSplit( unsigned int segId, Vector3^ pDataSpace )
 {
     float3 pDataSpaceFloat3 = make_float3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
     return mTileManager->CompletePointSplit( segId, pDataSpaceFloat3 );
 }
 
-int TileManager::CompleteDrawSplit( int segId, Vector3^ pDataSpace, bool join3D, int splitStartZ )
+int TileManager::CompleteDrawSplit( unsigned int segId, Vector3^ pDataSpace, bool join3D, int splitStartZ )
 {
     float3 pDataSpaceFloat3 = make_float3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
     return mTileManager->CompleteDrawSplit( segId, pDataSpaceFloat3, join3D, splitStartZ );
 }
 
-void TileManager::RecordSplitState( int segId, Vector3^ pDataSpace )
+void TileManager::RecordSplitState( unsigned int segId, Vector3^ pDataSpace )
 {
     float3 pDataSpaceFloat3 = make_float3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
     mTileManager->RecordSplitState( segId, pDataSpaceFloat3 );
 }
 
-void TileManager::PredictSplit( int segId, Vector3^ pDataSpace, float radius )
+void TileManager::PredictSplit( unsigned int segId, Vector3^ pDataSpace, float radius )
 {
     float3 pDataSpaceFloat3 = make_float3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
     mTileManager->PredictSplit( segId, pDataSpaceFloat3, radius );
@@ -290,22 +321,16 @@ void TileManager::ResetAdjustState()
     mTileManager->ResetAdjustState();
 }
 
-void TileManager::PrepForAdjust( int segId, Vector3^ pDataSpace )
+void TileManager::PrepForAdjust( unsigned int segId, Vector3^ pDataSpace )
 {
     float3 pDataSpaceFloat3 = make_float3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
     mTileManager->PrepForAdjust( segId, pDataSpaceFloat3 );
 }
 
-void TileManager::CommitAdjustChange( int segId, Vector3^ pDataSpace )
+void TileManager::CommitAdjustChange( unsigned int segId, Vector3^ pDataSpace )
 {
     float3 pDataSpaceFloat3 = make_float3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
     mTileManager->CommitAdjustChange( segId, pDataSpaceFloat3 );
-}
-
-void TileManager::ReplaceSegmentationLabelCurrentConnectedComponent( int oldId, int newId, TiledDatasetView^ tiledDatasetView, Vector3^ pDataSpace )
-{
-    float3 pDataSpaceFloat3 = make_float3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
-    mTileManager->ReplaceSegmentationLabelCurrentConnectedComponent( oldId, newId, pDataSpaceFloat3  );
 }
 
 void TileManager::UndoChange()

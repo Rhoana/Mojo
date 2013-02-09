@@ -52,18 +52,20 @@ public:
     Collections::Generic::IList< TileCacheEntry^ >^         GetTileCache();
     SlimDX::Direct3D11::ShaderResourceView^                 GetIdColorMap();
 
-    void                                                    SortById( bool reverse );
-    void                                                    SortByName( bool reverse );
-    void                                                    SortBySize( bool reverse );
-    void                                                    SortByConfidence( bool reverse );
+    void                                                    SortSegmentInfoById( bool reverse );
+    void                                                    SortSegmentInfoByName( bool reverse );
+    void                                                    SortSegmentInfoBySize( bool reverse );
+    void                                                    SortSegmentInfoByConfidence( bool reverse );
+	void                                                    LockSegmentLabel( unsigned int segId );
+	void                                                    UnlockSegmentLabel( unsigned int segId );
     Collections::Generic::IList< SegmentInfo^ >^            GetSegmentInfoRange( int begin, int end );
 
-    int                                                     GetSegmentationLabelId( TiledDatasetView^ tiledDatasetView, Vector3^ pDataSpace );
-    Vector3                                                 GetSegmentationLabelColor( int id );
+    unsigned int                                            GetSegmentationLabelId( TiledDatasetView^ tiledDatasetView, Vector3^ pDataSpace );
+    Vector3                                                 GetSegmentationLabelColor( unsigned int segId );
 
-    void                                                    ReplaceSegmentationLabel( int oldId, int newId );
-    void                                                    ReplaceSegmentationLabelCurrentSlice( int oldId, int newId, TiledDatasetView^ tiledDatasetView, Vector3^ pDataSpace );
-    void                                                    ReplaceSegmentationLabelCurrentConnectedComponent( int oldId, int newId, TiledDatasetView^ tiledDatasetView, Vector3^ pDataSpace );
+    void                                                    ReplaceSegmentationLabel( unsigned int oldId, unsigned int newId );
+    void                                                    ReplaceSegmentationLabelCurrentSlice( unsigned int oldId, unsigned int newId, TiledDatasetView^ tiledDatasetView, Vector3^ pDataSpace );
+    void                                                    ReplaceSegmentationLabelCurrentConnectedComponent( unsigned int oldId, unsigned int newId, TiledDatasetView^ tiledDatasetView, Vector3^ pDataSpace );
 
     void                                                    DrawSplit( TiledDatasetView^ tiledDatasetView, Vector3^ pDataSpace, float radius );
     void                                                    DrawErase( TiledDatasetView^ tiledDatasetView, Vector3^ pDataSpace, float radius );
@@ -73,18 +75,18 @@ public:
     void                                                    AddSplitSource( TiledDatasetView^ tiledDatasetView, Vector3^ pDataSpace );
     void                                                    RemoveSplitSource();
     void                                                    ResetSplitState();
-    void                                                    PrepForSplit( int segId, Vector3^ pDataSpace );
-	void                                                    FindBoundaryJoinPoints2D( int segId );
-	void                                                    FindBoundaryWithinRegion2D( int segId );
-	void                                                    FindBoundaryBetweenRegions2D( int segId );
-    int                                                     CompletePointSplit( int segId, Vector3^ pDataSpace );
-    int                                                     CompleteDrawSplit( int segId, Vector3^ pDataSpace, bool join3D, int splitStartZ );
-    void                                                    RecordSplitState( int segId, Vector3^ pDataSpace );
-    void                                                    PredictSplit( int segId, Vector3^ pDataSpace, float radius );
+    void                                                    PrepForSplit( unsigned int segId, Vector3^ pDataSpace );
+	void                                                    FindBoundaryJoinPoints2D( unsigned int segId );
+	void                                                    FindBoundaryWithinRegion2D( unsigned int segId );
+	void                                                    FindBoundaryBetweenRegions2D( unsigned int segId );
+    int                                                     CompletePointSplit( unsigned int segId, Vector3^ pDataSpace );
+    int                                                     CompleteDrawSplit( unsigned int segId, Vector3^ pDataSpace, bool join3D, int splitStartZ );
+    void                                                    RecordSplitState( unsigned int segId, Vector3^ pDataSpace );
+    void                                                    PredictSplit( unsigned int segId, Vector3^ pDataSpace, float radius );
 
     void                                                    ResetAdjustState();
-    void                                                    PrepForAdjust( int segId, Vector3^ pDataSpace );
-    void                                                    CommitAdjustChange( int segId, Vector3^ pDataSpace );
+    void                                                    PrepForAdjust( unsigned int segId, Vector3^ pDataSpace );
+    void                                                    CommitAdjustChange( unsigned int segId, Vector3^ pDataSpace );
 
 	void                                                    UndoChange();
 	void                                                    RedoChange();

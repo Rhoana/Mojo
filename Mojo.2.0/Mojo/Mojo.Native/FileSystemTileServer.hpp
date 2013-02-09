@@ -46,14 +46,14 @@ public:
     virtual void                                                  AutosaveSegmentation();
     virtual void                                                  DeleteTempFiles();
 
-    virtual int                                                   GetTileCountForId( int segId );
+    virtual int                                                   GetTileCountForId( unsigned int segId );
 
     virtual Core::HashMap< std::string, Core::VolumeDescription > LoadTile( int4 tileIndex );
     virtual void                                                  UnloadTile( int4 tileIndex );
 
-    virtual void                                                  ReplaceSegmentationLabel( int oldId, int newId );
-    virtual void                                                  ReplaceSegmentationLabelCurrentSlice( int oldId, int newId, float3 pointTileSpace );
-    virtual void                                                  ReplaceSegmentationLabelCurrentConnectedComponent( int oldId, int newId, float3 pointTileSpace );
+    virtual void                                                  ReplaceSegmentationLabel( unsigned int oldId, unsigned int newId );
+    virtual void                                                  ReplaceSegmentationLabelCurrentSlice( unsigned int oldId, unsigned int newId, float3 pointTileSpace );
+    virtual void                                                  ReplaceSegmentationLabelCurrentConnectedComponent( unsigned int oldId, unsigned int newId, float3 pointTileSpace );
 
     virtual void                                                  DrawSplit( float3 pointTileSpace, float radius );
     virtual void                                                  DrawErase( float3 pointTileSpace, float radius );
@@ -63,21 +63,21 @@ public:
 
     virtual void                                                  AddSplitSource( float3 pointTileSpace );
     virtual void                                                  RemoveSplitSource();
-    virtual void                                                  LoadSplitDistances( int segId );
+    virtual void                                                  LoadSplitDistances( unsigned int segId );
     virtual void                                                  ResetSplitState();
-    virtual void                                                  PrepForSplit( int segId, float3 pointTileSpace );
-	virtual void                                                  FindBoundaryJoinPoints2D( int segId );
-	virtual void                                                  FindBoundaryWithinRegion2D( int segId );
-	virtual void                                                  FindBoundaryBetweenRegions2D( int segId );
-    virtual int                                                   CompletePointSplit( int segId, float3 pointTileSpace );
-    virtual int                                                   CompleteDrawSplit( int segId, float3 pointTileSpace, bool join3D, int splitStartZ );
+    virtual void                                                  PrepForSplit( unsigned int segId, float3 pointTileSpace );
+	virtual void                                                  FindBoundaryJoinPoints2D( unsigned int segId );
+	virtual void                                                  FindBoundaryWithinRegion2D( unsigned int segId );
+	virtual void                                                  FindBoundaryBetweenRegions2D( unsigned int segId );
+    virtual int                                                   CompletePointSplit( unsigned int segId, float3 pointTileSpace );
+    virtual int                                                   CompleteDrawSplit( unsigned int segId, float3 pointTileSpace, bool join3D, int splitStartZ );
 
-    virtual void                                                  RecordSplitState( int segId, float3 pointTileSpace );
-    virtual void                                                  PredictSplit( int segId, float3 pointTileSpace, float radius );
+    virtual void                                                  RecordSplitState( unsigned int segId, float3 pointTileSpace );
+    virtual void                                                  PredictSplit( unsigned int segId, float3 pointTileSpace, float radius );
 
     virtual void                                                  ResetAdjustState();
-    virtual void                                                  PrepForAdjust( int segId, float3 pointTileSpace );
-    virtual void                                                  CommitAdjustChange( int segId, float3 pointTileSpace );
+    virtual void                                                  PrepForAdjust( unsigned int segId, float3 pointTileSpace );
+    virtual void                                                  CommitAdjustChange( unsigned int segId, float3 pointTileSpace );
 
 	virtual void                                                  UndoChange();
 	virtual void                                                  RedoChange();
@@ -85,6 +85,14 @@ public:
     virtual void                                                  SaveAndClearFileSystemTileCache();
 
     virtual marray::Marray< unsigned char >                       GetIdColorMap();
+
+    virtual void                                                  SortSegmentInfoById( bool reverse );
+    virtual void                                                  SortSegmentInfoByName( bool reverse );
+    virtual void                                                  SortSegmentInfoBySize( bool reverse );
+    virtual void                                                  SortSegmentInfoByConfidence( bool reverse );
+    virtual void                                                  LockSegmentLabel( unsigned int segId );
+    virtual void                                                  UnlockSegmentLabel( unsigned int segId );
+    virtual std::list< SegmentInfo >                              GetSegmentInfoRange( int begin, int end );
 
 private:
     template < typename TCudaType >

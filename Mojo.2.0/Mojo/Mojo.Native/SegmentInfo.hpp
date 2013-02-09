@@ -13,10 +13,10 @@ struct SegmentInfo
     unsigned int         id;
     std::string          name;
     long                 size;
-    char                 confidence;
+    int                  confidence;
 
     SegmentInfo();
-    SegmentInfo( unsigned int id, const std::string& name, long size, char confidence )
+    SegmentInfo( unsigned int id, const std::string& name, long size, int confidence )
         : id( id ), name( name ), size ( size ), confidence ( confidence ){}
 
     bool operator< (const SegmentInfo& e) const

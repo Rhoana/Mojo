@@ -6,12 +6,16 @@ namespace Mojo
     public class MergeSegmentationTool : ToolBase
     {
         private readonly TileManager mTileManager;
-        private int newId = 0;
 
         public MergeSegmentationTool( TileManager tileManager, Engine engine )
             : base( tileManager, engine )
         {
             mTileManager = tileManager;
+        }
+
+        public override void SelectSegment( uint segmentId )
+        {
+            mTileManager.SelectedSegmentId = segmentId;
         }
 
         public override void OnKeyDown( System.Windows.Input.KeyEventArgs keyEventArgs, int width, int height )
@@ -76,36 +80,31 @@ namespace Mojo
                     //Select this segment
                     if ( clickedId > 0 )
                     {
-                        if ( newId == clickedId )
-                        {
-                            //Unselect this segment
-                            //newId = 0;
-                            //mTileManager.SelectedSegmentId = 0;
-                        }
-                        else
+                        if ( clickedId != mTileManager.SelectedSegmentId )
                         {
                             //Select this segment
-                            newId = clickedId;
                             mTileManager.SelectedSegmentId = clickedId;
                         }
                     }
                 }
                 else if ( mouseEventArgs.Button == MouseButtons.Right )
                 {
-                    //Update this segment
-                    if ( clickedId > 0 && newId > 0 )
+                    if ( clickedId > 0 && mTileManager.SelectedSegmentId > 0 && clickedId != mTileManager.SelectedSegmentId)
                     {
-                        if ( mTileManager.CurrentMergeMode == MergeMode.Fill2D )
+                        //
+                        // Perform the merge
+                        //
+                        switch ( mTileManager.CurrentMergeMode )
                         {
-                            mTileManager.Internal.ReplaceSegmentationLabelCurrentSlice( clickedId, newId, mTileManager.TiledDatasetView, p );
-                        }
-                        else if ( mTileManager.CurrentMergeMode == MergeMode.Fill3D )
-                        {
-                            mTileManager.Internal.ReplaceSegmentationLabelCurrentConnectedComponent( clickedId, newId, mTileManager.TiledDatasetView, p );
-                        }
-                        else
-                        {
-                            mTileManager.Internal.ReplaceSegmentationLabel( clickedId, newId );
+                            case MergeMode.Fill2D:
+                                mTileManager.Internal.ReplaceSegmentationLabelCurrentSlice( clickedId, mTileManager.SelectedSegmentId, mTileManager.TiledDatasetView, p );
+                                break;
+                            case MergeMode.Fill3D:
+                                mTileManager.Internal.ReplaceSegmentationLabelCurrentConnectedComponent( clickedId, mTileManager.SelectedSegmentId, mTileManager.TiledDatasetView, p );
+                                break;
+                            default:
+                                mTileManager.Internal.ReplaceSegmentationLabel( clickedId, mTileManager.SelectedSegmentId );
+                                break;
                         }
                         mTileManager.ChangesMade = true;
                     }
@@ -137,16 +136,7 @@ namespace Mojo
 
                 var p = new Vector3( x, y, z );
 
-                int segmentId = mTileManager.Internal.GetSegmentationLabelId( mTileManager.TiledDatasetView, p );
-
-                if ( segmentId > 0 )
-                {
-                    mTileManager.MouseOverSegmentId = segmentId;
-                }
-                else
-                {
-                    mTileManager.MouseOverSegmentId = 0;
-                }
+                mTileManager.MouseOverSegmentId = mTileManager.Internal.GetSegmentationLabelId( mTileManager.TiledDatasetView, p );
 
                 mCurrentlyHandlingMouseOver = false;
             }

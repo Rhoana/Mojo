@@ -1,10 +1,16 @@
 ﻿using System;
 using System.Windows;
+using System.Windows.Threading;
 
 namespace Mojo
 {
     public class Viewer : IDisposable
     {
+        public Viewer()
+        {
+            mResizeTimer.Tick += ResizeRenderingPane;
+        }
+
         public D3D11RenderingPane D3D11RenderingPane { get; set; }
 
         private IUserInputHandler mUserInputHandler;
@@ -34,11 +40,17 @@ namespace Mojo
             }
         }
 
+        private readonly DispatcherTimer mResizeTimer = new DispatcherTimer();
+
         public void SetSize( Size oldSize, Size newSize )
         {
             if ( D3D11RenderingPane != null )
             {
-                D3D11RenderingPane.SetSize( newSize );                
+                mResizeTimer.Stop();
+                mResizeTimer.Interval = TimeSpan.FromSeconds( 0.01 );
+                mResizeTimer.Tag = newSize;
+                mResizeTimer.Start();
+                //D3D11RenderingPane.SetSize( newSize );                
             }
 
             if ( UserInputHandler != null )
@@ -46,5 +58,12 @@ namespace Mojo
                 UserInputHandler.SetSize( (int)oldSize.Width, (int)oldSize.Height, (int)newSize.Width, (int)newSize.Height );                
             }
         }
+
+        public void ResizeRenderingPane( object sender, EventArgs eventArgs )
+        {
+            mResizeTimer.Stop();
+            D3D11RenderingPane.SetSize( (Size)mResizeTimer.Tag );
+        }
+
     }
 }

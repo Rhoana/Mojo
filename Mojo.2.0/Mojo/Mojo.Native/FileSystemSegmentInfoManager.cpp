@@ -56,7 +56,7 @@ void FileSystemSegmentInfoManager::OpenDB()
 			// SQLite PRAGMAS for faster operation
 			//
 			std::string query;
-			std::stringstream converter;
+			std::ostringstream converter;
 
 			converter << "PRAGMA main.cache_size=10000;\n";
 			converter << "PRAGMA main.locking_mode=EXCLUSIVE;\n";
@@ -163,7 +163,7 @@ void FileSystemSegmentInfoManager::Save()
     OpenDB();
 
     std::string query;
-    std::stringstream converter;
+    std::ostringstream converter;
 
     int numDeletes = 0;
     int numInserts = 0;
@@ -208,6 +208,7 @@ void FileSystemSegmentInfoManager::Save()
     char *sqlError = NULL;
 
     query = converter.str();
+	Core::Printf( query );
     sqlReturn = sqlite3_exec( mIdTileIndexDB, query.c_str(), NULL, NULL, &sqlError); 
 
     if ( sqlReturn != SQLITE_OK )
@@ -255,7 +256,7 @@ FileSystemTileSet FileSystemSegmentInfoManager::LoadTileSet( unsigned int segid 
     FileSystemTileSet tileSet;
 
     std::string query;
-    std::stringstream converter;
+    std::ostringstream converter;
 
     int w, x, y, z, sqlReturn;
     sqlite3_stmt* statement = NULL; 
@@ -310,7 +311,7 @@ unsigned int FileSystemSegmentInfoManager::AddNewId()
     ++mIdMax;
 
     std::string name;
-    std::stringstream converter;
+    std::ostringstream converter;
 
     converter << "segment" << mIdMax;
     name = converter.str();
@@ -342,7 +343,7 @@ void FileSystemSegmentInfoManager::SetVoxelCount ( unsigned int segid, long voxe
 
 }
 
-void FileSystemSegmentInfoManager::SortById( bool reverse )
+void FileSystemSegmentInfoManager::SortSegmentInfoById( bool reverse )
 {
     mSegmentMultiIndex.get<0>().rearrange( mSegmentMultiIndex.get<id>().begin() );
     if ( reverse )
@@ -351,7 +352,7 @@ void FileSystemSegmentInfoManager::SortById( bool reverse )
     }
 }
 
-void FileSystemSegmentInfoManager::SortByName( bool reverse )
+void FileSystemSegmentInfoManager::SortSegmentInfoByName( bool reverse )
 {
     mSegmentMultiIndex.get<0>().rearrange( mSegmentMultiIndex.get<name>().begin() );
     if ( reverse )
@@ -360,7 +361,7 @@ void FileSystemSegmentInfoManager::SortByName( bool reverse )
     }
 }
 
-void FileSystemSegmentInfoManager::SortBySize( bool reverse )
+void FileSystemSegmentInfoManager::SortSegmentInfoBySize( bool reverse )
 {
     mSegmentMultiIndex.get<0>().rearrange( mSegmentMultiIndex.get<size>().begin() );
     if ( reverse )
@@ -369,13 +370,29 @@ void FileSystemSegmentInfoManager::SortBySize( bool reverse )
     }
 }
 
-void FileSystemSegmentInfoManager::SortByConfidence( bool reverse )
+void FileSystemSegmentInfoManager::SortSegmentInfoByConfidence( bool reverse )
 {
     mSegmentMultiIndex.get<0>().rearrange( mSegmentMultiIndex.get<confidence>().begin() );
     if ( reverse )
     {
         mSegmentMultiIndex.get<0>().reverse();
     }
+}
+
+void FileSystemSegmentInfoManager::LockSegmentLabel( unsigned int segId )
+{
+	SegmentMultiIndexById::iterator segmentInfoIt = mSegmentMultiIndex.get<id>().find( segId );
+    SegmentInfo changeSeg = *segmentInfoIt;
+	changeSeg.confidence = 100;
+	mSegmentMultiIndex.get<id>().replace( segmentInfoIt, changeSeg );
+}
+
+void FileSystemSegmentInfoManager::UnlockSegmentLabel( unsigned int segId )
+{
+	SegmentMultiIndexById::iterator segmentInfoIt = mSegmentMultiIndex.get<id>().find( segId );
+    SegmentInfo changeSeg = *segmentInfoIt;
+	changeSeg.confidence = 0;
+	mSegmentMultiIndex.get<id>().replace( segmentInfoIt, changeSeg );
 }
 
 std::list< SegmentInfo > FileSystemSegmentInfoManager::GetSegmentInfoRange( unsigned int startIndex, unsigned int endIndex )

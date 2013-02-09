@@ -40,11 +40,6 @@ namespace Mojo.Wpf.View
 
             var engineDataContext = new EngineDataContext( mEngine, new TileManagerDataContext( mEngine.TileManager ) );
 
-            if ( Settings.Default.AutoSaveSegmentation )
-            {
-                engineDataContext.EnableAutoSave( Settings.Default.AutoSaveSegmentationFrequencySeconds, Settings.Default.AutoSaveSegmentationPath );
-            }
-
             mMainWindow.DataContext = engineDataContext;
 
             mMainWindow.Closing += OnMainWindowClosing;

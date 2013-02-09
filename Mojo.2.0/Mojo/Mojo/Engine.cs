@@ -261,5 +261,21 @@ namespace Mojo
                 TileManager.CancelSplitChange();
             }
         }
+
+        public void LockSegmentLabel( uint segId )
+        {
+            TileManager.Internal.LockSegmentLabel( segId );
+        }
+
+        public void UnlockSegmentLabel( uint segId )
+        {
+            TileManager.Internal.UnlockSegmentLabel( segId );
+        }
+
+        public void SelectSegment( uint segId )
+        {
+            Tools.Get( ViewerMode.TileManager2D ).Get( CurrentToolMode ).SelectSegment( segId );
+        }
+
     }
 }

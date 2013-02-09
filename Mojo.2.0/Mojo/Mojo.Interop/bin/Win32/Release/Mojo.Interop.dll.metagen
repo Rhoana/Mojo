@@ -84,6 +84,27 @@ Struct Mojo.Interop.PrimitiveType: AutoLayout, AnsiClass, Class, Public, Sealed,
     Mojo.Interop.PrimitiveType UChar4 = 2 : Public, Static, Literal, HasDefault
     Mojo.Interop.PrimitiveType Float2 = 1 : Public, Static, Literal, HasDefault
     Mojo.Interop.PrimitiveType Float4 = 0 : Public, Static, Literal, HasDefault
+Class Mojo.Interop.SegmentInfo: AutoLayout, AnsiClass, Class, Public, BeforeFieldInit
+    Void .ctor(Mojo.Native.SegmentInfo*, std.basic_string<char\,std::char_traits<char>\,std::allocator<char> >*): PrivateScope, Public, HideBySig, SpecialName, RTSpecialName
+    Void .ctor(): PrivateScope, Public, HideBySig, SpecialName, RTSpecialName
+  Properties:
+    System.String Color 'get set' : 
+    Int32 Confidence 'get set' : 
+    Int32 Size 'get set' IsLong : 
+    System.String Name 'get set' : 
+    UInt32 Id  'get set' : 
+  Methods:
+    ToNative(SegmentInfo*): PrivateScope, Public, HideBySig
+    get_Id(): PrivateScope, Public, HideBySig, SpecialName
+    set_Id(UInt32): PrivateScope, Public, HideBySig, SpecialName
+    get_Name(): PrivateScope, Public, HideBySig, SpecialName
+    set_Name(String): PrivateScope, Public, HideBySig, SpecialName
+    get_Size(): PrivateScope, Public, HideBySig, SpecialName
+    set_Size(Int32 IsLong): PrivateScope, Public, HideBySig, SpecialName
+    get_Confidence(): PrivateScope, Public, HideBySig, SpecialName
+    set_Confidence(Int32): PrivateScope, Public, HideBySig, SpecialName
+    get_Color(): PrivateScope, Public, HideBySig, SpecialName
+    set_Color(String): PrivateScope, Public, HideBySig, SpecialName
 Class Mojo.Interop.Thrust: AutoLayout, AnsiClass, Class, Public, BeforeFieldInit
   Methods:
     Initialize(): PrivateScope, Public, Static, HideBySig
@@ -217,11 +238,18 @@ Class Mojo.Interop.TileManager: AutoLayout, AnsiClass, Class, Public, BeforeFiel
     LoadTiles(TiledDatasetView): PrivateScope, Public, HideBySig
     GetTileCache(): PrivateScope, Public, HideBySig
     GetIdColorMap(): PrivateScope, Public, HideBySig
+    SortSegmentInfoById(Boolean(HasFieldMarshal)): PrivateScope, Public, HideBySig
+    SortSegmentInfoByName(Boolean(HasFieldMarshal)): PrivateScope, Public, HideBySig
+    SortSegmentInfoBySize(Boolean(HasFieldMarshal)): PrivateScope, Public, HideBySig
+    SortSegmentInfoByConfidence(Boolean(HasFieldMarshal)): PrivateScope, Public, HideBySig
+    LockSegmentLabel(UInt32): PrivateScope, Public, HideBySig
+    UnlockSegmentLabel(UInt32): PrivateScope, Public, HideBySig
+    GetSegmentInfoRange(Int32, Int32): PrivateScope, Public, HideBySig
     GetSegmentationLabelId(TiledDatasetView, ValueType Vector3 IsBoxed): PrivateScope, Public, HideBySig
-    GetSegmentationLabelColor(Int32): PrivateScope, Public, HideBySig
-    ReplaceSegmentationLabel(Int32, Int32): PrivateScope, Public, HideBySig
-    ReplaceSegmentationLabelCurrentSlice(Int32, Int32, TiledDatasetView, ValueType Vector3 IsBoxed): PrivateScope, Public, HideBySig
-    ReplaceSegmentationLabelCurrentConnectedComponent(Int32, Int32, TiledDatasetView, ValueType Vector3 IsBoxed): PrivateScope, Public, HideBySig
+    GetSegmentationLabelColor(UInt32): PrivateScope, Public, HideBySig
+    ReplaceSegmentationLabel(UInt32, UInt32): PrivateScope, Public, HideBySig
+    ReplaceSegmentationLabelCurrentSlice(UInt32, UInt32, TiledDatasetView, ValueType Vector3 IsBoxed): PrivateScope, Public, HideBySig
+    ReplaceSegmentationLabelCurrentConnectedComponent(UInt32, UInt32, TiledDatasetView, ValueType Vector3 IsBoxed): PrivateScope, Public, HideBySig
     DrawSplit(TiledDatasetView, ValueType Vector3 IsBoxed, Single): PrivateScope, Public, HideBySig
     DrawErase(TiledDatasetView, ValueType Vector3 IsBoxed, Single): PrivateScope, Public, HideBySig
     DrawRegionB(TiledDatasetView, ValueType Vector3 IsBoxed, Single): PrivateScope, Public, HideBySig
@@ -229,17 +257,17 @@ Class Mojo.Interop.TileManager: AutoLayout, AnsiClass, Class, Public, BeforeFiel
     AddSplitSource(TiledDatasetView, ValueType Vector3 IsBoxed): PrivateScope, Public, HideBySig
     RemoveSplitSource(): PrivateScope, Public, HideBySig
     ResetSplitState(): PrivateScope, Public, HideBySig
-    PrepForSplit(Int32, ValueType Vector3 IsBoxed): PrivateScope, Public, HideBySig
-    FindBoundaryJoinPoints2D(Int32): PrivateScope, Public, HideBySig
-    FindBoundaryWithinRegion2D(Int32): PrivateScope, Public, HideBySig
-    FindBoundaryBetweenRegions2D(Int32): PrivateScope, Public, HideBySig
-    CompletePointSplit(Int32, ValueType Vector3 IsBoxed): PrivateScope, Public, HideBySig
-    CompleteDrawSplit(Int32, ValueType Vector3 IsBoxed, Boolean(HasFieldMarshal), Int32): PrivateScope, Public, HideBySig
-    RecordSplitState(Int32, ValueType Vector3 IsBoxed): PrivateScope, Public, HideBySig
-    PredictSplit(Int32, ValueType Vector3 IsBoxed, Single): PrivateScope, Public, HideBySig
+    PrepForSplit(UInt32, ValueType Vector3 IsBoxed): PrivateScope, Public, HideBySig
+    FindBoundaryJoinPoints2D(UInt32): PrivateScope, Public, HideBySig
+    FindBoundaryWithinRegion2D(UInt32): PrivateScope, Public, HideBySig
+    FindBoundaryBetweenRegions2D(UInt32): PrivateScope, Public, HideBySig
+    CompletePointSplit(UInt32, ValueType Vector3 IsBoxed): PrivateScope, Public, HideBySig
+    CompleteDrawSplit(UInt32, ValueType Vector3 IsBoxed, Boolean(HasFieldMarshal), Int32): PrivateScope, Public, HideBySig
+    RecordSplitState(UInt32, ValueType Vector3 IsBoxed): PrivateScope, Public, HideBySig
+    PredictSplit(UInt32, ValueType Vector3 IsBoxed, Single): PrivateScope, Public, HideBySig
     ResetAdjustState(): PrivateScope, Public, HideBySig
-    PrepForAdjust(Int32, ValueType Vector3 IsBoxed): PrivateScope, Public, HideBySig
-    CommitAdjustChange(Int32, ValueType Vector3 IsBoxed): PrivateScope, Public, HideBySig
+    PrepForAdjust(UInt32, ValueType Vector3 IsBoxed): PrivateScope, Public, HideBySig
+    CommitAdjustChange(UInt32, ValueType Vector3 IsBoxed): PrivateScope, Public, HideBySig
     UndoChange(): PrivateScope, Public, HideBySig
     RedoChange(): PrivateScope, Public, HideBySig
     SaveAndClearFileSystemTileCache(): PrivateScope, Public, HideBySig

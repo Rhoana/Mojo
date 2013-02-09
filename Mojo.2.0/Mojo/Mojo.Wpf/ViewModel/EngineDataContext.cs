@@ -53,6 +53,7 @@ namespace Mojo.Wpf.ViewModel
         public RelayCommand PreviousSegmentPageCommand { get; private set; }
         public RelayCommand NextSegmentPageCommand { get; private set; }
         public RelayCommand LastSegmentPageCommand { get; private set; }
+        public RelayCommand LockSegmentLabelCommand { get; private set; }
 
 
         public class MergeModeItem
@@ -74,6 +75,22 @@ namespace Mojo.Wpf.ViewModel
         public int TotalSegmentListPages { get; private set; }
         public object SelectedSegmentListViewItem { get; set; }
         public PagedSegmentListView PagedSegmentListView { get; private set; }
+
+        public IList< SegmentInfo > SegmentInfoList { get; private set; }
+
+        private SegmentInfo mSelectedSegmentInfo;
+        public SegmentInfo SelectedSegmentInfo
+        {
+            get { return mSelectedSegmentInfo; }
+            set
+            {
+                if ( SelectedSegmentInfo.Id != value.Id )
+                {
+                    Engine.TileManager.SelectedSegmentId = value.Id;
+                }
+                mSelectedSegmentInfo = value;
+            }
+        }
 
         public EngineDataContext( Engine engine, TileManagerDataContext tileManagerDataContext )
         {
@@ -125,80 +142,64 @@ namespace Mojo.Wpf.ViewModel
 
             MergeModes = new List<MergeModeItem>
             {
-              new MergeModeItem() { MergeMode = MergeMode.Fill2D, DisplayName = "2D Region Fill" },
-              new MergeModeItem() { MergeMode = MergeMode.Fill3D, DisplayName = "3D Region Fill (slow)" },
-              new MergeModeItem() { MergeMode = MergeMode.GlobalReplace, DisplayName = "Global Replace" }
+                new MergeModeItem() {MergeMode = MergeMode.Fill2D, DisplayName = "2D Region Fill"},
+                new MergeModeItem() {MergeMode = MergeMode.Fill3D, DisplayName = "3D Region Fill (slow)"},
+                new MergeModeItem() {MergeMode = MergeMode.GlobalReplace, DisplayName = "Global Replace"}
             };
 
             SplitModes = new List<SplitModeItem>
             {
-                new SplitModeItem() { SplitMode = SplitMode.DrawSplit, DisplayName = "Draw Split Line" },
-                new SplitModeItem() { SplitMode = SplitMode.DrawRegions, DisplayName = "Draw Regions" },
-                new SplitModeItem() { SplitMode = SplitMode.JoinPoints, DisplayName = "Points (2D only)" }
+                new SplitModeItem() {SplitMode = SplitMode.DrawSplit, DisplayName = "Draw Split Line"},
+                new SplitModeItem() {SplitMode = SplitMode.DrawRegions, DisplayName = "Draw Regions"},
+                new SplitModeItem() {SplitMode = SplitMode.JoinPoints, DisplayName = "Points (2D only)"}
             };
 
             OnPropertyChanged( "MergeModes" );
             OnPropertyChanged( "SplitModes" );
 
-            mAutoSaveTimer.Tick += AutoSave;
-
             //Segment list
             PagedSegmentListView = new PagedSegmentListView(
             new List<object>
                 {
-                    new { Id = 1, Color = "#aabbcc", Size = 7, Locked = false },
-                    new { Id = 2, Color = "#aa00cc", Size = 7, Locked = false },
-                    new { Id = 3, Color = "#cc33ff", Size = 7, Locked = true },
-                    new { Id = 4, Color = "#2de", Size = 7, Locked = false },
-                    new { Id = 5, Color = "#0babe0", Size = 7, Locked = false },
-                    new { Id = 6, Color = "#fade00", Size = 7, Locked = false },
-                    new { Id = 7, Color = "#235", Size = 7, Locked = false },
-                    new { Id = 11, Color = "#711", Size = 7, Locked = false },
-                    new { Id = 22, Color = "#314", Size = 7, Locked = true },
-                    new { Id = 385475, Color = "#002", Size = 7, Locked = false },
-                    new { Id = 14, Color = "#aabbcc", Size = 7, Locked = false },
-                    new { Id = 234, Color = "#aa00cc", Size = 7, Locked = false },
-                    new { Id = 334, Color = "#cc33ff", Size = 7, Locked = false },
-                    new { Id = 434, Color = "#2de", Size = 7, Locked = false },
-                    new { Id = 543, Color = "#0babe0", Size = 7, Locked = false },
-                    new { Id = 643, Color = "#fade00", Size = 7, Locked = false },
-                    new { Id = 743, Color = "#235", Size = 7, Locked = false },
-                    new { Id = 1143, Color = "#711", Size = 7, Locked = false },
-                    new { Id = 2243, Color = "#314", Size = 7, Locked = false },
-                    new { Id = 38547543, Color = "#002", Size = 7, Locked = false },
-                    new { Id = 189, Color = "#aabbcc", Size = 7, Locked = false },
-                    new { Id = 289, Color = "#aa00cc", Size = 7, Locked = false },
-                    new { Id = 389, Color = "#cc33ff", Size = 7, Locked = false },
-                    new { Id = 489, Color = "#2de", Size = 7, Locked = true },
-                    new { Id = 589, Color = "#0babe0", Size = 7, Locked = false },
-                    new { Id = 689, Color = "#fade00", Size = 7, Locked = false },
-                    new { Id = 789, Color = "#235", Size = 7, Locked = false },
-                    new { Id = 1189, Color = "#711", Size = 7, Locked = false },
-                    new { Id = 2289, Color = "#314", Size = 7, Locked = false },
-                    new { Id = 38547589, Color = "#002", Size = 7, Locked = false },
+                    //new { Id = 1, Color = "#aabbcc", Size = 7, Locked = false },
+                    //new { Id = 2, Color = "#aa00cc", Size = 7, Locked = false },
+                    //new { Id = 3, Color = "#cc33ff", Size = 7, Locked = true },
+                    //new { Id = 4, Color = "#2de", Size = 7, Locked = false },
+                    //new { Id = 5, Color = "#0babe0", Size = 7, Locked = false },
+                    //new { Id = 6, Color = "#fade00", Size = 7, Locked = false },
+                    //new { Id = 7, Color = "#235", Size = 7, Locked = false },
+                    //new { Id = 11, Color = "#711", Size = 7, Locked = false },
+                    //new { Id = 22, Color = "#314", Size = 7, Locked = true },
+                    //new { Id = 385475, Color = "#002", Size = 7, Locked = false },
+                    //new { Id = 14, Color = "#aabbcc", Size = 7, Locked = false },
+                    //new { Id = 234, Color = "#aa00cc", Size = 7, Locked = false },
+                    //new { Id = 334, Color = "#cc33ff", Size = 7, Locked = false },
+                    //new { Id = 434, Color = "#2de", Size = 7, Locked = false },
+                    //new { Id = 543, Color = "#0babe0", Size = 7, Locked = false },
+                    //new { Id = 643, Color = "#fade00", Size = 7, Locked = false },
+                    //new { Id = 743, Color = "#235", Size = 7, Locked = false },
+                    //new { Id = 1143, Color = "#711", Size = 7, Locked = false },
+                    //new { Id = 2243, Color = "#314", Size = 7, Locked = false },
+                    //new { Id = 38547543, Color = "#002", Size = 7, Locked = false },
+                    //new { Id = 189, Color = "#aabbcc", Size = 7, Locked = false },
+                    //new { Id = 289, Color = "#aa00cc", Size = 7, Locked = false },
+                    //new { Id = 389, Color = "#cc33ff", Size = 7, Locked = false },
+                    //new { Id = 489, Color = "#2de", Size = 7, Locked = true },
+                    //new { Id = 589, Color = "#0babe0", Size = 7, Locked = false },
+                    //new { Id = 689, Color = "#fade00", Size = 7, Locked = false },
+                    //new { Id = 789, Color = "#235", Size = 7, Locked = false },
+                    //new { Id = 1189, Color = "#711", Size = 7, Locked = false },
+                    //new { Id = 2289, Color = "#314", Size = 7, Locked = false },
+                    //new { Id = 38547589, Color = "#002", Size = 7, Locked = false },
                 },
-                6 );
+                0 );
 
             OnPropertyChanged( "PagedSegmentListView" );
-
-            SelectedSegmentListViewItem = PagedSegmentListView.GetItemAt(4);
-            OnPropertyChanged( "SelectedSegmentListViewItem" );
-
-
-            TotalSegmentListPages = 2;// PagedSegmentListView.PageCount;
-            CurrentSegmentListPage = 1;// PagedSegmentListView.CurrentPage;
-
-            OnPropertyChanged( "TotalSegmentListPages" );
-            OnPropertyChanged( "CurrentSegmentListPage" );
-
-            mSegmentListResizeTimer.Tick += ResizeSegmentList;
 
         }
 
         public void Dispose()
         {
-            mAutoSaveTimer.Tick -= AutoSave;
-
             if ( TileManagerDataContext != null )
             {
                 TileManagerDataContext.StateChanged -= StateChangedHandler;
@@ -299,6 +300,14 @@ namespace Mojo.Wpf.ViewModel
                     //
                     Engine.CurrentToolMode = ToolMode.SplitSegmentation;
                     Engine.TileManager.SegmentationVisibilityRatio = 0.5f;
+
+                    //
+                    // Load segment info ordered by size
+                    //
+                    Engine.TileManager.Internal.SortSegmentInfoById( false );
+                    SegmentInfoList = Engine.TileManager.Internal.GetSegmentInfoRange( 0, 1000 );
+                    OnPropertyChanged( "SegmentInfoList" );
+
                 }
             }
         }
@@ -333,52 +342,6 @@ namespace Mojo.Wpf.ViewModel
 
                 Engine.TileManager.SaveSegmentationAs( folderBrowserDialog.SelectedPath );
             }
-        }
-
-        private string mAutoSavePath;
-        private readonly DispatcherTimer mAutoSaveTimer = new DispatcherTimer( DispatcherPriority.Input );
-
-        public void EnableAutoSave( int autoSaveSegmentationFrequencySeconds, string autoSaveSegmentationPath )
-        {
-            mAutoSavePath = autoSaveSegmentationPath;
-            mAutoSaveTimer.Interval = TimeSpan.FromSeconds( autoSaveSegmentationFrequencySeconds );
-
-            mAutoSaveTimer.Start();
-
-            Console.WriteLine( "Auto-saving turned on. Auto-saving every {0} seconds.", autoSaveSegmentationFrequencySeconds );
-        }
-
-        public void DisableAutoSave()
-        {
-            mAutoSaveTimer.Stop();
-
-            Console.WriteLine( "Auto-saving turned off." );
-        }
-
-        public void AutoSave( object sender, EventArgs eventArgs )
-        {
-            if ( Engine.TileManager.ChangesMade )
-            {
-                Engine.TileManager.AutoSaveSegmentation();
-                Engine.TileManager.AutoChangesMade = false;
-            }
-        }
-
-        private readonly DispatcherTimer mSegmentListResizeTimer = new DispatcherTimer();
-
-        public void SegmentListSizeChanged( object sender, SizeChangedEventArgs e )
-        {
-            mSegmentListResizeTimer.Stop();
-            mSegmentListResizeTimer.Interval = TimeSpan.FromSeconds( 0.5 );
-            mSegmentListResizeTimer.Start();
-            PagedSegmentListView.SetItemsPerPage( (int) ( e.NewSize.Height - 5 ) / 30 - 1 );
-        }
-
-        public void ResizeSegmentList( object sender, EventArgs eventArgs )
-        {
-            mSegmentListResizeTimer.Stop();
-            PagedSegmentListView.Refresh();
-            OnPropertyChanged( "PagedSegmentListView" );
         }
 
     }

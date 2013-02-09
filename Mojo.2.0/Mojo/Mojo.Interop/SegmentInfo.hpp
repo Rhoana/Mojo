@@ -14,14 +14,16 @@ public ref class SegmentInfo
 {
 public:
     SegmentInfo();
-    SegmentInfo( Native::SegmentInfo segmentInfo );
+    SegmentInfo( Native::SegmentInfo segmentInfo, std::string color );
 
     Native::SegmentInfo ToNative();
 
-    property int       Id;
-    property String^   Name;
-    property long      Size;
-    property int       Confidence;
+    property unsigned int  Id;
+    property String^       Name;
+    property long          Size;
+    property int           Confidence;
+	property String^       Color;
+
 };
 
 }
