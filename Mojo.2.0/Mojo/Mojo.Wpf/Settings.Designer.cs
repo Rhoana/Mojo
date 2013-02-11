@@ -61,13 +61,13 @@ namespace Mojo.Wpf {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool AutoSaveSegmentation {
+        [global::System.Configuration.DefaultSettingValueAttribute("1000")]
+        public int SegmentListItemsPerPage {
             get {
-                return ((bool)(this["AutoSaveSegmentation"]));
+                return ((int)(this["SegmentListItemsPerPage"]));
             }
             set {
-                this["AutoSaveSegmentation"] = value;
+                this["SegmentListItemsPerPage"] = value;
             }
         }
     }

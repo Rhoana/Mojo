@@ -17,6 +17,8 @@ namespace Native
 TileManager::TileManager( ID3D11Device* d3d11Device, ID3D11DeviceContext* d3d11DeviceContext, ITileServer* tileServer, Core::PrimitiveMap constParameters ) :
     mIdColorMapBuffer            ( NULL ),
     mIdColorMapShaderResourceView( NULL ),
+    mIdConfidenceMapBuffer            ( NULL ),
+    mIdConfidenceMapShaderResourceView( NULL ),
     mTileServer                  ( tileServer ),
     mConstParameters             ( constParameters ),
     mIsTiledDatasetLoaded        ( false ),
@@ -265,6 +267,11 @@ ID3D11ShaderResourceView* TileManager::GetIdColorMap()
     return mIdColorMapShaderResourceView;
 }
 
+ID3D11ShaderResourceView* TileManager::GetIdConfidenceMap()
+{
+    return mIdConfidenceMapShaderResourceView;
+}
+
 unsigned int TileManager::GetSegmentationLabelId( const TiledDatasetView& tiledDatasetView, float3 pDataSpace )
 {
 	int3   zoomLevel = GetZoomLevel( tiledDatasetView );
@@ -331,6 +338,11 @@ void TileManager::UnlockSegmentLabel( unsigned int segId )
 	mTileServer->UnlockSegmentLabel( segId );
 }
 
+unsigned int TileManager::GetSegmentInfoCount()
+{
+	return mTileServer->GetSegmentInfoCount();
+}
+
 std::list< SegmentInfo > TileManager::GetSegmentInfoRange( int begin, int end )
 {
 	return mTileServer->GetSegmentInfoRange( begin, end );
@@ -338,8 +350,12 @@ std::list< SegmentInfo > TileManager::GetSegmentInfoRange( int begin, int end )
 
 int4 TileManager::GetSegmentationLabelColor( unsigned int segId )
 {
-    int index = segId % mIdColorMap.shape( 0 );
-    return make_int4( mIdColorMap( index, 0 ), mIdColorMap( index, 1 ), mIdColorMap( index, 2 ), 255 );
+	if ( mIdColorMap.size() > 0 )
+	{
+		int index = segId % mIdColorMap.shape( 0 );
+		return make_int4( mIdColorMap( index, 0 ), mIdColorMap( index, 1 ), mIdColorMap( index, 2 ), 255 );
+	}
+	return make_int4( 0, 0, 0, 0 );
 }
 
 void TileManager::ReplaceSegmentationLabel( unsigned int oldId, unsigned int newId )
@@ -528,17 +544,6 @@ void TileManager::UnloadTiledDatasetInternal()
         mTiledDatasetDescription = TiledDatasetDescription();
 
         //
-        // release id color map
-        //
-        //mIdColorMapShaderResourceView->Release();
-        //mIdColorMapShaderResourceView = NULL;
-
-        //mIdColorMapBuffer->Release();
-        //mIdColorMapBuffer = NULL;
-
-        //mIdColorMap = marray::Marray< unsigned char >();
-
-        //
         // reset page table
         //
         mTileCachePageTable = marray::Marray< int >( 0 );
@@ -611,6 +616,17 @@ void TileManager::UnloadSegmentationInternal()
         mIdColorMapBuffer = NULL;
 
         mIdColorMap = marray::Marray< unsigned char >();
+
+        //
+        // release id lock map
+        //
+        mIdConfidenceMapShaderResourceView->Release();
+        mIdConfidenceMapShaderResourceView = NULL;
+
+        mIdConfidenceMapBuffer->Release();
+        mIdConfidenceMapBuffer = NULL;
+
+        mIdConfidenceMap = marray::Marray< unsigned char >();
 
         //
         // output memory stats to the console

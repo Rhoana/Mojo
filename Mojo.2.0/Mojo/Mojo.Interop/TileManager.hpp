@@ -51,6 +51,7 @@ public:
 
     Collections::Generic::IList< TileCacheEntry^ >^         GetTileCache();
     SlimDX::Direct3D11::ShaderResourceView^                 GetIdColorMap();
+    SlimDX::Direct3D11::ShaderResourceView^                 GetIdConfidenceMap();
 
     void                                                    SortSegmentInfoById( bool reverse );
     void                                                    SortSegmentInfoByName( bool reverse );
@@ -58,6 +59,7 @@ public:
     void                                                    SortSegmentInfoByConfidence( bool reverse );
 	void                                                    LockSegmentLabel( unsigned int segId );
 	void                                                    UnlockSegmentLabel( unsigned int segId );
+	unsigned int                                            GetSegmentInfoCount();
     Collections::Generic::IList< SegmentInfo^ >^            GetSegmentInfoRange( int begin, int end );
 
     unsigned int                                            GetSegmentationLabelId( TiledDatasetView^ tiledDatasetView, Vector3^ pDataSpace );
@@ -100,11 +102,15 @@ private:
     void LoadIdColorMap();
     void UnloadIdColorMap();
 
+    void LoadIdConfidenceMap();
+    void UnloadIdConfidenceMap();
+
     Native::TileManager*                                    mTileManager;
     Native::ITileServer*                                    mTileServer;
 
     Collections::Generic::IList< TileCacheEntry^ >^         mTileCache;
     SlimDX::Direct3D11::ShaderResourceView^                 mIdColorMap;
+    SlimDX::Direct3D11::ShaderResourceView^                 mIdConfidenceMap;
 
 };
 

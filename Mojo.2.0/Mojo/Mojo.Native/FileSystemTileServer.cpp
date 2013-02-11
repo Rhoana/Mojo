@@ -4745,6 +4745,11 @@ marray::Marray< unsigned char > FileSystemTileServer::GetIdColorMap()
     return mSegmentInfoManager.GetIdColorMap();
 }
 
+marray::Marray< unsigned char > FileSystemTileServer::GetIdConfidenceMap()
+{
+    return mSegmentInfoManager.GetIdConfidenceMap();
+}
+
 void FileSystemTileServer::SortSegmentInfoById( bool reverse )
 {
 	mSegmentInfoManager.SortSegmentInfoById( reverse );
@@ -4773,6 +4778,11 @@ void FileSystemTileServer::LockSegmentLabel( unsigned int segId )
 void FileSystemTileServer::UnlockSegmentLabel( unsigned int segId )
 {
 	mSegmentInfoManager.UnlockSegmentLabel( segId );
+}
+
+unsigned int FileSystemTileServer::GetSegmentInfoCount()
+{
+	return mSegmentInfoManager.GetSegmentInfoCount();
 }
 
 std::list< SegmentInfo > FileSystemTileServer::GetSegmentInfoRange( int begin, int end )

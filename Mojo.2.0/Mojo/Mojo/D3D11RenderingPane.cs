@@ -19,6 +19,7 @@ namespace Mojo
 
         public Viewport Viewport { get; private set; }
         public IRenderingStrategy RenderingStrategy { get; set; }
+        public bool PauseRendering { get; set; }
 
         public D3D11RenderingPane( Factory dxgiFactory, SlimDX.Direct3D11.Device d3D11Device, DeviceContext d3D11DeviceContext, D3D11HwndDescription d3D11HwndDescription )
         {
@@ -45,6 +46,8 @@ namespace Mojo
             mDxgiFactory.SetWindowAssociation( d3D11HwndDescription.Handle, WindowAssociationFlags.IgnoreAll );
 
             CreateD3D11Resources( d3D11HwndDescription.Width, d3D11HwndDescription.Height );
+
+            PauseRendering = false;
         }
 
         public void Dispose()
@@ -66,15 +69,18 @@ namespace Mojo
 
         public void Render()
         {
-            mD3D11DeviceContext.OutputMerger.SetTargets( mD3D11DepthStencilView, mD3D11RenderTargetView );
-            mD3D11DeviceContext.Rasterizer.SetViewports( Viewport );
-
-            if ( RenderingStrategy != null )
+            if ( !PauseRendering )
             {
-                RenderingStrategy.Render( mD3D11DeviceContext, Viewport, mD3D11RenderTargetView, mD3D11DepthStencilView );                
-            }
+                mD3D11DeviceContext.OutputMerger.SetTargets( mD3D11DepthStencilView, mD3D11RenderTargetView );
+                mD3D11DeviceContext.Rasterizer.SetViewports( Viewport );
 
-            mSwapChain.Present( 0, PresentFlags.None );
+                if ( RenderingStrategy != null )
+                {
+                    RenderingStrategy.Render( mD3D11DeviceContext, Viewport, mD3D11RenderTargetView, mD3D11DepthStencilView );
+                }
+
+                mSwapChain.Present( 0, PresentFlags.None );
+            }
         }
 
         public void SetSize( Size size )

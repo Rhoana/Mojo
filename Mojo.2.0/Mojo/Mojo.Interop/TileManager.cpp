@@ -63,6 +63,9 @@ void TileManager::LoadTiledDataset( TiledDatasetDescription^ tiledDatasetDescrip
 
     UnloadIdColorMap();
     LoadIdColorMap();
+
+	UnloadIdConfidenceMap();
+	LoadIdConfidenceMap();
 }
 
 void TileManager::UnloadTiledDataset()
@@ -74,6 +77,9 @@ void TileManager::UnloadTiledDataset()
 
     UnloadIdColorMap();
     LoadIdColorMap();
+
+	UnloadIdConfidenceMap();
+	LoadIdConfidenceMap();
 }
 
 bool TileManager::IsTiledDatasetLoaded()
@@ -87,6 +93,9 @@ void TileManager::LoadSegmentation( TiledDatasetDescription^ tiledDatasetDescrip
 
     UnloadIdColorMap();
     LoadIdColorMap();
+
+	UnloadIdConfidenceMap();
+	LoadIdConfidenceMap();
 }
 
 void TileManager::UnloadSegmentation()
@@ -97,6 +106,9 @@ void TileManager::UnloadSegmentation()
 
     UnloadIdColorMap();
     LoadIdColorMap();
+
+	UnloadIdConfidenceMap();
+	LoadIdConfidenceMap();
 }
 
 bool TileManager::IsSegmentationLoaded()
@@ -171,6 +183,11 @@ void TileManager::UnlockSegmentLabel( unsigned int segId )
 	mTileManager->UnlockSegmentLabel( segId );
 }
 
+unsigned int TileManager::GetSegmentInfoCount()
+{
+	return mTileManager->GetSegmentInfoCount();
+}
+
 Collections::Generic::IList< SegmentInfo^ >^ TileManager::GetSegmentInfoRange( int begin, int end )
 {
     std::list< Native::SegmentInfo > segmentInfoPage = mTileManager->GetSegmentInfoRange( begin, end );
@@ -200,6 +217,11 @@ Collections::Generic::IList< SegmentInfo^ >^ TileManager::GetSegmentInfoRange( i
 SlimDX::Direct3D11::ShaderResourceView^ TileManager::GetIdColorMap()
 {
     return mIdColorMap;
+}
+
+SlimDX::Direct3D11::ShaderResourceView^ TileManager::GetIdConfidenceMap()
+{
+    return mIdConfidenceMap;
 }
 
 unsigned int TileManager::GetSegmentationLabelId( TiledDatasetView^ tiledDatasetView, Vector3^ pDataSpace )
@@ -414,6 +436,26 @@ void TileManager::UnloadIdColorMap()
     {
         delete mIdColorMap;
         mIdColorMap = nullptr;
+    }
+}
+
+void TileManager::LoadIdConfidenceMap()
+{
+    ID3D11ShaderResourceView* idConfidenceMap =  mTileManager->GetIdConfidenceMap();
+
+    if ( idConfidenceMap != NULL )
+    {
+        RELEASE_ASSERT( mIdConfidenceMap == nullptr );
+        mIdConfidenceMap = ShaderResourceView::FromPointer( IntPtr( idConfidenceMap ) );
+    }
+}
+
+void TileManager::UnloadIdConfidenceMap()
+{
+    if ( mIdConfidenceMap != nullptr )
+    {
+        delete mIdConfidenceMap;
+        mIdConfidenceMap = nullptr;
     }
 }
 

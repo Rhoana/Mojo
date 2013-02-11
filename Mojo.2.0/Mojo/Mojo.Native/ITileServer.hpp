@@ -69,6 +69,7 @@ public:
     virtual void                                                  SaveAndClearFileSystemTileCache()                                                       = 0;
 
     virtual marray::Marray< unsigned char >                       GetIdColorMap()                                                                         = 0;
+    virtual marray::Marray< unsigned char >                       GetIdConfidenceMap()                                                                          = 0;
 
 	virtual void                                                  SortSegmentInfoById( bool reverse )			                                          = 0;
     virtual void                                                  SortSegmentInfoByName( bool reverse )		                                              = 0;
@@ -76,6 +77,7 @@ public:
     virtual void                                                  SortSegmentInfoByConfidence( bool reverse )	                                          = 0;
     virtual void                                                  LockSegmentLabel( unsigned int segId )                                                  = 0;
     virtual void                                                  UnlockSegmentLabel( unsigned int segId )                                                = 0;
+	virtual unsigned int                                          GetSegmentInfoCount()                                                                   = 0;
     virtual std::list< SegmentInfo >                              GetSegmentInfoRange( int begin, int end ) 	                                          = 0;
 
 };

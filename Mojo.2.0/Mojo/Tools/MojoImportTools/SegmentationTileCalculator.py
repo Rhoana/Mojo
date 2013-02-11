@@ -118,7 +118,7 @@ if len(files) > 0:
         nouns_verbs = [x for x in nouns_verbs if not ( '_' in x.lemmas[0].name or '-' in x.lemmas[0].name )]
         adjectives_adverbs = [x for x in adjectives_adverbs if not ( '_' in x.lemmas[0].name or '-' in x.lemmas[0].name )]
         
-        def make_memorable_name(): return random.choice(nouns_verbs).lemmas[0].name.capitalize() + random.choice(adjectives_adverbs).lemmas[0].name.capitalize()
+        def make_memorable_name(): return random.choice(adjectives_adverbs).lemmas[0].name.capitalize() + random.choice(nouns_verbs).lemmas[0].name.capitalize()
     else:
         print 'Using boring names.'
 
@@ -258,6 +258,11 @@ if len(files) > 0:
     hdf5.close()
 
     print 'Writing segmentInfo file (sqlite)'
+
+        
+    if os.path.exists(output_segment_info_db_file):
+        os.remove(output_segment_info_db_file)
+        print "Deleted existing database file."
 
     con = sqlite3.connect(output_segment_info_db_file)
 

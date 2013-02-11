@@ -22,38 +22,102 @@ namespace Mojo.Wpf.View
         {
         }
 
-        private void SegmentList_SelectionChanged( object sender, SelectionChangedEventArgs e )
+        private void SegmentList_OnSelectionChanged( object sender, SelectionChangedEventArgs e )
         {
             var selectedSegment = (Interop.SegmentInfo)( (ListView)sender ).SelectedItem;
-            ( (Mojo.Wpf.ViewModel.EngineDataContext) DataContext ).Engine.SelectSegment( selectedSegment.Id );
+            if ( selectedSegment != null && DataContext != null )
+            {
+                ( (ViewModel.EngineDataContext) DataContext ).Engine.SelectSegment( selectedSegment.Id );
+                ( (ListView)sender ).ScrollIntoView( selectedSegment );
+            }
         }
 
         public void SegmentLockCheckBox_OnUnchecked( object sender, RoutedEventArgs e )
         {
             var changedSegment = (Interop.SegmentInfo) ( (CheckBox) sender ).DataContext;
-            if ( changedSegment.Confidence != 0 )
+            if ( changedSegment != null && changedSegment.Confidence != 0 )
             {
                 changedSegment.Confidence = 0;
-                ( (Mojo.Wpf.ViewModel.EngineDataContext) DataContext ).Engine.UnlockSegmentLabel( changedSegment.Id );
+                ( (ViewModel.EngineDataContext) DataContext ).Engine.UnlockSegmentLabel( changedSegment.Id );
             }
         }
 
         public void SegmentLockCheckBox_OnChecked( object sender, RoutedEventArgs e )
         {
             var changedSegment = (Interop.SegmentInfo)( (CheckBox)sender ).DataContext;
-            if ( changedSegment.Confidence != 100 )
+            if ( changedSegment != null && changedSegment.Confidence != 100 )
             {
                 changedSegment.Confidence = 100;
-                ( (Mojo.Wpf.ViewModel.EngineDataContext) DataContext ).Engine.LockSegmentLabel( changedSegment.Id );
+                ( (ViewModel.EngineDataContext) DataContext ).Engine.LockSegmentLabel( changedSegment.Id );
             }
         }
 
-        private void SegmentList_MouseWheel( object sender, System.Windows.Input.MouseWheelEventArgs e )
+        private void SegmentList_OnMouseWheel( object sender, System.Windows.Input.MouseWheelEventArgs e )
         {
             //
             // Take the focus so that the main window does not zoom.
             //
             Keyboard.Focus( (ListView)sender );
+        }
+
+        private void SegmentListViewItem_OnMouseEnter( object sender, MouseEventArgs e )
+        {
+            var segmentViewItem = ( (ListViewItem)sender );
+            ( (ViewModel.EngineDataContext) DataContext ).Engine.TileManager.MouseOverSegmentId = (uint)segmentViewItem.Tag;
+        }
+
+        private GridViewColumnHeader mCurrentSortColumHeader = null;
+        private bool mSordDescending = true;
+
+        private void SegmentListColumnHeader_OnClick( object sender, RoutedEventArgs e )
+        {
+            var header = sender as GridViewColumnHeader;
+            if ( header != null )
+            {
+                //
+                // Determine sort direction
+                //
+                if ( header.Equals( mCurrentSortColumHeader ) )
+                {
+                    mSordDescending = !mSordDescending;
+                }
+                else
+                {
+                    //
+                    // Sort size and Lock descending on first click (other colums ascending)
+                    //
+                    mSordDescending = header.Tag.Equals( "Size" ) || header.Tag.Equals( "Lock" );
+
+                    //
+                    // Reset previous sort column arrow
+                    //
+                    if ( mCurrentSortColumHeader != null )
+                    {
+                        mCurrentSortColumHeader.Column.HeaderTemplate = null;
+                    }
+                }
+
+                //
+                // Add sort column arrow
+                //
+                if ( mSordDescending )
+                {
+                    header.Column.HeaderTemplate = Resources["HeaderTemplateArrowUp"] as DataTemplate;
+                }
+                else
+                {
+                    header.Column.HeaderTemplate = Resources["HeaderTemplateArrowDown"] as DataTemplate;
+                }
+                
+                mCurrentSortColumHeader = header;
+
+                //
+                // Perform sort
+                //
+                var fieldName = header.Tag as String;
+                ( (ViewModel.EngineDataContext) DataContext ).TileManagerDataContext.SortSegmentListBy( fieldName, mSordDescending );
+
+            }
         }
     }
 

@@ -101,8 +101,11 @@ void FileSystemSegmentInfoManager::OpenDB()
 
             sqlite3_finalize(statement);
 
+			size_t shape[] = { mIdMax };
+			mIdConfidenceMap = marray::Marray< unsigned char >( shape, shape + 1 );
+
 			//
-			// Load the Segment Info
+			// Load the Segment Info 
 			//
             converter.str("");
             converter << "SELECT id, name, size, confidence FROM segmentInfo WHERE size > 0 ORDER BY id;";
@@ -123,6 +126,7 @@ void FileSystemSegmentInfoManager::OpenDB()
                         std::string( reinterpret_cast<const char*>( sqlite3_column_text(statement, 1) ) ),
                         sqlite3_column_int(statement, 2),
                         sqlite3_column_int(statement, 3) ) );
+					mIdConfidenceMap( sqlite3_column_int(statement, 0) ) = sqlite3_column_int(statement, 3);
                 }
                 Core::Printf( "Read ", mSegmentMultiIndex.size(), " segment info entries from db." );
             }
@@ -233,7 +237,12 @@ marray::Marray< unsigned char > FileSystemSegmentInfoManager::GetIdColorMap()
 {
     return mIdColorMap;
 }
-                                               
+
+marray::Marray< unsigned char > FileSystemSegmentInfoManager::GetIdConfidenceMap()
+{
+    return mIdConfidenceMap;
+}
+
 FileSystemTileSet FileSystemSegmentInfoManager::GetTiles( unsigned int segid )
 {
 
@@ -393,6 +402,11 @@ void FileSystemSegmentInfoManager::UnlockSegmentLabel( unsigned int segId )
     SegmentInfo changeSeg = *segmentInfoIt;
 	changeSeg.confidence = 0;
 	mSegmentMultiIndex.get<id>().replace( segmentInfoIt, changeSeg );
+}
+
+unsigned int FileSystemSegmentInfoManager::GetSegmentInfoCount()
+{
+	return mSegmentMultiIndex.size();
 }
 
 std::list< SegmentInfo > FileSystemSegmentInfoManager::GetSegmentInfoRange( unsigned int startIndex, unsigned int endIndex )

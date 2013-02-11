@@ -238,12 +238,14 @@ Class Mojo.Interop.TileManager: AutoLayout, AnsiClass, Class, Public, BeforeFiel
     LoadTiles(TiledDatasetView): PrivateScope, Public, HideBySig
     GetTileCache(): PrivateScope, Public, HideBySig
     GetIdColorMap(): PrivateScope, Public, HideBySig
+    GetIdConfidenceMap(): PrivateScope, Public, HideBySig
     SortSegmentInfoById(Boolean(HasFieldMarshal)): PrivateScope, Public, HideBySig
     SortSegmentInfoByName(Boolean(HasFieldMarshal)): PrivateScope, Public, HideBySig
     SortSegmentInfoBySize(Boolean(HasFieldMarshal)): PrivateScope, Public, HideBySig
     SortSegmentInfoByConfidence(Boolean(HasFieldMarshal)): PrivateScope, Public, HideBySig
     LockSegmentLabel(UInt32): PrivateScope, Public, HideBySig
     UnlockSegmentLabel(UInt32): PrivateScope, Public, HideBySig
+    GetSegmentInfoCount(): PrivateScope, Public, HideBySig
     GetSegmentInfoRange(Int32, Int32): PrivateScope, Public, HideBySig
     GetSegmentationLabelId(TiledDatasetView, ValueType Vector3 IsBoxed): PrivateScope, Public, HideBySig
     GetSegmentationLabelColor(UInt32): PrivateScope, Public, HideBySig

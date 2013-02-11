@@ -255,6 +255,7 @@ namespace Mojo
                 //}
                 mEffect.GetVariableByName( "gIdTexture3D" ).AsResource().SetResource( tileCacheEntry.D3D11CudaTextures.Get( "IdMap" ) );
                 mEffect.GetVariableByName( "gIdColorMapBuffer" ).AsResource().SetResource( mTileManager.Internal.GetIdColorMap() );
+                mEffect.GetVariableByName( "gIdConfidenceMapBuffer" ).AsResource().SetResource( mTileManager.Internal.GetIdConfidenceMap() );
             }
             mEffect.GetVariableByName( "gTransform" ).AsMatrix().SetMatrix( camera.GetLookAtMatrix() * camera.GetProjectionMatrix() );
             mEffect.GetVariableByName( "gSegmentationRatio" ).AsScalar().Set( mTileManager.SegmentationVisibilityRatio );

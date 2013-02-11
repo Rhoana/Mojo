@@ -35,7 +35,26 @@
 
         <Mojo.Wpf.ViewModel:EnumBooleanConverter x:Key="EnumBooleanConverter" />
         <Mojo.Wpf.ViewModel:SegmentLockConverter x:Key="SegmentLockConverter" />
-        
+
+        <DataTemplate x:Key="HeaderTemplateArrowUp">
+            <DockPanel>
+                <TextBlock HorizontalAlignment="Center" Text="{Binding}"/>
+                <Path x:Name="arrow"
+           StrokeThickness = "1"                                     
+           Fill            = "DeepSkyBlue"
+           Data            = "M 5,10 L 15,10 L 10,5 L 5,10"/>
+            </DockPanel>
+        </DataTemplate>
+        <DataTemplate x:Key="HeaderTemplateArrowDown">
+            <DockPanel>
+                <TextBlock HorizontalAlignment="Center" Text="{Binding }"/>
+                <Path x:Name="arrow"
+              StrokeThickness = "1"                                  
+              Fill            = "DeepSkyBlue"
+              Data            = "M 5,5 L 10,10 L 15,5 L 5,5"/>
+            </DockPanel>
+        </DataTemplate>
+
     </Window.Resources>
         
     <DockPanel x:Name="DockPanel" Background="AntiqueWhite">
@@ -232,7 +251,7 @@
         <Grid VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="270" />
+                <ColumnDefinition Width="370" />
             </Grid.ColumnDefinitions>
 
             <Mojo.Wpf.View:ViewerContext Grid.Column="0" x:Name="TileManager2DViewerContext" Viewer="{Binding Path=Engine.Viewers.Internal[TileManager2D]}" />
@@ -245,13 +264,7 @@
                     <StackPanel DockPanel.Dock="Top" Orientation="Horizontal">
                         <Label DockPanel.Dock="Left" Focusable="False" MinHeight="20" Content="Segment List">
                         </Label>
-                        <Label DockPanel.Dock="Left" Focusable="False" MinHeight="20">
-                            <Label.Content>
-                                <MultiBinding StringFormat="Page {0} of {1}">
-                                    <Binding Path="CurrentSegmentListPage"/>
-                                    <Binding Path="TotalSegmentListPages"/>
-                                </MultiBinding>
-                            </Label.Content>
+                        <Label DockPanel.Dock="Left" Focusable="False" MinHeight="20" Content="{Binding Path=TileManagerDataContext.SegmentListCurrentPageString}">
                         </Label>
                     </StackPanel>
 
@@ -262,20 +275,30 @@
                         <Button Content="&gt;&gt;" Command="{Binding Path=LastSegmentPageCommand}" Width="30" Margin="5"/>
                     </StackPanel>
 
-                    <ListView ItemsSource="{Binding Path=SegmentInfoList}" Name="SegmentList"
-                              SelectionChanged="SegmentList_SelectionChanged"
-                              MouseWheel="SegmentList_MouseWheel"
-                              SelectedItem="{Binding Path=SelectedSegmentInfo}">
-
+                    <ListView Name="SegmentList"
+                              ItemsSource="{Binding Path=TileManagerDataContext.SegmentInfoList}" 
+                              SelectionChanged="SegmentList_OnSelectionChanged"
+                              MouseWheel="SegmentList_OnMouseWheel"
+                              SelectedValue="{Binding Path=Engine.TileManager.SelectedSegmentId}"
+                              SelectedValuePath="Id"
+                              >
+                        
+                        <ListView.ItemContainerStyle>
+                            <Style TargetType="ListViewItem">
+                                <Setter Property="Tag" Value="{Binding Id}"></Setter>
+                                <EventSetter Event="MouseMove" Handler="SegmentListViewItem_OnMouseEnter" ></EventSetter>
+                            </Style>
+                        </ListView.ItemContainerStyle>
+                        
                         <ListView.View>
-                            <GridView AllowsColumnReorder="False">
+                            <GridView AllowsColumnReorder="True">
 
-
-                                <GridViewColumn Header="Lock" Width="50">
+                                <GridViewColumn Width="50">
+                                    <GridViewColumnHeader Content="Lock" Click="SegmentListColumnHeader_OnClick" Tag="Lock" />
                                     <GridViewColumn.CellTemplate>
                                         <DataTemplate>
-                                            <Grid Background="{Binding Color}">
-                                                <CheckBox Background="{Binding Color}" Height="20" Width="50" Margin="5,5,5,5" Name="SegmentLockCheckBox"
+                                            <Grid Background="{Binding Color}" Margin="0,0,0,0" >
+                                                <CheckBox Background="{Binding Color}" Height="20" Width="100" Margin="5,5,5,5" Name="SegmentLockCheckBox"
                                                           IsChecked="{Binding Confidence, Converter={StaticResource SegmentLockConverter}, Mode=OneWay}"
                                                           Checked="SegmentLockCheckBox_OnChecked"
                                                           Unchecked="SegmentLockCheckBox_OnUnchecked" />
@@ -284,17 +307,8 @@
                                     </GridViewColumn.CellTemplate>
                                 </GridViewColumn>
 
-                                <GridViewColumn Header="Id" Width="50">
-                                    <GridViewColumn.CellTemplate>
-                                        <DataTemplate>
-                                            <Grid HorizontalAlignment="Stretch">
-                                                <Label Content="{Binding Id}" />
-                                            </Grid>
-                                        </DataTemplate>
-                                    </GridViewColumn.CellTemplate>
-                                </GridViewColumn>
-
-                                <GridViewColumn Header="Name" Width="100">
+                                <GridViewColumn Width="150">
+                                    <GridViewColumnHeader Content="Name" Click="SegmentListColumnHeader_OnClick" Tag="Name" />
                                     <GridViewColumn.CellTemplate>
                                         <DataTemplate>
                                             <Grid HorizontalAlignment="Stretch">
@@ -304,11 +318,23 @@
                                     </GridViewColumn.CellTemplate>
                                 </GridViewColumn>
 
-                                <GridViewColumn Header="Size" Width="50">
+                                <GridViewColumn Width="70">
+                                    <GridViewColumnHeader Content="Size" Click="SegmentListColumnHeader_OnClick" Tag="Size" />
                                     <GridViewColumn.CellTemplate>
                                         <DataTemplate>
                                             <Grid HorizontalAlignment="Stretch">
                                                 <Label Content="{Binding Size}" />
+                                            </Grid>
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+
+                                <GridViewColumn Width="70">
+                                    <GridViewColumnHeader Content="Id" Click="SegmentListColumnHeader_OnClick" Tag="Id" />
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Grid HorizontalAlignment="Stretch" Margin="0,0,0,0">
+                                                <Label Content="{Binding Id}" />
                                             </Grid>
                                         </DataTemplate>
                                     </GridViewColumn.CellTemplate>

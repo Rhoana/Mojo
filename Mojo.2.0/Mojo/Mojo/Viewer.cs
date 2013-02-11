@@ -47,8 +47,9 @@ namespace Mojo
             if ( D3D11RenderingPane != null )
             {
                 mResizeTimer.Stop();
-                mResizeTimer.Interval = TimeSpan.FromSeconds( 0.01 );
+                mResizeTimer.Interval = TimeSpan.FromSeconds( 0.1 );
                 mResizeTimer.Tag = newSize;
+                D3D11RenderingPane.PauseRendering = true;
                 mResizeTimer.Start();
                 //D3D11RenderingPane.SetSize( newSize );                
             }
@@ -63,6 +64,7 @@ namespace Mojo
         {
             mResizeTimer.Stop();
             D3D11RenderingPane.SetSize( (Size)mResizeTimer.Tag );
+            D3D11RenderingPane.PauseRendering = false;
         }
 
     }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Windows.Media;
+using System.Collections.Generic;
 using Mojo.Interop;
 
 namespace Mojo.Wpf.ViewModel
@@ -139,6 +140,137 @@ namespace Mojo.Wpf.ViewModel
             {
                 CurrentZLocationString = "";
             }
+        }
+
+        private string mSegmentListCurrentPageString;
+        public string SegmentListCurrentPageString
+        {
+            get
+            {
+                return mSegmentListCurrentPageString;
+            }
+            set
+            {
+                mSegmentListCurrentPageString = value;
+                OnPropertyChanged( "SegmentListCurrentPageString" );
+            }
+        }
+
+        public void UpdateSegmentListCurrentPageString()
+        {
+            if ( mTileManager.TiledDatasetLoaded )
+            {
+                SegmentListCurrentPageString = "Page " + ( mSegmentInfoCurrentPageIndex + 1 ) + " of " + mSegmentInfoPageCount;
+            }
+            else
+            {
+                SegmentListCurrentPageString = "";
+            }
+        }
+
+        private IList<SegmentInfo> mSegmentInfoList;
+
+        public IList<SegmentInfo> SegmentInfoList
+        {
+            get
+            {
+                return mSegmentInfoList;
+            }
+            set
+            {
+                mSegmentInfoList = value;
+                OnPropertyChanged( "SegmentInfoList" );
+            }
+        }
+
+        private SegmentInfo mSelectedSegmentInfo;
+        public SegmentInfo SelectedSegmentInfo
+        {
+            get
+            {
+                return mSelectedSegmentInfo;
+            }
+            set
+            {
+                if ( SelectedSegmentInfo.Id != value.Id )
+                {
+                    mTileManager.SelectedSegmentId = value.Id;
+                }
+                mSelectedSegmentInfo = value;
+                OnPropertyChanged( "SelectedSegmentInfo" );
+            }
+        }
+
+        private int mSegmentInfoCurrentPageIndex = 0;
+        private int mSegmentInfoPageCount = 0;
+        private readonly int mItemsPerPage = Settings.Default.SegmentListItemsPerPage;
+
+        public void UpdateSegmentInfoList()
+        {
+            var totalSegments = mTileManager.Internal.GetSegmentInfoCount();
+            mSegmentInfoPageCount = (int) ( 1 + ( totalSegments - 1 ) / mItemsPerPage );
+
+            SegmentInfoList = mTileManager.Internal.GetSegmentInfoRange( mSegmentInfoCurrentPageIndex * mItemsPerPage, ( mSegmentInfoCurrentPageIndex + 1 ) * mItemsPerPage );
+            UpdateSegmentListCurrentPageString();
+        }
+
+        public void SortSegmentListBy( String fieldName )
+        {
+            SortSegmentListBy( fieldName, false );
+        }
+
+        public void SortSegmentListBy( String fieldName, bool sordDescending )
+        {
+            switch ( fieldName )
+            {
+                case "Id":
+                    mTileManager.Internal.SortSegmentInfoById( sordDescending );
+                    break;
+                case "Name":
+                    mTileManager.Internal.SortSegmentInfoByName( sordDescending );
+                    break;
+                case "Size":
+                    mTileManager.Internal.SortSegmentInfoBySize( sordDescending );
+                    break;
+                case "Lock":
+                    mTileManager.Internal.SortSegmentInfoByConfidence( sordDescending );
+                    break;
+            }
+
+            SegmentInfoList = mTileManager.Internal.GetSegmentInfoRange( 0, mItemsPerPage );
+            mSegmentInfoCurrentPageIndex = 0;
+
+            UpdateSegmentInfoList();
+        }
+
+        public void MoveToFirstSegmentInfoPage()
+        {
+            mSegmentInfoCurrentPageIndex = 0;
+            UpdateSegmentInfoList();
+        }
+
+        public void MoveToPreviousSegmentInfoPage()
+        {
+            if ( mSegmentInfoCurrentPageIndex > 0 )
+            {
+                --mSegmentInfoCurrentPageIndex;
+                UpdateSegmentInfoList();
+            }
+        }
+
+        public void MoveToNextSegmentInfoPage()
+        {
+            if ( mSegmentInfoCurrentPageIndex < mSegmentInfoPageCount - 1 )
+            {
+                ++mSegmentInfoCurrentPageIndex;
+                UpdateSegmentInfoList();
+            }
+        }
+
+        public void MoveToLastSegmentInfoPage()
+        {
+            mSegmentInfoCurrentPageIndex = mSegmentInfoPageCount - 1;
+            UpdateSegmentInfoList();
         }
     }
 }

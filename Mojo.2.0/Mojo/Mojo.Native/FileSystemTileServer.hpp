@@ -85,6 +85,7 @@ public:
     virtual void                                                  SaveAndClearFileSystemTileCache();
 
     virtual marray::Marray< unsigned char >                       GetIdColorMap();
+    virtual marray::Marray< unsigned char >                       GetIdConfidenceMap();
 
     virtual void                                                  SortSegmentInfoById( bool reverse );
     virtual void                                                  SortSegmentInfoByName( bool reverse );
@@ -92,7 +93,9 @@ public:
     virtual void                                                  SortSegmentInfoByConfidence( bool reverse );
     virtual void                                                  LockSegmentLabel( unsigned int segId );
     virtual void                                                  UnlockSegmentLabel( unsigned int segId );
+	virtual unsigned int                                          GetSegmentInfoCount();
     virtual std::list< SegmentInfo >                              GetSegmentInfoRange( int begin, int end );
+
 
 private:
     template < typename TCudaType >

@@ -58,6 +58,7 @@ public:
     boost::array< TileCacheEntry,
         DEVICE_TILE_CACHE_SIZE >&                         GetTileCache();
     ID3D11ShaderResourceView*                             GetIdColorMap();
+    ID3D11ShaderResourceView*                             GetIdConfidenceMap();
 
     void                                                  SortSegmentInfoById( bool reverse );
     void                                                  SortSegmentInfoByName( bool reverse );
@@ -65,6 +66,7 @@ public:
     void                                                  SortSegmentInfoByConfidence( bool reverse );
     void                                                  LockSegmentLabel( unsigned int segId );
     void                                                  UnlockSegmentLabel( unsigned int segId );
+	unsigned int                                          GetSegmentInfoCount();
     std::list< SegmentInfo >                              GetSegmentInfoRange( int begin, int end );
 
     unsigned int                                          GetSegmentationLabelId( const TiledDatasetView& tiledDatasetView, float3 pDataSpace );
@@ -120,8 +122,12 @@ private:
 
     ID3D11Device*                                         mD3D11Device;
     ID3D11DeviceContext*                                  mD3D11DeviceContext;
+
     ID3D11Buffer*                                         mIdColorMapBuffer;
     ID3D11ShaderResourceView*                             mIdColorMapShaderResourceView;
+
+    ID3D11Buffer*                                         mIdConfidenceMapBuffer;
+    ID3D11ShaderResourceView*                             mIdConfidenceMapShaderResourceView;
 
     ITileServer*                                          mTileServer;
 
@@ -132,6 +138,7 @@ private:
         DEVICE_TILE_CACHE_SIZE >                          mTileCache;
     marray::Marray< int >                                 mTileCachePageTable;
     marray::Marray< unsigned char >                       mIdColorMap;
+    marray::Marray< unsigned char >                       mIdConfidenceMap;
 
     bool                                                  mIsTiledDatasetLoaded;
     bool                                                  mIsSegmentationLoaded;
@@ -251,45 +258,6 @@ inline void TileManager::LoadTiledDatasetInternal( TiledDatasetDescription& tile
             for ( int y = 0; y < numTiles.y; y++ )
                 for ( int x = 0; x < numTiles.x; x++ )
                     mTileCachePageTable( w, z, y, x ) = TILE_CACHE_BAD_INDEX; 
-
-    //
-    // load the id color map
-    //
-    //hid_t hdf5FileHandle = marray::hdf5::openFile( mTiledDatasetDescription.paths.Get( "IdColorMap" ) );
-    //marray::hdf5::load( hdf5FileHandle, "IdColorMap", mIdColorMap );
-    //marray::hdf5::closeFile( hdf5FileHandle );
-
-    //uchar4* idColorMap = new uchar4[ mIdColorMap.shape( 0 ) ];
-
-    //for ( unsigned int i = 0; i < mIdColorMap.shape( 0 ); i++ )
-    //    idColorMap[ i ] = make_uchar4( mIdColorMap( i, 0 ), mIdColorMap( i, 1 ), mIdColorMap( i, 2 ), 255 );
-
-    //D3D11_BUFFER_DESC bufferDesc;
-    //ZeroMemory( &bufferDesc, sizeof( D3D11_BUFFER_DESC ) );
-
-    //bufferDesc.ByteWidth           = mIdColorMap.shape( 0 ) * sizeof( uchar4 );
-    //bufferDesc.Usage               = D3D11_USAGE_DEFAULT;
-    //bufferDesc.BindFlags           = D3D11_BIND_SHADER_RESOURCE;
-    //bufferDesc.StructureByteStride = sizeof( uchar4 );
-    //
-    //D3D11_SHADER_RESOURCE_VIEW_DESC shaderResourceViewDesc;
-    //ZeroMemory( &shaderResourceViewDesc, sizeof( D3D11_SHADER_RESOURCE_VIEW_DESC ) );
-
-    //shaderResourceViewDesc.Format               = DXGI_FORMAT_R8G8B8A8_UNORM;
-    //shaderResourceViewDesc.ViewDimension        = D3D11_SRV_DIMENSION_BUFFER;
-    //shaderResourceViewDesc.Buffer.FirstElement  = 0;
-    //shaderResourceViewDesc.Buffer.NumElements   = mIdColorMap.shape( 0 );
-
-    //MOJO_D3D_SAFE( mD3D11Device->CreateBuffer( &bufferDesc, NULL, &mIdColorMapBuffer ) );
-    //MOJO_D3D_SAFE( mD3D11Device->CreateShaderResourceView( mIdColorMapBuffer, &shaderResourceViewDesc, &mIdColorMapShaderResourceView ) );
-
-    //mD3D11DeviceContext->UpdateSubresource(
-    //    mIdColorMapBuffer,
-    //    0,
-    //    NULL,
-    //    idColorMap,
-    //    mIdColorMap.shape( 0 ) * sizeof( uchar4 ),
-    //    mIdColorMap.shape( 0 ) * sizeof( uchar4 ) );
 
     //
     // initialize all state
@@ -427,6 +395,52 @@ inline void TileManager::LoadSegmentationInternal( TiledDatasetDescription& tile
         idColorMap,
         (UINT) mIdColorMap.shape( 0 ) * sizeof( uchar4 ),
         (UINT) mIdColorMap.shape( 0 ) * sizeof( uchar4 ) );
+
+	//
+    // load the id lock map
+    //
+    mIdConfidenceMap = mTileServer->GetIdConfidenceMap();
+
+    uchar1* idConfidenceMap = new uchar1[ mIdConfidenceMap.shape( 0 ) ];
+
+	Core::Printf( "Loading locks for  ", mIdConfidenceMap.shape( 0 ), " segments.");
+
+    for ( i = 0; i < mIdConfidenceMap.shape( 0 ); i++ )
+	{
+		//unsigned int ci = i % mIdColorMap.shape( 0 );
+        idConfidenceMap[ i ] = make_uchar1( mIdConfidenceMap( i ) );
+		if ( mIdConfidenceMap( i ) > 0 )
+		{
+			Core::Printf( "Segment ", i, " is locked(", mIdConfidenceMap( i ), ").");
+		}
+	}
+
+    //D3D11_BUFFER_DESC bufferDesc;
+    ZeroMemory( &bufferDesc, sizeof( D3D11_BUFFER_DESC ) );
+
+    bufferDesc.ByteWidth           = (UINT) mIdConfidenceMap.shape( 0 ) * sizeof( uchar1 );
+    bufferDesc.Usage               = D3D11_USAGE_DEFAULT;
+    bufferDesc.BindFlags           = (UINT) D3D11_BIND_SHADER_RESOURCE;
+    bufferDesc.StructureByteStride = (UINT) sizeof( uchar1 );
+    
+    //D3D11_SHADER_RESOURCE_VIEW_DESC shaderResourceViewDesc;
+    ZeroMemory( &shaderResourceViewDesc, sizeof( D3D11_SHADER_RESOURCE_VIEW_DESC ) );
+
+	shaderResourceViewDesc.Format               = DXGI_FORMAT_R8_UNORM;
+    shaderResourceViewDesc.ViewDimension        = D3D11_SRV_DIMENSION_BUFFER;
+    shaderResourceViewDesc.Buffer.FirstElement  = (UINT) 0;
+    shaderResourceViewDesc.Buffer.NumElements   = (UINT) mIdConfidenceMap.shape( 0 );
+
+    MOJO_D3D_SAFE( mD3D11Device->CreateBuffer( &bufferDesc, NULL, &mIdConfidenceMapBuffer ) );
+	MOJO_D3D_SAFE( mD3D11Device->CreateShaderResourceView( mIdConfidenceMapBuffer, &shaderResourceViewDesc, &mIdConfidenceMapShaderResourceView ) );
+
+    mD3D11DeviceContext->UpdateSubresource(
+        mIdConfidenceMapBuffer,
+        0,
+        NULL,
+        idConfidenceMap,
+        (UINT) mIdConfidenceMap.shape( 0 ) * sizeof( uchar1 ),
+        (UINT) mIdConfidenceMap.shape( 0 ) * sizeof( uchar1 ) );
 
     //
     // initialize all state

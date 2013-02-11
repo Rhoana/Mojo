@@ -490,23 +490,6 @@ namespace Mojo
 
             var idMapTiledVolumeDescription = GetTiledVolumeDescription( idMapRootDirectory, idMapTiledVolumeDescriptionPath );
 
-
-
-            //var tempIdMapRootDirectory = Path.Combine( datasetRootDirectory, Constants.TEMP_ID_MAP_ROOT_DIRECTORY_NAME );
-
-            //var idTileMapPath = Path.Combine( datasetRootDirectory, Constants.ID_TILE_MAP_PATH );
-            //var idColorMapPath = Path.Combine( datasetRootDirectory, Constants.ID_COLOR_MAP_PATH );
-
-            //var tempIdMapTiledVolumeDescription = GetTiledVolumeDescription( tempIdMapRootDirectory, idMapTiledVolumeDescriptionPath );
-
-            //var idTileMapXml = XmlReader.ReadFromFile<idTileMap, idTileMapSerializer>( idTileMapPath );
-
-            //var idTileMap = idTileMapXml.idTileMapEntry.ToDictionary(
-            //                    idTileMapEntry => idTileMapEntry.id,
-            //                    idTileMapEntry => (IList<Vector4>)idTileMapEntry.tiles.Select( tile => new Vector4( tile.x, tile.y, tile.z, tile.w ) ).ToList() );
-
-
-
             var tiledDatasetDescription = new TiledDatasetDescription
                                           {
                                               TiledVolumeDescriptions =
@@ -560,16 +543,6 @@ namespace Mojo
             TiledDatasetDescription.TiledVolumeDescriptions.Set( "IdMap", idMapTiledVolumeDescription );
             TiledDatasetDescription.TiledVolumeDescriptions.Set( "TempIdMap", tempIdMapTiledVolumeDescription );
             TiledDatasetDescription.TiledVolumeDescriptions.Set( "AutosaveIdMap", autosaveIdMapTiledVolumeDescription );
-
-            //var idTileMapPath = Path.Combine( segmentationRootDirectory, Constants.ID_TILE_MAP_PATH );
-            //var tempIdTileMapPath = Path.Combine( segmentationRootDirectory, Constants.TEMP_ID_TILE_MAP_PATH );
-            //var autosaveIdTileMapPath = Path.Combine( segmentationRootDirectory, Constants.AUTOSAVE_ID_TILE_MAP_PATH );
-            //var idColorMapPath = Path.Combine( segmentationRootDirectory, Constants.ID_COLOR_MAP_PATH );
-
-            //TiledDatasetDescription.Paths.Set( "IdColorMap", idColorMapPath );
-            //TiledDatasetDescription.Paths.Set( "IdTileMap", idTileMapPath );
-            //TiledDatasetDescription.Paths.Set( "TempIdTileMap", tempIdTileMapPath );
-            //TiledDatasetDescription.Paths.Set( "AutosaveIdTileMap", autosaveIdTileMapPath );
 
             var colorMapPath = Path.Combine( segmentationRootDirectory, Constants.COLOR_MAP_PATH );
             TiledDatasetDescription.Paths.Set( "ColorMap", colorMapPath );
