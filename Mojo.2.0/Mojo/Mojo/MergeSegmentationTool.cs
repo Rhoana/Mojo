@@ -15,7 +15,10 @@ namespace Mojo
 
         public override void SelectSegment( uint segmentId )
         {
-            mTileManager.SelectedSegmentId = segmentId;
+            if ( mTileManager.SelectedSegmentId != segmentId )
+            {
+                mTileManager.SelectedSegmentId = segmentId;
+            }
         }
 
         public override void OnKeyDown( System.Windows.Input.KeyEventArgs keyEventArgs, int width, int height )

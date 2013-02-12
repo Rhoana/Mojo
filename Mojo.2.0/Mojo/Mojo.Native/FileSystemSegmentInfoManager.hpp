@@ -72,11 +72,12 @@ public:
     void                                              OpenDB();
 	void                                              CloseDB();
 
-    marray::Marray< unsigned char >                   GetIdColorMap();
-    marray::Marray< unsigned char >                   GetIdConfidenceMap();
+    marray::Marray< unsigned char >*                  GetIdColorMap();
+    marray::Marray< unsigned char >*                  GetIdConfidenceMap();
 	FileSystemTileSet                                 GetTiles( unsigned int segid );
 	unsigned int                                      GetTileCount ( unsigned int segid );
-	unsigned int                                      GetVoxelCount ( unsigned int segid );
+    long                                              GetVoxelCount ( unsigned int segid );
+	int                                               GetConfidence ( unsigned int segid );
                                                
 	unsigned int                                      GetMaxId();
 	unsigned int                                      AddNewId();
@@ -92,6 +93,7 @@ public:
     void                                              UnlockSegmentLabel( unsigned int segId );
 
     unsigned int                                      GetSegmentInfoCount();
+    unsigned int                                      GetSegmentInfoCurrentListLocation( unsigned int segId );
     std::list< SegmentInfo >                          GetSegmentInfoRange( unsigned int startIndex, unsigned int endIndex );
                                                
 private:                                       

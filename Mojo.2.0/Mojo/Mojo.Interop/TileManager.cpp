@@ -188,6 +188,11 @@ unsigned int TileManager::GetSegmentInfoCount()
 	return mTileManager->GetSegmentInfoCount();
 }
 
+unsigned int TileManager::GetSegmentInfoCurrentListLocation( unsigned int segId )
+{
+	return mTileManager->GetSegmentInfoCurrentListLocation( segId );
+}
+
 Collections::Generic::IList< SegmentInfo^ >^ TileManager::GetSegmentInfoRange( int begin, int end )
 {
     std::list< Native::SegmentInfo > segmentInfoPage = mTileManager->GetSegmentInfoRange( begin, end );
@@ -234,6 +239,18 @@ Vector3 TileManager::GetSegmentationLabelColor( unsigned int segId )
 {
     int4 color = mTileManager->GetSegmentationLabelColor( segId );
     return Vector3( (float)color.x, (float)color.y, (float)color.z );
+}
+
+Vector3 TileManager::GetSegmentCentralTileLocation( unsigned int segId )
+{
+    int3 location = mTileManager->GetSegmentCentralTileLocation( segId );
+    return Vector3( (float)location.x, (float)location.y, (float)location.z );
+}
+
+Vector4 TileManager::GetSegmentZTileBounds( unsigned int segId, int zIndex )
+{
+    int4 location = mTileManager->GetSegmentZTileBounds( segId, zIndex );
+    return Vector4( (float)location.x, (float)location.y, (float)location.z, (float)location.w );
 }
 
 void TileManager::ReplaceSegmentationLabel( unsigned int oldId, unsigned int newId )

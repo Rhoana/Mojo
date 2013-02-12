@@ -331,16 +331,69 @@ void TileManager::SortSegmentInfoByConfidence( bool reverse )
 void TileManager::LockSegmentLabel( unsigned int segId )
 {
 	mTileServer->LockSegmentLabel( segId );
+
+    //
+    // Update confidence map shader buffer
+    //
+    uchar1 idConfidenceMapEntry = make_uchar1( (*mIdConfidenceMap)( segId ) );
+
+    D3D11_BOX updateBox;
+    ZeroMemory( &updateBox, sizeof( D3D11_BOX ) );
+
+    updateBox.left = segId;
+    updateBox.top = 0;
+    updateBox.front = 0;
+    updateBox.right = segId + 1;
+    updateBox.bottom = 1;
+    updateBox.back = 1;
+
+    mD3D11DeviceContext->UpdateSubresource(
+    mIdConfidenceMapBuffer,
+    0,
+    &updateBox,
+    &idConfidenceMapEntry,
+    (UINT) mIdConfidenceMap->shape( 0 ) * sizeof( uchar1 ),
+    (UINT) mIdConfidenceMap->shape( 0 ) * sizeof( uchar1 ) );
+
 }
 
 void TileManager::UnlockSegmentLabel( unsigned int segId )
 {
 	mTileServer->UnlockSegmentLabel( segId );
+
+    //
+    // Update confidence map shader buffer
+    //
+    uchar1 idConfidenceMapEntry = make_uchar1( 0 );
+
+    D3D11_BOX updateBox;
+    ZeroMemory( &updateBox, sizeof( D3D11_BOX ) );
+
+    updateBox.left = segId;
+    updateBox.top = 0;
+    updateBox.front = 0;
+    updateBox.right = segId + 1;
+    updateBox.bottom = 1;
+    updateBox.back = 1;
+
+    mD3D11DeviceContext->UpdateSubresource(
+    mIdConfidenceMapBuffer,
+    0,
+    &updateBox,
+    &idConfidenceMapEntry,
+    (UINT) mIdConfidenceMap->shape( 0 ) * sizeof( uchar1 ),
+    (UINT) mIdConfidenceMap->shape( 0 ) * sizeof( uchar1 ) );
+
 }
 
 unsigned int TileManager::GetSegmentInfoCount()
 {
 	return mTileServer->GetSegmentInfoCount();
+}
+
+unsigned int TileManager::GetSegmentInfoCurrentListLocation( unsigned int segId )
+{
+	return mTileServer->GetSegmentInfoCurrentListLocation( segId );
 }
 
 std::list< SegmentInfo > TileManager::GetSegmentInfoRange( int begin, int end )
@@ -350,12 +403,22 @@ std::list< SegmentInfo > TileManager::GetSegmentInfoRange( int begin, int end )
 
 int4 TileManager::GetSegmentationLabelColor( unsigned int segId )
 {
-	if ( mIdColorMap.size() > 0 )
+	if ( mIdColorMap->size() > 0 )
 	{
-		int index = segId % mIdColorMap.shape( 0 );
-		return make_int4( mIdColorMap( index, 0 ), mIdColorMap( index, 1 ), mIdColorMap( index, 2 ), 255 );
+		int index = segId % mIdColorMap->shape( 0 );
+		return make_int4( (*mIdColorMap)( index, 0 ), (*mIdColorMap)( index, 1 ), (*mIdColorMap)( index, 2 ), 255 );
 	}
 	return make_int4( 0, 0, 0, 0 );
+}
+
+int3 TileManager::GetSegmentCentralTileLocation( unsigned int segId )
+{
+    return mTileServer->GetSegmentCentralTileLocation( segId );
+}
+
+int4 TileManager::GetSegmentZTileBounds( unsigned int segId, int zIndex )
+{
+    return mTileServer->GetSegmentZTileBounds( segId, zIndex );
 }
 
 void TileManager::ReplaceSegmentationLabel( unsigned int oldId, unsigned int newId )
@@ -615,8 +678,6 @@ void TileManager::UnloadSegmentationInternal()
         mIdColorMapBuffer->Release();
         mIdColorMapBuffer = NULL;
 
-        mIdColorMap = marray::Marray< unsigned char >();
-
         //
         // release id lock map
         //
@@ -625,8 +686,6 @@ void TileManager::UnloadSegmentationInternal()
 
         mIdConfidenceMapBuffer->Release();
         mIdConfidenceMapBuffer = NULL;
-
-        mIdConfidenceMap = marray::Marray< unsigned char >();
 
         //
         // output memory stats to the console

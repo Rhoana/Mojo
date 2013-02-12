@@ -245,7 +245,7 @@ namespace Mojo.Wpf.ViewModel
                     //
                     // Load segment info list
                     //
-                    TileManagerDataContext.SortSegmentListBy( "Size" );
+                    TileManagerDataContext.SortSegmentListBy( "Size", true );
 
                 }
             }

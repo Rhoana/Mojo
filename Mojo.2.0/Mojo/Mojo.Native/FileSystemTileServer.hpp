@@ -47,6 +47,8 @@ public:
     virtual void                                                  DeleteTempFiles();
 
     virtual int                                                   GetTileCountForId( unsigned int segId );
+    virtual int3                                                  GetSegmentCentralTileLocation( unsigned int segId );
+    virtual int4                                                  GetSegmentZTileBounds( unsigned int segId, int zIndex );
 
     virtual Core::HashMap< std::string, Core::VolumeDescription > LoadTile( int4 tileIndex );
     virtual void                                                  UnloadTile( int4 tileIndex );
@@ -84,8 +86,8 @@ public:
     virtual void                                                  FlushFileSystemTileCacheChanges();
     virtual void                                                  SaveAndClearFileSystemTileCache();
 
-    virtual marray::Marray< unsigned char >                       GetIdColorMap();
-    virtual marray::Marray< unsigned char >                       GetIdConfidenceMap();
+    virtual marray::Marray< unsigned char >*                      GetIdColorMap();
+    virtual marray::Marray< unsigned char >*                      GetIdConfidenceMap();
 
     virtual void                                                  SortSegmentInfoById( bool reverse );
     virtual void                                                  SortSegmentInfoByName( bool reverse );
@@ -94,6 +96,7 @@ public:
     virtual void                                                  LockSegmentLabel( unsigned int segId );
     virtual void                                                  UnlockSegmentLabel( unsigned int segId );
 	virtual unsigned int                                          GetSegmentInfoCount();
+	virtual unsigned int                                          GetSegmentInfoCurrentListLocation( unsigned int segId );
     virtual std::list< SegmentInfo >                              GetSegmentInfoRange( int begin, int end );
 
 

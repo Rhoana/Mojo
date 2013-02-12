@@ -33,7 +33,10 @@ public:
     virtual void                                                  AutosaveSegmentation()                                                                  = 0;
     virtual void                                                  DeleteTempFiles()                                                                       = 0;
 
-    virtual int                                                   GetTileCountForId( unsigned int segId )                                                          = 0;
+    virtual int                                                   GetTileCountForId( unsigned int segId )                                                  = 0;
+    virtual int3                                                  GetSegmentCentralTileLocation( unsigned int segId )                                      = 0;
+    virtual int4                                                  GetSegmentZTileBounds( unsigned int segId, int zIndex )                                  = 0;
+
 
     virtual Core::HashMap< std::string, Core::VolumeDescription > LoadTile( int4 tileIndex )                                                              = 0;
     virtual void                                                  UnloadTile( int4 tileIndex )                                                            = 0;
@@ -68,8 +71,8 @@ public:
 	virtual void                                                  RedoChange()                                                                            = 0;
     virtual void                                                  SaveAndClearFileSystemTileCache()                                                       = 0;
 
-    virtual marray::Marray< unsigned char >                       GetIdColorMap()                                                                         = 0;
-    virtual marray::Marray< unsigned char >                       GetIdConfidenceMap()                                                                          = 0;
+    virtual marray::Marray< unsigned char >*                      GetIdColorMap()                                                                         = 0;
+    virtual marray::Marray< unsigned char >*                      GetIdConfidenceMap()                                                                    = 0;
 
 	virtual void                                                  SortSegmentInfoById( bool reverse )			                                          = 0;
     virtual void                                                  SortSegmentInfoByName( bool reverse )		                                              = 0;
@@ -78,6 +81,7 @@ public:
     virtual void                                                  LockSegmentLabel( unsigned int segId )                                                  = 0;
     virtual void                                                  UnlockSegmentLabel( unsigned int segId )                                                = 0;
 	virtual unsigned int                                          GetSegmentInfoCount()                                                                   = 0;
+	virtual unsigned int                                          GetSegmentInfoCurrentListLocation( unsigned int segId )                                         = 0;
     virtual std::list< SegmentInfo >                              GetSegmentInfoRange( int begin, int end ) 	                                          = 0;
 
 };

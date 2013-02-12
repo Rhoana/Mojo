@@ -34,6 +34,14 @@ namespace Mojo.Wpf.View
             }
         }
 
+        protected override void OnMouseDoubleClick( MouseEventArgs e )
+        {
+            if ( ViewerContext != null )
+            {
+                ViewerContext.OnMouseDoubleClick( e, Width, Height );
+            }
+        }
+
         protected override void OnMouseMove( MouseEventArgs e )
         {
             if ( ViewerContext != null )

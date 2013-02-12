@@ -63,6 +63,15 @@ namespace Mojo.Wpf.View
             }
         }
 
+        public void OnMouseDoubleClick( System.Windows.Forms.MouseEventArgs e, int width, int height )
+        {
+            if ( Viewer != null )
+            {
+                Viewer.UserInputHandler.OnMouseDoubleClick( e, width, height );
+                AquireKeyboardFocusAndLogicalFocus();
+            }
+        }
+
         public void OnMouseMove( System.Windows.Forms.MouseEventArgs e, int width, int height )
         {
             if ( Viewer != null )

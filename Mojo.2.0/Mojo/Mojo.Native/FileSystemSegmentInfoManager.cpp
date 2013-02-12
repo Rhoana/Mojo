@@ -101,8 +101,12 @@ void FileSystemSegmentInfoManager::OpenDB()
 
             sqlite3_finalize(statement);
 
-			size_t shape[] = { mIdMax };
-			mIdConfidenceMap = marray::Marray< unsigned char >( shape, shape + 1 );
+            //
+            // Round confidence map size up to the nearest 1024
+            //
+			size_t shape[] = { ( mIdMax / 1024 + 1 ) * 1024 };
+            unsigned char defaultConfidence = 0;
+			mIdConfidenceMap = marray::Marray< unsigned char >( shape, shape + 1, defaultConfidence );
 
 			//
 			// Load the Segment Info 
@@ -172,9 +176,11 @@ void FileSystemSegmentInfoManager::Save()
     int numDeletes = 0;
     int numInserts = 0;
 
-    SegmentMultiIndexById& idIndex = mSegmentMultiIndex.get<id>();
-
 	converter << "BEGIN TRANSACTION;\n";
+
+    //
+    // Update tiles map
+    //
 
     for ( FileSystemIdTileMapDirect::iterator idIt = mCacheIdTileMap.GetHashMap().begin(); idIt != mCacheIdTileMap.GetHashMap().end(); ++idIt )
     {
@@ -198,10 +204,18 @@ void FileSystemSegmentInfoManager::Save()
             }
         }
 
-        SegmentInfo changedInfo = *idIndex.find( idIt->first );
+    }
 
-        converter << "INSERT or REPLACE INTO segmentInfo (id, name, size, confidence) VALUES (" << changedInfo.id << ",\"" << changedInfo.name << "\"," << changedInfo.size << "," << changedInfo.confidence << ");\n";
+    //
+    // Update tile info
+    //
 
+    for ( SegmentMultiIndex::iterator infoIt = mSegmentMultiIndex.begin(); infoIt != mSegmentMultiIndex.end(); ++infoIt )
+    {
+        if ( infoIt->changed )
+        {
+            converter << "INSERT or REPLACE INTO segmentInfo (id, name, size, confidence) VALUES (" << infoIt->id << ",\"" << infoIt->name << "\"," << infoIt->size << "," << infoIt->confidence << ");\n";
+        }
     }
 
 	converter << "END TRANSACTION;\n";
@@ -233,14 +247,14 @@ void FileSystemSegmentInfoManager::Save()
 
 }
 
-marray::Marray< unsigned char > FileSystemSegmentInfoManager::GetIdColorMap()
+marray::Marray< unsigned char >* FileSystemSegmentInfoManager::GetIdColorMap()
 {
-    return mIdColorMap;
+    return &mIdColorMap;
 }
 
-marray::Marray< unsigned char > FileSystemSegmentInfoManager::GetIdConfidenceMap()
+marray::Marray< unsigned char >* FileSystemSegmentInfoManager::GetIdConfidenceMap()
 {
-    return mIdConfidenceMap;
+    return &mIdConfidenceMap;
 }
 
 FileSystemTileSet FileSystemSegmentInfoManager::GetTiles( unsigned int segid )
@@ -305,9 +319,14 @@ unsigned int FileSystemSegmentInfoManager::GetTileCount ( unsigned int segid )
     return GetTiles( segid ).size();
 }
 
-unsigned int FileSystemSegmentInfoManager::GetVoxelCount ( unsigned int segid )
+long FileSystemSegmentInfoManager::GetVoxelCount ( unsigned int segid )
 {
     return mSegmentMultiIndex.get<id>().find( segid )->size;
+}
+                                               
+int FileSystemSegmentInfoManager::GetConfidence ( unsigned int segid )
+{
+    return mSegmentMultiIndex.get<id>().find( segid )->confidence;
 }
                                                
 unsigned int FileSystemSegmentInfoManager::GetMaxId()
@@ -325,7 +344,17 @@ unsigned int FileSystemSegmentInfoManager::AddNewId()
     converter << "segment" << mIdMax;
     name = converter.str();
 
-    mSegmentMultiIndex.push_back( SegmentInfo( mIdMax, name, 0, 0 ) );
+    mSegmentMultiIndex.push_back( SegmentInfo( mIdMax, name, 0, 0, true ) );
+
+    //
+    // Resize the confidence map if necessary
+    //
+    if ( mIdMax > mIdConfidenceMap.shape( 0 ) )
+    {
+    	size_t shape[] = { ( mIdMax / 1024 + 1 ) * 1024 };
+        unsigned char defaultConfidence = 0;
+        mIdConfidenceMap.resize( shape, shape + 1, defaultConfidence );
+    }
 
     return mIdMax;
 }
@@ -342,6 +371,7 @@ void FileSystemSegmentInfoManager::SetVoxelCount ( unsigned int segid, long voxe
     SegmentInfo segInfo = *segIt;
 
     segInfo.size = voxelCount;
+    segInfo.changed = true;
     
     bool success = idIndex.replace( segIt, segInfo );
 
@@ -390,23 +420,38 @@ void FileSystemSegmentInfoManager::SortSegmentInfoByConfidence( bool reverse )
 
 void FileSystemSegmentInfoManager::LockSegmentLabel( unsigned int segId )
 {
-	SegmentMultiIndexById::iterator segmentInfoIt = mSegmentMultiIndex.get<id>().find( segId );
-    SegmentInfo changeSeg = *segmentInfoIt;
-	changeSeg.confidence = 100;
-	mSegmentMultiIndex.get<id>().replace( segmentInfoIt, changeSeg );
+    if ( segId <= mIdMax )
+    {
+        mIdConfidenceMap( segId ) = 100;
+	    SegmentMultiIndexById::iterator segmentInfoIt = mSegmentMultiIndex.get<id>().find( segId );
+        SegmentInfo changeSeg = *segmentInfoIt;
+	    changeSeg.confidence = 100;
+        changeSeg.changed = true;
+	    mSegmentMultiIndex.get<id>().replace( segmentInfoIt, changeSeg );
+    }
 }
 
 void FileSystemSegmentInfoManager::UnlockSegmentLabel( unsigned int segId )
 {
-	SegmentMultiIndexById::iterator segmentInfoIt = mSegmentMultiIndex.get<id>().find( segId );
-    SegmentInfo changeSeg = *segmentInfoIt;
-	changeSeg.confidence = 0;
-	mSegmentMultiIndex.get<id>().replace( segmentInfoIt, changeSeg );
+    if ( segId <= mIdMax )
+    {
+        mIdConfidenceMap( segId ) = 0;
+	    SegmentMultiIndexById::iterator segmentInfoIt = mSegmentMultiIndex.get<id>().find( segId );
+        SegmentInfo changeSeg = *segmentInfoIt;
+	    changeSeg.confidence = 0;
+        changeSeg.changed = true;
+	    mSegmentMultiIndex.get<id>().replace( segmentInfoIt, changeSeg );
+    }
 }
 
 unsigned int FileSystemSegmentInfoManager::GetSegmentInfoCount()
 {
 	return mSegmentMultiIndex.size();
+}
+
+unsigned int FileSystemSegmentInfoManager::GetSegmentInfoCurrentListLocation( unsigned int segId )
+{
+    return mSegmentMultiIndex.project<0> ( mSegmentMultiIndex.get<id>().find( segId ) ) - mSegmentMultiIndex.get<0>().begin();
 }
 
 std::list< SegmentInfo > FileSystemSegmentInfoManager::GetSegmentInfoRange( unsigned int startIndex, unsigned int endIndex )

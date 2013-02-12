@@ -350,6 +350,96 @@ int FileSystemTileServer::GetTileCountForId( unsigned int segId )
     return (int) mSegmentInfoManager.GetTileCount( segId );
 }
 
+int3 FileSystemTileServer::GetSegmentCentralTileLocation( unsigned int segId )
+{
+    if ( mIsSegmentationLoaded )
+    {
+        int4 numTiles = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "IdMap" ).numTiles;
+
+        int minTileX = numTiles.x;
+        int maxTileX = 0;
+        int minTileY = numTiles.y;
+        int maxTileY = 0;
+        int minTileZ = numTiles.z;
+        int maxTileZ = 0;
+
+        FileSystemTileSet tilesContainingSegId = mSegmentInfoManager.GetTiles( segId );
+
+        for ( FileSystemTileSet::iterator tileIterator = tilesContainingSegId.begin(); tileIterator != tilesContainingSegId.end(); ++tileIterator )
+        {
+            if ( tileIterator->w == 0 )
+            {
+                //
+                // Include this tile
+                //
+                minTileX = MIN( minTileX, tileIterator->x );
+                maxTileX = MAX( maxTileX, tileIterator->x );
+                minTileY = MIN( minTileY, tileIterator->y );
+                maxTileY = MAX( maxTileY, tileIterator->y );
+                minTileZ = MIN( minTileZ, tileIterator->z );
+                maxTileZ = MAX( maxTileZ, tileIterator->z );
+            }
+        }
+
+        if ( minTileX > maxTileX || minTileY > maxTileY || minTileZ > maxTileZ )
+	    {
+		    //
+		    // No tile found at w=0
+		    //
+		    return make_int3( 0, 0, 0 );
+	    }
+
+        return make_int3( minTileX + ( ( maxTileX - minTileX ) / 2 ), minTileY + ( ( maxTileY - minTileY ) / 2 ), minTileZ + ( ( maxTileZ - minTileZ ) / 2 ) );
+
+    }
+
+    return make_int3( 0, 0, 0 );
+
+}
+
+int4 FileSystemTileServer::GetSegmentZTileBounds( unsigned int segId, int zIndex )
+{
+    if ( mIsSegmentationLoaded )
+    {
+        int4 numTiles = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "IdMap" ).numTiles;
+
+        int minTileX = numTiles.x;
+        int maxTileX = 0;
+        int minTileY = numTiles.y;
+        int maxTileY = 0;
+
+        FileSystemTileSet tilesContainingSegId = mSegmentInfoManager.GetTiles( segId );
+
+        for ( FileSystemTileSet::iterator tileIterator = tilesContainingSegId.begin(); tileIterator != tilesContainingSegId.end(); ++tileIterator )
+        {
+            if ( tileIterator->w == 0 && tileIterator->z == zIndex )
+            {
+                //
+                // Include this tile
+                //
+                minTileX = MIN( minTileX, tileIterator->x );
+                maxTileX = MAX( maxTileX, tileIterator->x );
+                minTileY = MIN( minTileY, tileIterator->y );
+                maxTileY = MAX( maxTileY, tileIterator->y );
+            }
+        }
+
+        if ( minTileX > maxTileX || minTileY > maxTileY )
+	    {
+		    //
+		    // No tile found at w=0
+		    //
+		    return make_int4( 0, 0, 0, 0 );
+	    }
+
+        return make_int4( minTileX, minTileY, maxTileX, maxTileY );
+
+    }
+
+    return make_int4( 0, 0, 0, 0 );
+
+}
+
 
 //
 // Edit Methods
@@ -357,8 +447,10 @@ int FileSystemTileServer::GetTileCountForId( unsigned int segId )
 
 void FileSystemTileServer::ReplaceSegmentationLabel( unsigned int oldId, unsigned int newId )
 {
-	if ( oldId != newId && mIsSegmentationLoaded )
+	if ( oldId != newId && mIsSegmentationLoaded && mSegmentInfoManager.GetConfidence( newId ) < 100 && mSegmentInfoManager.GetConfidence( oldId ) < 100 )
     {
+        long voxelChangeCount = 0;
+
         Core::Printf( "\nReplacing segmentation label ", oldId, " with segmentation label ", newId, "...\n" );
 
         FileSystemTileSet tilesContainingOldId = mSegmentInfoManager.GetTiles( oldId );
@@ -407,6 +499,8 @@ void FileSystemTileServer::ReplaceSegmentationLabel( unsigned int oldId, unsigne
                         {
                             currentIdVolume[ index1D ] = newId;
 							changeBits->set( index1D );
+                            if ( tileIndex.w == 0 )
+                                ++voxelChangeCount;
                         }
                     }
                 }
@@ -429,6 +523,17 @@ void FileSystemTileServer::ReplaceSegmentationLabel( unsigned int oldId, unsigne
             //
             UnloadTile( tileIndex );
 
+        }
+
+        //
+        // Update the segment sizes
+        //
+        mSegmentInfoManager.SetVoxelCount( newId, mSegmentInfoManager.GetVoxelCount( newId ) + voxelChangeCount );
+        mSegmentInfoManager.SetVoxelCount( oldId, mSegmentInfoManager.GetVoxelCount( oldId ) - voxelChangeCount );
+
+        if ( mSegmentInfoManager.GetVoxelCount( oldId ) != 0 )
+        {
+            Core::Printf( "WARNING: Replaced all voxels belonging segment ", oldId, " but segment size is not zero (", mSegmentInfoManager.GetVoxelCount( oldId ), "). Tile index and segment database should be regenerated." );
         }
 
         //
@@ -464,8 +569,10 @@ bool FileSystemTileServer::TileContainsId ( int3 numVoxelsPerTile, int3 currentI
 
 void FileSystemTileServer::ReplaceSegmentationLabelCurrentSlice( unsigned int oldId, unsigned int newId, float3 pointTileSpace )
 {
-    if ( oldId != newId && mIsSegmentationLoaded )
+    if ( oldId != newId && mIsSegmentationLoaded && mSegmentInfoManager.GetConfidence( newId ) < 100 && mSegmentInfoManager.GetConfidence( oldId ) < 100 )
     {
+        long voxelChangeCount = 0;
+
         int3 numVoxels = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "IdMap" ).numVoxels;
         int3 numVoxelsPerTile = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "IdMap" ).numVoxelsPerTile;
         int4 numTiles = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "IdMap" ).numTiles;
@@ -610,6 +717,8 @@ void FileSystemTileServer::ReplaceSegmentationLabelCurrentSlice( unsigned int ol
 					//
                     if ( currentW == 0 )
                     {
+                        ++voxelChangeCount;
+
                         //
 						// Add neighbours to the appropriate queue
 						//
@@ -715,6 +824,12 @@ void FileSystemTileServer::ReplaceSegmentationLabelCurrentSlice( unsigned int ol
         }
 
         //
+        // Update the segment sizes
+        //
+        mSegmentInfoManager.SetVoxelCount( newId, mSegmentInfoManager.GetVoxelCount( newId ) + voxelChangeCount );
+        mSegmentInfoManager.SetVoxelCount( oldId, mSegmentInfoManager.GetVoxelCount( oldId ) - voxelChangeCount );
+
+        //
 		// Update idTileMap
 		//
         mSegmentInfoManager.SetTiles( oldId, tilesContainingOldId );
@@ -726,8 +841,10 @@ void FileSystemTileServer::ReplaceSegmentationLabelCurrentSlice( unsigned int ol
 
 void FileSystemTileServer::ReplaceSegmentationLabelCurrentConnectedComponent( unsigned int oldId, unsigned int newId, float3 pointTileSpace )
 {
-    if ( oldId != newId && mIsSegmentationLoaded )
+    if ( oldId != newId && mIsSegmentationLoaded && mSegmentInfoManager.GetConfidence( newId ) < 100 && mSegmentInfoManager.GetConfidence( oldId ) < 100 )
     {
+        long voxelChangeCount = 0;
+
         int3 numVoxels = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "IdMap" ).numVoxels;
         int3 numVoxelsPerTile = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "IdMap" ).numVoxelsPerTile;
         int4 numTiles = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "IdMap" ).numTiles;
@@ -871,6 +988,8 @@ void FileSystemTileServer::ReplaceSegmentationLabelCurrentConnectedComponent( un
 					//
                     if ( currentW == 0 )
                     {
+                        ++voxelChangeCount;
+
                         //
 						// Add neighbours to the appropriate queue
 						//
@@ -990,6 +1109,12 @@ void FileSystemTileServer::ReplaceSegmentationLabelCurrentConnectedComponent( un
             }
             UnloadTile( previousTileIndex );
         }
+
+        //
+        // Update the segment sizes
+        //
+        mSegmentInfoManager.SetVoxelCount( newId, mSegmentInfoManager.GetVoxelCount( newId ) + voxelChangeCount );
+        mSegmentInfoManager.SetVoxelCount( oldId, mSegmentInfoManager.GetVoxelCount( oldId ) - voxelChangeCount );
 
         //
 		// Update idTileMap
@@ -1962,8 +2087,9 @@ int FileSystemTileServer::CompletePointSplit( unsigned int segId, float3 pointTi
 {
 	int newId = 0;
 
-	if ( mIsSegmentationLoaded && mSplitSourcePoints.size() > 0 )
+	if ( mIsSegmentationLoaded && mSplitSourcePoints.size() > 0 && mSegmentInfoManager.GetConfidence( segId ) < 100 )
     {
+        long voxelChangeCount = 0;
 
 		int3 numVoxelsPerTile = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "IdMap" ).numVoxelsPerTile;
 
@@ -2417,6 +2543,8 @@ int FileSystemTileServer::CompletePointSplit( unsigned int segId, float3 pointTi
 					currentIdVolume[ index1D ] = newId;
 					changeBits->set( index1D );
 					tileChanged = true;
+                    if ( currentW == 0 )
+                        ++voxelChangeCount;
 
 					//
 					// Add a scaled-down w to the queue
@@ -2465,6 +2593,12 @@ int FileSystemTileServer::CompletePointSplit( unsigned int segId, float3 pointTi
         }
 
         //
+        // Update the segment sizes
+        //
+        mSegmentInfoManager.SetVoxelCount( newId, mSegmentInfoManager.GetVoxelCount( newId ) + voxelChangeCount );
+        mSegmentInfoManager.SetVoxelCount( segId, mSegmentInfoManager.GetVoxelCount( segId ) - voxelChangeCount );
+
+        //
 		// Update idTileMap
 		//
         mSegmentInfoManager.SetTiles( segId, tilesContainingOldId );
@@ -2487,8 +2621,9 @@ int FileSystemTileServer::CompleteDrawSplit( unsigned int segId, float3 pointTil
 {
 	int newId = 0;
 
-	if ( mIsSegmentationLoaded && mSplitNPerimiters > 0 )
+	if ( mIsSegmentationLoaded && mSplitNPerimiters > 0 && mSegmentInfoManager.GetConfidence( segId ) < 100 )
     {
+        long voxelChangeCount = 0;
 
         RecordSplitState( segId, pointTileSpace );
 
@@ -3047,6 +3182,8 @@ int FileSystemTileServer::CompleteDrawSplit( unsigned int segId, float3 pointTil
 						    currentIdVolume[ index1D ] = newId;
 						    changeBits->set( index1D );
 						    tileChanged = true;
+                            if ( currentW == 0 )
+                                ++voxelChangeCount;
 
 						    //
 						    // Add a scaled-down w to the queue
@@ -3093,6 +3230,12 @@ int FileSystemTileServer::CompleteDrawSplit( unsigned int segId, float3 pointTil
 				    }
 				    UnloadTile( previousTileIndex );
 			    }
+
+                //
+                // Update the segment sizes
+                //
+                mSegmentInfoManager.SetVoxelCount( newId, mSegmentInfoManager.GetVoxelCount( newId ) + voxelChangeCount );
+                mSegmentInfoManager.SetVoxelCount( segId, mSegmentInfoManager.GetVoxelCount( segId ) - voxelChangeCount );
 
 			    //
 			    // Update idTileMap
@@ -3163,6 +3306,9 @@ void FileSystemTileServer::CommitAdjustChange( unsigned int segId, float3 pointT
 {
 	if ( mIsSegmentationLoaded )
     {
+        long voxelChangeCount = 0;
+        std::map< unsigned int, long > idChangeCounts;
+
         Core::HashMap< std::string, Core::VolumeDescription > volumeDescriptions;
 
         int3 numVoxelsPerTile = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "IdMap" ).numVoxelsPerTile;
@@ -3170,7 +3316,6 @@ void FileSystemTileServer::CommitAdjustChange( unsigned int segId, float3 pointT
         int* currentIdVolume;
         int nVoxels = numVoxelsPerTile.x * numVoxelsPerTile.y;
 
-        std::set< int > oldIds;
         FileSystemTileSet tilesContainingNewId = mSegmentInfoManager.GetTiles( segId );
 
 		PrepForNextUndoRedoChange();
@@ -3218,7 +3363,7 @@ void FileSystemTileServer::CommitAdjustChange( unsigned int segId, float3 pointT
 
                     RELEASE_ASSERT( areaIndex1D < mSplitWindowNPix );
 
-                    if ( currentIdVolume[ tileIndex1D ] != segId && mSplitDrawArea[ areaIndex1D ] == REGION_A )
+                    if ( currentIdVolume[ tileIndex1D ] != segId && mSplitDrawArea[ areaIndex1D ] == REGION_A && mSegmentInfoManager.GetConfidence( currentIdVolume[ tileIndex1D ] ) < 100 )
                     {
                         if ( !tileChanged )
                         {
@@ -3230,9 +3375,11 @@ void FileSystemTileServer::CommitAdjustChange( unsigned int segId, float3 pointT
                         }
 
                         changeSet->insert( make_int2( tileIndex1D, currentIdVolume[ tileIndex1D ] ) );
-                        oldIds.insert( currentIdVolume[ tileIndex1D ] );
                         currentIdVolume[ tileIndex1D ] = segId;
                         tileChanged = true;
+
+                        ++voxelChangeCount;
+                        ++idChangeCounts[ currentIdVolume[ tileIndex1D ] ];
 
                         if ( tilesContainingNewId.find( tileIndex ) == tilesContainingNewId.end() )
                         {
@@ -3249,34 +3396,43 @@ void FileSystemTileServer::CommitAdjustChange( unsigned int segId, float3 pointT
 
                 if ( tileChanged )
                 {
+
+                    //
+                    // Update segment sizes
+                    //
+                    for ( std::map< unsigned int, long >::iterator changedIt = idChangeCounts.begin(); changedIt != idChangeCounts.end(); ++changedIt )
+                    {
+                        mSegmentInfoManager.SetVoxelCount( changedIt->first, mSegmentInfoManager.GetVoxelCount( changedIt->first ) - changedIt->second );
+                    }
+
                     //
                     // Check overwritten ids to see if they should be removed from the idTileMap
                     //
                     for ( int tileIndex1D = 0; tileIndex1D < nVoxels; ++tileIndex1D )
                     {
-                        std::set< int >::iterator matchIt = oldIds.find( currentIdVolume[ tileIndex1D ] );
-                        if ( matchIt != oldIds.end() )
+                        std::map< unsigned int, long >::iterator matchIt = idChangeCounts.find( currentIdVolume[ tileIndex1D ] );
+                        if ( matchIt != idChangeCounts.end() )
                         {
-                            oldIds.erase( matchIt );
+                            idChangeCounts.erase( matchIt );
 
-                            if ( oldIds.size() == 0 )
+                            if ( idChangeCounts.size() == 0 )
                                 break;
                         }
                     }
 
-                    for ( std::set< int >::iterator removedIt = oldIds.begin(); removedIt != oldIds.end(); ++removedIt )
+                    for ( std::map< unsigned int, long >::iterator removedIt = idChangeCounts.begin(); removedIt != idChangeCounts.end(); ++removedIt )
                     {
-                        mNextUndoItem->idTileMapRemoveOldIdSets.GetHashMap()[ *removedIt ].insert( tileIndex );
+                        mNextUndoItem->idTileMapRemoveOldIdSets.GetHashMap()[ removedIt->first ].insert( tileIndex );
 
-                        FileSystemTileSet tilesContainingOldId = mSegmentInfoManager.GetTiles( *removedIt );
+                        FileSystemTileSet tilesContainingOldId = mSegmentInfoManager.GetTiles( removedIt->first );
                         tilesContainingOldId.erase( tileIndex );
-                        mSegmentInfoManager.SetTiles( *removedIt, tilesContainingOldId );
+                        mSegmentInfoManager.SetTiles( removedIt->first, tilesContainingOldId );
                     }
 
                     SaveTile( tileIndex, volumeDescriptions );
                 }
                 UnloadTile( tileIndex );
-                oldIds.clear();
+                idChangeCounts.clear();
 
             }
         }
@@ -3297,7 +3453,7 @@ void FileSystemTileServer::CommitAdjustChange( unsigned int segId, float3 pointT
 		int4 previousTileIndex;
         int3 currentIdNumVoxels;
 
-        oldIds.clear();
+        std::set< int >oldIds;
 
 		while ( currentW < numTiles.w )
 		{
@@ -3472,11 +3628,17 @@ void FileSystemTileServer::CommitAdjustChange( unsigned int segId, float3 pointT
 
             }
             UnloadTile( previousTileIndex );
+            oldIds.clear();
         }
 
         //
-		// Update idTileMap
-		//
+        // Update segment size
+        //
+        mSegmentInfoManager.SetVoxelCount( segId, mSegmentInfoManager.GetVoxelCount( segId ) + voxelChangeCount );
+
+        //
+        // Update idTileMap
+        //
         mSegmentInfoManager.SetTiles( segId, tilesContainingNewId );
 
         Core::Printf( "\nFinished Adjusting segmentation label ", segId, " in tile z=", pointTileSpace.z, ".\n" );
@@ -4065,6 +4227,8 @@ void FileSystemTileServer::UndoChange()
 
     if ( mUndoDeque.size() > 0 )
     {
+        long voxelChangeCount = 0;
+        std::map< unsigned int, long > idChangeCounts;
 
         FileSystemUndoRedoItem UndoItem = mUndoDeque.front();
 
@@ -4107,6 +4271,11 @@ void FileSystemTileServer::UndoChange()
 
 						    if ( changeBits->test( index1D ) )
 						    {
+                                if ( tileIndex.w == 0 )
+                                {
+                                    ++voxelChangeCount;
+                                    ++idChangeCounts[ oldId ];
+                                }
 							    currentIdVolume[ index1D ] = oldId;
 						    }
                         }
@@ -4148,6 +4317,11 @@ void FileSystemTileServer::UndoChange()
                 //
                 for ( std::set< int2, Core::Int2Comparator >::iterator indexIt = changeSetIt->second.begin(); indexIt != changeSetIt->second.end(); ++indexIt )
                 {
+                    if ( tileIndex.w == 0 )
+                    {
+                        ++voxelChangeCount;
+                        ++idChangeCounts[ indexIt->y ];
+                    }
                     currentIdVolume[ indexIt->x ] = indexIt->y;
                 }
 
@@ -4161,6 +4335,15 @@ void FileSystemTileServer::UndoChange()
                 //
                 UnloadTile( tileIndex );
 			 
+            }
+
+            //
+            // Update the segment sizes
+            //
+            mSegmentInfoManager.SetVoxelCount( newId, mSegmentInfoManager.GetVoxelCount( newId ) - voxelChangeCount );
+            for ( std::map< unsigned int, long >::iterator oldIdSizeIt = idChangeCounts.begin(); oldIdSizeIt != idChangeCounts.end(); ++oldIdSizeIt )
+            {
+                mSegmentInfoManager.SetVoxelCount( oldIdSizeIt->first, mSegmentInfoManager.GetVoxelCount( oldIdSizeIt->first ) + oldIdSizeIt->second );
             }
 
             //
@@ -4200,6 +4383,9 @@ void FileSystemTileServer::RedoChange()
 
     if ( mRedoDeque.size() > 0 )
     {
+        long voxelChangeCount = 0;
+        std::map< unsigned int, long > idChangeCounts;
+
         FileSystemUndoRedoItem RedoItem = mRedoDeque.front();
 
 	    int oldId = RedoItem.oldId;
@@ -4241,6 +4427,11 @@ void FileSystemTileServer::RedoChange()
 
 						    if ( changeBits->test( index1D ) )
 						    {
+                                if ( tileIndex.w == 0 )
+                                {
+                                    ++voxelChangeCount;
+                                    ++idChangeCounts[ currentIdVolume[ index1D ] ];
+                                }
 							    currentIdVolume[ index1D ] = newId;
 						    }
                         }
@@ -4282,6 +4473,11 @@ void FileSystemTileServer::RedoChange()
                 //
                 for ( std::set< int2, Core::Int2Comparator >::iterator indexIt = changeSetIt->second.begin(); indexIt != changeSetIt->second.end(); ++indexIt )
                 {
+                    if ( tileIndex.w == 0 )
+                    {
+                        ++voxelChangeCount;
+                        ++idChangeCounts[ currentIdVolume[ indexIt->x ] ];
+                    }
                     currentIdVolume[ indexIt->x ] = newId;
                 }
 
@@ -4295,6 +4491,15 @@ void FileSystemTileServer::RedoChange()
                 //
                 UnloadTile( tileIndex );
 			 
+            }
+
+            //
+            // Update the segment sizes
+            //
+            mSegmentInfoManager.SetVoxelCount( newId, mSegmentInfoManager.GetVoxelCount( newId ) + voxelChangeCount );
+            for ( std::map< unsigned int, long >::iterator oldIdSizeIt = idChangeCounts.begin(); oldIdSizeIt != idChangeCounts.end(); ++oldIdSizeIt )
+            {
+                mSegmentInfoManager.SetVoxelCount( oldIdSizeIt->first, mSegmentInfoManager.GetVoxelCount( oldIdSizeIt->first ) - oldIdSizeIt->second );
             }
 
             //
@@ -4740,12 +4945,12 @@ void FileSystemTileServer::SaveAndClearFileSystemTileCache( )
     RELEASE_ASSERT( mFileSystemTileCache.GetHashMap().size() == 0 );
 }
 
-marray::Marray< unsigned char > FileSystemTileServer::GetIdColorMap()
+marray::Marray< unsigned char >* FileSystemTileServer::GetIdColorMap()
 {
     return mSegmentInfoManager.GetIdColorMap();
 }
 
-marray::Marray< unsigned char > FileSystemTileServer::GetIdConfidenceMap()
+marray::Marray< unsigned char >* FileSystemTileServer::GetIdConfidenceMap()
 {
     return mSegmentInfoManager.GetIdConfidenceMap();
 }
@@ -4783,6 +4988,11 @@ void FileSystemTileServer::UnlockSegmentLabel( unsigned int segId )
 unsigned int FileSystemTileServer::GetSegmentInfoCount()
 {
 	return mSegmentInfoManager.GetSegmentInfoCount();
+}
+
+unsigned int FileSystemTileServer::GetSegmentInfoCurrentListLocation( unsigned int segId )
+{
+	return mSegmentInfoManager.GetSegmentInfoCurrentListLocation( segId );
 }
 
 std::list< SegmentInfo > FileSystemTileServer::GetSegmentInfoRange( int begin, int end )

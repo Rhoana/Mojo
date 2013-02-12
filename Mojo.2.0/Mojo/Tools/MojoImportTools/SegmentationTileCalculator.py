@@ -21,11 +21,11 @@ tile_num_pixels_x             = 512
 
 generate_memorable_names      = True
 
-##original_input_ids_path       = 'C:\\dev\\datasets\\NewPipelineResults0\\labels'
-##output_path                   = 'C:\\dev\\datasets\\NewPipelineResults0\\mojo'
-##nimages_to_process            = 52
-##ncolors                       = 10000
-##input_file_format             = 'tif'
+original_input_ids_path       = 'C:\\dev\\datasets\\NewPipelineResults1\\output_labels'
+output_path                   = 'C:\\dev\\datasets\\NewPipelineResults1\\mojo'
+nimages_to_process            = 168
+ncolors                       = 10000
+input_file_format             = 'tif'
 
 
 ##original_input_color_map_path = 'C:\\dev\\datasets\\conn\\main_dataset\\cube2\\diced_xy=512_z=32_xyOv=128_zOv=12_dwnSmp=1\\res_from_Nov29_PF\\FS=1\\cmap2.mat'
@@ -46,11 +46,11 @@ generate_memorable_names      = True
 #ncolors                       = 1000
 #input_file_format             = 'png'
 
-original_input_ids_path       = 'C:\\dev\\datasets\\conn\\main_dataset\\ac3train\\diced_xy=512_z=32_xyOv=128_zOv=12_dwnSmp=1\\res_from_sept_30_minotrC_PF\\FS=1\\stitched\\labels_grow'
-output_path                   = 'C:\\dev\\datasets\\ac3x10\\mojo'
-nimages_to_process            = 10
-ncolors                       = 1000
-input_file_format             = 'png'
+#original_input_ids_path       = 'C:\\dev\\datasets\\conn\\main_dataset\\ac3train\\diced_xy=512_z=32_xyOv=128_zOv=12_dwnSmp=1\\res_from_sept_30_minotrC_PF\\FS=1\\stitched\\labels_grow'
+#output_path                   = 'C:\\dev\\datasets\\ac3x10\\mojo'
+#nimages_to_process            = 10
+#ncolors                       = 1000
+#input_file_format             = 'png'
 
 output_ids_path                = output_path + '\\ids'
 output_tile_ids_path           = output_ids_path + '\\tiles'
@@ -149,6 +149,9 @@ if len(files) > 0:
 
         if len( original_ids.shape ) == 3:
             original_ids = original_ids[ :, :, 0 ] + original_ids[ :, :, 1 ] * 2**8 + original_ids[ :, :, 2 ] * 2**16
+        else:
+            original_ids = original_ids.transpose() - 1
+
 
         current_image_counts = numpy.bincount( original_ids.flatten() )
         current_image_counts_ids = numpy.nonzero( current_image_counts )[0]
@@ -267,6 +270,13 @@ if len(files) > 0:
     con = sqlite3.connect(output_segment_info_db_file)
 
     cur = con.cursor()
+
+    cur.execute('PRAGMA main.cache_size=10000;')
+    cur.execute('PRAGMA main.locking_mode=EXCLUSIVE;')
+    cur.execute('PRAGMA main.synchronous=OFF;')
+    cur.execute('PRAGMA main.journal_mode=WAL;')
+    cur.execute('PRAGMA count_changes=OFF;')
+    cur.execute('PRAGMA main.temp_store=MEMORY;')
 
     cur.execute('DROP TABLE IF EXISTS idTileIndex;')
     cur.execute('CREATE TABLE idTileIndex (id int, w int, z int, y int, x int);')

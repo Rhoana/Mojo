@@ -27,7 +27,7 @@ namespace Mojo.Wpf.View
             var selectedSegment = (Interop.SegmentInfo)( (ListView)sender ).SelectedItem;
             if ( selectedSegment != null && DataContext != null )
             {
-                ( (ViewModel.EngineDataContext) DataContext ).Engine.SelectSegment( selectedSegment.Id );
+                ( (ViewModel.EngineDataContext)DataContext ).Engine.SelectSegment( selectedSegment.Id );
                 ( (ListView)sender ).ScrollIntoView( selectedSegment );
             }
         }
@@ -38,7 +38,7 @@ namespace Mojo.Wpf.View
             if ( changedSegment != null && changedSegment.Confidence != 0 )
             {
                 changedSegment.Confidence = 0;
-                ( (ViewModel.EngineDataContext) DataContext ).Engine.UnlockSegmentLabel( changedSegment.Id );
+                ( (ViewModel.EngineDataContext)DataContext ).Engine.TileManager.UnlockSegmentLabel( changedSegment.Id );
             }
         }
 
@@ -48,7 +48,7 @@ namespace Mojo.Wpf.View
             if ( changedSegment != null && changedSegment.Confidence != 100 )
             {
                 changedSegment.Confidence = 100;
-                ( (ViewModel.EngineDataContext) DataContext ).Engine.LockSegmentLabel( changedSegment.Id );
+                ( (ViewModel.EngineDataContext)DataContext ).Engine.TileManager.LockSegmentLabel( changedSegment.Id );
             }
         }
 
@@ -63,7 +63,13 @@ namespace Mojo.Wpf.View
         private void SegmentListViewItem_OnMouseEnter( object sender, MouseEventArgs e )
         {
             var segmentViewItem = ( (ListViewItem)sender );
-            ( (ViewModel.EngineDataContext) DataContext ).Engine.TileManager.MouseOverSegmentId = (uint)segmentViewItem.Tag;
+            ( (ViewModel.EngineDataContext)DataContext ).Engine.TileManager.MouseOverSegmentId = (uint)segmentViewItem.Tag;
+        }
+
+        private void SegmentListViewItem_OnMouseDoubleClick( object sender, MouseEventArgs e )
+        {
+            var segmentViewItem = ( (ListViewItem)sender );
+            ( (ViewModel.EngineDataContext)DataContext ).Engine.CenterAndZoomToSegmentCentroid3D( (uint)segmentViewItem.Tag );
         }
 
         private GridViewColumnHeader mCurrentSortColumHeader = null;
@@ -115,7 +121,7 @@ namespace Mojo.Wpf.View
                 // Perform sort
                 //
                 var fieldName = header.Tag as String;
-                ( (ViewModel.EngineDataContext) DataContext ).TileManagerDataContext.SortSegmentListBy( fieldName, mSordDescending );
+                ( (ViewModel.EngineDataContext)DataContext ).TileManagerDataContext.SortSegmentListBy( fieldName, mSordDescending );
 
             }
         }

@@ -60,10 +60,14 @@ public:
 	void                                                    LockSegmentLabel( unsigned int segId );
 	void                                                    UnlockSegmentLabel( unsigned int segId );
 	unsigned int                                            GetSegmentInfoCount();
+	unsigned int                                            GetSegmentInfoCurrentListLocation( unsigned int segId );
     Collections::Generic::IList< SegmentInfo^ >^            GetSegmentInfoRange( int begin, int end );
 
     unsigned int                                            GetSegmentationLabelId( TiledDatasetView^ tiledDatasetView, Vector3^ pDataSpace );
     Vector3                                                 GetSegmentationLabelColor( unsigned int segId );
+    Vector3                                                 GetSegmentCentralTileLocation( unsigned int segId );
+    Vector4                                                 GetSegmentZTileBounds( unsigned int segId, int zIndex );
+
 
     void                                                    ReplaceSegmentationLabel( unsigned int oldId, unsigned int newId );
     void                                                    ReplaceSegmentationLabelCurrentSlice( unsigned int oldId, unsigned int newId, TiledDatasetView^ tiledDatasetView, Vector3^ pDataSpace );

@@ -26,6 +26,10 @@ namespace Mojo
         {
         }
 
+        public void OnMouseDoubleClick( System.Windows.Forms.MouseEventArgs mouseEventArgs, int width, int height )
+        {
+        }
+
         public void OnMouseMove( System.Windows.Forms.MouseEventArgs mouseEventArgs, int width, int height )
         {
         }

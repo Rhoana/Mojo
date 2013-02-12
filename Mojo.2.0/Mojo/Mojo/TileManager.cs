@@ -410,6 +410,18 @@ namespace Mojo
             ChangesMade = true;
         }
 
+        public void LockSegmentLabel( uint segId )
+        {
+            Internal.LockSegmentLabel( segId );
+            ChangesMade = true;
+        }
+
+        public void UnlockSegmentLabel( uint segId )
+        {
+            Internal.UnlockSegmentLabel( segId );
+            ChangesMade = true;
+        }
+
         public TileManager( Interop.TileManager tileManager )
         {
             Internal = tileManager;

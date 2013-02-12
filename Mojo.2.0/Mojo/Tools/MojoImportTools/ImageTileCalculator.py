@@ -11,21 +11,21 @@ import glob
 tile_num_pixels_y = 512
 tile_num_pixels_x = 512
 
-##original_input_images_path = 'C:\\dev\\datasets\\NewPipelineResults0\\images'
-##output_tile_image_path     = 'C:\\dev\\datasets\\NewPipelineResults0\\mojo\\images\\tiles'
-##output_tile_volume_file    = 'C:\\dev\\datasets\\NewPipelineResults0\\mojo\\images\\tiledVolumeDescription.xml'
-##input_image_extension     = '.tiff'
-##output_image_extension     = '.tif'
-##image_resize_filter        = PIL.Image.ANTIALIAS
-##nimages_to_process         = 52
-
-original_input_images_path = 'C:\\dev\\datasets\\conn\\main_dataset\\ac3train\\input_images'
-output_tile_image_path     = 'C:\\dev\\datasets\\ac3x10\\mojo\\images\\tiles'
-output_tile_volume_file    = 'C:\\dev\\datasets\\ac3x10\\mojo\\images\\tiledVolumeDescription.xml'
+original_input_images_path = 'C:\\dev\\datasets\\NewPipelineResults1\\output_images'
+output_tile_image_path     = 'C:\\dev\\datasets\\NewPipelineResults1\\mojo\\images\\tiles'
+output_tile_volume_file    = 'C:\\dev\\datasets\\NewPipelineResults1\\mojo\\images\\tiledVolumeDescription.xml'
 input_image_extension      = '.tif'
 output_image_extension     = '.tif'
 image_resize_filter        = PIL.Image.ANTIALIAS
-nimages_to_process         = 10
+nimages_to_process         = 168
+
+#original_input_images_path = 'C:\\dev\\datasets\\conn\\main_dataset\\ac3train\\input_images'
+#output_tile_image_path     = 'C:\\dev\\datasets\\ac3x10\\mojo\\images\\tiles'
+#output_tile_volume_file    = 'C:\\dev\\datasets\\ac3x10\\mojo\\images\\tiledVolumeDescription.xml'
+#input_image_extension      = '.tif'
+#output_image_extension     = '.tif'
+#image_resize_filter        = PIL.Image.ANTIALIAS
+#nimages_to_process         = 10
 
 #original_input_images_path = 'C:\\dev\\datasets\\challengeCubeV2x20\\images'
 #output_tile_image_path     = 'C:\\dev\\datasets\\Cube1x10\\mojo\\images\\tiles'

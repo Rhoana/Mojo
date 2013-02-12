@@ -51,6 +51,7 @@ namespace Mojo.Wpf.ViewModel
                     break;
                 case "SelectedSegmentId":
                     UpdateSelectedSegmentBrush();
+                    JumpToSelectedSegmentInfoPage();
                     break;
                 case "MouseOverSegmentId":
                     UpdateMouseOverSegmentBrush();
@@ -272,5 +273,13 @@ namespace Mojo.Wpf.ViewModel
             mSegmentInfoCurrentPageIndex = mSegmentInfoPageCount - 1;
             UpdateSegmentInfoList();
         }
+
+        public void JumpToSelectedSegmentInfoPage()
+        {
+            uint segmentIndex = mTileManager.Internal.GetSegmentInfoCurrentListLocation( mTileManager.SelectedSegmentId );
+            mSegmentInfoCurrentPageIndex = (int) (segmentIndex / mItemsPerPage);
+            UpdateSegmentInfoList();
+        }
+
     }
 }

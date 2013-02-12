@@ -35,6 +35,8 @@
 
         <Mojo.Wpf.ViewModel:EnumBooleanConverter x:Key="EnumBooleanConverter" />
         <Mojo.Wpf.ViewModel:SegmentLockConverter x:Key="SegmentLockConverter" />
+        <Mojo.Wpf.ViewModel:ObjectsEqualBooleanConverter x:Key="ObjectsEqualBooleanConverter" />
+        <Mojo.Wpf.ViewModel:ObjectsEqualBrushConverter x:Key="ObjectsEqualBrushConverter" />
 
         <DataTemplate x:Key="HeaderTemplateArrowUp">
             <DockPanel>
@@ -244,7 +246,7 @@
                 <Label Focusable="False" MinHeight="20" MinWidth="100"  Content="{Binding Path=Engine.TileManager.SelectedSegmentId}" />
                 <Label Focusable="False" MinHeight="20" Content="Target:" />
                 <Rectangle Height="20" Name="TargetRectangle" Stroke="Black" Width="50" Fill="{Binding Path=TileManagerDataContext.MouseOverSegmentBrush}" />
-                <Label Focusable="False" MinHeight="20" MinWidth="100"  Content="{Binding Path=Engine.TileManager.MouseOverSegmentId}" />
+                <Label Focusable="False" MinHeight="20" MinWidth="100" Content="{Binding Path=Engine.TileManager.MouseOverSegmentId}" />
             </StackPanel>
         </Border>
 
@@ -286,7 +288,32 @@
                         <ListView.ItemContainerStyle>
                             <Style TargetType="ListViewItem">
                                 <Setter Property="Tag" Value="{Binding Id}"></Setter>
-                                <EventSetter Event="MouseMove" Handler="SegmentListViewItem_OnMouseEnter" ></EventSetter>
+                                <EventSetter Event="MouseEnter" Handler="SegmentListViewItem_OnMouseEnter" ></EventSetter>
+                                <EventSetter Event="MouseDoubleClick" Handler="SegmentListViewItem_OnMouseDoubleClick" ></EventSetter>
+                                
+                                <!--
+                                <Style.Triggers>
+                                    <DataTrigger>
+                                        <DataTrigger.Binding>
+                                            <MultiBinding  Converter="{StaticResource ObjectsEqualBooleanConverter}">
+                                                <Binding Path="Id"  />
+                                                <Binding Path="DataContext.Engine.TileManager.MouseOverSegmentId" RelativeSource="{RelativeSource FindAncestor, AncestorType={x:Type Window}}"/>
+                                            </MultiBinding>
+                                        </DataTrigger.Binding>
+                                        <Setter Property="Background" Value="LightBlue" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                                -->
+                               
+                                <Setter Property="Background">
+                                    <Setter.Value>
+                                        <MultiBinding Converter="{StaticResource ObjectsEqualBrushConverter}">
+                                            <Binding Path="Id"/>
+                                            <Binding Path="DataContext.Engine.TileManager.MouseOverSegmentId" RelativeSource="{RelativeSource FindAncestor, AncestorType={x:Type Window}}"/>
+                                        </MultiBinding>
+                                    </Setter.Value>
+                                </Setter>
+
                             </Style>
                         </ListView.ItemContainerStyle>
                         

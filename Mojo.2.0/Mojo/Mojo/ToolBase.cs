@@ -1,5 +1,6 @@
-﻿using System.Windows.Input;
-using System;
+﻿using System;
+using System.Windows.Input;
+using SlimDX;
 
 namespace Mojo
 {
@@ -115,6 +116,33 @@ namespace Mojo
         {
         }
 
+        public virtual void OnMouseDoubleClick( System.Windows.Forms.MouseEventArgs mouseEventArgs, int width, int height )
+        {
+            if ( mTileManager.SegmentationLoaded && mouseEventArgs.Button == System.Windows.Forms.MouseButtons.Left )
+            {
+                //Get the id of the segment being clicked
+
+                var centerDataSpace = mTileManager.TiledDatasetView.CenterDataSpace;
+                var extentDataSpace = mTileManager.TiledDatasetView.ExtentDataSpace;
+
+                var topLeftDataSpaceX = centerDataSpace.X - ( extentDataSpace.X / 2f );
+                var topLeftDataSpaceY = centerDataSpace.Y - ( extentDataSpace.Y / 2f );
+
+                var offsetDataSpaceX = ( (float)mouseEventArgs.X / width ) * extentDataSpace.X;
+                var offsetDataSpaceY = ( (float)mouseEventArgs.Y / height ) * extentDataSpace.Y;
+
+                var x = topLeftDataSpaceX + offsetDataSpaceX;
+                var y = topLeftDataSpaceY + offsetDataSpaceY;
+                var z = centerDataSpace.Z;
+
+                var p = new Vector3( x, y, z );
+
+                var clickedId = mTileManager.Internal.GetSegmentationLabelId( mTileManager.TiledDatasetView, p );
+
+                mEngine.CenterAndZoomToSegment2D( clickedId );
+            }
+        }
+
         public virtual void OnMouseMove( System.Windows.Forms.MouseEventArgs mouseEventArgs, int width, int height )
         {
             if ( mCurrentlyPanning )
@@ -174,6 +202,27 @@ namespace Mojo
                 //
                 centerDataSpace.X -= ( relativeMouseLocationX * changeBy - relativeMouseLocationX ) / dataSpaceUnitWidthNumPixels;
                 centerDataSpace.Y -= ( relativeMouseLocationY * changeBy - relativeMouseLocationY ) / dataSpaceUnitWidthNumPixels;
+            }
+
+            var tiledVolumeDescription = mTileManager.TiledDatasetDescription.TiledVolumeDescriptions.Get( "SourceMap" );
+
+            if ( centerDataSpace.X < 0 )
+            {
+                centerDataSpace.X = 0;
+
+            }
+            if ( centerDataSpace.X > tiledVolumeDescription.NumTilesX )
+            {
+                centerDataSpace.X = tiledVolumeDescription.NumTilesX;
+            }
+
+            if ( centerDataSpace.Y < 0 )
+            {
+                centerDataSpace.Y = 0;
+            }
+            if ( centerDataSpace.Y > tiledVolumeDescription.NumTilesY )
+            {
+                centerDataSpace.Y = tiledVolumeDescription.NumTilesY;
             }
 
             mTileManager.TiledDatasetView.CenterDataSpace = centerDataSpace;

@@ -192,6 +192,35 @@ namespace Mojo
             }
         }
 
+        private void CheckBounds()
+        {
+            var centerDataSpace = TileManager.TiledDatasetView.CenterDataSpace;
+
+            var tiledVolumeDescription = TileManager.TiledDatasetDescription.TiledVolumeDescriptions.Get( "SourceMap" );
+
+            if ( centerDataSpace.X < 0 )
+            {
+                centerDataSpace.X = 0;
+
+            }
+            if ( centerDataSpace.X > tiledVolumeDescription.NumTilesX )
+            {
+                centerDataSpace.X = tiledVolumeDescription.NumTilesX;
+            }
+
+            if ( centerDataSpace.Y < 0 )
+            {
+                centerDataSpace.Y = 0;
+            }
+            if ( centerDataSpace.Y > tiledVolumeDescription.NumTilesY )
+            {
+                centerDataSpace.Y = tiledVolumeDescription.NumTilesY;
+            }
+
+            TileManager.TiledDatasetView.CenterDataSpace = centerDataSpace;
+
+        }
+
         public void ZoomIn()
         {
             var extentDataSpace = TileManager.TiledDatasetView.ExtentDataSpace;
@@ -204,6 +233,8 @@ namespace Mojo
             extentDataSpace.Y /= changeBy;
 
             TileManager.TiledDatasetView.ExtentDataSpace = extentDataSpace;
+
+            CheckBounds();
 
             QuickRender();
         }
@@ -221,7 +252,69 @@ namespace Mojo
 
             TileManager.TiledDatasetView.ExtentDataSpace = extentDataSpace;
 
+            CheckBounds();
+
             QuickRender();
+        }
+
+        public void PanToSegmentCentroid3D( uint segId )
+        {
+            var centerDataSpace = TileManager.TiledDatasetView.CenterDataSpace;
+            var pointTileSpace = TileManager.Internal.GetSegmentCentralTileLocation( segId );
+
+            if ( centerDataSpace.Z != pointTileSpace.Z && CurrentToolMode == ToolMode.SplitSegmentation && TileManager.JoinSplits3D )
+            {
+                //
+                // Record split state for 3D splitting
+                //
+                TileManager.Internal.RecordSplitState( TileManager.SelectedSegmentId, centerDataSpace );
+            }
+
+            centerDataSpace.X = 0.5f + pointTileSpace.X;
+            centerDataSpace.Y = 0.5f + pointTileSpace.Y;
+            centerDataSpace.Z = pointTileSpace.Z;
+
+            TileManager.TiledDatasetView.CenterDataSpace = centerDataSpace;
+            TileManager.UpdateView();
+            Update();
+        }
+
+        public void CenterAndZoomToSegment2D( uint segId )
+        {
+            var centerDataSpace = TileManager.TiledDatasetView.CenterDataSpace;
+            var extentDataSpace = TileManager.TiledDatasetView.ExtentDataSpace;
+
+            var boundsTileSpace = TileManager.Internal.GetSegmentZTileBounds( segId, (int)centerDataSpace.Z );
+            centerDataSpace.X = 0.5f + boundsTileSpace.X + ( boundsTileSpace.Z - boundsTileSpace.X ) / 2;
+            centerDataSpace.Y = 0.5f + boundsTileSpace.Y + ( boundsTileSpace.W - boundsTileSpace.Y ) / 2;
+
+            var targetExtentX = 1 + boundsTileSpace.Z - boundsTileSpace.X;
+            var targetExtentY = 1 + boundsTileSpace.W - boundsTileSpace.Y;
+
+            var changeBy = (float)Math.Max( 1.1, (float)Constants.MAGNIFICATION_STEP );
+
+            while ( extentDataSpace.X > targetExtentX || extentDataSpace.Y > targetExtentY )
+            {
+                extentDataSpace.X /= changeBy;
+                extentDataSpace.Y /= changeBy;
+            }
+
+            while ( extentDataSpace.X < targetExtentX || extentDataSpace.Y < targetExtentY )
+            {
+                extentDataSpace.X *= changeBy;
+                extentDataSpace.Y *= changeBy;
+            }
+
+            TileManager.TiledDatasetView.CenterDataSpace = centerDataSpace;
+            TileManager.TiledDatasetView.ExtentDataSpace = extentDataSpace;
+
+            QuickRender();
+        }
+
+        public void CenterAndZoomToSegmentCentroid3D( uint segId )
+        {
+            PanToSegmentCentroid3D( segId );
+            CenterAndZoomToSegment2D( segId );
         }
 
         public void Update()
@@ -260,16 +353,6 @@ namespace Mojo
             {
                 TileManager.CancelSplitChange();
             }
-        }
-
-        public void LockSegmentLabel( uint segId )
-        {
-            TileManager.Internal.LockSegmentLabel( segId );
-        }
-
-        public void UnlockSegmentLabel( uint segId )
-        {
-            TileManager.Internal.UnlockSegmentLabel( segId );
         }
 
         public void SelectSegment( uint segId )
