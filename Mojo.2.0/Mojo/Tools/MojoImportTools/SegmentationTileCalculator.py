@@ -21,18 +21,18 @@ tile_num_pixels_x             = 512
 
 generate_memorable_names      = True
 
-original_input_ids_path       = 'C:\\dev\\datasets\\NewPipelineResults1\\output_labels'
-output_path                   = 'C:\\dev\\datasets\\NewPipelineResults1\\mojo'
-nimages_to_process            = 168
+#original_input_ids_path       = 'C:\\dev\\datasets\\NewPipelineResults1\\output_labels'
+#output_path                   = 'C:\\dev\\datasets\\NewPipelineResults1\\mojo'
+#nimages_to_process            = 168
+#ncolors                       = 10000
+#input_file_format             = 'tif'
+
+
+original_input_ids_path       = 'C:\\dev\\datasets\\conn\\main_dataset\\cube2\\diced_xy=512_z=32_xyOv=128_zOv=12_dwnSmp=1\\res_from_Nov29_PF\\FS=1\\stitched\\labels_grow'
+output_path                    = 'C:\\dev\\datasets\\Cube2x1124\\mojo'
+nimages_to_process            = 1124
 ncolors                       = 10000
-input_file_format             = 'tif'
-
-
-##original_input_color_map_path = 'C:\\dev\\datasets\\conn\\main_dataset\\cube2\\diced_xy=512_z=32_xyOv=128_zOv=12_dwnSmp=1\\res_from_Nov29_PF\\FS=1\\cmap2.mat'
-##original_input_ids_path       = 'C:\\dev\\datasets\\conn\\main_dataset\\cube2\\diced_xy=512_z=32_xyOv=128_zOv=12_dwnSmp=1\\res_from_Nov29_PF\\FS=1\\stitched\\labels_grow'
-##output_path                    = 'C:\\dev\\datasets\\Cube2x1124\\mojo'
-####nimages_to_process            = 50
-##nimages_to_process            = 1124
+input_file_format             = 'png'
 
 #original_input_ids_path       = 'C:\\dev\\datasets\\conn\\main_dataset\\5K_cube\\diced_xy=512_z=32_xyOv=128_zOv=12_dwnSmp=1\\res_from_0ct15_PF\\FS=1\\stitched\\labels_grow'
 #output_path                   = 'C:\\dev\\datasets\\Cube1x10\\mojo'
