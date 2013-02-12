@@ -277,7 +277,7 @@ unsigned int TileManager::GetSegmentationLabelId( const TiledDatasetView& tiledD
 	int3   zoomLevel = GetZoomLevel( tiledDatasetView );
 	float4 pointTileSpace;
 	int4   tileIndex;
-	int segmentId = -1;
+	int segmentId = 0;
 
 	if ( mIsSegmentationLoaded )
 	{

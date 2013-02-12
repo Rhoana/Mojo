@@ -138,7 +138,7 @@
     </ApplicationDefinition>
     <Compile Include="ViewModel\EnumBooleanConverter.cs" />
     <Compile Include="ViewModel\EngineDataContext.cs" />
-    <Compile Include="ViewModel\ObjectsEqualBooleanConverter.cs" />
+    <Compile Include="ViewModel\ObjectsEqualParameterConverter.cs" />
     <Compile Include="ViewModel\ObjectsEqualBrushConverter.cs" />
     <Compile Include="ViewModel\SegmentLockConverter.cs" />
     <Compile Include="ViewModel\TileManagerDataContext.cs" />

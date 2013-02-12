@@ -35,7 +35,7 @@
 
         <Mojo.Wpf.ViewModel:EnumBooleanConverter x:Key="EnumBooleanConverter" />
         <Mojo.Wpf.ViewModel:SegmentLockConverter x:Key="SegmentLockConverter" />
-        <Mojo.Wpf.ViewModel:ObjectsEqualBooleanConverter x:Key="ObjectsEqualBooleanConverter" />
+        <Mojo.Wpf.ViewModel:ObjectsEqualParameterConverter x:Key="ObjectsEqualParameterConverter" />
         <Mojo.Wpf.ViewModel:ObjectsEqualBrushConverter x:Key="ObjectsEqualBrushConverter" />
 
         <DataTemplate x:Key="HeaderTemplateArrowUp">
@@ -281,14 +281,16 @@
                               ItemsSource="{Binding Path=TileManagerDataContext.SegmentInfoList}" 
                               SelectionChanged="SegmentList_OnSelectionChanged"
                               MouseWheel="SegmentList_OnMouseWheel"
-                              SelectedValue="{Binding Path=Engine.TileManager.SelectedSegmentId}"
+                              SelectedValue="{Binding Path=Engine.TileManager.SelectedSegmentId, Mode=OneWay}"
                               SelectedValuePath="Id"
                               >
                         
                         <ListView.ItemContainerStyle>
                             <Style TargetType="ListViewItem">
                                 <Setter Property="Tag" Value="{Binding Id}"></Setter>
+                                <Setter Property="BorderThickness" Value="1"></Setter>
                                 <EventSetter Event="MouseEnter" Handler="SegmentListViewItem_OnMouseEnter" ></EventSetter>
+                                <EventSetter Event="MouseLeave" Handler="SegmentListViewItem_OnMouseLeave" ></EventSetter>
                                 <EventSetter Event="MouseDoubleClick" Handler="SegmentListViewItem_OnMouseDoubleClick" ></EventSetter>
                                 
                                 <!--
@@ -304,8 +306,19 @@
                                     </DataTrigger>
                                 </Style.Triggers>
                                 -->
-                               
+
+                                <!--
                                 <Setter Property="Background">
+                                    <Setter.Value>
+                                        <MultiBinding Converter="{StaticResource ObjectsEqualBrushConverter}">
+                                            <Binding Path="Id"/>
+                                            <Binding Path="DataContext.Engine.TileManager.MouseOverSegmentId" RelativeSource="{RelativeSource FindAncestor, AncestorType={x:Type Window}}"/>
+                                        </MultiBinding>
+                                    </Setter.Value>
+                                </Setter>
+                                -->
+                                
+                                <Setter Property="BorderBrush">
                                     <Setter.Value>
                                         <MultiBinding Converter="{StaticResource ObjectsEqualBrushConverter}">
                                             <Binding Path="Id"/>
