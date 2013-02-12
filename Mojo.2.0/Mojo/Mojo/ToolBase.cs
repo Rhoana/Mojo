@@ -165,6 +165,8 @@ namespace Mojo
         {
             var centerDataSpace = mTileManager.TiledDatasetView.CenterDataSpace;
             var extentDataSpace = mTileManager.TiledDatasetView.ExtentDataSpace;
+            var tiledVolumeDescription = mTileManager.TiledDatasetDescription.TiledVolumeDescriptions.Get( "SourceMap" );
+
             var dataSpaceUnitWidthNumPixels = width / extentDataSpace.X;
 
             var changeBy = (float) Math.Pow( Constants.MAGNIFICATION_STEP, Math.Abs( (double) mouseEventArgs.Delta ) / Constants.NUM_DETENTS_PER_WHEEL_MOVE );
@@ -175,7 +177,7 @@ namespace Mojo
             var relativeMouseLocationX = mouseEventArgs.X - ( width / 2f );
             var relativeMouseLocationY = mouseEventArgs.Y - ( height / 2f );
 
-            if ( mouseEventArgs.Delta > 0 )
+            if ( mouseEventArgs.Delta > 0 && extentDataSpace.X > 1e-3 && extentDataSpace.Y > 1e-3 )
             {
                 //
                 // Decrease the view extent
@@ -189,7 +191,7 @@ namespace Mojo
                 centerDataSpace.X += ( relativeMouseLocationX * changeBy - relativeMouseLocationX ) / dataSpaceUnitWidthNumPixels / changeBy;
                 centerDataSpace.Y += ( relativeMouseLocationY * changeBy - relativeMouseLocationY ) / dataSpaceUnitWidthNumPixels / changeBy;
             }
-            else if ( mouseEventArgs.Delta < 0 )
+            else if ( mouseEventArgs.Delta < 0 && extentDataSpace.X < tiledVolumeDescription.NumTilesX * 10 && extentDataSpace.Y < tiledVolumeDescription.NumTilesY * 10 )
             {
                 //
                 // Increase the view extent
@@ -203,8 +205,6 @@ namespace Mojo
                 centerDataSpace.X -= ( relativeMouseLocationX * changeBy - relativeMouseLocationX ) / dataSpaceUnitWidthNumPixels;
                 centerDataSpace.Y -= ( relativeMouseLocationY * changeBy - relativeMouseLocationY ) / dataSpaceUnitWidthNumPixels;
             }
-
-            var tiledVolumeDescription = mTileManager.TiledDatasetDescription.TiledVolumeDescriptions.Get( "SourceMap" );
 
             if ( centerDataSpace.X < 0 )
             {

@@ -224,37 +224,45 @@ namespace Mojo
         public void ZoomIn()
         {
             var extentDataSpace = TileManager.TiledDatasetView.ExtentDataSpace;
-            var changeBy = (float) Constants.MAGNIFICATION_STEP;
+            if ( extentDataSpace.X > 1e-3 && extentDataSpace.Y > 1e-3 )
+            {
+                var changeBy = (float) Constants.MAGNIFICATION_STEP;
 
-            //
-            // Decrease the view extent
-            //
-            extentDataSpace.X /= changeBy;
-            extentDataSpace.Y /= changeBy;
+                //
+                // Decrease the view extent
+                //
+                extentDataSpace.X /= changeBy;
+                extentDataSpace.Y /= changeBy;
 
-            TileManager.TiledDatasetView.ExtentDataSpace = extentDataSpace;
+                TileManager.TiledDatasetView.ExtentDataSpace = extentDataSpace;
 
-            CheckBounds();
+                CheckBounds();
 
-            QuickRender();
+                QuickRender();
+            }
         }
 
         public void ZoomOut()
         {
             var extentDataSpace = TileManager.TiledDatasetView.ExtentDataSpace;
-            var changeBy = (float) Constants.MAGNIFICATION_STEP;
+            var tiledVolumeDescription = TileManager.TiledDatasetDescription.TiledVolumeDescriptions.Get( "SourceMap" );
 
-            //
-            // Increase the view extent
-            //
-            extentDataSpace.X *= changeBy;
-            extentDataSpace.Y *= changeBy;
+            if ( extentDataSpace.X < tiledVolumeDescription.NumTilesX * 10 && extentDataSpace.Y < tiledVolumeDescription.NumTilesY * 10 )
+            {
+                var changeBy = (float) Constants.MAGNIFICATION_STEP;
 
-            TileManager.TiledDatasetView.ExtentDataSpace = extentDataSpace;
+                //
+                // Increase the view extent
+                //
+                extentDataSpace.X *= changeBy;
+                extentDataSpace.Y *= changeBy;
 
-            CheckBounds();
+                TileManager.TiledDatasetView.ExtentDataSpace = extentDataSpace;
 
-            QuickRender();
+                CheckBounds();
+
+                QuickRender();
+            }
         }
 
         public void PanToSegmentCentroid3D( uint segId )

@@ -159,7 +159,7 @@ namespace Mojo.Wpf.ViewModel
 
         public void UpdateSegmentListCurrentPageString()
         {
-            if ( mTileManager.TiledDatasetLoaded )
+            if ( mTileManager.SegmentationLoaded )
             {
                 SegmentListCurrentPageString = "Page " + ( mSegmentInfoCurrentPageIndex + 1 ) + " of " + mSegmentInfoPageCount;
             }
@@ -208,11 +208,14 @@ namespace Mojo.Wpf.ViewModel
 
         public void UpdateSegmentInfoList()
         {
-            var totalSegments = mTileManager.Internal.GetSegmentInfoCount();
-            mSegmentInfoPageCount = (int) ( 1 + ( totalSegments - 1 ) / mItemsPerPage );
+            if ( mTileManager.SegmentationLoaded )
+            {
+                var totalSegments = mTileManager.Internal.GetSegmentInfoCount();
+                mSegmentInfoPageCount = (int) ( 1 + ( totalSegments - 1 ) / mItemsPerPage );
 
-            SegmentInfoList = mTileManager.Internal.GetSegmentInfoRange( mSegmentInfoCurrentPageIndex * mItemsPerPage, ( mSegmentInfoCurrentPageIndex + 1 ) * mItemsPerPage );
-            UpdateSegmentListCurrentPageString();
+                SegmentInfoList = mTileManager.Internal.GetSegmentInfoRange( mSegmentInfoCurrentPageIndex * mItemsPerPage, ( mSegmentInfoCurrentPageIndex + 1 ) * mItemsPerPage );
+                UpdateSegmentListCurrentPageString();
+            }
         }
 
         public void SortSegmentListBy( String fieldName )
@@ -238,10 +241,8 @@ namespace Mojo.Wpf.ViewModel
                     break;
             }
 
-            SegmentInfoList = mTileManager.Internal.GetSegmentInfoRange( 0, mItemsPerPage );
-            mSegmentInfoCurrentPageIndex = 0;
+            JumpToSelectedSegmentInfoPage();
 
-            UpdateSegmentInfoList();
         }
 
         public void MoveToFirstSegmentInfoPage()
@@ -276,8 +277,15 @@ namespace Mojo.Wpf.ViewModel
 
         public void JumpToSelectedSegmentInfoPage()
         {
-            uint segmentIndex = mTileManager.Internal.GetSegmentInfoCurrentListLocation( mTileManager.SelectedSegmentId );
-            mSegmentInfoCurrentPageIndex = (int) (segmentIndex / mItemsPerPage);
+            if ( mTileManager.SelectedSegmentId > 0 )
+            {
+                uint segmentIndex = mTileManager.Internal.GetSegmentInfoCurrentListLocation( mTileManager.SelectedSegmentId );
+                mSegmentInfoCurrentPageIndex = (int) ( segmentIndex / mItemsPerPage );
+            }
+            else
+            {
+                mSegmentInfoCurrentPageIndex = 0;
+            }
             UpdateSegmentInfoList();
         }
 

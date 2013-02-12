@@ -27,8 +27,12 @@ namespace Mojo.Wpf.View
             var selectedSegment = (Interop.SegmentInfo)( (ListView)sender ).SelectedItem;
             if ( selectedSegment != null && DataContext != null )
             {
-                ( (ViewModel.EngineDataContext)DataContext ).Engine.SelectSegment( selectedSegment.Id );
-                ( (ListView)sender ).ScrollIntoView( selectedSegment );
+                var engine = ( (ViewModel.EngineDataContext)DataContext ).Engine;
+                if ( engine.TileManager.SelectedSegmentId != selectedSegment.Id )
+                {
+                    engine.SelectSegment( selectedSegment.Id );
+                    ( (ListView)sender ).ScrollIntoView( selectedSegment );
+                }
             }
         }
 
@@ -66,6 +70,11 @@ namespace Mojo.Wpf.View
             ( (ViewModel.EngineDataContext)DataContext ).Engine.TileManager.MouseOverSegmentId = (uint)segmentViewItem.Tag;
         }
 
+        private void SegmentListViewItem_OnMouseLeave( object sender, MouseEventArgs e )
+        {
+            ( (ViewModel.EngineDataContext) DataContext ).Engine.TileManager.MouseOverSegmentId = 0;
+        }
+
         private void SegmentListViewItem_OnMouseDoubleClick( object sender, MouseEventArgs e )
         {
             var segmentViewItem = ( (ListViewItem)sender );
@@ -92,7 +101,7 @@ namespace Mojo.Wpf.View
                     //
                     // Sort size and Lock descending on first click (other colums ascending)
                     //
-                    mSordDescending = header.Tag.Equals( "Size" ) || header.Tag.Equals( "Lock" );
+                    mSordDescending = ( header.Tag.Equals( "Size" ) && mCurrentSortColumHeader != null ) || header.Tag.Equals( "Lock" );
 
                     //
                     // Reset previous sort column arrow
@@ -123,8 +132,11 @@ namespace Mojo.Wpf.View
                 var fieldName = header.Tag as String;
                 ( (ViewModel.EngineDataContext)DataContext ).TileManagerDataContext.SortSegmentListBy( fieldName, mSordDescending );
 
+                SegmentList.SelectedValue = ( (ViewModel.EngineDataContext) DataContext ).Engine.TileManager.SelectedSegmentId;
+
             }
         }
+
     }
 
 
