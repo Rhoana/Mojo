@@ -226,7 +226,7 @@ void FileSystemSegmentInfoManager::Save()
     char *sqlError = NULL;
 
     query = converter.str();
-	Core::Printf( query );
+	//Core::Printf( query );
     sqlReturn = sqlite3_exec( mIdTileIndexDB, query.c_str(), NULL, NULL, &sqlError); 
 
     if ( sqlReturn != SQLITE_OK )
