@@ -19,6 +19,14 @@ output_image_extension     = '.tif'
 image_resize_filter        = PIL.Image.ANTIALIAS
 nimages_to_process         = 168
 
+original_input_images_path = 'C:\\dev\\datasets\\conn\\main_dataset\\cube2\\input_images'
+output_tile_image_path     = 'C:\\dev\\datasets\\Cube2x100\\mojo\\images\\tiles'
+output_tile_volume_file    = 'C:\\dev\\datasets\\Cube2x100\\mojo\\images\\tiledVolumeDescription.xml'
+output_image_extension     = '.tif'
+image_resize_filter        = PIL.Image.ANTIALIAS
+nimages_to_process            = 100
+#nimages_to_process            = 1124
+
 #original_input_images_path = 'C:\\dev\\datasets\\conn\\main_dataset\\ac3train\\input_images'
 #output_tile_image_path     = 'C:\\dev\\datasets\\ac3x10\\mojo\\images\\tiles'
 #output_tile_volume_file    = 'C:\\dev\\datasets\\ac3x10\\mojo\\images\\tiledVolumeDescription.xml'
@@ -43,14 +51,6 @@ nimages_to_process         = 168
 #image_resize_filter        = PIL.Image.ANTIALIAS
 #nimages_to_process         = 20
 
-##original_input_images_path = 'C:\\dev\\datasets\\conn\\main_dataset\\cube2\\input_images'
-##output_tile_image_path     = 'C:\\dev\\datasets\\Cube2x1124\\mojo\\images\\tiles'
-##output_tile_volume_file    = 'C:\\dev\\datasets\\Cube2x1124\\mojo\\images\\tiledVolumeDescription.xml'
-##output_image_extension     = '.tif'
-##image_resize_filter        = PIL.Image.ANTIALIAS
-
-####nimages_to_process            = 50
-##nimages_to_process            = 1124
 
 
 def mkdir_safe( dir_to_make ):

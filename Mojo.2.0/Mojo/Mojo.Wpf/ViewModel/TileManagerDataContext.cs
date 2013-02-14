@@ -51,6 +51,8 @@ namespace Mojo.Wpf.ViewModel
                     break;
                 case "SelectedSegmentId":
                     UpdateSelectedSegmentBrush();
+                    break;
+                case "SegmentListFocus":
                     JumpToSelectedSegmentInfoPage();
                     break;
                 case "MouseOverSegmentId":

@@ -328,6 +328,9 @@ namespace Mojo
             TileManager.TiledDatasetView.ExtentDataSpace = extentDataSpace;
 
             QuickRender();
+
+            TileManager.UpdateSegmentListFocus();
+
         }
 
         public void CenterAndZoomToSegmentCentroid3D( uint segId )

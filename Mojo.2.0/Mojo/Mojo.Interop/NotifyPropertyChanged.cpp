@@ -11,7 +11,6 @@ namespace Interop
 
 void NotifyPropertyChanged::OnPropertyChanged( String^ propertyName )
 {
-    RELEASE_ASSERT( TypeDescriptor::GetProperties( this )[ propertyName ] != nullptr );
     PropertyChanged( this, gcnew PropertyChangedEventArgs( propertyName ) );
 }
 

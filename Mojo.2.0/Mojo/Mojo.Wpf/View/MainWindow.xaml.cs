@@ -31,8 +31,8 @@ namespace Mojo.Wpf.View
                 if ( engine.TileManager.SelectedSegmentId != selectedSegment.Id )
                 {
                     engine.SelectSegment( selectedSegment.Id );
-                    ( (ListView)sender ).ScrollIntoView( selectedSegment );
                 }
+                ( (ListView)sender ).ScrollIntoView( selectedSegment );
             }
         }
 

@@ -234,8 +234,8 @@ namespace Mojo
                         if ( clickedId != mTileManager.SelectedSegmentId )
                         {
                             //Select this segment
-                            mTileManager.SelectedSegmentId = clickedId;
                             mTileManager.Internal.PrepForSplit( clickedId, p );
+                            mTileManager.SelectedSegmentId = clickedId;
                         }
                     }
                 }

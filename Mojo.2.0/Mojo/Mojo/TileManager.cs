@@ -474,6 +474,11 @@ namespace Mojo
             OnPropertyChanged( "TiledDatasetView" );
         }
 
+        public void UpdateSegmentListFocus()
+        {
+            OnPropertyChanged( "SegmentListFocus" );
+        }
+
         public void LoadTiledDataset( string datasetRootDirectory )
         {
             if ( TiledDatasetLoaded )
@@ -716,6 +721,7 @@ namespace Mojo
         {
             return Internal.GetTileCache().Where( tileCacheEntry => tileCacheEntry.Active ).OrderBy( tileCacheEntry => tileCacheEntry.CenterDataSpace.Z ).ToList();
         }
+
 
     }
 }

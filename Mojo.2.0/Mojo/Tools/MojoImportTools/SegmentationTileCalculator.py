@@ -27,12 +27,11 @@ generate_memorable_names      = True
 #ncolors                       = 10000
 #input_file_format             = 'tif'
 
-
-#original_input_ids_path       = 'C:\\dev\\datasets\\conn\\main_dataset\\cube2\\diced_xy=512_z=32_xyOv=128_zOv=12_dwnSmp=1\\res_from_Nov29_PF\\FS=1\\stitched\\labels_grow'
-#output_path                    = 'C:\\dev\\datasets\\Cube2x1124\\mojo'
-#nimages_to_process            = 1124
-#ncolors                       = 10000
-#input_file_format             = 'png'
+original_input_ids_path       = 'C:\\dev\\datasets\\conn\\main_dataset\\cube2\\diced_xy=512_z=32_xyOv=128_zOv=12_dwnSmp=1\\res_from_Nov29_PF\\FS=1\\stitched\\labels_grow'
+output_path                    = 'C:\\dev\\datasets\\Cube2x100\\mojo'
+nimages_to_process            = 100
+ncolors                       = 10000
+input_file_format             = 'png'
 
 #original_input_ids_path       = 'C:\\dev\\datasets\\conn\\main_dataset\\5K_cube\\diced_xy=512_z=32_xyOv=128_zOv=12_dwnSmp=1\\res_from_0ct15_PF\\FS=1\\stitched\\labels_grow'
 #output_path                   = 'C:\\dev\\datasets\\Cube1x10\\mojo'
@@ -46,11 +45,11 @@ generate_memorable_names      = True
 #ncolors                       = 1000
 #input_file_format             = 'png'
 
-original_input_ids_path       = 'C:\\dev\\datasets\\conn\\main_dataset\\ac3train\\diced_xy=512_z=32_xyOv=128_zOv=12_dwnSmp=1\\res_from_sept_30_minotrC_PF\\FS=1\\stitched\\labels_grow'
-output_path                   = 'C:\\dev\\datasets\\ac3x20\\mojo'
-nimages_to_process            = 20
-ncolors                       = 1000
-input_file_format             = 'png'
+#original_input_ids_path       = 'C:\\dev\\datasets\\conn\\main_dataset\\ac3train\\diced_xy=512_z=32_xyOv=128_zOv=12_dwnSmp=1\\res_from_sept_30_minotrC_PF\\FS=1\\stitched\\labels_grow'
+#output_path                   = 'C:\\dev\\datasets\\ac3x20\\mojo'
+#nimages_to_process            = 20
+#ncolors                       = 1000
+#input_file_format             = 'png'
 
 output_ids_path                = output_path + '\\ids'
 output_tile_ids_path           = output_ids_path + '\\tiles'

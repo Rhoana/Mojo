@@ -179,8 +179,8 @@ namespace Mojo
                     //
                     // Select this segment
                     //
-                    mTileManager.SelectedSegmentId = clickedId;
                     mTileManager.Internal.PrepForAdjust( clickedId, p );
+                    mTileManager.SelectedSegmentId = clickedId;
                 }
             }
         }
