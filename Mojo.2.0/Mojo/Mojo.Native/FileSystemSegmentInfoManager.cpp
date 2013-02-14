@@ -84,7 +84,7 @@ void FileSystemSegmentInfoManager::OpenDB()
             converter << "SELECT MAX(id) FROM segmentInfo;";
             query = converter.str();
 
-            sqlReturn = sqlite3_prepare_v2(mIdTileIndexDB, query.c_str(), query.size(), &statement, NULL); 
+            sqlReturn = sqlite3_prepare_v2(mIdTileIndexDB, query.c_str(), (int)query.size(), &statement, NULL); 
 
             if ( sqlReturn )
             {
@@ -115,7 +115,7 @@ void FileSystemSegmentInfoManager::OpenDB()
             converter << "SELECT id, name, size, confidence FROM segmentInfo WHERE size > 0 ORDER BY id;";
             query = converter.str();
 
-            sqlReturn = sqlite3_prepare_v2(mIdTileIndexDB, query.c_str(), query.size(), &statement, NULL); 
+            sqlReturn = sqlite3_prepare_v2(mIdTileIndexDB, query.c_str(), (int)query.size(), &statement, NULL); 
 
             if ( sqlReturn )
             {
@@ -132,7 +132,7 @@ void FileSystemSegmentInfoManager::OpenDB()
                         sqlite3_column_int(statement, 3) ) );
 					mIdConfidenceMap( sqlite3_column_int(statement, 0) ) = sqlite3_column_int(statement, 3);
                 }
-                Core::Printf( "Read ", mSegmentMultiIndex.size(), " segment info entries from db." );
+                Core::Printf( "Read ", (int)mSegmentMultiIndex.size(), " segment info entries from db." );
             }
 
             sqlite3_finalize(statement);
@@ -289,7 +289,7 @@ FileSystemTileSet FileSystemSegmentInfoManager::LoadTileSet( unsigned int segid 
     converter << "SELECT w, z, y, x FROM idTileIndex WHERE id = " << segid << ";";
     query = converter.str();
 
-    sqlReturn = sqlite3_prepare_v2(mIdTileIndexDB, query.c_str(), query.size(), &statement, NULL); 
+    sqlReturn = sqlite3_prepare_v2(mIdTileIndexDB, query.c_str(), (int)query.size(), &statement, NULL); 
 
     if ( sqlReturn )
     {
@@ -304,7 +304,7 @@ FileSystemTileSet FileSystemSegmentInfoManager::LoadTileSet( unsigned int segid 
             y = sqlite3_column_int(statement, 2);
             x = sqlite3_column_int(statement, 3);
 
-            tileSet.insert( make_int4( x, y, z, w ) );
+            tileSet.insert( Mojo::Core::MojoInt4( x, y, z, w ) );
         }
         //Core::Printf( "Read ", tileSet.size(), " entries from db for segment ", segid, "." );
     }
@@ -316,7 +316,7 @@ FileSystemTileSet FileSystemSegmentInfoManager::LoadTileSet( unsigned int segid 
 
 unsigned int FileSystemSegmentInfoManager::GetTileCount ( unsigned int segid )
 {
-    return GetTiles( segid ).size();
+    return (unsigned int)GetTiles( segid ).size();
 }
 
 long FileSystemSegmentInfoManager::GetVoxelCount ( unsigned int segid )
@@ -446,12 +446,12 @@ void FileSystemSegmentInfoManager::UnlockSegmentLabel( unsigned int segId )
 
 unsigned int FileSystemSegmentInfoManager::GetSegmentInfoCount()
 {
-	return mSegmentMultiIndex.size();
+	return (unsigned int)mSegmentMultiIndex.size();
 }
 
 unsigned int FileSystemSegmentInfoManager::GetSegmentInfoCurrentListLocation( unsigned int segId )
 {
-    return mSegmentMultiIndex.project<0> ( mSegmentMultiIndex.get<id>().find( segId ) ) - mSegmentMultiIndex.get<0>().begin();
+    return (unsigned int) ( mSegmentMultiIndex.project<0> ( mSegmentMultiIndex.get<id>().find( segId ) ) - mSegmentMultiIndex.get<0>().begin() );
 }
 
 std::list< SegmentInfo > FileSystemSegmentInfoManager::GetSegmentInfoRange( unsigned int startIndex, unsigned int endIndex )
@@ -460,7 +460,7 @@ std::list< SegmentInfo > FileSystemSegmentInfoManager::GetSegmentInfoRange( unsi
 
     if ( endIndex > mSegmentMultiIndex.size() )
     {
-        endIndex = mSegmentMultiIndex.size();
+        endIndex = (unsigned int)mSegmentMultiIndex.size();
     }
 
     for ( unsigned int i = startIndex; i < endIndex; ++i )

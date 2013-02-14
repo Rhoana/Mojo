@@ -26,11 +26,11 @@ Native::TiledDatasetDescription TiledDatasetDescription::ToNative()
 	//{
 	//	for each ( Collections::Generic::KeyValuePair< unsigned int, Collections::Generic::IList< Vector4 >^ > keyValuePair in IdTileMap )
 	//	{
-	//		std::set< int4, Mojo::Core::Int4Comparator > tiles;
+	//		std::set< MojoInt4, Mojo::Core::Int4Comparator > tiles;
 
 	//		for each ( Vector4 tile in keyValuePair.Value )
 	//		{
-	//			tiles.insert( make_int4( (int)tile.X, (int)tile.Y, (int)tile.Z, (int)tile.W ) );
+	//			tiles.insert( MojoInt4( (int)tile.X, (int)tile.Y, (int)tile.Z, (int)tile.W ) );
 	//		}
 
 	//		//tiledDatasetDescription.idTileMap.Set( keyValuePair.Key, tiles );

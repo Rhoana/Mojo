@@ -2,6 +2,7 @@
 #include "SimpleSplitTools.hpp"
 #include "Mojo.Core/Stl.hpp"
 #include "Mojo.Core/Comparator.hpp"
+#include "Mojo.Core/Printf.hpp"
 
 namespace Mojo
 {
@@ -157,8 +158,8 @@ void SimpleSplitTools::DijkstraSearch ( const int* searchArea, const char* searc
 
 	dist[ fromIndex ] = 0;
 
-	std::set< int2, Mojo::Core::Int2Comparator > distQueue;
-	distQueue.insert( make_int2( fromIndex, 0 ) );
+	std::set< Mojo::Core::MojoInt2, Mojo::Core::Int2Comparator > distQueue;
+	distQueue.insert( Mojo::Core::MojoInt2( fromIndex, 0 ) );
 
 	bool found_target = false;
 	int currentIndex = fromIndex;
@@ -172,7 +173,7 @@ void SimpleSplitTools::DijkstraSearch ( const int* searchArea, const char* searc
 	int itCount = 0;
 	while ( !distQueue.empty() )
 	{
-		std::set< int2, Mojo::Core::Int2Comparator >::iterator top = distQueue.begin();
+        std::set< Mojo::Core::MojoInt2, Mojo::Core::Int2Comparator >::iterator top = distQueue.begin();
 		currentIndex = top->x;
 		distQueue.erase( top );
 
@@ -186,11 +187,11 @@ void SimpleSplitTools::DijkstraSearch ( const int* searchArea, const char* searc
 
 		if ( dist[ currentIndex ] == -1 )
 		{
-			RELEASE_ASSERT( 0 );
+            Core::Printf( "ERROR: Found distance or -1 while searching for shortest path." );
 			break;
 		}
 
-		int2 currentPix = make_int2( currentIndex % width, currentIndex / width );
+		Mojo::Core::MojoInt2 currentPix = Mojo::Core::MojoInt2( currentIndex % width, currentIndex / width );
 
 		int nextIndex = -1;
 
@@ -247,13 +248,13 @@ void SimpleSplitTools::DijkstraSearch ( const int* searchArea, const char* searc
 					//
 					// Remove previous node from the queue
 					//
-					distQueue.erase( distQueue.find( make_int2( nextIndex, dist[ nextIndex ] ) ) );
+					distQueue.erase( distQueue.find( Mojo::Core::MojoInt2( nextIndex, dist[ nextIndex ] ) ) );
 				}
 
 				//
 				// Insert new node into the queue
 				//
-				distQueue.insert( make_int2( nextIndex, altDist ) );
+				distQueue.insert( Mojo::Core::MojoInt2( nextIndex, altDist ) );
 
 				dist[ nextIndex ] = altDist;
 				prev[ nextIndex ] = currentIndex;

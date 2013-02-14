@@ -77,20 +77,20 @@ Core::PrimitiveMap PrimitiveMap::ToCore()
 {
     Core::PrimitiveMap primitiveDictionary;
 
-    for each ( Collections::Generic::KeyValuePair< String^, Vector4 > keyValuePair in mFloat4 )
-    {
-        primitiveDictionary.Set( msclr::interop::marshal_as< std::string >( keyValuePair.Key ), keyValuePair.Value.X, keyValuePair.Value.Y, keyValuePair.Value.Z, keyValuePair.Value.W );
-    }
+    //for each ( Collections::Generic::KeyValuePair< String^, Vector4 > keyValuePair in mFloat4 )
+    //{
+    //    primitiveDictionary.Set( msclr::interop::marshal_as< std::string >( keyValuePair.Key ), keyValuePair.Value.X, keyValuePair.Value.Y, keyValuePair.Value.Z, keyValuePair.Value.W );
+    //}
 
-    for each ( Collections::Generic::KeyValuePair< String^, Vector2 > keyValuePair in mFloat2 )
-    {
-        primitiveDictionary.Set( msclr::interop::marshal_as< std::string >( keyValuePair.Key ), keyValuePair.Value.X, keyValuePair.Value.Y );
-    }
+    //for each ( Collections::Generic::KeyValuePair< String^, Vector2 > keyValuePair in mFloat2 )
+    //{
+    //    primitiveDictionary.Set( msclr::interop::marshal_as< std::string >( keyValuePair.Key ), keyValuePair.Value.X, keyValuePair.Value.Y );
+    //}
 
-    for each ( Collections::Generic::KeyValuePair< String^, Vector4 > keyValuePair in mUChar4 )
-    {
-        primitiveDictionary.Set( msclr::interop::marshal_as< std::string >( keyValuePair.Key ), (unsigned char)keyValuePair.Value.X, (unsigned char)keyValuePair.Value.Y, (unsigned char)keyValuePair.Value.Z, (unsigned char)keyValuePair.Value.W );
-    }
+    //for each ( Collections::Generic::KeyValuePair< String^, Vector4 > keyValuePair in mUChar4 )
+    //{
+    //    primitiveDictionary.Set( msclr::interop::marshal_as< std::string >( keyValuePair.Key ), (unsigned char)keyValuePair.Value.X, (unsigned char)keyValuePair.Value.Y, (unsigned char)keyValuePair.Value.Z, (unsigned char)keyValuePair.Value.W );
+    //}
 
     for each ( Collections::Generic::KeyValuePair< String^, float > keyValuePair in mFloat )
     {

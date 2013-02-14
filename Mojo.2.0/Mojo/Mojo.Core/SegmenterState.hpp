@@ -5,7 +5,7 @@
 #include "HashMap.hpp"
 #include "PrimitiveMap.hpp"
 #include "HostVectorMap.hpp"
-#include "DeviceVectorMap.hpp"
+//#include "DeviceVectorMap.hpp"
 #include "D3D11CudaTextureMap.hpp"
 #include "VolumeDescription.hpp"
 
@@ -26,7 +26,7 @@ public:
     SegmenterState();
 
     D3D11CudaTextureMap                d3d11CudaTextures;
-    DeviceVectorMap                    deviceVectors;
+    //DeviceVectorMap                    deviceVectors;
     HostVectorMap                      hostVectors;
     PrimitiveMap                       constParameters;
     PrimitiveMap                       dynamicParameters;

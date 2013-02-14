@@ -4,6 +4,9 @@
 
 #include "Mojo.Core/HashMap.hpp"
 #include "Mojo.Core/VolumeDescription.hpp"
+#include "Mojo.Core/MojoVectors.hpp"
+
+using namespace Mojo::Core;
 
 namespace Mojo
 {
@@ -14,7 +17,7 @@ struct FileSystemTileCacheEntry
 {
     FileSystemTileCacheEntry();
 
-    int4                                                     tileIndex;
+    MojoInt4                                                 tileIndex;
     int                                                      inUse;
     clock_t                                                  timeStamp;
     bool                                                     needsSaving;

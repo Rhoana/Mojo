@@ -12,6 +12,7 @@
     <ClCompile Include="FileSystemSplitState.cpp" />
     <ClCompile Include="FileSystemSegmentInfoManager.cpp" />
     <ClCompile Include="SegmentInfo.cpp" />
+    <ClCompile Include="..\Sdk\SQLite\sqlite-amalgamation-3071502\sqlite3.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="TileCacheEntry.hpp" />
@@ -28,5 +29,6 @@
     <ClInclude Include="FileSystemSplitState.hpp" />
     <ClInclude Include="FileSystemSegmentInfoManager.hpp" />
     <ClInclude Include="SegmentInfo.hpp" />
+    <ClInclude Include="..\Sdk\SQLite\sqlite-amalgamation-3071502\sqlite3.h" />
   </ItemGroup>
 </Project>

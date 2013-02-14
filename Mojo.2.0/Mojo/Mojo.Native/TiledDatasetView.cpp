@@ -6,8 +6,8 @@ namespace Native
 {
 
 TiledDatasetView::TiledDatasetView() :
-centerDataSpace( make_float3( -1.0f, -1.0f, -1.0f ) ),
-extentDataSpace( make_float3( -1.0f, -1.0f, -1.0f ) ),
+centerDataSpace( Mojo::Core::MojoFloat3( -1.0f, -1.0f, -1.0f ) ),
+extentDataSpace( Mojo::Core::MojoFloat3( -1.0f, -1.0f, -1.0f ) ),
 widthNumPixels ( -1 )
 {
 }

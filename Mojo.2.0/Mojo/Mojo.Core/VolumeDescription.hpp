@@ -1,7 +1,7 @@
 #pragma once
 
+#include "MojoVectors.hpp"
 #include <cuda_runtime.h>
-
 #include <DXGIFormat.h>
 
 namespace Mojo
@@ -16,7 +16,7 @@ public:
 
     void*       data;
 
-    int3        numVoxels;
+    MojoInt3        numVoxels;
 
     DXGI_FORMAT dxgiFormat;
     int         numBytesPerVoxel;

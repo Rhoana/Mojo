@@ -16,6 +16,8 @@
 #include <boost/multi_index/member.hpp>
 #include "sqlite3.h"
 
+#undef min
+
 using boost::multi_index_container;
 using namespace boost::multi_index;
 
@@ -24,7 +26,7 @@ namespace Mojo
 namespace Native
 {
 
-typedef std::set< int4, Mojo::Core::Int4Comparator, boost::fast_pool_allocator< int4 > >   FileSystemTileSet;
+typedef std::set< Mojo::Core::MojoInt4, Mojo::Core::Int4Comparator, boost::fast_pool_allocator< Mojo::Core::MojoInt4 > >   FileSystemTileSet;
 typedef Core::HashMap< unsigned int, FileSystemTileSet >                                   FileSystemIdTileMap;
 typedef stdext::hash_map< unsigned int, FileSystemTileSet >                                FileSystemIdTileMapDirect;
 
@@ -53,7 +55,8 @@ typedef boost::multi_index_container<
 	    ordered_non_unique< tag<size>, member< SegmentInfo, long, &SegmentInfo::size > >,
 	    // index by confidence
 	    ordered_non_unique< tag<confidence>, member< SegmentInfo, int, &SegmentInfo::confidence > >
-  > 
+  >,
+  boost::fast_pool_allocator< SegmentInfo >
 > SegmentMultiIndex;
 
 typedef SegmentMultiIndex::index<id>::type SegmentMultiIndexById;

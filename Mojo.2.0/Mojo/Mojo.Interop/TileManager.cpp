@@ -3,7 +3,7 @@
 #include <msclr/marshal_cppstd.h>
 
 #include "Mojo.Core/Assert.hpp"
-#include "Mojo.Core/Cuda.hpp"
+//#include "Mojo.Core/Cuda.hpp"
 #include "Mojo.Core/ForEach.hpp"
 #include "Mojo.Core/ID3D11CudaTexture.hpp"
 #include "Mojo.Core/Stl.hpp"
@@ -199,20 +199,9 @@ Collections::Generic::IList< SegmentInfo^ >^ TileManager::GetSegmentInfoRange( i
 
     Collections::Generic::List< SegmentInfo^ >^ interopSegmentInfoPage = gcnew Collections::Generic::List< SegmentInfo^ >();
 
-	std::ostringstream colorConverter;
-	colorConverter << std::setfill( '0' ) << std::hex;
-
 	for ( std::list< Native::SegmentInfo >::iterator segIt = segmentInfoPage.begin(); segIt != segmentInfoPage.end(); ++segIt )
 	{
-		int4 color = mTileManager->GetSegmentationLabelColor( segIt->id );
-
-		colorConverter.str("");
-		colorConverter << std::setw( 1 ) << "#";
-		colorConverter << std::setw( 2 ) << color.x;
-		colorConverter << std::setw( 2 ) << color.y;
-		colorConverter << std::setw( 2 ) << color.z;
-
-        interopSegmentInfoPage->Add( gcnew SegmentInfo( *segIt, colorConverter.str() ) );
+        interopSegmentInfoPage->Add( gcnew SegmentInfo( *segIt, mTileManager->GetSegmentationLabelColorString( segIt->id ) ) );
 	}
 
     return interopSegmentInfoPage;
@@ -231,25 +220,30 @@ SlimDX::Direct3D11::ShaderResourceView^ TileManager::GetIdConfidenceMap()
 
 unsigned int TileManager::GetSegmentationLabelId( TiledDatasetView^ tiledDatasetView, Vector3^ pDataSpace )
 {
-    float3 pDataSpaceFloat3 = make_float3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
+    MojoFloat3 pDataSpaceFloat3 = MojoFloat3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
     return mTileManager->GetSegmentationLabelId( tiledDatasetView->ToNative(), pDataSpaceFloat3 );
 }
 
 Vector3 TileManager::GetSegmentationLabelColor( unsigned int segId )
 {
-    int4 color = mTileManager->GetSegmentationLabelColor( segId );
-    return Vector3( (float)color.x, (float)color.y, (float)color.z );
+    MojoInt3 labelColor = mTileManager->GetSegmentationLabelColor( segId );
+    return Vector3( (float)labelColor.x, (float)labelColor.y, (float)labelColor.z );
+}
+
+String^ TileManager::GetSegmentationLabelColorString( unsigned int segId )
+{
+    return msclr::interop::marshal_as< String^ >( mTileManager->GetSegmentationLabelColorString( segId ) );
 }
 
 Vector3 TileManager::GetSegmentCentralTileLocation( unsigned int segId )
 {
-    int3 location = mTileManager->GetSegmentCentralTileLocation( segId );
+    Core::MojoInt3 location = mTileManager->GetSegmentCentralTileLocation( segId );
     return Vector3( (float)location.x, (float)location.y, (float)location.z );
 }
 
 Vector4 TileManager::GetSegmentZTileBounds( unsigned int segId, int zIndex )
 {
-    int4 location = mTileManager->GetSegmentZTileBounds( segId, zIndex );
+    Core::MojoInt4 location = mTileManager->GetSegmentZTileBounds( segId, zIndex );
     return Vector4( (float)location.x, (float)location.y, (float)location.z, (float)location.w );
 }
 
@@ -260,43 +254,43 @@ void TileManager::ReplaceSegmentationLabel( unsigned int oldId, unsigned int new
 
 void TileManager::ReplaceSegmentationLabelCurrentSlice( unsigned int oldId, unsigned int newId, TiledDatasetView^ tiledDatasetView, Vector3^ pDataSpace )
 {
-    float3 pDataSpaceFloat3 = make_float3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
+    MojoFloat3 pDataSpaceFloat3 = MojoFloat3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
     mTileManager->ReplaceSegmentationLabelCurrentSlice( oldId, newId, pDataSpaceFloat3  );
 }
 
 void TileManager::ReplaceSegmentationLabelCurrentConnectedComponent( unsigned int oldId, unsigned int newId, TiledDatasetView^ tiledDatasetView, Vector3^ pDataSpace )
 {
-    float3 pDataSpaceFloat3 = make_float3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
+    MojoFloat3 pDataSpaceFloat3 = MojoFloat3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
     mTileManager->ReplaceSegmentationLabelCurrentConnectedComponent( oldId, newId, pDataSpaceFloat3  );
 }
 
 void TileManager::DrawSplit( TiledDatasetView^ tiledDatasetView, Vector3^ pDataSpace, float radius )
 {
-    float3 pDataSpaceFloat3 = make_float3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
+    MojoFloat3 pDataSpaceFloat3 = MojoFloat3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
     mTileManager->DrawSplit( pDataSpaceFloat3, radius );
 }
 
 void TileManager::DrawErase( TiledDatasetView^ tiledDatasetView, Vector3^ pDataSpace, float radius )
 {
-    float3 pDataSpaceFloat3 = make_float3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
+    MojoFloat3 pDataSpaceFloat3 = MojoFloat3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
     mTileManager->DrawErase( pDataSpaceFloat3, radius );
 }
 
 void TileManager::DrawRegionA( TiledDatasetView^ tiledDatasetView, Vector3^ pDataSpace, float radius )
 {
-    float3 pDataSpaceFloat3 = make_float3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
+    MojoFloat3 pDataSpaceFloat3 = MojoFloat3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
     mTileManager->DrawRegionA( pDataSpaceFloat3, radius );
 }
 
 void TileManager::DrawRegionB( TiledDatasetView^ tiledDatasetView, Vector3^ pDataSpace, float radius )
 {
-    float3 pDataSpaceFloat3 = make_float3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
+    MojoFloat3 pDataSpaceFloat3 = MojoFloat3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
     mTileManager->DrawRegionB( pDataSpaceFloat3, radius );
 }
 
 void TileManager::AddSplitSource( TiledDatasetView^ tiledDatasetView, Vector3^ pDataSpace )
 {
-    float3 pDataSpaceFloat3 = make_float3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
+    MojoFloat3 pDataSpaceFloat3 = MojoFloat3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
     mTileManager->AddSplitSource( pDataSpaceFloat3 );
 }
 
@@ -305,70 +299,75 @@ void TileManager::RemoveSplitSource()
     mTileManager->RemoveSplitSource();
 }
 
-void TileManager::ResetSplitState()
+void TileManager::ResetSplitState( Vector3^ pDataSpace )
 {
-    mTileManager->ResetSplitState();
+    MojoFloat3 pDataSpaceFloat3 = MojoFloat3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
+    mTileManager->ResetSplitState( pDataSpaceFloat3 );
 }
 
 void TileManager::PrepForSplit( unsigned int segId, Vector3^ pDataSpace )
 {
-    float3 pDataSpaceFloat3 = make_float3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
+    MojoFloat3 pDataSpaceFloat3 = MojoFloat3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
     mTileManager->PrepForSplit( segId, pDataSpaceFloat3 );
 }
 
-void TileManager::FindBoundaryJoinPoints2D( unsigned int segId )
+void TileManager::FindBoundaryJoinPoints2D( unsigned int segId, Vector3^ pDataSpace  )
 {
-    mTileManager->FindBoundaryJoinPoints2D( segId );
+    MojoFloat3 pDataSpaceFloat3 = MojoFloat3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
+    mTileManager->FindBoundaryJoinPoints2D( segId, pDataSpaceFloat3 );
 }
 
-void TileManager::FindBoundaryWithinRegion2D( unsigned int segId )
+void TileManager::FindBoundaryWithinRegion2D( unsigned int segId, Vector3^ pDataSpace  )
 {
-    mTileManager->FindBoundaryWithinRegion2D( segId );
+    MojoFloat3 pDataSpaceFloat3 = MojoFloat3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
+    mTileManager->FindBoundaryWithinRegion2D( segId, pDataSpaceFloat3 );
 }
 
-void TileManager::FindBoundaryBetweenRegions2D( unsigned int segId )
+void TileManager::FindBoundaryBetweenRegions2D( unsigned int segId, Vector3^ pDataSpace  )
 {
-    mTileManager->FindBoundaryBetweenRegions2D( segId );
+    MojoFloat3 pDataSpaceFloat3 = MojoFloat3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
+    mTileManager->FindBoundaryBetweenRegions2D( segId, pDataSpaceFloat3 );
 }
 
 int TileManager::CompletePointSplit( unsigned int segId, Vector3^ pDataSpace )
 {
-    float3 pDataSpaceFloat3 = make_float3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
+    MojoFloat3 pDataSpaceFloat3 = MojoFloat3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
     return mTileManager->CompletePointSplit( segId, pDataSpaceFloat3 );
 }
 
 int TileManager::CompleteDrawSplit( unsigned int segId, Vector3^ pDataSpace, bool join3D, int splitStartZ )
 {
-    float3 pDataSpaceFloat3 = make_float3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
+    MojoFloat3 pDataSpaceFloat3 = MojoFloat3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
     return mTileManager->CompleteDrawSplit( segId, pDataSpaceFloat3, join3D, splitStartZ );
 }
 
 void TileManager::RecordSplitState( unsigned int segId, Vector3^ pDataSpace )
 {
-    float3 pDataSpaceFloat3 = make_float3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
+    MojoFloat3 pDataSpaceFloat3 = MojoFloat3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
     mTileManager->RecordSplitState( segId, pDataSpaceFloat3 );
 }
 
 void TileManager::PredictSplit( unsigned int segId, Vector3^ pDataSpace, float radius )
 {
-    float3 pDataSpaceFloat3 = make_float3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
+    MojoFloat3 pDataSpaceFloat3 = MojoFloat3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
     mTileManager->PredictSplit( segId, pDataSpaceFloat3, radius );
 }
 
-void TileManager::ResetAdjustState()
+void TileManager::ResetAdjustState( Vector3^ pDataSpace )
 {
-    mTileManager->ResetAdjustState();
+    MojoFloat3 pDataSpaceFloat3 = MojoFloat3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
+    mTileManager->ResetAdjustState( pDataSpaceFloat3 );
 }
 
 void TileManager::PrepForAdjust( unsigned int segId, Vector3^ pDataSpace )
 {
-    float3 pDataSpaceFloat3 = make_float3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
+    MojoFloat3 pDataSpaceFloat3 = MojoFloat3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
     mTileManager->PrepForAdjust( segId, pDataSpaceFloat3 );
 }
 
 void TileManager::CommitAdjustChange( unsigned int segId, Vector3^ pDataSpace )
 {
-    float3 pDataSpaceFloat3 = make_float3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
+    MojoFloat3 pDataSpaceFloat3 = MojoFloat3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
     mTileManager->CommitAdjustChange( segId, pDataSpaceFloat3 );
 }
 

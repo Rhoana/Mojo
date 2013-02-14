@@ -26,7 +26,10 @@ namespace Mojo
 
         public virtual void SelectSegment( uint segmentId )
         {
-            
+        }
+
+        public virtual void MoveZ()
+        {
         }
 
         public virtual void OnKeyDown( KeyEventArgs keyEventArgs, int width, int height )

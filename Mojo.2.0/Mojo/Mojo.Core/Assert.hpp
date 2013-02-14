@@ -2,6 +2,7 @@
 
 #include "Stl.hpp"
 
+#define NOMINMAX
 #include <Windows.h>
 
 #include "Printf.hpp"

@@ -78,33 +78,20 @@
     <Reference Include="Emgu.Util">
       <HintPath>..\Sdk\Emgu\libemgucv-windows-x86-2.2.1.1150\bin\Emgu.Util.dll</HintPath>
     </Reference>
-    <Reference Include="Mojo.Xml, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\Tools\Mojo.Xml\bin\x86\Release\Mojo.Xml.dll</HintPath>
-    </Reference>
-    <Reference Include="Mojo.Xml.XmlSerializers, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\Tools\Mojo.Xml\bin\x86\Release\Mojo.Xml.XmlSerializers.dll</HintPath>
-    </Reference>
     <Reference Include="ObservableDictionary">
       <HintPath>..\Sdk\ObservableDictionary\v1.0\bin\Release\ObservableDictionary.dll</HintPath>
     </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
-    <Reference Include="SlimDX, Version=2.0.11.43, Culture=neutral, PublicKeyToken=b1b0c32fd1ffe4f9, processorArchitecture=x86">
+    <Reference Include="SlimDX, Version=2.0.10.43, Culture=neutral, PublicKeyToken=b1b0c32fd1ffe4f9, processorArchitecture=x86">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\Sdk\SlimDX\SlimDX SDK (October 2010)\Bin\net20\x86\SlimDX.dll</HintPath>
-      <Private>True</Private>
+      <HintPath>..\Sdk\SlimDX\SlimDX SDK (October 2010)\Bin\net20\x64\SlimDX.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xaml" />
     <Reference Include="System.XML" />
-    <Reference Include="TinyText, Version=0.0.0.0, Culture=neutral, processorArchitecture=x86">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\Sdk\TinyText\v1.0\TinyText\bin\Win32\Release\TinyText.dll</HintPath>
-    </Reference>
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
@@ -133,6 +120,9 @@
     <Compile Include="SplitSegmentationRenderingStrategy.cs" />
     <Compile Include="SplitSegmentationTool.cs" />
     <Compile Include="StreamUtil.cs" />
+    <Compile Include="tiledVolumeDescription.cs">
+      <DependentUpon>tiledVolumeDescription.xsd</DependentUpon>
+    </Compile>
     <Compile Include="TileManager.cs" />
     <Compile Include="MergeSegmentationRenderingStrategy.cs" />
     <Compile Include="MergeSegmentationTool.cs" />
@@ -156,6 +146,9 @@
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
     <AppDesigner Include="Properties\" />
+    <None Include="tiledVolumeDescription.xsd">
+      <SubType>Designer</SubType>
+    </None>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

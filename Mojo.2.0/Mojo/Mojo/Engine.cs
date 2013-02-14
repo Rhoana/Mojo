@@ -79,8 +79,8 @@ namespace Mojo
             Console.WriteLine( "\nMojo initializing...\n" );
 
             D3D11.Initialize( out mDxgiFactory, out mD3D11Device );
-            Cuda.Initialize( mD3D11Device );
-            Thrust.Initialize();
+            //Cuda.Initialize( mD3D11Device );
+            //Thrust.Initialize();
 
             TileManager = new TileManager( new Interop.TileManager( mD3D11Device, mD3D11Device.ImmediateContext, Constants.ConstParameters ) );
 
@@ -147,8 +147,8 @@ namespace Mojo
                 TileManager = null;
             }
 
-            Thrust.Terminate();
-            Cuda.Terminate();
+            //Thrust.Terminate();
+            //Cuda.Terminate();
             D3D11.Terminate( ref mDxgiFactory, ref mD3D11Device );
 
             Console.WriteLine( "\nMojo terminating...\n" );
@@ -167,7 +167,11 @@ namespace Mojo
                     TileManager.Internal.RecordSplitState( TileManager.SelectedSegmentId, centerDataSpace );
                 }
                 centerDataSpace.Z += 1f;
+
                 TileManager.TiledDatasetView.CenterDataSpace = centerDataSpace;
+
+                Tools.Get( ViewerMode.TileManager2D ).Get( CurrentToolMode ).MoveZ();
+
                 TileManager.UpdateView();
                 Update();
             }
@@ -186,7 +190,11 @@ namespace Mojo
                     TileManager.Internal.RecordSplitState( TileManager.SelectedSegmentId, centerDataSpace );
                 }
                 centerDataSpace.Z -= 1f;
+
                 TileManager.TiledDatasetView.CenterDataSpace = centerDataSpace;
+
+                Tools.Get( ViewerMode.TileManager2D ).Get( CurrentToolMode ).MoveZ();
+
                 TileManager.UpdateView();
                 Update();
             }
@@ -283,6 +291,9 @@ namespace Mojo
             centerDataSpace.Z = pointTileSpace.Z;
 
             TileManager.TiledDatasetView.CenterDataSpace = centerDataSpace;
+
+            Tools.Get( ViewerMode.TileManager2D ).Get( CurrentToolMode ).Select();
+
             TileManager.UpdateView();
             Update();
         }

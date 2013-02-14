@@ -1,7 +1,10 @@
 #pragma once
 
 #include "Mojo.Core/Stl.hpp"
-#include "Mojo.Core/Cuda.hpp"
+//#include "Mojo.Core/Cuda.hpp"
+#include "Mojo.Core/MojoVectors.hpp"
+
+using namespace Mojo::Core;
 
 namespace Mojo
 {
@@ -14,8 +17,8 @@ struct FileSystemSplitState
 
     int                                                           splitId;
     int                                                           splitZ;
-    std::vector< float2 >                                         splitLine;
-    std::vector< std::pair< float2, char >>                       splitDrawPoints;
+    std::vector< MojoFloat2 >                                         splitLine;
+    std::vector< std::pair< MojoFloat2, char >>                       splitDrawPoints;
 
 };
 

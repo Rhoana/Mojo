@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Microsoft.Xml.Serialization.GeneratedAssembly;
 using Mojo.Interop;
-using Mojo.Xml;
 using SlimDX;
 using SlimDX.DXGI;
+using System.Xml.Serialization;
+using System.Xml;
 
 namespace Mojo
 {
@@ -384,7 +384,7 @@ namespace Mojo
 
         public void CancelSplitChange()
         {
-            Internal.ResetSplitState();
+            Internal.ResetSplitState( new Vector3( mMouseOverX, mMouseOverY, mTiledDatasetView.CenterDataSpace.Z ) );
         }
 
         public void CommmitAdjustChange()
@@ -395,7 +395,7 @@ namespace Mojo
 
         public void CancelAdjustChange()
         {
-            Internal.ResetAdjustState();
+            Internal.ResetAdjustState( new Vector3( mMouseOverX, mMouseOverY, mTiledDatasetView.CenterDataSpace.Z ) );
         }
 
         public void UndoChange()
@@ -573,7 +573,28 @@ namespace Mojo
 
         private static TiledVolumeDescription GetTiledVolumeDescription( string mapRootDirectory, string tiledVolumeDescriptionPath )
         {
-            var tiledVolumeDescriptionXml = XmlReader.ReadFromFile<tiledVolumeDescription, tiledVolumeDescriptionSerializer>( tiledVolumeDescriptionPath );
+            tiledVolumeDescription tiledVolumeDescriptionXml;
+
+            try
+            {
+                XmlSerializer tiledVolumeDescriptionSerializer = new XmlSerializer( typeof( tiledVolumeDescription ) );
+
+                // A FileStream is needed to read the XML document.
+                using ( var fileStream = new FileStream( tiledVolumeDescriptionPath, FileMode.Open ) )
+                {
+                    System.Xml.XmlReader xmlTextReader = new XmlTextReader( fileStream );
+
+                    // Declare an object variable of the type to be deserialized.
+                    tiledVolumeDescriptionXml = (tiledVolumeDescription)tiledVolumeDescriptionSerializer.Deserialize( xmlTextReader );
+                }
+            }
+            catch ( Exception e )
+            {
+                Console.WriteLine( e.Message );
+                Release.Assert( false );
+                tiledVolumeDescriptionXml = new tiledVolumeDescription();
+            }
+
             var tiledVolumeDescription = new TiledVolumeDescription
                                          {
                                              ImageDataDirectory = mapRootDirectory,

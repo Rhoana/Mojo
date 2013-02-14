@@ -4,6 +4,7 @@
 
 #include <stdio.h>
 
+#define NOMINMAX
 #include <Windows.h>
 
 #include "ToString.hpp"

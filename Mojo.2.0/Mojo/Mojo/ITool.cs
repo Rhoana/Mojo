@@ -4,5 +4,6 @@ namespace Mojo
     {
         void Select();
         void SelectSegment( uint segmentId );
+        void MoveZ();
     }
 }

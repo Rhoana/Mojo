@@ -10,6 +10,10 @@ namespace Mojo
         {
         }
 
+        public void MoveZ()
+        {
+        }
+
         public void OnKeyDown( System.Windows.Input.KeyEventArgs keyEventArgs, int width, int height )
         {
         }

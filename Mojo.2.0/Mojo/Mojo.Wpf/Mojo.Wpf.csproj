@@ -89,8 +89,6 @@
     <ErrorReport>prompt</ErrorReport>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Emgu.CV, Version=2.2.1.1150, Culture=neutral, PublicKeyToken=7281126722ab4438, processorArchitecture=MSIL" />
-    <Reference Include="Emgu.Util, Version=2.2.1.1150, Culture=neutral, PublicKeyToken=7281126722ab4438, processorArchitecture=MSIL" />
     <Reference Include="ObservableDictionary, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL" />
     <Reference Include="Ookii.Dialogs">
       <HintPath>..\Sdk\Ookii\v1.0\Ookii.Dialogs.dll</HintPath>
@@ -98,10 +96,9 @@
     <Reference Include="Ookii.Dialogs.Wpf">
       <HintPath>..\Sdk\Ookii\v1.0\Ookii.Dialogs.Wpf.dll</HintPath>
     </Reference>
-    <Reference Include="SlimDX, Version=2.0.11.43, Culture=neutral, PublicKeyToken=b1b0c32fd1ffe4f9, processorArchitecture=x86">
+    <Reference Include="SlimDX, Version=2.0.10.43, Culture=neutral, PublicKeyToken=b1b0c32fd1ffe4f9, processorArchitecture=x86">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\Sdk\SlimDX\SlimDX SDK (October 2010)\Bin\net20\x86\SlimDX.dll</HintPath>
-      <Private>True</Private>
+      <HintPath>..\Sdk\SlimDX\SlimDX SDK (October 2010)\Bin\net20\x64\SlimDX.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">

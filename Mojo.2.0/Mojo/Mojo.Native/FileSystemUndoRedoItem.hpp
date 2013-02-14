@@ -6,6 +6,7 @@
 #include "Mojo.Core/Comparator.hpp"
 #include "Mojo.Core/HashMap.hpp"
 #include "Mojo.Core/VolumeDescription.hpp"
+#include "Mojo.Core/MojoVectors.hpp"
 #include "FileSystemSegmentInfoManager.hpp"
 #include "Constants.hpp"
 
@@ -28,7 +29,7 @@ struct FileSystemUndoRedoItem
 		std::bitset< TILE_SIZE * TILE_SIZE > >
 		                                                                changePixels;
 	Core::HashMap< std::string,
-		std::set< int2, Core::Int2Comparator > >
+		std::set< Core::MojoInt2, Core::Int2Comparator > >
 		                                                                changeSets;
 };
 

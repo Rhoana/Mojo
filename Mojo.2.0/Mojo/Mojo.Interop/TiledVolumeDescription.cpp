@@ -32,18 +32,18 @@ TiledVolumeDescription::TiledVolumeDescription( Native::TiledVolumeDescription t
     ImageDataDirectory = msclr::interop::marshal_as< String^ >( tiledVolumeDescription.imageDataDirectory );
     FileExtension      = msclr::interop::marshal_as< String^ >( tiledVolumeDescription.fileExtension );
 
-    NumTilesX         = tiledVolumeDescription.numTiles.x;
-    NumTilesY         = tiledVolumeDescription.numTiles.y;
-    NumTilesZ         = tiledVolumeDescription.numTiles.z;
-    NumTilesW         = tiledVolumeDescription.numTiles.w;
+    NumTilesX         = tiledVolumeDescription.numTilesX;
+    NumTilesY         = tiledVolumeDescription.numTilesY;
+    NumTilesZ         = tiledVolumeDescription.numTilesZ;
+    NumTilesW         = tiledVolumeDescription.numTilesW;
 
-    NumVoxelsPerTileX = tiledVolumeDescription.numVoxelsPerTile.x;
-    NumVoxelsPerTileY = tiledVolumeDescription.numVoxelsPerTile.y;
-    NumVoxelsPerTileZ = tiledVolumeDescription.numVoxelsPerTile.z;
+    NumVoxelsPerTileX = tiledVolumeDescription.numVoxelsPerTileX;
+    NumVoxelsPerTileY = tiledVolumeDescription.numVoxelsPerTileY;
+    NumVoxelsPerTileZ = tiledVolumeDescription.numVoxelsPerTileZ;
 
-    NumVoxelsX        = tiledVolumeDescription.numVoxels.x;
-    NumVoxelsY        = tiledVolumeDescription.numVoxels.y;
-    NumVoxelsZ        = tiledVolumeDescription.numVoxels.z;
+    NumVoxelsX        = tiledVolumeDescription.numVoxelsX;
+    NumVoxelsY        = tiledVolumeDescription.numVoxelsY;
+    NumVoxelsZ        = tiledVolumeDescription.numVoxelsZ;
 
     DxgiFormat        = (SlimDX::DXGI::Format)tiledVolumeDescription.dxgiFormat;
     NumBytesPerVoxel  = tiledVolumeDescription.numBytesPerVoxel;
@@ -57,18 +57,18 @@ Native::TiledVolumeDescription TiledVolumeDescription::ToNative()
     tiledVolumeDescription.imageDataDirectory = msclr::interop::marshal_as< std::string >( ImageDataDirectory );
     tiledVolumeDescription.fileExtension      = msclr::interop::marshal_as< std::string >( FileExtension );
 
-    tiledVolumeDescription.numTiles.x         = NumTilesX;
-    tiledVolumeDescription.numTiles.y         = NumTilesY;
-    tiledVolumeDescription.numTiles.z         = NumTilesZ;
-    tiledVolumeDescription.numTiles.w         = NumTilesW;
+    tiledVolumeDescription.numTilesX         = NumTilesX;
+    tiledVolumeDescription.numTilesY         = NumTilesY;
+    tiledVolumeDescription.numTilesZ         = NumTilesZ;
+    tiledVolumeDescription.numTilesW         = NumTilesW;
 
-    tiledVolumeDescription.numVoxelsPerTile.x = NumVoxelsPerTileX;
-    tiledVolumeDescription.numVoxelsPerTile.y = NumVoxelsPerTileY;
-    tiledVolumeDescription.numVoxelsPerTile.z = NumVoxelsPerTileZ;
+    tiledVolumeDescription.numVoxelsPerTileX = NumVoxelsPerTileX;
+    tiledVolumeDescription.numVoxelsPerTileY = NumVoxelsPerTileY;
+    tiledVolumeDescription.numVoxelsPerTileZ = NumVoxelsPerTileZ;
 
-    tiledVolumeDescription.numVoxels.x        = NumVoxelsX;
-    tiledVolumeDescription.numVoxels.y        = NumVoxelsY;
-    tiledVolumeDescription.numVoxels.z        = NumVoxelsZ;
+    tiledVolumeDescription.numVoxelsX        = NumVoxelsX;
+    tiledVolumeDescription.numVoxelsY        = NumVoxelsY;
+    tiledVolumeDescription.numVoxelsZ        = NumVoxelsZ;
 
     tiledVolumeDescription.dxgiFormat         = (DXGI_FORMAT)DxgiFormat;
     tiledVolumeDescription.numBytesPerVoxel   = NumBytesPerVoxel;

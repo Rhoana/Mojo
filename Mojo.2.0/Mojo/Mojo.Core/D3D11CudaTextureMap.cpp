@@ -24,23 +24,23 @@ stdext::hash_map< std::string, ID3D11CudaTexture* >& D3D11CudaTextureMap::GetHas
     return mD3D11CudaTextures;
 };
 
-void D3D11CudaTextureMap::MapCudaArrays()
-{
-    RELEASE_ASSERT( mCudaGraphicsResources.empty() );
+//void D3D11CudaTextureMap::MapCudaArrays()
+//{
+//    RELEASE_ASSERT( mCudaGraphicsResources.empty() );
+//
+//    MOJO_FOR_EACH_KEY_VALUE( std::string key, ID3D11CudaTexture* d3d11CudaTexture, mD3D11CudaTextures )
+//    {
+//        mCudaGraphicsResources.push_back( d3d11CudaTexture->GetCudaGraphicsResource() );
+//    }
+//
+//    MOJO_CUDA_SAFE( cudaGraphicsMapResources( mCudaGraphicsResources.size(), &mCudaGraphicsResources[ 0 ], 0 ) );
+//}
 
-    MOJO_FOR_EACH_KEY_VALUE( std::string key, ID3D11CudaTexture* d3d11CudaTexture, mD3D11CudaTextures )
-    {
-        mCudaGraphicsResources.push_back( d3d11CudaTexture->GetCudaGraphicsResource() );
-    }
-
-    MOJO_CUDA_SAFE( cudaGraphicsMapResources( mCudaGraphicsResources.size(), &mCudaGraphicsResources[ 0 ], 0 ) );
-}
-
-void D3D11CudaTextureMap::UnmapCudaArrays()
-{
-    MOJO_CUDA_SAFE( cudaGraphicsUnmapResources( mCudaGraphicsResources.size(), &mCudaGraphicsResources[ 0 ], 0 ) );
-    mCudaGraphicsResources.clear();
-}
+//void D3D11CudaTextureMap::UnmapCudaArrays()
+//{
+//    MOJO_CUDA_SAFE( cudaGraphicsUnmapResources( mCudaGraphicsResources.size(), &mCudaGraphicsResources[ 0 ], 0 ) );
+//    mCudaGraphicsResources.clear();
+//}
 
 }
 }

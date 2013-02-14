@@ -1,5 +1,6 @@
  #include "TiledDatasetView.hpp"
 
+#include "Mojo.Core/MojoVectors.hpp"
 #include "Mojo.Native/TiledDatasetView.hpp"
 
 namespace Mojo
@@ -18,8 +19,8 @@ Native::TiledDatasetView TiledDatasetView::ToNative()
 {
     Native::TiledDatasetView tiledDatasetView;
 
-    tiledDatasetView.centerDataSpace = make_float3( CenterDataSpace.X, CenterDataSpace.Y, CenterDataSpace.Z );
-    tiledDatasetView.extentDataSpace = make_float3( ExtentDataSpace.X, ExtentDataSpace.Y, ExtentDataSpace.Z );
+    tiledDatasetView.centerDataSpace = Core::MojoFloat3( CenterDataSpace.X, CenterDataSpace.Y, CenterDataSpace.Z );
+    tiledDatasetView.extentDataSpace = Core::MojoFloat3( ExtentDataSpace.X, ExtentDataSpace.Y, ExtentDataSpace.Z );
     tiledDatasetView.widthNumPixels  = WidthNumPixels;
 
     return tiledDatasetView;

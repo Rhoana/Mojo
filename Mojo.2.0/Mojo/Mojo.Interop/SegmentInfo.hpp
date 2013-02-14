@@ -2,7 +2,11 @@
 
 #include "Mojo.Native/SegmentInfo.hpp"
 
+#using <SlimDX.dll>
+
 using namespace System;
+using namespace SlimDX;
+using namespace SlimDX::DXGI;
 
 namespace Mojo
 {

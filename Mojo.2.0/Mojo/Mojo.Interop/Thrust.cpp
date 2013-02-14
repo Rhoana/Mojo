@@ -1,6 +1,6 @@
 #include "Thrust.hpp"
 
-#include "Mojo.Core/Thrust.hpp"
+//#include "Mojo.Core/Thrust.hpp"
 
 namespace Mojo
 {
@@ -13,12 +13,12 @@ Thrust::Thrust()
 
 void Thrust::Initialize()
 {
-    Core::Thrust::Initialize();
+    //Core::Thrust::Initialize();
 }
 
 void Thrust::Terminate()
 {
-    Core::Thrust::Terminate();
+    //Core::Thrust::Terminate();
 }
 
 }

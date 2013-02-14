@@ -62,10 +62,12 @@ namespace Mojo
                 case System.Windows.Input.Key.Z:
                     if ( keyEventArgs.KeyboardDevice.Modifiers == System.Windows.Input.ModifierKeys.Control )
                         mTileManager.UndoChange();
+                        mTileManager.Internal.PrepForAdjust( mTileManager.SelectedSegmentId, p );
                     break;
                 case System.Windows.Input.Key.Y:
                     if ( keyEventArgs.KeyboardDevice.Modifiers == System.Windows.Input.ModifierKeys.Control )
                         mTileManager.RedoChange();
+                        mTileManager.Internal.PrepForAdjust( mTileManager.SelectedSegmentId, p );
                     break;
                 case System.Windows.Input.Key.Tab:
                     mTileManager.CommmitAdjustChange();

@@ -15,6 +15,8 @@
 #include "TileCacheEntry.hpp"
 #include "SimpleSplitTools.hpp"
 
+using namespace Mojo::Core;
+
 namespace Mojo
 {
 namespace Native
@@ -70,7 +72,7 @@ void FileSystemTileServer::LoadTiledDataset( TiledDatasetDescription& tiledDatas
     switch ( tiledDatasetDescription.tiledVolumeDescriptions.Get( "SourceMap" ).dxgiFormat )
     {
     case DXGI_FORMAT_R8_UNORM:
-        LoadTiledDatasetInternal< uchar1 >( tiledDatasetDescription );
+        LoadTiledDatasetInternal( tiledDatasetDescription );
         break;
 
     default:
@@ -94,7 +96,7 @@ void FileSystemTileServer::LoadSegmentation( TiledDatasetDescription& tiledDatas
     switch ( tiledDatasetDescription.tiledVolumeDescriptions.Get( "SourceMap" ).dxgiFormat )
     {
     case DXGI_FORMAT_R8_UNORM:
-        LoadSegmentationInternal< uchar1 >( tiledDatasetDescription );
+        LoadSegmentationInternal( tiledDatasetDescription );
         break;
 
     default:
@@ -137,7 +139,7 @@ void FileSystemTileServer::SaveSegmentation()
 
     Core::Printf( "Replacing tiles." );
 
-    int4 numTiles = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "SourceMap" ).numTiles;
+    MojoInt4 numTiles = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "SourceMap" ).numTiles();
 
     //size_t shape[] = { numTiles.w, numTiles.z, numTiles.y, numTiles.x };
     //mTileCachePageTable = marray::Marray< int >( shape, shape + 4 );
@@ -245,7 +247,7 @@ void FileSystemTileServer::AutosaveSegmentation()
 
                 Core::Printf( "Autosave copying all modified tiles." );
 
-                int4 numTiles = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "SourceMap" ).numTiles;
+                MojoInt4 numTiles = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "SourceMap" ).numTiles();
 
                 //size_t shape[] = { numTiles.w, numTiles.z, numTiles.y, numTiles.x };
                 //mTileCachePageTable = marray::Marray< int >( shape, shape + 4 );
@@ -331,7 +333,7 @@ void FileSystemTileServer::DeleteTempFiles()
 
     Core::Printf( "Deleting temp files." );
 
-    int4 numTiles = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "SourceMap" ).numTiles;
+    MojoInt4 numTiles = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "SourceMap" ).numTiles();
 
     TiledVolumeDescription tempVolumeDesctiption = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "TempIdMap" );
     TiledVolumeDescription autosaveVolumeDesctiption = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "IdMap" );
@@ -350,11 +352,11 @@ int FileSystemTileServer::GetTileCountForId( unsigned int segId )
     return (int) mSegmentInfoManager.GetTileCount( segId );
 }
 
-int3 FileSystemTileServer::GetSegmentCentralTileLocation( unsigned int segId )
+MojoInt3 FileSystemTileServer::GetSegmentCentralTileLocation( unsigned int segId )
 {
     if ( mIsSegmentationLoaded )
     {
-        int4 numTiles = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "IdMap" ).numTiles;
+        MojoInt4 numTiles = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "IdMap" ).numTiles();
 
         int minTileX = numTiles.x;
         int maxTileX = 0;
@@ -386,22 +388,22 @@ int3 FileSystemTileServer::GetSegmentCentralTileLocation( unsigned int segId )
 		    //
 		    // No tile found at w=0
 		    //
-		    return make_int3( 0, 0, 0 );
+		    return MojoInt3( 0, 0, 0 );
 	    }
 
-        return make_int3( minTileX + ( ( maxTileX - minTileX ) / 2 ), minTileY + ( ( maxTileY - minTileY ) / 2 ), minTileZ + ( ( maxTileZ - minTileZ ) / 2 ) );
+        return MojoInt3( minTileX + ( ( maxTileX - minTileX ) / 2 ), minTileY + ( ( maxTileY - minTileY ) / 2 ), minTileZ + ( ( maxTileZ - minTileZ ) / 2 ) );
 
     }
 
-    return make_int3( 0, 0, 0 );
+    return MojoInt3( 0, 0, 0 );
 
 }
 
-int4 FileSystemTileServer::GetSegmentZTileBounds( unsigned int segId, int zIndex )
+MojoInt4 FileSystemTileServer::GetSegmentZTileBounds( unsigned int segId, int zIndex )
 {
     if ( mIsSegmentationLoaded )
     {
-        int4 numTiles = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "IdMap" ).numTiles;
+        MojoInt4 numTiles = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "IdMap" ).numTiles();
 
         int minTileX = numTiles.x;
         int maxTileX = 0;
@@ -429,14 +431,14 @@ int4 FileSystemTileServer::GetSegmentZTileBounds( unsigned int segId, int zIndex
 		    //
 		    // No tile found at w=0
 		    //
-		    return make_int4( 0, 0, 0, 0 );
+		    return MojoInt4( 0, 0, 0, 0 );
 	    }
 
-        return make_int4( minTileX, minTileY, maxTileX, maxTileY );
+        return MojoInt4( minTileX, minTileY, maxTileX, maxTileY );
 
     }
 
-    return make_int4( 0, 0, 0, 0 );
+    return MojoInt4( 0, 0, 0, 0 );
 
 }
 
@@ -468,7 +470,7 @@ void FileSystemTileServer::ReplaceSegmentationLabel( unsigned int oldId, unsigne
 
         for( FileSystemTileSet::iterator tileIndexi = tilesContainingOldId.begin(); tileIndexi != tilesContainingOldId.end(); ++tileIndexi )
         {
-            int4 tileIndex = *tileIndexi;
+            MojoInt4 tileIndex = *tileIndexi;
             //
             // load tile
             //
@@ -484,14 +486,14 @@ void FileSystemTileServer::ReplaceSegmentationLabel( unsigned int oldId, unsigne
             //
             // replace the old id and color with the new id and color...
             //
-            int3 numVoxels = volumeDescriptions.Get( "IdMap" ).numVoxels;
+            MojoInt3 numVoxels = volumeDescriptions.Get( "IdMap" ).numVoxels;
             for ( int zv = 0; zv < numVoxels.z; zv++ )
             {
                 for ( int yv = 0; yv < numVoxels.y; yv++ )
                 {
                     for ( int xv = 0; xv < numVoxels.x; xv++ )
                     {
-                        int3 index3D = make_int3( xv, yv, zv );
+                        MojoInt3 index3D = MojoInt3( xv, yv, zv );
                         int  index1D = Core::Index3DToIndex1D( index3D, numVoxels );
                         int  idValue = currentIdVolume[ index1D ];
 
@@ -552,10 +554,10 @@ void FileSystemTileServer::ReplaceSegmentationLabel( unsigned int oldId, unsigne
     }
 }
 
-bool FileSystemTileServer::TileContainsId ( int3 numVoxelsPerTile, int3 currentIdNumVoxels, int* currentIdVolume, int segId )
+bool FileSystemTileServer::TileContainsId ( MojoInt3 numVoxelsPerTile, MojoInt3 currentIdNumVoxels, int* currentIdVolume, int segId )
 {
     bool found = false;
-    int maxIndex3D = Core::Index3DToIndex1D( make_int3( numVoxelsPerTile.x-1, numVoxelsPerTile.y-1, 0 ), currentIdNumVoxels );
+    int maxIndex3D = Core::Index3DToIndex1D( MojoInt3( numVoxelsPerTile.x-1, numVoxelsPerTile.y-1, 0 ), currentIdNumVoxels );
     for (int i1D = 0; i1D < maxIndex3D; ++i1D )
     {
         if ( currentIdVolume[ i1D ] == segId )
@@ -567,17 +569,19 @@ bool FileSystemTileServer::TileContainsId ( int3 numVoxelsPerTile, int3 currentI
     return found;
 }
 
-void FileSystemTileServer::ReplaceSegmentationLabelCurrentSlice( unsigned int oldId, unsigned int newId, float3 pointTileSpace )
+void FileSystemTileServer::ReplaceSegmentationLabelCurrentSlice( unsigned int oldId, unsigned int newId, MojoFloat3 pointTileSpace )
 {
     if ( oldId != newId && mIsSegmentationLoaded && mSegmentInfoManager.GetConfidence( newId ) < 100 && mSegmentInfoManager.GetConfidence( oldId ) < 100 )
     {
         long voxelChangeCount = 0;
 
-        int3 numVoxels = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "IdMap" ).numVoxels;
-        int3 numVoxelsPerTile = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "IdMap" ).numVoxelsPerTile;
-        int4 numTiles = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "IdMap" ).numTiles;
-        int3 pVoxelSpace = 
-            make_int3(
+        TiledVolumeDescription tiledVolumeDescription = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "IdMap" );
+
+        MojoInt3 numVoxels = tiledVolumeDescription.numVoxels();
+        MojoInt3 numVoxelsPerTile = tiledVolumeDescription.numVoxelsPerTile();
+        MojoInt4 numTiles = tiledVolumeDescription.numTiles();
+        MojoInt3 pVoxelSpace = 
+            MojoInt3 (
             (int)floor( pointTileSpace.x * numVoxelsPerTile.x ),
             (int)floor( pointTileSpace.y * numVoxelsPerTile.y ),
             (int)floor( pointTileSpace.z * numVoxelsPerTile.z ) );
@@ -594,20 +598,20 @@ void FileSystemTileServer::ReplaceSegmentationLabelCurrentSlice( unsigned int ol
 		mNextUndoItem->oldId = oldId;
 		std::bitset< TILE_SIZE * TILE_SIZE > *changeBits;
 
-		int4 previousTileIndex;
+		MojoInt4 previousTileIndex;
         bool tileLoaded = false;
         bool tileChanged = false;
 
         int currentW = 0;
-        std::queue< int4 > tileQueue;
-        std::multimap< int4, int4, Mojo::Core::Int4Comparator > sliceQueue;
-        std::queue< int4 > wQueue;
+        std::queue< MojoInt4 > tileQueue;
+        std::multimap< MojoInt4, MojoInt4, Mojo::Core::Int4Comparator > sliceQueue;
+        std::queue< MojoInt4 > wQueue;
 
         int* currentIdVolume;
-        int3 currentIdNumVoxels;
-        int4 thisVoxel;
+        MojoInt3 currentIdNumVoxels;
+        MojoInt4 thisVoxel;
 
-        tileQueue.push( make_int4(pVoxelSpace.x, pVoxelSpace.y, pVoxelSpace.z, 0) );
+        tileQueue.push( MojoInt4(pVoxelSpace.x, pVoxelSpace.y, pVoxelSpace.z, 0) );
 
         while ( currentW < numTiles.w )
         {
@@ -633,7 +637,7 @@ void FileSystemTileServer::ReplaceSegmentationLabelCurrentSlice( unsigned int ol
                 //
 				// Find the tile for this pixel
 				//
-                int4 tileIndex = make_int4( thisVoxel.x / numVoxelsPerTile.x,
+                MojoInt4 tileIndex = MojoInt4( thisVoxel.x / numVoxelsPerTile.x,
                     thisVoxel.y / numVoxelsPerTile.y,
                     thisVoxel.z / numVoxelsPerTile.z,
                     currentW);
@@ -702,7 +706,7 @@ void FileSystemTileServer::ReplaceSegmentationLabelCurrentSlice( unsigned int ol
                 int tileY = thisVoxel.y % numVoxelsPerTile.y;
 
 
-                int3 index3D = make_int3( tileX, tileY, 0 );
+                MojoInt3 index3D = MojoInt3( tileX, tileY, 0 );
                 int  index1D = Mojo::Core::Index3DToIndex1D( index3D, currentIdNumVoxels );
                 int  idValue = currentIdVolume[ index1D ];
 
@@ -726,13 +730,13 @@ void FileSystemTileServer::ReplaceSegmentationLabelCurrentSlice( unsigned int ol
                         {
                             if (tileX > 0)
                             {
-                                tileQueue.push( make_int4(thisVoxel.x-1, thisVoxel.y, thisVoxel.z, currentW) );
+                                tileQueue.push( MojoInt4(thisVoxel.x-1, thisVoxel.y, thisVoxel.z, currentW) );
                             }
                             else
                             {
-                                sliceQueue.insert( std::pair< int4, int4 > (
-                                    make_int4( tileIndex.x - 1, tileIndex.y, tileIndex.z, tileIndex.w ),
-                                    make_int4( thisVoxel.x-1, thisVoxel.y, thisVoxel.z, currentW ) ) );
+                                sliceQueue.insert( std::pair< MojoInt4, MojoInt4 > (
+                                    MojoInt4( tileIndex.x - 1, tileIndex.y, tileIndex.z, tileIndex.w ),
+                                    MojoInt4( thisVoxel.x-1, thisVoxel.y, thisVoxel.z, currentW ) ) );
                             }
                         }
 
@@ -740,39 +744,39 @@ void FileSystemTileServer::ReplaceSegmentationLabelCurrentSlice( unsigned int ol
                         {
                             if (tileX < numVoxelsPerTile.x - 1)
                             {
-                                tileQueue.push( make_int4(thisVoxel.x+1, thisVoxel.y, thisVoxel.z, currentW) );
+                                tileQueue.push( MojoInt4(thisVoxel.x+1, thisVoxel.y, thisVoxel.z, currentW) );
                             }
                             else
                             {
-                                sliceQueue.insert( std::pair< int4, int4 > (
-                                    make_int4( tileIndex.x + 1, tileIndex.y, tileIndex.z, tileIndex.w ),
-                                    make_int4( thisVoxel.x+1, thisVoxel.y, thisVoxel.z, currentW ) ) );
+                                sliceQueue.insert( std::pair< MojoInt4, MojoInt4 > (
+                                    MojoInt4( tileIndex.x + 1, tileIndex.y, tileIndex.z, tileIndex.w ),
+                                    MojoInt4( thisVoxel.x+1, thisVoxel.y, thisVoxel.z, currentW ) ) );
                             }
                         }
                         if (thisVoxel.y > 0)
                         {
                             if (tileY > 0)
                             {
-                                tileQueue.push( make_int4(thisVoxel.x, thisVoxel.y-1, thisVoxel.z, currentW) );
+                                tileQueue.push( MojoInt4(thisVoxel.x, thisVoxel.y-1, thisVoxel.z, currentW) );
                             }
                             else
                             {
-                                sliceQueue.insert( std::pair< int4, int4 > (
-                                    make_int4( tileIndex.x, tileIndex.y - 1, tileIndex.z, tileIndex.w ),
-                                    make_int4( thisVoxel.x, thisVoxel.y-1, thisVoxel.z, currentW ) ) );
+                                sliceQueue.insert( std::pair< MojoInt4, MojoInt4 > (
+                                    MojoInt4( tileIndex.x, tileIndex.y - 1, tileIndex.z, tileIndex.w ),
+                                    MojoInt4( thisVoxel.x, thisVoxel.y-1, thisVoxel.z, currentW ) ) );
                             }
                         }
                         if (thisVoxel.y < numVoxels.y - 1)
                         {
                             if (tileY < numVoxelsPerTile.y - 1)
                             {
-                                tileQueue.push( make_int4(thisVoxel.x, thisVoxel.y+1, thisVoxel.z, currentW) );
+                                tileQueue.push( MojoInt4(thisVoxel.x, thisVoxel.y+1, thisVoxel.z, currentW) );
                             }
                             else
                             {
-                                sliceQueue.insert( std::pair< int4, int4 > (
-                                    make_int4( tileIndex.x, tileIndex.y + 1, tileIndex.z, tileIndex.w ),
-                                    make_int4( thisVoxel.x, thisVoxel.y+1, thisVoxel.z, currentW ) ) );
+                                sliceQueue.insert( std::pair< MojoInt4, MojoInt4 > (
+                                    MojoInt4( tileIndex.x, tileIndex.y + 1, tileIndex.z, tileIndex.w ),
+                                    MojoInt4( thisVoxel.x, thisVoxel.y+1, thisVoxel.z, currentW ) ) );
                             }
                         }
                     }
@@ -780,7 +784,7 @@ void FileSystemTileServer::ReplaceSegmentationLabelCurrentSlice( unsigned int ol
                     //
 					// Add a scaled-down w to the queue
 					//
-                    if (currentW < numTiles.w-1) wQueue.push( make_int4(thisVoxel.x / 2, thisVoxel.y / 2, thisVoxel.z, currentW+1) );
+                    if (currentW < numTiles.w-1) wQueue.push( MojoInt4(thisVoxel.x / 2, thisVoxel.y / 2, thisVoxel.z, currentW+1) );
                 }
 
             }
@@ -839,17 +843,19 @@ void FileSystemTileServer::ReplaceSegmentationLabelCurrentSlice( unsigned int ol
     }
 }
 
-void FileSystemTileServer::ReplaceSegmentationLabelCurrentConnectedComponent( unsigned int oldId, unsigned int newId, float3 pointTileSpace )
+void FileSystemTileServer::ReplaceSegmentationLabelCurrentConnectedComponent( unsigned int oldId, unsigned int newId, MojoFloat3 pointTileSpace )
 {
     if ( oldId != newId && mIsSegmentationLoaded && mSegmentInfoManager.GetConfidence( newId ) < 100 && mSegmentInfoManager.GetConfidence( oldId ) < 100 )
     {
         long voxelChangeCount = 0;
 
-        int3 numVoxels = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "IdMap" ).numVoxels;
-        int3 numVoxelsPerTile = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "IdMap" ).numVoxelsPerTile;
-        int4 numTiles = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "IdMap" ).numTiles;
-        int3 pVoxelSpace = 
-            make_int3(
+        TiledVolumeDescription tiledVolumeDescription = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "IdMap" );
+
+        MojoInt3 numVoxels = tiledVolumeDescription.numVoxels();
+        MojoInt3 numVoxelsPerTile = tiledVolumeDescription.numVoxelsPerTile();
+        MojoInt4 numTiles = tiledVolumeDescription.numTiles();
+        MojoInt3 pVoxelSpace = 
+            MojoInt3(
             (int)floor( pointTileSpace.x * numVoxelsPerTile.x ),
             (int)floor( pointTileSpace.y * numVoxelsPerTile.y ),
             (int)floor( pointTileSpace.z * numVoxelsPerTile.z ) );
@@ -866,20 +872,20 @@ void FileSystemTileServer::ReplaceSegmentationLabelCurrentConnectedComponent( un
 		mNextUndoItem->oldId = oldId;
 		std::bitset< TILE_SIZE * TILE_SIZE > *changeBits;
 
-		int4 previousTileIndex;
+		MojoInt4 previousTileIndex;
         bool tileLoaded = false;
         bool tileChanged = false;
 
         int currentW = 0;
-        std::queue< int4 > tileQueue;
-        std::multimap< int4, int4, Mojo::Core::Int4Comparator > sliceQueue;
-        std::queue< int4 > wQueue;
+        std::queue< MojoInt4 > tileQueue;
+        std::multimap< MojoInt4, MojoInt4, Mojo::Core::Int4Comparator > sliceQueue;
+        std::queue< MojoInt4 > wQueue;
 
         int* currentIdVolume;
-        int3 currentIdNumVoxels;
-        int4 thisVoxel;
+        MojoInt3 currentIdNumVoxels;
+        MojoInt4 thisVoxel;
 
-        tileQueue.push( make_int4(pVoxelSpace.x, pVoxelSpace.y, pVoxelSpace.z, 0) );
+        tileQueue.push( MojoInt4(pVoxelSpace.x, pVoxelSpace.y, pVoxelSpace.z, 0) );
 
         while ( currentW < numTiles.w )
         {
@@ -905,7 +911,7 @@ void FileSystemTileServer::ReplaceSegmentationLabelCurrentConnectedComponent( un
                 //
 				// Find the tile for this pixel
 				//
-                int4 tileIndex = make_int4( thisVoxel.x / numVoxelsPerTile.x,
+                MojoInt4 tileIndex = MojoInt4( thisVoxel.x / numVoxelsPerTile.x,
                     thisVoxel.y / numVoxelsPerTile.y,
                     thisVoxel.z / numVoxelsPerTile.z,
                     currentW);
@@ -973,7 +979,7 @@ void FileSystemTileServer::ReplaceSegmentationLabelCurrentConnectedComponent( un
                 int tileX = thisVoxel.x % numVoxelsPerTile.x;
                 int tileY = thisVoxel.y % numVoxelsPerTile.y;
 
-                int3 index3D = make_int3( tileX, tileY, 0 );
+                MojoInt3 index3D = MojoInt3( tileX, tileY, 0 );
                 int  index1D = Mojo::Core::Index3DToIndex1D( index3D, currentIdNumVoxels );
                 int  idValue = currentIdVolume[ index1D ];
 
@@ -997,13 +1003,13 @@ void FileSystemTileServer::ReplaceSegmentationLabelCurrentConnectedComponent( un
                         {
                             if (tileX > 0)
                             {
-                                tileQueue.push( make_int4(thisVoxel.x-1, thisVoxel.y, thisVoxel.z, currentW) );
+                                tileQueue.push( MojoInt4(thisVoxel.x-1, thisVoxel.y, thisVoxel.z, currentW) );
                             }
                             else
                             {
-                                sliceQueue.insert( std::pair< int4, int4 > (
-                                    make_int4( tileIndex.x - 1, tileIndex.y, tileIndex.z, tileIndex.w ),
-                                    make_int4( thisVoxel.x-1, thisVoxel.y, thisVoxel.z, currentW ) ) );
+                                sliceQueue.insert( std::pair< MojoInt4, MojoInt4 > (
+                                    MojoInt4( tileIndex.x - 1, tileIndex.y, tileIndex.z, tileIndex.w ),
+                                    MojoInt4( thisVoxel.x-1, thisVoxel.y, thisVoxel.z, currentW ) ) );
                             }
                         }
 
@@ -1011,13 +1017,13 @@ void FileSystemTileServer::ReplaceSegmentationLabelCurrentConnectedComponent( un
                         {
                             if (tileX < numVoxelsPerTile.x - 1)
                             {
-                                tileQueue.push( make_int4(thisVoxel.x+1, thisVoxel.y, thisVoxel.z, currentW) );
+                                tileQueue.push( MojoInt4(thisVoxel.x+1, thisVoxel.y, thisVoxel.z, currentW) );
                             }
                             else
                             {
-                                sliceQueue.insert( std::pair< int4, int4 > (
-                                    make_int4( tileIndex.x + 1, tileIndex.y, tileIndex.z, tileIndex.w ),
-                                    make_int4( thisVoxel.x+1, thisVoxel.y, thisVoxel.z, currentW ) ) );
+                                sliceQueue.insert( std::pair< MojoInt4, MojoInt4 > (
+                                    MojoInt4( tileIndex.x + 1, tileIndex.y, tileIndex.z, tileIndex.w ),
+                                    MojoInt4( thisVoxel.x+1, thisVoxel.y, thisVoxel.z, currentW ) ) );
                             }
                         }
 
@@ -1025,13 +1031,13 @@ void FileSystemTileServer::ReplaceSegmentationLabelCurrentConnectedComponent( un
                         {
                             if (tileY > 0)
                             {
-                                tileQueue.push( make_int4(thisVoxel.x, thisVoxel.y-1, thisVoxel.z, currentW) );
+                                tileQueue.push( MojoInt4(thisVoxel.x, thisVoxel.y-1, thisVoxel.z, currentW) );
                             }
                             else
                             {
-                                sliceQueue.insert( std::pair< int4, int4 > (
-                                    make_int4( tileIndex.x, tileIndex.y - 1, tileIndex.z, tileIndex.w ),
-                                    make_int4( thisVoxel.x, thisVoxel.y-1, thisVoxel.z, currentW ) ) );
+                                sliceQueue.insert( std::pair< MojoInt4, MojoInt4 > (
+                                    MojoInt4( tileIndex.x, tileIndex.y - 1, tileIndex.z, tileIndex.w ),
+                                    MojoInt4( thisVoxel.x, thisVoxel.y-1, thisVoxel.z, currentW ) ) );
                             }
                         }
 
@@ -1039,35 +1045,35 @@ void FileSystemTileServer::ReplaceSegmentationLabelCurrentConnectedComponent( un
                         {
                             if (tileY < numVoxelsPerTile.y - 1)
                             {
-                                tileQueue.push( make_int4(thisVoxel.x, thisVoxel.y+1, thisVoxel.z, currentW) );
+                                tileQueue.push( MojoInt4(thisVoxel.x, thisVoxel.y+1, thisVoxel.z, currentW) );
                             }
                             else
                             {
-                                sliceQueue.insert( std::pair< int4, int4 > (
-                                    make_int4( tileIndex.x, tileIndex.y + 1, tileIndex.z, tileIndex.w ),
-                                    make_int4( thisVoxel.x, thisVoxel.y+1, thisVoxel.z, currentW ) ) );
+                                sliceQueue.insert( std::pair< MojoInt4, MojoInt4 > (
+                                    MojoInt4( tileIndex.x, tileIndex.y + 1, tileIndex.z, tileIndex.w ),
+                                    MojoInt4( thisVoxel.x, thisVoxel.y+1, thisVoxel.z, currentW ) ) );
                             }
                         }
 
                         if (thisVoxel.z > 0)
                         {
-                            sliceQueue.insert( std::pair< int4, int4 > (
-                                make_int4( tileIndex.x, tileIndex.y, tileIndex.z - 1, tileIndex.w ),
-                                make_int4( thisVoxel.x, thisVoxel.y, thisVoxel.z - 1, currentW ) ) );
+                            sliceQueue.insert( std::pair< MojoInt4, MojoInt4 > (
+                                MojoInt4( tileIndex.x, tileIndex.y, tileIndex.z - 1, tileIndex.w ),
+                                MojoInt4( thisVoxel.x, thisVoxel.y, thisVoxel.z - 1, currentW ) ) );
                         }
 
                         if (thisVoxel.z < numVoxels.z - 1)
                         {
-                            sliceQueue.insert( std::pair< int4, int4 > (
-                                make_int4( tileIndex.x, tileIndex.y, tileIndex.z + 1, tileIndex.w ),
-                                make_int4( thisVoxel.x, thisVoxel.y, thisVoxel.z + 1, currentW ) ) );
+                            sliceQueue.insert( std::pair< MojoInt4, MojoInt4 > (
+                                MojoInt4( tileIndex.x, tileIndex.y, tileIndex.z + 1, tileIndex.w ),
+                                MojoInt4( thisVoxel.x, thisVoxel.y, thisVoxel.z + 1, currentW ) ) );
                         }
                     }
 
                     //
 					// Add a scaled-down w to the queue
 					//
-                    if (currentW < numTiles.w-1) wQueue.push( make_int4(thisVoxel.x / 2, thisVoxel.y / 2, thisVoxel.z, currentW+1) );
+                    if (currentW < numTiles.w-1) wQueue.push( MojoInt4(thisVoxel.x / 2, thisVoxel.y / 2, thisVoxel.z, currentW+1) );
                 }
 
             }
@@ -1131,32 +1137,32 @@ void FileSystemTileServer::ReplaceSegmentationLabelCurrentConnectedComponent( un
 //
 
 
-void FileSystemTileServer::DrawSplit( float3 pointTileSpace, float radius )
+void FileSystemTileServer::DrawSplit( MojoFloat3 pointTileSpace, float radius )
 {
 	DrawRegionValue( pointTileSpace, radius, REGION_SPLIT );
 }
 
-void FileSystemTileServer::DrawErase( float3 pointTileSpace, float radius )
+void FileSystemTileServer::DrawErase( MojoFloat3 pointTileSpace, float radius )
 {
 	DrawRegionValue( pointTileSpace, radius, 0 );
 }
 
-void FileSystemTileServer::DrawRegionA( float3 pointTileSpace, float radius )
+void FileSystemTileServer::DrawRegionA( MojoFloat3 pointTileSpace, float radius )
 {
 	DrawRegionValue( pointTileSpace, radius, REGION_A );
 }
 
-void FileSystemTileServer::DrawRegionB( float3 pointTileSpace, float radius )
+void FileSystemTileServer::DrawRegionB( MojoFloat3 pointTileSpace, float radius )
 {
 	DrawRegionValue( pointTileSpace, radius, REGION_B );
 }
 
-void FileSystemTileServer::DrawRegionValue( float3 pointTileSpace, float radius, int value )
+void FileSystemTileServer::DrawRegionValue( MojoFloat3 pointTileSpace, float radius, int value )
 {
-    int3 numVoxelsPerTile = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "IdMap" ).numVoxelsPerTile;
+    MojoInt3 numVoxelsPerTile = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "IdMap" ).numVoxelsPerTile();
 
-    int3 pVoxelSpace = 
-        make_int3(
+    MojoInt3 pVoxelSpace = 
+        MojoInt3(
         (int)floor( pointTileSpace.x * numVoxelsPerTile.x ),
         (int)floor( pointTileSpace.y * numVoxelsPerTile.y ),
         (int)floor( pointTileSpace.z * numVoxelsPerTile.z ) );
@@ -1168,20 +1174,20 @@ void FileSystemTileServer::DrawRegionValue( float3 pointTileSpace, float radius,
     SimpleSplitTools::ApplyCircleMask( areaIndex, mSplitWindowWidth, mSplitWindowHeight, value, radius, mSplitDrawArea );
 
     int irad = (int) ( radius + 0.5 );
-    int2 upperLeft = make_int2( areaX - irad, areaY - irad );
-    int2 lowerRight = make_int2( areaX + irad, areaY + irad );
+    MojoInt2 upperLeft = MojoInt2( areaX - irad, areaY - irad );
+    MojoInt2 lowerRight = MojoInt2( areaX + irad, areaY + irad );
     UpdateOverlayTilesBoundingBox( upperLeft, lowerRight );
 
     //Core::Printf( "\nDrew inside bounding box (", upperLeft.x, ",", upperLeft.y, "x", lowerRight.x, ",", lowerRight.y, ").\n" );
     //Core::Printf( "\nDrew split circle voxel (x", pVoxelSpace.x, ", y", pVoxelSpace.y, " z", pVoxelSpace.z, "), with radius ", radius, ".\n" );
 }
 
-void FileSystemTileServer::AddSplitSource( float3 pointTileSpace )
+void FileSystemTileServer::AddSplitSource( MojoFloat3 pointTileSpace )
 {
-    int3 numVoxelsPerTile = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "IdMap" ).numVoxelsPerTile;
+    MojoInt3 numVoxelsPerTile = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "IdMap" ).numVoxelsPerTile();
 
-    int3 pVoxelSpace = 
-        make_int3(
+    MojoInt3 pVoxelSpace = 
+        MojoInt3(
         (int)floor( pointTileSpace.x * numVoxelsPerTile.x ),
         (int)floor( pointTileSpace.y * numVoxelsPerTile.y ),
         (int)floor( pointTileSpace.z * numVoxelsPerTile.z ) );
@@ -1193,7 +1199,7 @@ void FileSystemTileServer::AddSplitSource( float3 pointTileSpace )
 
     for ( unsigned int si = 0; si < mSplitSourcePoints.size(); ++si )
     {
-        int3 existingPoint = mSplitSourcePoints[ si ];
+        MojoInt3 existingPoint = mSplitSourcePoints[ si ];
         if ( existingPoint.x == pVoxelSpace.x && existingPoint.y == pVoxelSpace.y ) //ignore z
         {
             duplicate = true;
@@ -1217,25 +1223,27 @@ void FileSystemTileServer::RemoveSplitSource()
 
 void FileSystemTileServer::UpdateOverlayTiles()
 {
-    int3 numVoxelsPerTile = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "IdMap" ).numVoxelsPerTile;
+    MojoInt3 numVoxelsPerTile = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "IdMap" ).numVoxelsPerTile();
 
-    int2 upperLeft = make_int2( 0, 0 );
-    int2 lowerRight = make_int2( mSplitWindowNTiles.x * numVoxelsPerTile.x, mSplitWindowNTiles.y * numVoxelsPerTile.y );
+    MojoInt2 upperLeft = MojoInt2( 0, 0 );
+    MojoInt2 lowerRight = MojoInt2( mSplitWindowNTiles.x * numVoxelsPerTile.x, mSplitWindowNTiles.y * numVoxelsPerTile.y );
 
     UpdateOverlayTilesBoundingBox( upperLeft, lowerRight );
 }
 
-void FileSystemTileServer::UpdateOverlayTilesBoundingBox( int2 upperLeft, int2 lowerRight )
+void FileSystemTileServer::UpdateOverlayTilesBoundingBox( MojoInt2 upperLeft, MojoInt2 lowerRight )
 {
 	//
 	// Export result to OverlayMap tiles
 	//
-    int3 numVoxelsPerTile = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "IdMap" ).numVoxelsPerTile;
-	int4 numTiles = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "IdMap" ).numTiles;
+    TiledVolumeDescription tiledVolumeDescription = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "IdMap" );
+
+    MojoInt3 numVoxelsPerTile = tiledVolumeDescription.numVoxelsPerTile();
+	MojoInt4 numTiles = tiledVolumeDescription.numTiles();
 
 	Core::HashMap< std::string, Core::VolumeDescription > volumeDescriptions;
 
-    std::map< int4, int, Core::Int4Comparator > wQueue;
+    std::map< MojoInt4, int, Core::Int4Comparator > wQueue;
 
 	int tileCount = 0;
 	int sourceSplitCount = 0;
@@ -1273,7 +1281,7 @@ void FileSystemTileServer::UpdateOverlayTilesBoundingBox( int2 upperLeft, int2 l
 				++tileCount;
 				//Core::Printf( "Copying result tile ", tileCount, "." );
 
-				int4 tileIndex = make_int4( mSplitWindowStart.x + xd, mSplitWindowStart.y + yd, mSplitWindowStart.z, 0 );
+				MojoInt4 tileIndex = MojoInt4( mSplitWindowStart.x + xd, mSplitWindowStart.y + yd, mSplitWindowStart.z, 0 );
 				volumeDescriptions = LoadTile( tileIndex );
 				Core::VolumeDescription splitVolumeDescription = volumeDescriptions.Get( "OverlayMap" );
 
@@ -1297,17 +1305,17 @@ void FileSystemTileServer::UpdateOverlayTilesBoundingBox( int2 upperLeft, int2 l
                             if ( mSplitResultArea[ areaIndex1D ] && splitData[ tileIndex1D ] != mSplitResultArea[ areaIndex1D ] )
                             {
                                 splitData[ tileIndex1D ] = mSplitResultArea[ areaIndex1D ];
-                                wQueue[ make_int4( ( mSplitWindowStart.x * numVoxelsPerTile.x + xOffset + tileX ) / 2, ( mSplitWindowStart.y * numVoxelsPerTile.y + yOffset + tileY ) / 2, mSplitWindowStart.z, 1) ] = mSplitResultArea[ areaIndex1D ];
+                                wQueue[ MojoInt4( ( mSplitWindowStart.x * numVoxelsPerTile.x + xOffset + tileX ) / 2, ( mSplitWindowStart.y * numVoxelsPerTile.y + yOffset + tileY ) / 2, mSplitWindowStart.z, 1) ] = mSplitResultArea[ areaIndex1D ];
                             }
                             else if ( mSplitResultArea[ areaIndex1D ] == 0 && mSplitDrawArea[ areaIndex1D ] && splitData[ tileIndex1D ] != mSplitDrawArea[ areaIndex1D ] )
                             {
                                 splitData[ tileIndex1D ] = mSplitDrawArea[ areaIndex1D ];
-						        wQueue[ make_int4( ( mSplitWindowStart.x * numVoxelsPerTile.x + xOffset + tileX ) / 2, ( mSplitWindowStart.y * numVoxelsPerTile.y + yOffset + tileY ) / 2, mSplitWindowStart.z, 1) ] = mSplitDrawArea[ areaIndex1D ];
+						        wQueue[ MojoInt4( ( mSplitWindowStart.x * numVoxelsPerTile.x + xOffset + tileX ) / 2, ( mSplitWindowStart.y * numVoxelsPerTile.y + yOffset + tileY ) / 2, mSplitWindowStart.z, 1) ] = mSplitDrawArea[ areaIndex1D ];
                             }
 						    else if ( splitData[ tileIndex1D ] && mSplitResultArea[ areaIndex1D ] == 0 && mSplitDrawArea[ areaIndex1D ] == 0)
 						    {
                                 splitData[ tileIndex1D ] = 0;
-						        wQueue[ make_int4( ( mSplitWindowStart.x * numVoxelsPerTile.x + xOffset + tileX ) / 2, ( mSplitWindowStart.y * numVoxelsPerTile.y + yOffset + tileY ) / 2, mSplitWindowStart.z, 1) ] = 0;
+						        wQueue[ MojoInt4( ( mSplitWindowStart.x * numVoxelsPerTile.x + xOffset + tileX ) / 2, ( mSplitWindowStart.y * numVoxelsPerTile.y + yOffset + tileY ) / 2, mSplitWindowStart.z, 1) ] = 0;
 						    }
                         }
                         else if ( mSplitDrawArea != 0 )
@@ -1315,12 +1323,12 @@ void FileSystemTileServer::UpdateOverlayTilesBoundingBox( int2 upperLeft, int2 l
                             if ( mSplitDrawArea[ areaIndex1D ] && splitData[ tileIndex1D ] != mSplitDrawArea[ areaIndex1D ] )
                             {
                                 splitData[ tileIndex1D ] = mSplitDrawArea[ areaIndex1D ];
-						        wQueue[ make_int4( ( mSplitWindowStart.x * numVoxelsPerTile.x + xOffset + tileX ) / 2, ( mSplitWindowStart.y * numVoxelsPerTile.y + yOffset + tileY ) / 2, mSplitWindowStart.z, 1) ] = mSplitDrawArea[ areaIndex1D ];
+						        wQueue[ MojoInt4( ( mSplitWindowStart.x * numVoxelsPerTile.x + xOffset + tileX ) / 2, ( mSplitWindowStart.y * numVoxelsPerTile.y + yOffset + tileY ) / 2, mSplitWindowStart.z, 1) ] = mSplitDrawArea[ areaIndex1D ];
                             }
 						    else if ( splitData[ tileIndex1D ] && mSplitDrawArea[ areaIndex1D ] == 0)
 						    {
                                 splitData[ tileIndex1D ] = 0;
-						        wQueue[ make_int4( ( mSplitWindowStart.x * numVoxelsPerTile.x + xOffset + tileX ) / 2, ( mSplitWindowStart.y * numVoxelsPerTile.y + yOffset + tileY ) / 2, mSplitWindowStart.z, 1) ] = 0;
+						        wQueue[ MojoInt4( ( mSplitWindowStart.x * numVoxelsPerTile.x + xOffset + tileX ) / 2, ( mSplitWindowStart.y * numVoxelsPerTile.y + yOffset + tileY ) / 2, mSplitWindowStart.z, 1) ] = 0;
 						    }
                         }
 
@@ -1337,12 +1345,12 @@ void FileSystemTileServer::UpdateOverlayTilesBoundingBox( int2 upperLeft, int2 l
 	//
 
 	bool tileLoaded = false;
-    std::map< int4, int, Core::Int4Comparator >::iterator thisIt;
-	int4 thisVoxel;
+    std::map< MojoInt4, int, Core::Int4Comparator >::iterator thisIt;
+	MojoInt4 thisVoxel;
     int newValue;
-	int4 tileIndex;
-	int4 previousTileIndex;
-	int3 currentTileNumVoxels;
+	MojoInt4 tileIndex;
+	MojoInt4 previousTileIndex;
+	MojoInt3 currentTileNumVoxels;
 
 	while ( wQueue.size() > 0 )
     {
@@ -1351,7 +1359,7 @@ void FileSystemTileServer::UpdateOverlayTilesBoundingBox( int2 upperLeft, int2 l
         newValue = thisIt->second;
         wQueue.erase( wQueue.begin() );
 
-        tileIndex = make_int4( thisVoxel.x / numVoxelsPerTile.x,
+        tileIndex = MojoInt4( thisVoxel.x / numVoxelsPerTile.x,
             thisVoxel.y / numVoxelsPerTile.y,
             thisVoxel.z / numVoxelsPerTile.z,
             thisVoxel.w );
@@ -1389,7 +1397,7 @@ void FileSystemTileServer::UpdateOverlayTilesBoundingBox( int2 upperLeft, int2 l
         //    Core::Printf( "=tile: ", tileIndex.x, ",",  tileIndex.y, ",",  tileIndex.z, ",",  tileIndex.w, " at ", tileX, ",", tileY, "." );
         //}
 
-        int3 index3D = make_int3( tileX, tileY, 0 );
+        MojoInt3 index3D = MojoInt3( tileX, tileY, 0 );
         int  index1D = Mojo::Core::Index3DToIndex1D( index3D, currentTileNumVoxels );
 
 		//Core::Printf( "Writing to index1D=", index1D, " ( thisVoxel.x=", thisVoxel.x, " thisVoxel.y=", thisVoxel.y, " thisVoxel.z=", thisVoxel.z, " thisVoxel.w=", thisVoxel.w, " ).");
@@ -1403,7 +1411,7 @@ void FileSystemTileServer::UpdateOverlayTilesBoundingBox( int2 upperLeft, int2 l
 			//
             if (thisVoxel.w < numTiles.w - 1)
             {
-                wQueue[ make_int4( thisVoxel.x / 2, thisVoxel.y / 2, thisVoxel.z, thisVoxel.w + 1 ) ] = newValue;
+                wQueue[ MojoInt4( thisVoxel.x / 2, thisVoxel.y / 2, thisVoxel.z, thisVoxel.w + 1 ) ] = newValue;
             }
         }
 
@@ -1421,12 +1429,13 @@ void FileSystemTileServer::ResetOverlayTiles()
 	//
 	// Reset the overlay layer
 	//
-    int3 numVoxelsPerTile = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "IdMap" ).numVoxelsPerTile;
-	int4 numTiles = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "IdMap" ).numTiles;
+    TiledVolumeDescription tiledVolumeDescription = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "IdMap" );
+    MojoInt3 numVoxelsPerTile = tiledVolumeDescription.numVoxelsPerTile();
+	MojoInt4 numTiles = tiledVolumeDescription.numTiles();
 
 	Core::HashMap< std::string, Core::VolumeDescription > volumeDescriptions;
 
-	std::queue< int4 > wQueue;
+	std::queue< MojoInt4 > wQueue;
 
 	int tileCount = 0;
 	int sourceSplitCount = 0;
@@ -1440,7 +1449,7 @@ void FileSystemTileServer::ResetOverlayTiles()
 			++tileCount;
 			//Core::Printf( "Copying result tile ", tileCount, "." );
 
-			int4 tileIndex = make_int4( mSplitWindowStart.x + xd, mSplitWindowStart.y + yd, mSplitWindowStart.z, 0 );
+			MojoInt4 tileIndex = MojoInt4( mSplitWindowStart.x + xd, mSplitWindowStart.y + yd, mSplitWindowStart.z, 0 );
 			volumeDescriptions = LoadTile( tileIndex );
 			Core::VolumeDescription splitVolumeDescription = volumeDescriptions.Get( "OverlayMap" );
 
@@ -1464,7 +1473,7 @@ void FileSystemTileServer::ResetOverlayTiles()
 				if ( splitData[ tileIndex1D ] != 0 )
 				{
                     splitData[ tileIndex1D ] = 0;
-					wQueue.push( make_int4( ( mSplitWindowStart.x * numVoxelsPerTile.x + xOffset + tileX ) / 2, ( mSplitWindowStart.y * numVoxelsPerTile.y + yOffset + tileY ) / 2, mSplitWindowStart.z, 1) );
+					wQueue.push( MojoInt4( ( mSplitWindowStart.x * numVoxelsPerTile.x + xOffset + tileX ) / 2, ( mSplitWindowStart.y * numVoxelsPerTile.y + yOffset + tileY ) / 2, mSplitWindowStart.z, 1) );
 				}
 			}
 
@@ -1478,17 +1487,17 @@ void FileSystemTileServer::ResetOverlayTiles()
 	//
 
 	bool tileLoaded = false;
-	int4 thisVoxel;
-	int4 tileIndex;
-	int4 previousTileIndex;
-	int3 currentTileNumVoxels;
+	MojoInt4 thisVoxel;
+	MojoInt4 tileIndex;
+	MojoInt4 previousTileIndex;
+	MojoInt3 currentTileNumVoxels;
 
 	while ( wQueue.size() > 0 )
     {
         thisVoxel = wQueue.front();
         wQueue.pop();
 
-        tileIndex = make_int4( thisVoxel.x / numVoxelsPerTile.x,
+        tileIndex = MojoInt4( thisVoxel.x / numVoxelsPerTile.x,
             thisVoxel.y / numVoxelsPerTile.y,
             thisVoxel.z / numVoxelsPerTile.z,
             thisVoxel.w );
@@ -1526,7 +1535,7 @@ void FileSystemTileServer::ResetOverlayTiles()
         //    Core::Printf( "=tile: ", tileIndex.x, ",",  tileIndex.y, ",",  tileIndex.z, ",",  tileIndex.w, " at ", tileX, ",", tileY, "." );
         //}
 
-        int3 index3D = make_int3( tileX, tileY, 0 );
+        MojoInt3 index3D = MojoInt3( tileX, tileY, 0 );
         int  index1D = Mojo::Core::Index3DToIndex1D( index3D, currentTileNumVoxels );
 
 		//Core::Printf( "Writing to index1D=", index1D, " ( thisVoxel.x=", thisVoxel.x, " thisVoxel.y=", thisVoxel.y, " thisVoxel.z=", thisVoxel.z, " thisVoxel.w=", thisVoxel.w, " ).");
@@ -1538,7 +1547,7 @@ void FileSystemTileServer::ResetOverlayTiles()
             //
 		    // Add a scaled-down w to the queue
 		    //
-            if (thisVoxel.w < numTiles.w - 1) wQueue.push( make_int4( thisVoxel.x / 2, thisVoxel.y / 2, thisVoxel.z, thisVoxel.w + 1 ) );
+            if (thisVoxel.w < numTiles.w - 1) wQueue.push( MojoInt4( thisVoxel.x / 2, thisVoxel.y / 2, thisVoxel.z, thisVoxel.w + 1 ) );
         }
 
 	}
@@ -1594,7 +1603,7 @@ void FileSystemTileServer::LoadSplitDistances( unsigned int segId )
     //
     Core::HashMap< std::string, Core::VolumeDescription > volumeDescriptions;
 
-    int3 numVoxelsPerTile = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "IdMap" ).numVoxelsPerTile;
+    MojoInt3 numVoxelsPerTile = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "IdMap" ).numVoxelsPerTile();
     unsigned char* currentSrcVolume;
     int* currentIdVolume;
 
@@ -1612,7 +1621,7 @@ void FileSystemTileServer::LoadSplitDistances( unsigned int segId )
             ++tileCount;
             //Core::Printf( "Loading distance tile ", tileCount, "." );
 
-            int4 tileIndex = make_int4( mSplitWindowStart.x + xd, mSplitWindowStart.y + yd, mSplitWindowStart.z, 0 );
+            MojoInt4 tileIndex = MojoInt4( mSplitWindowStart.x + xd, mSplitWindowStart.y + yd, mSplitWindowStart.z, 0 );
             volumeDescriptions = LoadTile( tileIndex );
             currentSrcVolume = (unsigned char*)volumeDescriptions.Get( "SourceMap" ).data;
             currentIdVolume = (int*)volumeDescriptions.Get( "IdMap" ).data;
@@ -1674,7 +1683,7 @@ void FileSystemTileServer::LoadSplitDistances( unsigned int segId )
 
 }
 
-void FileSystemTileServer::PrepForSplit( unsigned int segId, float3 pointTileSpace )
+void FileSystemTileServer::PrepForSplit( unsigned int segId, MojoFloat3 pointTileSpace )
 {
     //
     // Find the size of this segment and load the bounding box of tiles
@@ -1694,9 +1703,11 @@ void FileSystemTileServer::PrepForSplit( unsigned int segId, float3 pointTileSpa
 
                 Core::Printf( "\nPreparing for split of segment ", segId, " at x=", pointTileSpace.x, ", y=", pointTileSpace.y, ", z=", pointTileSpace.z, ".\n" );
 
-                int3 numVoxels = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "IdMap" ).numVoxels;
-                int3 numVoxelsPerTile = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "IdMap" ).numVoxelsPerTile;
-                int4 numTiles = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "IdMap" ).numTiles;
+                TiledVolumeDescription tiledVolumeDescription = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "IdMap" );
+
+                MojoInt3 numVoxels = tiledVolumeDescription.numVoxels();
+                MojoInt3 numVoxelsPerTile = tiledVolumeDescription.numVoxelsPerTile();
+                MojoInt4 numTiles = tiledVolumeDescription.numTiles();
 
                 int minTileX = numTiles.x;
                 int maxTileX = 0;
@@ -1726,21 +1737,21 @@ void FileSystemTileServer::PrepForSplit( unsigned int segId, float3 pointTileSpa
 		        }
 
                 // Restrict search tiles to max 2 tiles away from clicked location
-                if ( minTileX < ( (int) pointTileSpace.x ) - 2 )
-                    minTileX = ( (int) pointTileSpace.x ) - 2;
-                if ( maxTileX > ( (int) pointTileSpace.x ) + 2 )
-                    maxTileX = ( (int) pointTileSpace.x ) + 2;
+                if ( minTileX < ( (int) pointTileSpace.x ) - SPLIT_ADJUST_BUFFER_TILE_HALO )
+                    minTileX = ( (int) pointTileSpace.x ) - SPLIT_ADJUST_BUFFER_TILE_HALO;
+                if ( maxTileX > ( (int) pointTileSpace.x ) + SPLIT_ADJUST_BUFFER_TILE_HALO )
+                    maxTileX = ( (int) pointTileSpace.x ) + SPLIT_ADJUST_BUFFER_TILE_HALO;
 
-                if ( minTileY < ( (int) pointTileSpace.y ) - 2 )
-                    minTileY = ( (int) pointTileSpace.y ) - 2;
-                if ( maxTileY > ( (int) pointTileSpace.y ) + 2 )
-                    maxTileY = ( (int) pointTileSpace.y ) + 2;
+                if ( minTileY < ( (int) pointTileSpace.y ) - SPLIT_ADJUST_BUFFER_TILE_HALO )
+                    minTileY = ( (int) pointTileSpace.y ) - SPLIT_ADJUST_BUFFER_TILE_HALO;
+                if ( maxTileY > ( (int) pointTileSpace.y ) + SPLIT_ADJUST_BUFFER_TILE_HALO )
+                    maxTileY = ( (int) pointTileSpace.y ) + SPLIT_ADJUST_BUFFER_TILE_HALO;
 
                 //
                 // Calculate sizes
                 //
-                mSplitWindowStart = make_int3( minTileX, minTileY, (int) pointTileSpace.z );
-                mSplitWindowNTiles = make_int3( ( maxTileX - minTileX + 1 ), ( maxTileY - minTileY + 1 ), 1 );
+                mSplitWindowStart = MojoInt3( minTileX, minTileY, (int) pointTileSpace.z );
+                mSplitWindowNTiles = MojoInt3( ( maxTileX - minTileX + 1 ), ( maxTileY - minTileY + 1 ), 1 );
 
                 //Core::Printf( "mSplitWindowStart=", mSplitWindowStart.x, ":", mSplitWindowStart.y, ":", mSplitWindowStart.z, ".\n" );
                 //Core::Printf( "mSplitWindowSize=", mSplitWindowNTiles.x, ":", mSplitWindowNTiles.y, ":", mSplitWindowNTiles.z, ".\n" );
@@ -1749,42 +1760,38 @@ void FileSystemTileServer::PrepForSplit( unsigned int segId, float3 pointTileSpa
 		        mSplitWindowHeight = numVoxelsPerTile.y * mSplitWindowNTiles.y;
 		        mSplitWindowNPix = mSplitWindowWidth * mSplitWindowHeight;
 
-                //Core::Printf( "mSplitWindowWidth=", mSplitWindowWidth, ", mSplitWindowHeight=", mSplitWindowHeight, ", nPix=", mSplitWindowNPix, ".\n" );
+                Core::Printf( "mSplitWindowWidth=", mSplitWindowWidth, ", mSplitWindowHeight=", mSplitWindowHeight, ", nPix=", mSplitWindowNPix, ".\n" );
+
+                int maxBufferSize = ( SPLIT_ADJUST_BUFFER_TILE_HALO * 2 + 1 ) * ( SPLIT_ADJUST_BUFFER_TILE_HALO * 2 + 1 ) * TILE_SIZE * TILE_SIZE;
+                RELEASE_ASSERT( mSplitWindowNPix <= maxBufferSize );
 
 		        mSplitLabelCount = 0;
 
                 //
-                // Allocate working space (free if necessary)
+                // Allocate working space (if necessary)
                 //
 
-                if ( mSplitStepDist != 0 )
-                    delete[] mSplitStepDist;
+                if ( mSplitStepDist == 0 )
+		            mSplitStepDist = new int[ maxBufferSize ];
+                    
+                if ( mSplitResultDist == 0 )
+                    mSplitResultDist = new int[ maxBufferSize ];
 
-                if ( mSplitResultDist != 0 )
-                    delete[] mSplitResultDist;
+                if ( mSplitPrev == 0 )
+		            mSplitPrev = new int[ maxBufferSize ];
 
-                if ( mSplitPrev != 0 )
-                    delete[] mSplitPrev;
+                if ( mSplitSearchMask == 0 )
+		            mSplitSearchMask = new char[ maxBufferSize ];
 
-                if ( mSplitSearchMask != 0 )
-                    delete[] mSplitSearchMask;
+                if ( mSplitDrawArea == 0 )
+		            mSplitDrawArea = new char[ maxBufferSize ];
 
-                if ( mSplitDrawArea != 0 )
-                    delete[] mSplitDrawArea;
+		        if ( mSplitBorderTargets == 0 )
+		            mSplitBorderTargets = new char[ maxBufferSize ];
 
-		        if ( mSplitBorderTargets != 0 )
-			        delete[] mSplitBorderTargets;
+                if ( mSplitResultArea == 0 )
+		            mSplitResultArea = new unsigned int[ maxBufferSize ];
 
-                if ( mSplitResultArea != 0 )
-                    delete[] mSplitResultArea;
-
-		        mSplitStepDist = new int[ mSplitWindowNPix ];
-                mSplitResultDist = new int[ mSplitWindowNPix ];
-		        mSplitPrev = new int[ mSplitWindowNPix ];
-		        mSplitSearchMask = new char[ mSplitWindowNPix ];
-		        mSplitDrawArea = new char[ mSplitWindowNPix ];
-		        mSplitBorderTargets = new char[ mSplitWindowNPix ];
-		        mSplitResultArea = new unsigned int[ mSplitWindowNPix ];
 
                 LoadSplitDistances( segId );
 
@@ -1814,7 +1821,7 @@ void FileSystemTileServer::PrepForSplit( unsigned int segId, float3 pointTileSpa
 
 }
 
-void FileSystemTileServer::PrepForAdjust( unsigned int segId, float3 pointTileSpace )
+void FileSystemTileServer::PrepForAdjust( unsigned int segId, MojoFloat3 pointTileSpace )
 {
     //
     // Find the size of this segment and load the bounding box of tiles
@@ -1834,9 +1841,11 @@ void FileSystemTileServer::PrepForAdjust( unsigned int segId, float3 pointTileSp
 
                 Core::Printf( "\nPreparing for adjustment of segment ", segId, " at x=", pointTileSpace.x, ", y=", pointTileSpace.y, ", z=", pointTileSpace.z, ".\n" );
 
-                int3 numVoxels = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "IdMap" ).numVoxels;
-                int3 numVoxelsPerTile = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "IdMap" ).numVoxelsPerTile;
-                int4 numTiles = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "IdMap" ).numTiles;
+                TiledVolumeDescription tiledVolumeDescription = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "IdMap" );
+
+                MojoInt3 numVoxels = tiledVolumeDescription.numVoxels();
+                MojoInt3 numVoxelsPerTile = tiledVolumeDescription.numVoxelsPerTile();
+                MojoInt4 numTiles = tiledVolumeDescription.numTiles();
 
                 int minTileX = numTiles.x;
                 int maxTileX = 0;
@@ -1883,21 +1892,21 @@ void FileSystemTileServer::PrepForAdjust( unsigned int segId, float3 pointTileSp
                 //
                 // Restrict search tiles to max 2 tiles away from clicked location
                 //
-                if ( minTileX < ( (int) pointTileSpace.x ) - 2 )
-                    minTileX = ( (int) pointTileSpace.x ) - 2;
-                if ( maxTileX > ( (int) pointTileSpace.x ) + 2 )
-                    maxTileX = ( (int) pointTileSpace.x ) + 2;
+                if ( minTileX < ( (int) pointTileSpace.x ) - SPLIT_ADJUST_BUFFER_TILE_HALO )
+                    minTileX = ( (int) pointTileSpace.x ) - SPLIT_ADJUST_BUFFER_TILE_HALO;
+                if ( maxTileX > ( (int) pointTileSpace.x ) + SPLIT_ADJUST_BUFFER_TILE_HALO )
+                    maxTileX = ( (int) pointTileSpace.x ) + SPLIT_ADJUST_BUFFER_TILE_HALO;
 
-                if ( minTileY < ( (int) pointTileSpace.y ) - 2 )
-                    minTileY = ( (int) pointTileSpace.y ) - 2;
-                if ( maxTileY > ( (int) pointTileSpace.y ) + 2 )
-                    maxTileY = ( (int) pointTileSpace.y ) + 2;
+                if ( minTileY < ( (int) pointTileSpace.y ) - SPLIT_ADJUST_BUFFER_TILE_HALO )
+                    minTileY = ( (int) pointTileSpace.y ) - SPLIT_ADJUST_BUFFER_TILE_HALO;
+                if ( maxTileY > ( (int) pointTileSpace.y ) + SPLIT_ADJUST_BUFFER_TILE_HALO )
+                    maxTileY = ( (int) pointTileSpace.y ) + SPLIT_ADJUST_BUFFER_TILE_HALO;
 
                 //
                 // Calculate sizes
                 //
-                mSplitWindowStart = make_int3( minTileX, minTileY, (int) pointTileSpace.z );
-                mSplitWindowNTiles = make_int3( ( maxTileX - minTileX + 1 ), ( maxTileY - minTileY + 1 ), 1 );
+                mSplitWindowStart = MojoInt3( minTileX, minTileY, (int) pointTileSpace.z );
+                mSplitWindowNTiles = MojoInt3( ( maxTileX - minTileX + 1 ), ( maxTileY - minTileY + 1 ), 1 );
 
                 //Core::Printf( "mSplitWindowStart=", mSplitWindowStart.x, ":", mSplitWindowStart.y, ":", mSplitWindowStart.z, ".\n" );
                 //Core::Printf( "mSplitWindowSize=", mSplitWindowNTiles.x, ":", mSplitWindowNTiles.y, ":", mSplitWindowNTiles.z, ".\n" );
@@ -1906,42 +1915,19 @@ void FileSystemTileServer::PrepForAdjust( unsigned int segId, float3 pointTileSp
 		        mSplitWindowHeight = numVoxelsPerTile.y * mSplitWindowNTiles.y;
 		        mSplitWindowNPix = mSplitWindowWidth * mSplitWindowHeight;
 
+                int maxBufferSize = ( SPLIT_ADJUST_BUFFER_TILE_HALO * 2 + 1 ) * ( SPLIT_ADJUST_BUFFER_TILE_HALO * 2 + 1 ) * TILE_SIZE * TILE_SIZE;
+                RELEASE_ASSERT( mSplitWindowNPix <= maxBufferSize );
+
                 //Core::Printf( "mSplitWindowWidth=", mSplitWindowWidth, ", mSplitWindowHeight=", mSplitWindowHeight, ", nPix=", mSplitWindowNPix, ".\n" );
 
 		        mSplitLabelCount = 0;
 
                 //
-                // Allocate working space (free if necessary)
+                // Allocate working space (if necessary)
                 //
 
-                if ( mSplitStepDist != 0 )
-                    delete[] mSplitStepDist;
-
-                if ( mSplitResultDist != 0 )
-                    delete[] mSplitResultDist;
-
-                if ( mSplitPrev != 0 )
-                    delete[] mSplitPrev;
-
-                if ( mSplitSearchMask != 0 )
-                    delete[] mSplitSearchMask;
-
-                if ( mSplitDrawArea != 0 )
-                    delete[] mSplitDrawArea;
-
-		        if ( mSplitBorderTargets != 0 )
-			        delete[] mSplitBorderTargets;
-
-                if ( mSplitResultArea != 0 )
-                    delete[] mSplitResultArea;
-
-		        mSplitStepDist = 0;
-                mSplitResultDist = 0;
-		        mSplitPrev = 0;
-		        mSplitSearchMask = 0;
-		        mSplitDrawArea = new char[ mSplitWindowNPix ];
-		        mSplitBorderTargets = 0;
-		        mSplitResultArea = 0;
+                if ( mSplitDrawArea == 0 )
+		            mSplitDrawArea = new char[ maxBufferSize ];
 
                 ResetAdjustState();
 
@@ -1969,11 +1955,11 @@ void FileSystemTileServer::PrepForAdjust( unsigned int segId, float3 pointTileSp
 
 }
 
-void FileSystemTileServer::RecordSplitState( unsigned int segId, float3 pointTileSpace )
+void FileSystemTileServer::RecordSplitState( unsigned int segId, MojoFloat3 pointTileSpace )
 {
     if ( mIsSegmentationLoaded )
     {
-	    int3 numVoxelsPerTile = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "IdMap" ).numVoxelsPerTile;
+	    MojoInt3 numVoxelsPerTile = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "IdMap" ).numVoxelsPerTile();
         int currentZ = (int) floor( pointTileSpace.z * numVoxelsPerTile.z );
 
         bool anyLinePixels = false;
@@ -1992,14 +1978,14 @@ void FileSystemTileServer::RecordSplitState( unsigned int segId, float3 pointTil
                 int areaIndex1D = areaX + areaY * mSplitWindowWidth;
                 if ( mSplitResultArea[ areaIndex1D ] == PATH_RESULT )
                 {
-                    currentState.splitLine.push_back( make_float2(
+                    currentState.splitLine.push_back( MojoFloat2(
                         (float) ( mSplitWindowStart.x * numVoxelsPerTile.x + areaX ) / (float) numVoxelsPerTile.x,
                         (float) ( mSplitWindowStart.y * numVoxelsPerTile.y + areaY ) / (float) numVoxelsPerTile.y ) );
                     anyLinePixels = true;
                 }
                 if ( mSplitDrawArea[ areaIndex1D ] != 0 )
                 {
-                    currentState.splitDrawPoints.push_back( std::pair< float2, char >( make_float2(
+                    currentState.splitDrawPoints.push_back( std::pair< MojoFloat2, char >( MojoFloat2(
                         (float) ( mSplitWindowStart.x * numVoxelsPerTile.x + areaX ) / (float) numVoxelsPerTile.x,
                         (float) ( mSplitWindowStart.y * numVoxelsPerTile.y + areaY ) / (float) numVoxelsPerTile.y ),
                         mSplitDrawArea[ areaIndex1D ] ) );
@@ -2015,22 +2001,22 @@ void FileSystemTileServer::RecordSplitState( unsigned int segId, float3 pointTil
     }
 }
 
-void FileSystemTileServer::PredictSplit( unsigned int segId, float3 pointTileSpace, float radius )
+void FileSystemTileServer::PredictSplit( unsigned int segId, MojoFloat3 pointTileSpace, float radius )
 {
     if ( mIsSegmentationLoaded )
     {
-	    int3 numVoxelsPerTile = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "IdMap" ).numVoxelsPerTile;
+	    MojoInt3 numVoxelsPerTile = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "IdMap" ).numVoxelsPerTile();
         int currentZ = (int) floor( pointTileSpace.z * numVoxelsPerTile.z );
 
-        std::vector< float2 > *restoreLine = NULL;
+        std::vector< MojoFloat2 > *restoreLine = NULL;
 
         //
         // Try to restore from stored state
         //
         if ( mSplitStates.find( currentZ ) != mSplitStates.end() )
         {
-            std::vector< std::pair< float2, char >> *restorePoints = &mSplitStates.find( currentZ )->second.splitDrawPoints;
-            for ( std::vector< std::pair< float2, char >>::iterator drawIt = restorePoints->begin(); drawIt != restorePoints->end(); ++drawIt )
+            std::vector< std::pair< MojoFloat2, char >> *restorePoints = &mSplitStates.find( currentZ )->second.splitDrawPoints;
+            for ( std::vector< std::pair< MojoFloat2, char >>::iterator drawIt = restorePoints->begin(); drawIt != restorePoints->end(); ++drawIt )
             {
                 int areaX = ( (int) floor( drawIt->first.x * numVoxelsPerTile.x ) ) - mSplitWindowStart.x * numVoxelsPerTile.x;
                 int areaY = ( (int) floor( drawIt->first.y * numVoxelsPerTile.y ) ) - mSplitWindowStart.y * numVoxelsPerTile.y;
@@ -2070,9 +2056,9 @@ void FileSystemTileServer::PredictSplit( unsigned int segId, float3 pointTileSpa
             //
             // Draw a line where the previous split was
             //
-            for ( std::vector< float2 >::iterator splitIt = restoreLine->begin(); splitIt != restoreLine->end(); ++splitIt )
+            for ( std::vector< MojoFloat2 >::iterator splitIt = restoreLine->begin(); splitIt != restoreLine->end(); ++splitIt )
             {
-                DrawSplit( make_float3( splitIt->x, splitIt->y, (float) currentZ ), radius );
+                DrawSplit( MojoFloat3( splitIt->x, splitIt->y, (float) currentZ ), radius );
             }
 
             //
@@ -2083,7 +2069,7 @@ void FileSystemTileServer::PredictSplit( unsigned int segId, float3 pointTileSpa
     }
 }
 
-int FileSystemTileServer::CompletePointSplit( unsigned int segId, float3 pointTileSpace )
+int FileSystemTileServer::CompletePointSplit( unsigned int segId, MojoFloat3 pointTileSpace )
 {
 	int newId = 0;
 
@@ -2091,10 +2077,10 @@ int FileSystemTileServer::CompletePointSplit( unsigned int segId, float3 pointTi
     {
         long voxelChangeCount = 0;
 
-		int3 numVoxelsPerTile = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "IdMap" ).numVoxelsPerTile;
+		MojoInt3 numVoxelsPerTile = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "IdMap" ).numVoxelsPerTile();
 
-        int3 pMouseOverVoxelSpace = 
-            make_int3(
+        MojoInt3 pMouseOverVoxelSpace = 
+            MojoInt3(
             (int)floor( pointTileSpace.x * numVoxelsPerTile.x ),
             (int)floor( pointTileSpace.y * numVoxelsPerTile.y ),
             (int)floor( pointTileSpace.z * numVoxelsPerTile.z ) );
@@ -2136,13 +2122,15 @@ int FileSystemTileServer::CompletePointSplit( unsigned int segId, float3 pointTi
 		// Perform a 2D Flood-fill ( no changes yet, just record bits in the UndoItem )
 		//
 
-		int3 pVoxelSpace = 
-			make_int3( seedIndex1D % mSplitWindowWidth + mSplitWindowStart.x * numVoxelsPerTile.x,
+		MojoInt3 pVoxelSpace = 
+			MojoInt3( seedIndex1D % mSplitWindowWidth + mSplitWindowStart.x * numVoxelsPerTile.x,
 			seedIndex1D / mSplitWindowWidth + mSplitWindowStart.y * numVoxelsPerTile.y,
 			mSplitWindowStart.z );
 
-		int3 numVoxels = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "IdMap" ).numVoxels;
-		int4 numTiles = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "IdMap" ).numTiles;
+        TiledVolumeDescription tiledVolumeDescription = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "IdMap" );
+
+		MojoInt3 numVoxels = tiledVolumeDescription.numVoxels();
+		MojoInt4 numTiles = tiledVolumeDescription.numTiles();
 
         Core::Printf( "\nSplitting segmentation label ", segId, " from voxel (x", pVoxelSpace.x, ", y", pVoxelSpace.y, " z", pVoxelSpace.z, ")...\n" );
 
@@ -2152,22 +2140,22 @@ int FileSystemTileServer::CompletePointSplit( unsigned int segId, float3 pointTi
 
 		std::bitset< TILE_SIZE * TILE_SIZE > *changeBits;
 
-		int4 previousTileIndex;
+		MojoInt4 previousTileIndex;
         bool tileLoaded = false;
 
-        std::queue< int4 > tileQueue;
-        std::multimap< int4, int4, Mojo::Core::Int4Comparator > sliceQueue;
-		std::queue< int4 > wQueue;
+        std::queue< MojoInt4 > tileQueue;
+        std::multimap< MojoInt4, MojoInt4, Mojo::Core::Int4Comparator > sliceQueue;
+		std::queue< MojoInt4 > wQueue;
 
         int* currentIdVolume;
-        int3 currentIdNumVoxels;
-        int4 thisVoxel;
+        MojoInt3 currentIdNumVoxels;
+        MojoInt4 thisVoxel;
 
 		int nPixChanged = 0;
 		bool invert = false;
         bool foundMouseOverPixel = false;
 
-        tileQueue.push( make_int4(pVoxelSpace.x, pVoxelSpace.y, pVoxelSpace.z, 0) );
+        tileQueue.push( MojoInt4(pVoxelSpace.x, pVoxelSpace.y, pVoxelSpace.z, 0) );
 
         Core::Printf( "Filling at w=0." );
 
@@ -2199,7 +2187,7 @@ int FileSystemTileServer::CompletePointSplit( unsigned int segId, float3 pointTi
             //
 			// Find the tile for this pixel
 			//
-            int4 tileIndex = make_int4( thisVoxel.x / numVoxelsPerTile.x,
+            MojoInt4 tileIndex = MojoInt4( thisVoxel.x / numVoxelsPerTile.x,
                 thisVoxel.y / numVoxelsPerTile.y,
                 thisVoxel.z / numVoxelsPerTile.z,
                 0);
@@ -2238,7 +2226,7 @@ int FileSystemTileServer::CompletePointSplit( unsigned int segId, float3 pointTi
             int tileX = thisVoxel.x % numVoxelsPerTile.x;
             int tileY = thisVoxel.y % numVoxelsPerTile.y;
 
-            int3 index3D = make_int3( tileX, tileY, 0 );
+            MojoInt3 index3D = MojoInt3( tileX, tileY, 0 );
             int  index1D = Mojo::Core::Index3DToIndex1D( index3D, currentIdNumVoxels );
             int  idValue = currentIdVolume[ index1D ];
 
@@ -2264,13 +2252,13 @@ int FileSystemTileServer::CompletePointSplit( unsigned int segId, float3 pointTi
                 {
                     if (tileX > 0)
                     {
-                        tileQueue.push( make_int4(thisVoxel.x-1, thisVoxel.y, thisVoxel.z, 0) );
+                        tileQueue.push( MojoInt4(thisVoxel.x-1, thisVoxel.y, thisVoxel.z, 0) );
                     }
                     else
                     {
-                        sliceQueue.insert( std::pair< int4, int4 > (
-                            make_int4( tileIndex.x - 1, tileIndex.y, tileIndex.z, tileIndex.w ),
-                            make_int4( thisVoxel.x-1, thisVoxel.y, thisVoxel.z, 0 ) ) );
+                        sliceQueue.insert( std::pair< MojoInt4, MojoInt4 > (
+                            MojoInt4( tileIndex.x - 1, tileIndex.y, tileIndex.z, tileIndex.w ),
+                            MojoInt4( thisVoxel.x-1, thisVoxel.y, thisVoxel.z, 0 ) ) );
                     }
                 }
 
@@ -2278,39 +2266,39 @@ int FileSystemTileServer::CompletePointSplit( unsigned int segId, float3 pointTi
                 {
                     if (tileX < numVoxelsPerTile.x - 1)
                     {
-                        tileQueue.push( make_int4(thisVoxel.x+1, thisVoxel.y, thisVoxel.z, 0) );
+                        tileQueue.push( MojoInt4(thisVoxel.x+1, thisVoxel.y, thisVoxel.z, 0) );
                     }
                     else
                     {
-                        sliceQueue.insert( std::pair< int4, int4 > (
-                            make_int4( tileIndex.x + 1, tileIndex.y, tileIndex.z, tileIndex.w ),
-                            make_int4( thisVoxel.x+1, thisVoxel.y, thisVoxel.z, 0 ) ) );
+                        sliceQueue.insert( std::pair< MojoInt4, MojoInt4 > (
+                            MojoInt4( tileIndex.x + 1, tileIndex.y, tileIndex.z, tileIndex.w ),
+                            MojoInt4( thisVoxel.x+1, thisVoxel.y, thisVoxel.z, 0 ) ) );
                     }
                 }
                 if (thisVoxel.y > 0)
                 {
                     if (tileY > 0)
                     {
-                        tileQueue.push( make_int4(thisVoxel.x, thisVoxel.y-1, thisVoxel.z, 0) );
+                        tileQueue.push( MojoInt4(thisVoxel.x, thisVoxel.y-1, thisVoxel.z, 0) );
                     }
                     else
                     {
-                        sliceQueue.insert( std::pair< int4, int4 > (
-                            make_int4( tileIndex.x, tileIndex.y - 1, tileIndex.z, tileIndex.w ),
-                            make_int4( thisVoxel.x, thisVoxel.y-1, thisVoxel.z, 0 ) ) );
+                        sliceQueue.insert( std::pair< MojoInt4, MojoInt4 > (
+                            MojoInt4( tileIndex.x, tileIndex.y - 1, tileIndex.z, tileIndex.w ),
+                            MojoInt4( thisVoxel.x, thisVoxel.y-1, thisVoxel.z, 0 ) ) );
                     }
                 }
                 if (thisVoxel.y < numVoxels.y - 1)
                 {
                     if (tileY < numVoxelsPerTile.y - 1)
                     {
-                        tileQueue.push( make_int4(thisVoxel.x, thisVoxel.y+1, thisVoxel.z, 0) );
+                        tileQueue.push( MojoInt4(thisVoxel.x, thisVoxel.y+1, thisVoxel.z, 0) );
                     }
                     else
                     {
-                        sliceQueue.insert( std::pair< int4, int4 > (
-                            make_int4( tileIndex.x, tileIndex.y + 1, tileIndex.z, tileIndex.w ),
-                            make_int4( thisVoxel.x, thisVoxel.y+1, thisVoxel.z, 0 ) ) );
+                        sliceQueue.insert( std::pair< MojoInt4, MojoInt4 > (
+                            MojoInt4( tileIndex.x, tileIndex.y + 1, tileIndex.z, tileIndex.w ),
+                            MojoInt4( thisVoxel.x, thisVoxel.y+1, thisVoxel.z, 0 ) ) );
                     }
                 }
             }
@@ -2329,7 +2317,7 @@ int FileSystemTileServer::CompletePointSplit( unsigned int segId, float3 pointTi
 				// This fill is too big - find an alternative fill point
 				//
 
-				wQueue = std::queue< int4 >();
+				wQueue = std::queue< MojoInt4 >();
 
 				if ( tileLoaded )
 				{
@@ -2351,7 +2339,7 @@ int FileSystemTileServer::CompletePointSplit( unsigned int segId, float3 pointTi
 				{
 					for (int yd = 0; !seedFound && yd < mSplitWindowNTiles.y; ++yd )
 					{
-						tileIndex = make_int4( mSplitWindowStart.x + xd, mSplitWindowStart.y + yd, mSplitWindowStart.z, 0 );
+						tileIndex = MojoInt4( mSplitWindowStart.x + xd, mSplitWindowStart.y + yd, mSplitWindowStart.z, 0 );
 						volumeDescriptions = LoadTile( tileIndex );
 						currentIdVolume = (int*)volumeDescriptions.Get( "IdMap" ).data;
 
@@ -2407,14 +2395,14 @@ int FileSystemTileServer::CompletePointSplit( unsigned int segId, float3 pointTi
 				// Use this new seed point
 				//
 				pVoxelSpace = 
-					make_int3( seedIndex1D % mSplitWindowWidth + mSplitWindowStart.x * numVoxelsPerTile.x,
+					MojoInt3( seedIndex1D % mSplitWindowWidth + mSplitWindowStart.x * numVoxelsPerTile.x,
 					seedIndex1D / mSplitWindowWidth + mSplitWindowStart.y * numVoxelsPerTile.y,
 					mSplitWindowStart.z );
 
 				nPixChanged = 0;
 				invert = true;
 
-				tileQueue.push( make_int4(pVoxelSpace.x, pVoxelSpace.y, pVoxelSpace.z, 0) );
+				tileQueue.push( MojoInt4(pVoxelSpace.x, pVoxelSpace.y, pVoxelSpace.z, 0) );
 
 				Core::Printf( "Filling (invert) at w=0." );
 
@@ -2467,7 +2455,7 @@ int FileSystemTileServer::CompletePointSplit( unsigned int segId, float3 pointTi
 				//
 				// Find the tile for this pixel
 				//
-				int4 tileIndex = make_int4( thisVoxel.x / numVoxelsPerTile.x,
+				MojoInt4 tileIndex = MojoInt4( thisVoxel.x / numVoxelsPerTile.x,
 					thisVoxel.y / numVoxelsPerTile.y,
 					thisVoxel.z / numVoxelsPerTile.z,
 					currentW);
@@ -2534,7 +2522,7 @@ int FileSystemTileServer::CompletePointSplit( unsigned int segId, float3 pointTi
 				int tileX = thisVoxel.x % numVoxelsPerTile.x;
 				int tileY = thisVoxel.y % numVoxelsPerTile.y;
 
-				int3 index3D = make_int3( tileX, tileY, 0 );
+				MojoInt3 index3D = MojoInt3( tileX, tileY, 0 );
 				int  index1D = Mojo::Core::Index3DToIndex1D( index3D, currentIdNumVoxels );
 				int  idValue = currentIdVolume[ index1D ];
 
@@ -2549,7 +2537,7 @@ int FileSystemTileServer::CompletePointSplit( unsigned int segId, float3 pointTi
 					//
 					// Add a scaled-down w to the queue
 					//
-					if (currentW < numTiles.w-1) wQueue.push( make_int4(thisVoxel.x / 2, thisVoxel.y / 2, thisVoxel.z, currentW+1) );
+					if (currentW < numTiles.w-1) wQueue.push( MojoInt4(thisVoxel.x / 2, thisVoxel.y / 2, thisVoxel.z, currentW+1) );
 				}
 
 			}
@@ -2617,7 +2605,7 @@ int FileSystemTileServer::CompletePointSplit( unsigned int segId, float3 pointTi
 
 }
 
-int FileSystemTileServer::CompleteDrawSplit( unsigned int segId, float3 pointTileSpace, bool join3D, int splitStartZ )
+int FileSystemTileServer::CompleteDrawSplit( unsigned int segId, MojoFloat3 pointTileSpace, bool join3D, int splitStartZ )
 {
 	int newId = 0;
 
@@ -2627,9 +2615,9 @@ int FileSystemTileServer::CompleteDrawSplit( unsigned int segId, float3 pointTil
 
         RecordSplitState( segId, pointTileSpace );
 
-		int3 numVoxelsPerTile = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "IdMap" ).numVoxelsPerTile;
-        int3 pMouseOverVoxelSpace = 
-            make_int3(
+		MojoInt3 numVoxelsPerTile = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "IdMap" ).numVoxelsPerTile();
+        MojoInt3 pMouseOverVoxelSpace = 
+            MojoInt3(
             (int)floor( pointTileSpace.x * numVoxelsPerTile.x ),
             (int)floor( pointTileSpace.y * numVoxelsPerTile.y ),
             (int)floor( pointTileSpace.z * numVoxelsPerTile.z ) );
@@ -2647,7 +2635,7 @@ int FileSystemTileServer::CompleteDrawSplit( unsigned int segId, float3 pointTil
         }
 
         bool continueZ = true;
-        std::vector< std::pair< float2, int >> newCentroids;
+        std::vector< std::pair< MojoFloat2, int >> newCentroids;
 
         while ( continueZ )
         {
@@ -2703,13 +2691,15 @@ int FileSystemTileServer::CompleteDrawSplit( unsigned int segId, float3 pointTil
 			    // Perform a 2D Flood-fill ( no changes yet, just record bits in the UndoItem )
 			    //
 
-			    int3 pVoxelSpace = 
-				    make_int3( seedIndex1D % mSplitWindowWidth + mSplitWindowStart.x * numVoxelsPerTile.x,
+			    MojoInt3 pVoxelSpace = 
+				    MojoInt3( seedIndex1D % mSplitWindowWidth + mSplitWindowStart.x * numVoxelsPerTile.x,
 				    seedIndex1D / mSplitWindowWidth + mSplitWindowStart.y * numVoxelsPerTile.y,
 				    mSplitWindowStart.z );
 
-			    int3 numVoxels = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "IdMap" ).numVoxels;
-			    int4 numTiles = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "IdMap" ).numTiles;
+                TiledVolumeDescription tiledVolumeDescription = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "IdMap" );
+
+			    MojoInt3 numVoxels = tiledVolumeDescription.numVoxels();
+			    MojoInt4 numTiles = tiledVolumeDescription.numTiles();
 
 			    Core::Printf( "\nSplitting segmentation label ", segId, " from voxel (x", pVoxelSpace.x, ", y", pVoxelSpace.y, " z", pVoxelSpace.z, ")...\n" );
 
@@ -2719,22 +2709,22 @@ int FileSystemTileServer::CompleteDrawSplit( unsigned int segId, float3 pointTil
 
 			    std::bitset< TILE_SIZE * TILE_SIZE > *changeBits;
 
-			    int4 previousTileIndex;
+			    MojoInt4 previousTileIndex;
 			    bool tileLoaded = false;
 
-			    std::queue< int4 > tileQueue;
-			    std::multimap< int4, int4, Mojo::Core::Int4Comparator > sliceQueue;
-			    std::queue< int4 > wQueue;
+			    std::queue< MojoInt4 > tileQueue;
+			    std::multimap< MojoInt4, MojoInt4, Mojo::Core::Int4Comparator > sliceQueue;
+			    std::queue< MojoInt4 > wQueue;
 
 			    int* currentIdVolume;
-			    int3 currentIdNumVoxels;
-			    int4 thisVoxel;
+			    MojoInt3 currentIdNumVoxels;
+			    MojoInt4 thisVoxel;
 
 			    int nPixChanged = 0;
 			    bool invert = false;
                 bool foundMouseOverPixel = false;
 
-			    tileQueue.push( make_int4( pVoxelSpace.x, pVoxelSpace.y, pVoxelSpace.z, 0 ) );
+			    tileQueue.push( MojoInt4( pVoxelSpace.x, pVoxelSpace.y, pVoxelSpace.z, 0 ) );
 
 			    Core::Printf( "Filling at w=0." );
 
@@ -2766,7 +2756,7 @@ int FileSystemTileServer::CompleteDrawSplit( unsigned int segId, float3 pointTil
 				    //
 				    // Find the tile for this pixel
 				    //
-				    int4 tileIndex = make_int4( thisVoxel.x / numVoxelsPerTile.x,
+				    MojoInt4 tileIndex = MojoInt4( thisVoxel.x / numVoxelsPerTile.x,
 					    thisVoxel.y / numVoxelsPerTile.y,
 					    thisVoxel.z / numVoxelsPerTile.z,
 					    0);
@@ -2805,7 +2795,7 @@ int FileSystemTileServer::CompleteDrawSplit( unsigned int segId, float3 pointTil
 				    int tileX = thisVoxel.x % numVoxelsPerTile.x;
 				    int tileY = thisVoxel.y % numVoxelsPerTile.y;
 
-				    int3 index3D = make_int3( tileX, tileY, 0 );
+				    MojoInt3 index3D = MojoInt3( tileX, tileY, 0 );
 				    int  index1D = Mojo::Core::Index3DToIndex1D( index3D, currentIdNumVoxels );
 				    int  idValue = currentIdVolume[ index1D ];
 
@@ -2836,13 +2826,13 @@ int FileSystemTileServer::CompleteDrawSplit( unsigned int segId, float3 pointTil
 						    {
 							    if (tileX > 0)
 							    {
-								    tileQueue.push( make_int4(thisVoxel.x-1, thisVoxel.y, thisVoxel.z, 0) );
+								    tileQueue.push( MojoInt4(thisVoxel.x-1, thisVoxel.y, thisVoxel.z, 0) );
 							    }
 							    else
 							    {
-								    sliceQueue.insert( std::pair< int4, int4 > (
-									    make_int4( tileIndex.x - 1, tileIndex.y, tileIndex.z, tileIndex.w ),
-									    make_int4( thisVoxel.x-1, thisVoxel.y, thisVoxel.z, 0 ) ) );
+								    sliceQueue.insert( std::pair< MojoInt4, MojoInt4 > (
+									    MojoInt4( tileIndex.x - 1, tileIndex.y, tileIndex.z, tileIndex.w ),
+									    MojoInt4( thisVoxel.x-1, thisVoxel.y, thisVoxel.z, 0 ) ) );
 							    }
 						    }
 
@@ -2850,39 +2840,39 @@ int FileSystemTileServer::CompleteDrawSplit( unsigned int segId, float3 pointTil
 						    {
 							    if (tileX < numVoxelsPerTile.x - 1)
 							    {
-								    tileQueue.push( make_int4(thisVoxel.x+1, thisVoxel.y, thisVoxel.z, 0) );
+								    tileQueue.push( MojoInt4(thisVoxel.x+1, thisVoxel.y, thisVoxel.z, 0) );
 							    }
 							    else
 							    {
-								    sliceQueue.insert( std::pair< int4, int4 > (
-									    make_int4( tileIndex.x + 1, tileIndex.y, tileIndex.z, tileIndex.w ),
-									    make_int4( thisVoxel.x+1, thisVoxel.y, thisVoxel.z, 0 ) ) );
+								    sliceQueue.insert( std::pair< MojoInt4, MojoInt4 > (
+									    MojoInt4( tileIndex.x + 1, tileIndex.y, tileIndex.z, tileIndex.w ),
+									    MojoInt4( thisVoxel.x+1, thisVoxel.y, thisVoxel.z, 0 ) ) );
 							    }
 						    }
 						    if (thisVoxel.y > 0)
 						    {
 							    if (tileY > 0)
 							    {
-								    tileQueue.push( make_int4(thisVoxel.x, thisVoxel.y-1, thisVoxel.z, 0) );
+								    tileQueue.push( MojoInt4(thisVoxel.x, thisVoxel.y-1, thisVoxel.z, 0) );
 							    }
 							    else
 							    {
-								    sliceQueue.insert( std::pair< int4, int4 > (
-									    make_int4( tileIndex.x, tileIndex.y - 1, tileIndex.z, tileIndex.w ),
-									    make_int4( thisVoxel.x, thisVoxel.y-1, thisVoxel.z, 0 ) ) );
+								    sliceQueue.insert( std::pair< MojoInt4, MojoInt4 > (
+									    MojoInt4( tileIndex.x, tileIndex.y - 1, tileIndex.z, tileIndex.w ),
+									    MojoInt4( thisVoxel.x, thisVoxel.y-1, thisVoxel.z, 0 ) ) );
 							    }
 						    }
 						    if (thisVoxel.y < numVoxels.y - 1)
 						    {
 							    if (tileY < numVoxelsPerTile.y - 1)
 							    {
-								    tileQueue.push( make_int4(thisVoxel.x, thisVoxel.y+1, thisVoxel.z, 0) );
+								    tileQueue.push( MojoInt4(thisVoxel.x, thisVoxel.y+1, thisVoxel.z, 0) );
 							    }
 							    else
 							    {
-								    sliceQueue.insert( std::pair< int4, int4 > (
-									    make_int4( tileIndex.x, tileIndex.y + 1, tileIndex.z, tileIndex.w ),
-									    make_int4( thisVoxel.x, thisVoxel.y+1, thisVoxel.z, 0 ) ) );
+								    sliceQueue.insert( std::pair< MojoInt4, MojoInt4 > (
+									    MojoInt4( tileIndex.x, tileIndex.y + 1, tileIndex.z, tileIndex.w ),
+									    MojoInt4( thisVoxel.x, thisVoxel.y+1, thisVoxel.z, 0 ) ) );
 							    }
 						    }
 					    }
@@ -2902,13 +2892,13 @@ int FileSystemTileServer::CompleteDrawSplit( unsigned int segId, float3 pointTil
 			            //
                         float minDist = -1;
                         int closestId = -1;
-                        std::vector< std::pair< float2, int >>::iterator closestIt;
+                        std::vector< std::pair< MojoFloat2, int >>::iterator closestIt;
 
                         if ( join3D && segId == mPrevSplitId && ( mPrevSplitZ == mSplitWindowStart.z - 1 || mPrevSplitZ == mSplitWindowStart.z + 1 ) )
                         {
-                            Core::Printf( "Checking for 3D link, ", mPrevSplitCentroids.size(), " candidates." );
+                            Core::Printf( "Checking for 3D link, ", (unsigned int) mPrevSplitCentroids.size(), " candidates." );
 
-                            for ( std::vector< std::pair< float2, int >>::iterator centroidIt = mPrevSplitCentroids.begin(); centroidIt != mPrevSplitCentroids.end(); ++centroidIt )
+                            for ( std::vector< std::pair< MojoFloat2, int >>::iterator centroidIt = mPrevSplitCentroids.begin(); centroidIt != mPrevSplitCentroids.end(); ++centroidIt )
                             {
                                 float thisDist = sqrt ( ( centroidIt->first.x - centerX ) * ( centroidIt->first.x - centerX ) + ( centroidIt->first.y - centerY ) * ( centroidIt->first.y - centerY ) );
                                 if ( minDist < 0 || thisDist < minDist )
@@ -2956,7 +2946,7 @@ int FileSystemTileServer::CompleteDrawSplit( unsigned int segId, float3 pointTil
 					            // Invert - find an alternative fill point
 					            //
 
-					            wQueue = std::queue< int4 >();
+					            wQueue = std::queue< MojoInt4 >();
 
 					            if ( tileLoaded )
 					            {
@@ -2978,7 +2968,7 @@ int FileSystemTileServer::CompleteDrawSplit( unsigned int segId, float3 pointTil
 					            {
 						            for (int yd = 0; !seedFound && yd < mSplitWindowNTiles.y; ++yd )
 						            {
-							            tileIndex = make_int4( mSplitWindowStart.x + xd, mSplitWindowStart.y + yd, mSplitWindowStart.z, 0 );
+							            tileIndex = MojoInt4( mSplitWindowStart.x + xd, mSplitWindowStart.y + yd, mSplitWindowStart.z, 0 );
 							            volumeDescriptions = LoadTile( tileIndex );
 							            currentIdVolume = (int*)volumeDescriptions.Get( "IdMap" ).data;
 
@@ -3034,7 +3024,7 @@ int FileSystemTileServer::CompleteDrawSplit( unsigned int segId, float3 pointTil
 					            // Use this new seed point
 					            //
 					            pVoxelSpace = 
-						            make_int3( seedIndex1D % mSplitWindowWidth + mSplitWindowStart.x * numVoxelsPerTile.x,
+						            MojoInt3( seedIndex1D % mSplitWindowWidth + mSplitWindowStart.x * numVoxelsPerTile.x,
 						            seedIndex1D / mSplitWindowWidth + mSplitWindowStart.y * numVoxelsPerTile.y,
 						            mSplitWindowStart.z );
 
@@ -3044,7 +3034,7 @@ int FileSystemTileServer::CompleteDrawSplit( unsigned int segId, float3 pointTil
 					            nPixChanged = 0;
 					            invert = true;
 
-					            tileQueue.push( make_int4(pVoxelSpace.x, pVoxelSpace.y, pVoxelSpace.z, 0) );
+					            tileQueue.push( MojoInt4(pVoxelSpace.x, pVoxelSpace.y, pVoxelSpace.z, 0) );
 
 					            Core::Printf( "Filling (invert) at w=0." );
                             }
@@ -3106,7 +3096,7 @@ int FileSystemTileServer::CompleteDrawSplit( unsigned int segId, float3 pointTil
 					    //
 					    // Find the tile for this pixel
 					    //
-					    int4 tileIndex = make_int4( thisVoxel.x / numVoxelsPerTile.x,
+					    MojoInt4 tileIndex = MojoInt4( thisVoxel.x / numVoxelsPerTile.x,
 						    thisVoxel.y / numVoxelsPerTile.y,
 						    thisVoxel.z / numVoxelsPerTile.z,
 						    currentW);
@@ -3173,7 +3163,7 @@ int FileSystemTileServer::CompleteDrawSplit( unsigned int segId, float3 pointTil
 					    int tileX = thisVoxel.x % numVoxelsPerTile.x;
 					    int tileY = thisVoxel.y % numVoxelsPerTile.y;
 
-					    int3 index3D = make_int3( tileX, tileY, 0 );
+					    MojoInt3 index3D = MojoInt3( tileX, tileY, 0 );
 					    int  index1D = Mojo::Core::Index3DToIndex1D( index3D, currentIdNumVoxels );
 					    int  idValue = currentIdVolume[ index1D ];
 
@@ -3188,7 +3178,7 @@ int FileSystemTileServer::CompleteDrawSplit( unsigned int segId, float3 pointTil
 						    //
 						    // Add a scaled-down w to the queue
 						    //
-						    if (currentW < numTiles.w-1) wQueue.push( make_int4(thisVoxel.x / 2, thisVoxel.y / 2, thisVoxel.z, currentW+1) );
+						    if (currentW < numTiles.w-1) wQueue.push( MojoInt4(thisVoxel.x / 2, thisVoxel.y / 2, thisVoxel.z, currentW+1) );
 					    }
 
 				    }
@@ -3246,7 +3236,7 @@ int FileSystemTileServer::CompleteDrawSplit( unsigned int segId, float3 pointTil
                 //
                 // Record new centroid
                 //
-                newCentroids.push_back( std::pair< float2, int >( make_float2( centerX, centerY ), newId ));
+                newCentroids.push_back( std::pair< MojoFloat2, int >( MojoFloat2( centerX, centerY ), newId ));
 
                 //
                 // Recalculate centroid of unchanged label
@@ -3260,7 +3250,7 @@ int FileSystemTileServer::CompleteDrawSplit( unsigned int segId, float3 pointTil
 
 		    }
 
-            newCentroids.push_back( std::pair< float2, int>( mCentroid, segId ) );
+            newCentroids.push_back( std::pair< MojoFloat2, int>( mCentroid, segId ) );
 
             //
             // Record centroids for next z
@@ -3277,7 +3267,7 @@ int FileSystemTileServer::CompleteDrawSplit( unsigned int segId, float3 pointTil
             }
             else
             {
-                float3 newPointTileSpace = pointTileSpace;
+                MojoFloat3 newPointTileSpace = pointTileSpace;
                 newPointTileSpace.z = (float) currentZ;
                 PrepForSplit( segId, newPointTileSpace );
                 PredictSplit( segId, newPointTileSpace, 0 );
@@ -3302,7 +3292,7 @@ int FileSystemTileServer::CompleteDrawSplit( unsigned int segId, float3 pointTil
 
 }
 
-void FileSystemTileServer::CommitAdjustChange( unsigned int segId, float3 pointTileSpace )
+void FileSystemTileServer::CommitAdjustChange( unsigned int segId, MojoFloat3 pointTileSpace )
 {
 	if ( mIsSegmentationLoaded )
     {
@@ -3311,8 +3301,10 @@ void FileSystemTileServer::CommitAdjustChange( unsigned int segId, float3 pointT
 
         Core::HashMap< std::string, Core::VolumeDescription > volumeDescriptions;
 
-        int3 numVoxelsPerTile = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "IdMap" ).numVoxelsPerTile;
-		int4 numTiles = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "IdMap" ).numTiles;
+        TiledVolumeDescription tiledVolumeDescription = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "IdMap" );
+
+        MojoInt3 numVoxelsPerTile = tiledVolumeDescription.numVoxelsPerTile();
+		MojoInt4 numTiles = tiledVolumeDescription.numTiles();
         int* currentIdVolume;
         int nVoxels = numVoxelsPerTile.x * numVoxelsPerTile.y;
 
@@ -3321,11 +3313,11 @@ void FileSystemTileServer::CommitAdjustChange( unsigned int segId, float3 pointT
 		PrepForNextUndoRedoChange();
 		mNextUndoItem->newId = segId;
 		mNextUndoItem->oldId = -1;
-        std::set< int2, Core::Int2Comparator > *changeSet;
+        std::set< MojoInt2, Core::Int2Comparator > *changeSet;
 
         int currentW = 0;
-        std::queue< int4 > tileQueue;
-        std::queue< int4 > wQueue;
+        std::queue< MojoInt4 > tileQueue;
+        std::queue< MojoInt4 > wQueue;
 
         int tileCount = 0;
         int areaCount = 0;
@@ -3344,7 +3336,7 @@ void FileSystemTileServer::CommitAdjustChange( unsigned int segId, float3 pointT
                 ++tileCount;
                 //Core::Printf( "Loading distance tile ", tileCount, "." );
 
-                int4 tileIndex = make_int4( mSplitWindowStart.x + xd, mSplitWindowStart.y + yd, mSplitWindowStart.z, 0 );
+                MojoInt4 tileIndex = MojoInt4( mSplitWindowStart.x + xd, mSplitWindowStart.y + yd, mSplitWindowStart.z, 0 );
                 volumeDescriptions = LoadTile( tileIndex );
                 tileChanged = false;
                 currentIdVolume = (int*)volumeDescriptions.Get( "IdMap" ).data;
@@ -3374,7 +3366,7 @@ void FileSystemTileServer::CommitAdjustChange( unsigned int segId, float3 pointT
 						        &mNextUndoItem->changeSets.GetHashMap()[ CreateTileString( tileIndex ) ];
                         }
 
-                        changeSet->insert( make_int2( tileIndex1D, currentIdVolume[ tileIndex1D ] ) );
+                        changeSet->insert( MojoInt2( tileIndex1D, currentIdVolume[ tileIndex1D ] ) );
                         currentIdVolume[ tileIndex1D ] = segId;
                         tileChanged = true;
 
@@ -3389,7 +3381,7 @@ void FileSystemTileServer::CommitAdjustChange( unsigned int segId, float3 pointT
                         //
 					    // Add a scaled-down w to the queue
 					    //
-                        wQueue.push( make_int4( ( mSplitWindowStart.x * numVoxelsPerTile.x + areaX ) / 2,
+                        wQueue.push( MojoInt4( ( mSplitWindowStart.x * numVoxelsPerTile.x + areaX ) / 2,
                             ( mSplitWindowStart.y * numVoxelsPerTile.y + areaY ) / 2, mSplitWindowStart.z, currentW + 1) );
                     }
                 }
@@ -3448,10 +3440,10 @@ void FileSystemTileServer::CommitAdjustChange( unsigned int segId, float3 pointT
 		tileLoaded = false;
 		tileChanged = false;
 
-        int4 thisVoxel;
-        int4 tileIndex;
-		int4 previousTileIndex;
-        int3 currentIdNumVoxels;
+        MojoInt4 thisVoxel;
+        MojoInt4 tileIndex;
+		MojoInt4 previousTileIndex;
+        MojoInt3 currentIdNumVoxels;
 
         std::set< int >oldIds;
 
@@ -3466,7 +3458,7 @@ void FileSystemTileServer::CommitAdjustChange( unsigned int segId, float3 pointT
 				//
 				// Find the tile for this pixel
 				//
-				tileIndex = make_int4( thisVoxel.x / numVoxelsPerTile.x,
+				tileIndex = MojoInt4( thisVoxel.x / numVoxelsPerTile.x,
 					thisVoxel.y / numVoxelsPerTile.y,
 					thisVoxel.z / numVoxelsPerTile.z,
 					currentW);
@@ -3544,7 +3536,7 @@ void FileSystemTileServer::CommitAdjustChange( unsigned int segId, float3 pointT
 				int tileX = thisVoxel.x % numVoxelsPerTile.x;
 				int tileY = thisVoxel.y % numVoxelsPerTile.y;
 
-				int3 index3D = make_int3( tileX, tileY, 0 );
+				MojoInt3 index3D = MojoInt3( tileX, tileY, 0 );
 				int  index1D = Mojo::Core::Index3DToIndex1D( index3D, currentIdNumVoxels );
 				int  idValue = currentIdVolume[ index1D ];
 
@@ -3559,7 +3551,7 @@ void FileSystemTileServer::CommitAdjustChange( unsigned int segId, float3 pointT
 						    &mNextUndoItem->changeSets.GetHashMap()[ CreateTileString( tileIndex ) ];
                     }
 
-                    changeSet->insert( make_int2( index1D, currentIdVolume[ index1D ] ) );
+                    changeSet->insert( MojoInt2( index1D, currentIdVolume[ index1D ] ) );
                     oldIds.insert( currentIdVolume[ index1D ] );
                     currentIdVolume[ index1D ] = segId;
                     tileChanged = true;
@@ -3572,7 +3564,7 @@ void FileSystemTileServer::CommitAdjustChange( unsigned int segId, float3 pointT
                     //
 					// Add a scaled-down w to the queue
 					//
-					if (currentW < numTiles.w-1) wQueue.push( make_int4(thisVoxel.x / 2, thisVoxel.y / 2, thisVoxel.z, currentW+1) );
+					if (currentW < numTiles.w-1) wQueue.push( MojoInt4(thisVoxel.x / 2, thisVoxel.y / 2, thisVoxel.z, currentW+1) );
                 }
 
 			}
@@ -3656,7 +3648,7 @@ void FileSystemTileServer::FindBoundaryJoinPoints2D( unsigned int segId )
     {
 		Core::Printf( "\nFinding Split line for segment ", segId, " with ", (unsigned int) mSplitSourcePoints.size(), " split segments.\n" );
 
-        int3 numVoxelsPerTile = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "IdMap" ).numVoxelsPerTile;
+        MojoInt3 numVoxelsPerTile = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "IdMap" ).numVoxelsPerTile();
 
         int nSources = (int) mSplitSourcePoints.size();
         int* sourceLinks = new int[ nSources ];
@@ -4243,7 +4235,7 @@ void FileSystemTileServer::UndoChange()
 		    for ( changeIt = UndoItem.changePixels.GetHashMap().begin(); changeIt != UndoItem.changePixels.GetHashMap().end(); ++changeIt )
 		    {
 
-			    int4 tileIndex = CreateTileIndex( changeIt->first );
+			    MojoInt4 tileIndex = CreateTileIndex( changeIt->first );
 
                 //
                 // load tile
@@ -4259,14 +4251,14 @@ void FileSystemTileServer::UndoChange()
                 //
                 // replace the old id and color with the new id and color...
                 //
-                int3 numVoxels = volumeDescriptions.Get( "IdMap" ).numVoxels;
+                MojoInt3 numVoxels = volumeDescriptions.Get( "IdMap" ).numVoxels;
                 for ( int zv = 0; zv < numVoxels.z; zv++ )
                 {
                     for ( int yv = 0; yv < numVoxels.y; yv++ )
                     {
                         for ( int xv = 0; xv < numVoxels.x; xv++ )
                         {
-                            int3 index3D = make_int3( xv, yv, zv );
+                            MojoInt3 index3D = MojoInt3( xv, yv, zv );
                             int  index1D = Core::Index3DToIndex1D( index3D, numVoxels );
 
 						    if ( changeBits->test( index1D ) )
@@ -4294,12 +4286,12 @@ void FileSystemTileServer::UndoChange()
 
             }
 
-		    stdext::hash_map< std::string, std::set< int2, Core::Int2Comparator > >::iterator changeSetIt;
+		    stdext::hash_map< std::string, std::set< MojoInt2, Core::Int2Comparator > >::iterator changeSetIt;
 
 		    for ( changeSetIt = UndoItem.changeSets.GetHashMap().begin(); changeSetIt != UndoItem.changeSets.GetHashMap().end(); ++changeSetIt )
 		    {
 
-			    int4 tileIndex = CreateTileIndex( changeSetIt->first );
+			    MojoInt4 tileIndex = CreateTileIndex( changeSetIt->first );
 
                 //
                 // load tile
@@ -4310,12 +4302,12 @@ void FileSystemTileServer::UndoChange()
 			    //
 			    // Get the changes
 			    //
-			    std::set< int2, Core::Int2Comparator > *changeBits = &changeSetIt->second;
+			    std::set< MojoInt2, Core::Int2Comparator > *changeBits = &changeSetIt->second;
 
                 //
                 // replace the new id and color with the previous id and color...
                 //
-                for ( std::set< int2, Core::Int2Comparator >::iterator indexIt = changeSetIt->second.begin(); indexIt != changeSetIt->second.end(); ++indexIt )
+                for ( std::set< MojoInt2, Core::Int2Comparator >::iterator indexIt = changeSetIt->second.begin(); indexIt != changeSetIt->second.end(); ++indexIt )
                 {
                     if ( tileIndex.w == 0 )
                     {
@@ -4399,7 +4391,7 @@ void FileSystemTileServer::RedoChange()
 		    for ( changeIt = RedoItem.changePixels.GetHashMap().begin(); changeIt != RedoItem.changePixels.GetHashMap().end(); ++changeIt )
 		    {
 
-			    int4 tileIndex = CreateTileIndex( changeIt->first );
+			    MojoInt4 tileIndex = CreateTileIndex( changeIt->first );
 
                 //
                 // load tile
@@ -4415,14 +4407,14 @@ void FileSystemTileServer::RedoChange()
                 //
                 // replace the old id and color with the new id and color...
                 //
-                int3 numVoxels = volumeDescriptions.Get( "IdMap" ).numVoxels;
+                MojoInt3 numVoxels = volumeDescriptions.Get( "IdMap" ).numVoxels;
                 for ( int zv = 0; zv < numVoxels.z; zv++ )
                 {
                     for ( int yv = 0; yv < numVoxels.y; yv++ )
                     {
                         for ( int xv = 0; xv < numVoxels.x; xv++ )
                         {
-                            int3 index3D = make_int3( xv, yv, zv );
+                            MojoInt3 index3D = MojoInt3( xv, yv, zv );
                             int  index1D = Core::Index3DToIndex1D( index3D, numVoxels );
 
 						    if ( changeBits->test( index1D ) )
@@ -4450,12 +4442,12 @@ void FileSystemTileServer::RedoChange()
 			 
             }
 
-		    stdext::hash_map< std::string, std::set< int2, Core::Int2Comparator > >::iterator changeSetIt;
+		    stdext::hash_map< std::string, std::set< MojoInt2, Core::Int2Comparator > >::iterator changeSetIt;
 
 		    for ( changeSetIt = RedoItem.changeSets.GetHashMap().begin(); changeSetIt != RedoItem.changeSets.GetHashMap().end(); ++changeSetIt )
 		    {
 
-			    int4 tileIndex = CreateTileIndex( changeSetIt->first );
+			    MojoInt4 tileIndex = CreateTileIndex( changeSetIt->first );
 
                 //
                 // load tile
@@ -4466,12 +4458,12 @@ void FileSystemTileServer::RedoChange()
 			    //
 			    // Get or create the change bitset for this tile
 			    //
-			    std::set< int2, Core::Int2Comparator > *changeBits = &changeSetIt->second;
+			    std::set< MojoInt2, Core::Int2Comparator > *changeBits = &changeSetIt->second;
 
                 //
                 // replace the old id and color with the new id and color...
                 //
-                for ( std::set< int2, Core::Int2Comparator >::iterator indexIt = changeSetIt->second.begin(); indexIt != changeSetIt->second.end(); ++indexIt )
+                for ( std::set< MojoInt2, Core::Int2Comparator >::iterator indexIt = changeSetIt->second.begin(); indexIt != changeSetIt->second.end(); ++indexIt )
                 {
                     if ( tileIndex.w == 0 )
                     {
@@ -4561,7 +4553,7 @@ void FileSystemTileServer::PrepForNextUndoRedoChange()
 // Tile Methods
 //
 
-Core::HashMap< std::string, Core::VolumeDescription > FileSystemTileServer::LoadTile( int4 tileIndex )
+Core::HashMap< std::string, Core::VolumeDescription > FileSystemTileServer::LoadTile( MojoInt4 tileIndex )
 {
     std::string tileIndexString = CreateTileString( tileIndex );
     if ( mFileSystemTileCache.GetHashMap().find( tileIndexString ) != mFileSystemTileCache.GetHashMap().end() )
@@ -4631,7 +4623,7 @@ Core::HashMap< std::string, Core::VolumeDescription > FileSystemTileServer::Load
 }
 
 
-void FileSystemTileServer::UnloadTile( int4 tileIndex )
+void FileSystemTileServer::UnloadTile( MojoInt4 tileIndex )
 {
     //
 	// Keep the tile in the cache, but mark it as unused
@@ -4667,7 +4659,7 @@ void FileSystemTileServer::UnloadSegmentationInternal()
     mTiledDatasetDescription = TiledDatasetDescription();
 }
 
-Core::VolumeDescription FileSystemTileServer::LoadTileImage( int4 tileIndex, std::string imageName )
+Core::VolumeDescription FileSystemTileServer::LoadTileImage( MojoInt4 tileIndex, std::string imageName )
 {
     Core::VolumeDescription volumeDescription;
 
@@ -4678,16 +4670,16 @@ Core::VolumeDescription FileSystemTileServer::LoadTileImage( int4 tileIndex, std
     return volumeDescription;
 }
 
-bool FileSystemTileServer::TryLoadTileImage( int4 tileIndex, std::string imageName, Core::VolumeDescription& volumeDescription )
+bool FileSystemTileServer::TryLoadTileImage( MojoInt4 tileIndex, std::string imageName, Core::VolumeDescription& volumeDescription )
 {
     switch ( mTiledDatasetDescription.tiledVolumeDescriptions.Get( imageName ).dxgiFormat )
     {
     case DXGI_FORMAT_R8_UNORM:
-        return TryLoadTileImageInternal< uchar1 >( tileIndex, imageName, volumeDescription );
+        return TryLoadTileImageInternalUChar1( tileIndex, imageName, volumeDescription );
         break;
 
     case DXGI_FORMAT_R8G8B8A8_UNORM:
-        return TryLoadTileImageInternal< uchar4 >( tileIndex, imageName, volumeDescription );
+        return TryLoadTileImageInternalUChar4( tileIndex, imageName, volumeDescription );
         break;
 
     default:
@@ -4711,7 +4703,7 @@ void FileSystemTileServer::UnloadTileImageInternal( Core::VolumeDescription& vol
     volumeDescription = Core::VolumeDescription();
 }
 
-Core::VolumeDescription FileSystemTileServer::LoadTileHdf5( int4 tileIndex, std::string hdf5Name, std::string hdf5InternalDatasetName )
+Core::VolumeDescription FileSystemTileServer::LoadTileHdf5( MojoInt4 tileIndex, std::string hdf5Name, std::string hdf5InternalDatasetName )
 {
     Core::VolumeDescription volumeDescription;
 
@@ -4722,12 +4714,12 @@ Core::VolumeDescription FileSystemTileServer::LoadTileHdf5( int4 tileIndex, std:
     return volumeDescription;
 }
 
-bool FileSystemTileServer::TryLoadTileHdf5( int4 tileIndex, std::string hdf5Name, std::string hdf5InternalDatasetName, Core::VolumeDescription& volumeDescription )
+bool FileSystemTileServer::TryLoadTileHdf5( MojoInt4 tileIndex, std::string hdf5Name, std::string hdf5InternalDatasetName, Core::VolumeDescription& volumeDescription )
 {
     switch ( mTiledDatasetDescription.tiledVolumeDescriptions.Get( hdf5Name ).dxgiFormat )
     {
     case DXGI_FORMAT_R32_UINT:
-        return TryLoadTileHdf5Internal< unsigned int >( tileIndex, hdf5Name, hdf5InternalDatasetName, volumeDescription );
+        return TryLoadTileHdf5Internal( tileIndex, hdf5Name, hdf5InternalDatasetName, volumeDescription );
         break;
 
     default:
@@ -4751,7 +4743,7 @@ void FileSystemTileServer::UnloadTileHdf5Internal( Core::VolumeDescription& volu
     volumeDescription = Core::VolumeDescription();
 }
 
-void FileSystemTileServer::SaveTile( int4 tileIndex, Core::HashMap< std::string, Core::VolumeDescription >& volumeDescriptions )
+void FileSystemTileServer::SaveTile( MojoInt4 tileIndex, Core::HashMap< std::string, Core::VolumeDescription >& volumeDescriptions )
 {
     //
 	// Mark this tile as needs saving
@@ -4763,16 +4755,16 @@ void FileSystemTileServer::SaveTile( int4 tileIndex, Core::HashMap< std::string,
     }
 }
 
-void FileSystemTileServer::SaveTileImage( int4 tileIndex, std::string imageName, const Core::VolumeDescription& volumeDescription )
+void FileSystemTileServer::SaveTileImage( MojoInt4 tileIndex, std::string imageName, const Core::VolumeDescription& volumeDescription )
 {
     switch ( mTiledDatasetDescription.tiledVolumeDescriptions.Get( imageName ).dxgiFormat )
     {
     case DXGI_FORMAT_R8_UNORM:
-        SaveTileImageInternal< uchar1 >( tileIndex, imageName, volumeDescription );
+        SaveTileImageInternalUChar1( tileIndex, imageName, volumeDescription );
         break;
 
     case DXGI_FORMAT_R8G8B8A8_UNORM:
-        SaveTileImageInternal< uchar4 >( tileIndex, imageName, volumeDescription );
+        SaveTileImageInternalUChar4( tileIndex, imageName, volumeDescription );
         break;
 
     default:
@@ -4781,12 +4773,12 @@ void FileSystemTileServer::SaveTileImage( int4 tileIndex, std::string imageName,
     }
 }
 
-void FileSystemTileServer::SaveTileHdf5( int4 tileIndex, std::string hdf5Name, std::string hdf5InternalDatasetName, const Core::VolumeDescription& volumeDescription )
+void FileSystemTileServer::SaveTileHdf5( MojoInt4 tileIndex, std::string hdf5Name, std::string hdf5InternalDatasetName, const Core::VolumeDescription& volumeDescription )
 {
     switch ( mTiledDatasetDescription.tiledVolumeDescriptions.Get( hdf5Name ).dxgiFormat )
     {
     case DXGI_FORMAT_R32_UINT:
-        return SaveTileHdf5Internal< unsigned int >( tileIndex, hdf5Name, hdf5InternalDatasetName, volumeDescription );
+        return SaveTileHdf5Internal( tileIndex, hdf5Name, hdf5InternalDatasetName, volumeDescription );
         break;
 
     default:
@@ -4800,7 +4792,7 @@ void FileSystemTileServer::SaveTileHdf5( int4 tileIndex, std::string hdf5Name, s
 // Cache Methods
 //
 
-std::string FileSystemTileServer::CreateTileString( int4 tileIndex )
+std::string FileSystemTileServer::CreateTileString( MojoInt4 tileIndex )
 {
 	return Core::ToString("W", tileIndex.w, "X", tileIndex.x, "Y", tileIndex.y, "Z", tileIndex.z);
 	
@@ -4813,12 +4805,12 @@ std::string FileSystemTileServer::CreateTileString( int4 tileIndex )
 	//return tileString;
 }
 
-int4 FileSystemTileServer::CreateTileIndex( std::string tileString )
+MojoInt4 FileSystemTileServer::CreateTileIndex( std::string tileString )
 {
 	int w, x, y, z;
 	sscanf_s( tileString.c_str(), "W%dX%dY%dZ%d", &w, &x, &y, &z );
 	//sscanf_s( tileString.c_str(), "w=%dz=%dy=%dx=%d", &w, &z, &y, &x );
-	return make_int4( x, y, z, w );
+	return MojoInt4( x, y, z, w );
 }
 
 void FileSystemTileServer::FlushFileSystemTileCacheChanges()
@@ -4998,6 +4990,336 @@ unsigned int FileSystemTileServer::GetSegmentInfoCurrentListLocation( unsigned i
 std::list< SegmentInfo > FileSystemTileServer::GetSegmentInfoRange( int begin, int end )
 {
 	return mSegmentInfoManager.GetSegmentInfoRange( begin, end );
+}
+
+
+
+//
+// Internal template functions moved here to resolve x64 linking errors
+//
+
+
+void FileSystemTileServer::LoadTiledDatasetInternal( TiledDatasetDescription& tiledDatasetDescription )
+{
+    mTiledDatasetDescription = tiledDatasetDescription;
+    mIsTiledDatasetLoaded    = true;
+}
+
+void FileSystemTileServer::LoadSegmentationInternal( TiledDatasetDescription& tiledDatasetDescription )
+{
+    mTiledDatasetDescription = tiledDatasetDescription;
+
+    Core::Printf( "Loading idMaps..." );
+
+    mSegmentInfoManager = FileSystemSegmentInfoManager( mTiledDatasetDescription.paths.Get( "ColorMap" ), mTiledDatasetDescription.paths.Get( "SegmentInfo" ) );
+
+	mSegmentInfoManager.OpenDB();
+
+    Core::Printf( "Loaded." );
+
+    mTiledDatasetDescription.maxLabelId = mSegmentInfoManager.GetMaxId();
+
+    mIsSegmentationLoaded    = true;
+
+    //Core::Printf( "FileSystemTileServer::LoadSegmentationInternal Returning." );
+}
+
+bool FileSystemTileServer::TryLoadTileImageInternalUChar1( MojoInt4 tileIndex, std::string imageName, Core::VolumeDescription& volumeDescription )
+{
+    std::string tilePath = Core::ToString(
+        mTiledDatasetDescription.tiledVolumeDescriptions.Get( imageName ).imageDataDirectory, "\\",
+        "w=", Core::ToStringZeroPad( tileIndex.w, 8 ), "\\",
+        "z=", Core::ToStringZeroPad( tileIndex.z, 8 ), "\\",
+        "y=", Core::ToStringZeroPad( tileIndex.y, 8 ), ",",
+        "x=", Core::ToStringZeroPad( tileIndex.x, 8 ), ".",
+        mTiledDatasetDescription.tiledVolumeDescriptions.Get( imageName ).fileExtension );
+
+    if ( boost::filesystem::exists( tilePath ) )
+    {
+        TiledVolumeDescription tiledVolumeDescription = mTiledDatasetDescription.tiledVolumeDescriptions.Get( imageName );
+
+        volumeDescription.data             = new unsigned char[ tiledVolumeDescription.numVoxelsPerTileY * tiledVolumeDescription.numVoxelsPerTileX * tiledVolumeDescription.numBytesPerVoxel ];
+        volumeDescription.dxgiFormat       = tiledVolumeDescription.dxgiFormat;
+        volumeDescription.isSigned         = tiledVolumeDescription.isSigned;
+        volumeDescription.numBytesPerVoxel = tiledVolumeDescription.numBytesPerVoxel;
+        volumeDescription.numVoxels        = tiledVolumeDescription.numVoxelsPerTile();
+
+        int flags = 0; // force greyscale
+        cv::Mat tileImage = cv::imread( tilePath, flags );
+
+        RELEASE_ASSERT( tileImage.cols        == tiledVolumeDescription.numVoxelsPerTileX );
+        RELEASE_ASSERT( tileImage.rows        == tiledVolumeDescription.numVoxelsPerTileY );
+        RELEASE_ASSERT( tileImage.elemSize()  == 1 );
+        RELEASE_ASSERT( tileImage.elemSize1() == 1 );
+        RELEASE_ASSERT( tileImage.channels()  == 1 );
+        RELEASE_ASSERT( tileImage.type()      == CV_8UC1 );
+        RELEASE_ASSERT( tileImage.depth()     == CV_8U );
+        RELEASE_ASSERT( tileImage.isContinuous() );
+
+        memcpy( volumeDescription.data, tileImage.ptr(), tiledVolumeDescription.numVoxelsPerTileY * tiledVolumeDescription.numVoxelsPerTileX * tiledVolumeDescription.numBytesPerVoxel );
+
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+bool FileSystemTileServer::TryLoadTileImageInternalUChar4( MojoInt4 tileIndex, std::string imageName, Core::VolumeDescription& volumeDescription )
+{
+    std::string tilePath = Core::ToString(
+        mTiledDatasetDescription.tiledVolumeDescriptions.Get( imageName ).imageDataDirectory, "\\",
+        "w=", Core::ToStringZeroPad( tileIndex.w, 8 ), "\\",
+        "z=", Core::ToStringZeroPad( tileIndex.z, 8 ), "\\",
+        "y=", Core::ToStringZeroPad( tileIndex.y, 8 ), ",",
+        "x=", Core::ToStringZeroPad( tileIndex.x, 8 ), ".",
+        mTiledDatasetDescription.tiledVolumeDescriptions.Get( imageName ).fileExtension );
+
+    if ( boost::filesystem::exists( tilePath ) )
+    {
+        TiledVolumeDescription tiledVolumeDescription = mTiledDatasetDescription.tiledVolumeDescriptions.Get( imageName );
+        MojoInt3 numVoxelsPerTile              = tiledVolumeDescription.numVoxelsPerTile();
+        int  numBytesPerVoxel              = tiledVolumeDescription.numBytesPerVoxel;
+
+        volumeDescription.data             = new unsigned char[ numVoxelsPerTile.y * numVoxelsPerTile.x * numBytesPerVoxel ];
+        volumeDescription.dxgiFormat       = tiledVolumeDescription.dxgiFormat;
+        volumeDescription.isSigned         = tiledVolumeDescription.isSigned;
+        volumeDescription.numBytesPerVoxel = tiledVolumeDescription.numBytesPerVoxel;
+        volumeDescription.numVoxels        = numVoxelsPerTile;
+
+        cv::Mat tileImage = cv::imread( tilePath );
+
+        std::vector<cv::Mat> tileImageChannels;
+        cv::split( tileImage, tileImageChannels );
+
+        cv::Mat tileImageR;
+        cv::Mat tileImageG;
+        cv::Mat tileImageB;
+        cv::Mat tileImageA;
+
+        if ( mConstParameters.Get< bool >( "SWAP_COLOR_CHANNELS" ) )
+        {
+            tileImageR = tileImageChannels[ 2 ];
+            tileImageG = tileImageChannels[ 1 ];
+            tileImageB = tileImageChannels[ 0 ];
+            tileImageA = cv::Mat::zeros( tileImageR.rows, tileImageR.cols, CV_8UC1 );
+        }
+        else
+        {
+            tileImageR = tileImageChannels[ 0 ];
+            tileImageG = tileImageChannels[ 1 ];
+            tileImageB = tileImageChannels[ 2 ];
+            tileImageA = cv::Mat::zeros( tileImageR.rows, tileImageR.cols, CV_8UC1 );
+        }
+
+        tileImageChannels.clear();
+
+        tileImageChannels.push_back( tileImageR );
+        tileImageChannels.push_back( tileImageG );
+        tileImageChannels.push_back( tileImageB );
+        tileImageChannels.push_back( tileImageA );
+
+        cv::merge( tileImageChannels, tileImage );
+
+        RELEASE_ASSERT( tileImage.cols        == numVoxelsPerTile.x );
+        RELEASE_ASSERT( tileImage.rows        == numVoxelsPerTile.y );
+        RELEASE_ASSERT( tileImage.elemSize()  == 4 );
+        RELEASE_ASSERT( tileImage.elemSize1() == 1 );
+        RELEASE_ASSERT( tileImage.channels()  == 4 );
+        RELEASE_ASSERT( tileImage.type()      == CV_8UC4 );
+        RELEASE_ASSERT( tileImage.depth()     == CV_8U );
+        RELEASE_ASSERT( tileImage.isContinuous() );
+
+        memcpy( volumeDescription.data, tileImage.ptr(), numVoxelsPerTile.y * numVoxelsPerTile.x * numBytesPerVoxel );
+
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+//
+// Type is always unsigned int
+//
+
+bool FileSystemTileServer::TryLoadTileHdf5Internal( MojoInt4 tileIndex, std::string hdf5Name, std::string hdf5InternalDatasetName, Core::VolumeDescription& volumeDescription )
+{
+    std::string tilePath = Core::ToString(
+        mTiledDatasetDescription.tiledVolumeDescriptions.Get( hdf5Name ).imageDataDirectory, "\\",
+        "w=", Core::ToStringZeroPad( tileIndex.w, 8 ), "\\",
+        "z=", Core::ToStringZeroPad( tileIndex.z, 8 ), "\\",
+        "y=", Core::ToStringZeroPad( tileIndex.y, 8 ), ",",
+        "x=", Core::ToStringZeroPad( tileIndex.x, 8 ), ".",
+        mTiledDatasetDescription.tiledVolumeDescriptions.Get( hdf5Name ).fileExtension );
+
+    if ( boost::filesystem::exists( tilePath ) )
+    {
+        MojoInt3 numVoxelsPerTile              = mTiledDatasetDescription.tiledVolumeDescriptions.Get( hdf5Name ).numVoxelsPerTile();
+        int  numBytesPerVoxel              = mTiledDatasetDescription.tiledVolumeDescriptions.Get( hdf5Name ).numBytesPerVoxel;
+
+        volumeDescription.data             = new unsigned char[ numVoxelsPerTile.y * numVoxelsPerTile.x * numBytesPerVoxel ];
+        volumeDescription.dxgiFormat       = mTiledDatasetDescription.tiledVolumeDescriptions.Get( hdf5Name ).dxgiFormat;
+        volumeDescription.isSigned         = mTiledDatasetDescription.tiledVolumeDescriptions.Get( hdf5Name ).isSigned;
+        volumeDescription.numBytesPerVoxel = mTiledDatasetDescription.tiledVolumeDescriptions.Get( hdf5Name ).numBytesPerVoxel;
+        volumeDescription.numVoxels        = numVoxelsPerTile;
+
+		//Core::Printf( "Loading tile ", tilePath, "...");
+
+        hid_t hdf5FileHandle = marray::hdf5::openFile( tilePath );
+        marray::Marray< unsigned int > marray;
+        try
+        {
+            marray::hdf5::load( hdf5FileHandle, hdf5InternalDatasetName, marray );
+        }
+        catch (...)
+        {
+            Core::Printf( "Warning - error loading hdf5 tile. Attempting to reduce cache size." );
+            ReduceCacheSize();
+            marray::hdf5::load( hdf5FileHandle, hdf5InternalDatasetName, marray );
+        }
+        marray::hdf5::closeFile( hdf5FileHandle );
+
+		//Core::Printf( "Done.");
+
+        RELEASE_ASSERT( marray.dimension() == 2 );
+        RELEASE_ASSERT( marray.shape( 0 ) == numVoxelsPerTile.y && marray.shape( 1 ) == numVoxelsPerTile.y );
+
+        memcpy( volumeDescription.data, &marray( 0 ), numVoxelsPerTile.y * numVoxelsPerTile.x * numBytesPerVoxel );
+
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+void FileSystemTileServer::SaveTileImageInternalUChar4( MojoInt4 tileIndex, std::string imageName, const Core::VolumeDescription& volumeDescription )
+{
+    std::string tilePath = Core::ToString(
+        mTiledDatasetDescription.tiledVolumeDescriptions.Get( imageName ).imageDataDirectory, "\\",
+        "w=", Core::ToStringZeroPad( tileIndex.w, 8 ), "\\",
+        "z=", Core::ToStringZeroPad( tileIndex.z, 8 ), "\\",
+        "y=", Core::ToStringZeroPad( tileIndex.y, 8 ), ",",
+        "x=", Core::ToStringZeroPad( tileIndex.x, 8 ), ".",
+        mTiledDatasetDescription.tiledVolumeDescriptions.Get( imageName ).fileExtension );
+
+    RELEASE_ASSERT( boost::filesystem::exists( tilePath ) );
+
+    cv::Mat tileImage = cv::Mat::zeros( volumeDescription.numVoxels.y, volumeDescription.numVoxels.x, CV_8UC4 );
+
+    memcpy( tileImage.ptr(), volumeDescription.data, volumeDescription.numVoxels.y * volumeDescription.numVoxels.x * volumeDescription.numBytesPerVoxel );
+
+    std::vector<cv::Mat> tileImageChannels;
+    cv::split( tileImage, tileImageChannels );
+
+    cv::Mat tileImageR;
+    cv::Mat tileImageG;
+    cv::Mat tileImageB;
+
+    if ( mConstParameters.Get< bool >( "SWAP_COLOR_CHANNELS" ) )
+    {
+        tileImageR = tileImageChannels[ 2 ];
+        tileImageG = tileImageChannels[ 1 ];
+        tileImageB = tileImageChannels[ 0 ];
+    }
+    else
+    {
+        tileImageR = tileImageChannels[ 0 ];
+        tileImageG = tileImageChannels[ 1 ];
+        tileImageB = tileImageChannels[ 2 ];
+    }
+
+    tileImageChannels.clear();
+
+    tileImageChannels.push_back( tileImageR );
+    tileImageChannels.push_back( tileImageG );
+    tileImageChannels.push_back( tileImageB );
+
+    cv::merge( tileImageChannels, tileImage );
+
+    RELEASE_ASSERT( tileImage.cols        == volumeDescription.numVoxels.x );
+    RELEASE_ASSERT( tileImage.rows        == volumeDescription.numVoxels.y );
+    RELEASE_ASSERT( tileImage.elemSize()  == 3 );
+    RELEASE_ASSERT( tileImage.elemSize1() == 1 );
+    RELEASE_ASSERT( tileImage.channels()  == 3 );
+    RELEASE_ASSERT( tileImage.type()      == CV_8UC3 );
+    RELEASE_ASSERT( tileImage.depth()     == CV_8U );
+    RELEASE_ASSERT( tileImage.isContinuous() );
+
+    cv::imwrite( tilePath, tileImage );
+}
+
+void FileSystemTileServer::SaveTileImageInternalUChar1( MojoInt4 tileIndex, std::string imageName, const Core::VolumeDescription& volumeDescription )
+{
+    std::string tilePath = Core::ToString(
+        mTiledDatasetDescription.tiledVolumeDescriptions.Get( imageName ).imageDataDirectory, "\\",
+        "w=", Core::ToStringZeroPad( tileIndex.w, 8 ), "\\",
+        "z=", Core::ToStringZeroPad( tileIndex.z, 8 ), "\\",
+        "y=", Core::ToStringZeroPad( tileIndex.y, 8 ), ",",
+        "x=", Core::ToStringZeroPad( tileIndex.x, 8 ), ".",
+        mTiledDatasetDescription.tiledVolumeDescriptions.Get( imageName ).fileExtension );
+
+    RELEASE_ASSERT( boost::filesystem::exists( tilePath ) );
+
+    cv::Mat tileImage = cv::Mat::zeros( volumeDescription.numVoxels.y, volumeDescription.numVoxels.x, CV_8UC1 );
+
+    memcpy( tileImage.ptr(), volumeDescription.data, volumeDescription.numVoxels.y * volumeDescription.numVoxels.x * volumeDescription.numBytesPerVoxel );
+
+    RELEASE_ASSERT( tileImage.cols        == volumeDescription.numVoxels.x );
+    RELEASE_ASSERT( tileImage.rows        == volumeDescription.numVoxels.y );
+    RELEASE_ASSERT( tileImage.elemSize()  == 3 );
+    RELEASE_ASSERT( tileImage.elemSize1() == 1 );
+    RELEASE_ASSERT( tileImage.channels()  == 3 );
+    RELEASE_ASSERT( tileImage.type()      == CV_8UC3 );
+    RELEASE_ASSERT( tileImage.depth()     == CV_8U );
+    RELEASE_ASSERT( tileImage.isContinuous() );
+
+    cv::imwrite( tilePath, tileImage );
+}
+
+//
+// Type is always unsigned int
+//
+
+void FileSystemTileServer::SaveTileHdf5Internal( MojoInt4 tileIndex, std::string hdf5Name, std::string hdf5InternalDatasetName, const Core::VolumeDescription& volumeDescription )
+{
+
+    size_t shape[] = { volumeDescription.numVoxels.y, volumeDescription.numVoxels.x };
+    marray::Marray< unsigned int > marray( shape, shape + 2 );
+
+    memcpy( &marray( 0 ), volumeDescription.data, volumeDescription.numVoxels.y * volumeDescription.numVoxels.x * volumeDescription.numBytesPerVoxel );
+
+    std::string tilePathString = Core::ToString(
+        mTiledDatasetDescription.tiledVolumeDescriptions.Get( hdf5Name ).imageDataDirectory, "\\",
+        "w=", Core::ToStringZeroPad( tileIndex.w, 8 ), "\\",
+        "z=", Core::ToStringZeroPad( tileIndex.z, 8 ), "\\",
+        "y=", Core::ToStringZeroPad( tileIndex.y, 8 ), ",",
+        "x=", Core::ToStringZeroPad( tileIndex.x, 8 ), ".",
+        mTiledDatasetDescription.tiledVolumeDescriptions.Get( hdf5Name ).fileExtension );
+
+    boost::filesystem::path tilePath = boost::filesystem::path( tilePathString );
+
+    if ( !boost::filesystem::exists( tilePath ) )
+    {
+        boost::filesystem::create_directories( tilePath.parent_path() );
+
+        hid_t hdf5FileHandle = marray::hdf5::createFile( tilePath.native_file_string() );
+        marray::hdf5::save( hdf5FileHandle, hdf5InternalDatasetName, marray );
+        marray::hdf5::closeFile( hdf5FileHandle );
+    }
+    else
+    {
+        size_t origin[]       = { 0, 0 };
+        size_t shape[]        = { marray.shape( 0 ), marray.shape( 1 ) };
+        hid_t  hdf5FileHandle = marray::hdf5::openFile( tilePath.native_file_string(), marray::hdf5::READ_WRITE );
+        
+        marray::hdf5::saveHyperslab( hdf5FileHandle, hdf5InternalDatasetName, origin, origin + 2, shape, marray );
+        marray::hdf5::closeFile( hdf5FileHandle );
+    }
 }
 
 }

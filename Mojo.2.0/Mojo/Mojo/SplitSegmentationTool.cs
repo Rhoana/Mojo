@@ -38,6 +38,23 @@ namespace Mojo
             }
         }
 
+        public override void MoveZ()
+        {
+            //
+            // Z index has changed - prep for splitting
+            //
+            if ( mTileManager.SelectedSegmentId != 0 )
+            {
+                var centerDataSpace = mTileManager.TiledDatasetView.CenterDataSpace;
+                var p = new Vector3( centerDataSpace.X, centerDataSpace.Y, centerDataSpace.Z );
+                mTileManager.Internal.PrepForSplit( mTileManager.SelectedSegmentId, p );
+                if ( mTileManager.JoinSplits3D )
+                {
+                    mTileManager.Internal.PredictSplit( mTileManager.SelectedSegmentId, p, mTileManager.BrushSize );
+                }
+            }
+        }
+
         public override void OnKeyDown( System.Windows.Input.KeyEventArgs keyEventArgs, int width, int height )
         {
             base.OnKeyDown( keyEventArgs, width, height );
@@ -76,28 +93,6 @@ namespace Mojo
 
                 case System.Windows.Input.Key.Escape:
                     mTileManager.CancelSplitChange();
-                    break;
-
-                //Base class will move the view - make sure we prep for splitting again
-                case System.Windows.Input.Key.W:
-                    if ( mTileManager.SelectedSegmentId != 0 )
-                    {
-                        mTileManager.Internal.PrepForSplit( mTileManager.SelectedSegmentId, p );
-                        if ( mTileManager.JoinSplits3D )
-                        {
-                            mTileManager.Internal.PredictSplit( mTileManager.SelectedSegmentId, p, mTileManager.BrushSize );
-                        }
-                    }
-                    break;
-                case System.Windows.Input.Key.S:
-                    if ( mTileManager.SelectedSegmentId != 0 )
-                    {
-                        mTileManager.Internal.PrepForSplit( mTileManager.SelectedSegmentId, p );
-                        if ( mTileManager.JoinSplits3D )
-                        {
-                            mTileManager.Internal.PredictSplit( mTileManager.SelectedSegmentId, p, mTileManager.BrushSize );
-                        }
-                    }
                     break;
 
                 case System.Windows.Input.Key.OemComma:
@@ -183,13 +178,27 @@ namespace Mojo
             {
                 mCurrentlyDrawing = false;
 
+                var centerDataSpace = mTileManager.TiledDatasetView.CenterDataSpace;
+                var extentDataSpace = mTileManager.TiledDatasetView.ExtentDataSpace;
+
+                var topLeftDataSpaceX = centerDataSpace.X - ( extentDataSpace.X / 2f );
+                var topLeftDataSpaceY = centerDataSpace.Y - ( extentDataSpace.Y / 2f );
+
+                var offsetDataSpaceX = ( (float)mouseEventArgs.X / width ) * extentDataSpace.X;
+                var offsetDataSpaceY = ( (float)mouseEventArgs.Y / height ) * extentDataSpace.Y;
+                var x = topLeftDataSpaceX + offsetDataSpaceX;
+                var y = topLeftDataSpaceY + offsetDataSpaceY;
+                var z = centerDataSpace.Z;
+
+                var p = new Vector3( x, y, z );
+
                 if ( mTileManager.CurrentSplitMode == SplitMode.DrawSplit )
                 {
-                    mTileManager.Internal.FindBoundaryWithinRegion2D( mTileManager.SelectedSegmentId );
+                    mTileManager.Internal.FindBoundaryWithinRegion2D( mTileManager.SelectedSegmentId, p );
                 }
                 if ( mTileManager.CurrentSplitMode == SplitMode.DrawRegions )
                 {
-                    mTileManager.Internal.FindBoundaryBetweenRegions2D( mTileManager.SelectedSegmentId );
+                    mTileManager.Internal.FindBoundaryBetweenRegions2D( mTileManager.SelectedSegmentId, p );
                 }
             }
         }
@@ -236,7 +245,7 @@ namespace Mojo
                     {
                         mTileManager.Internal.AddSplitSource( mTileManager.TiledDatasetView, p );
                         mTileManager.Internal.DrawRegionB( mTileManager.TiledDatasetView, p, 4 );
-                        mTileManager.Internal.FindBoundaryJoinPoints2D( clickedId );
+                        mTileManager.Internal.FindBoundaryJoinPoints2D( clickedId, p );
                     }
                     else if ( clickedId > 0 && mTileManager.SelectedSegmentId > 0 && clickedId != mTileManager.SelectedSegmentId )
                     {

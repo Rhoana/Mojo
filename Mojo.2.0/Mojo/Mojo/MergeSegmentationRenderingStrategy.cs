@@ -4,7 +4,7 @@ using Mojo.Interop;
 using SlimDX;
 using SlimDX.DXGI;
 using SlimDX.Direct3D11;
-using TinyText;
+//using TinyText;
 
 namespace Mojo
 {
@@ -31,7 +31,7 @@ namespace Mojo
         private Buffer mPositionVertexBuffer;
         private Buffer mTexCoordVertexBuffer;
 
-        private Context mTinyTextContext;
+        //private Context mTinyTextContext;
 
         private DebugRenderer mDebugRenderer;
         private TileManager mTileManager;
@@ -80,9 +80,9 @@ namespace Mojo
                                                 ResourceOptionFlags.None,
                                                 0 );
 
-            bool result;
-            mTinyTextContext = new Context( device, deviceContext, Constants.MAX_NUM_TINY_TEXT_CHARACTERS, out result );
-            Release.Assert( result );
+            //bool result;
+            //mTinyTextContext = new Context( device, deviceContext, Constants.MAX_NUM_TINY_TEXT_CHARACTERS, out result );
+            //Release.Assert( result );
 
             mStopwatch.Start();
         }
@@ -113,11 +113,11 @@ namespace Mojo
                 mEffect = null;
             }
 
-            if ( mTinyTextContext != null )
-            {
-                mTinyTextContext.Dispose();
-                mTinyTextContext = null;
-            }
+            //if ( mTinyTextContext != null )
+            //{
+            //    mTinyTextContext.Dispose();
+            //    mTinyTextContext = null;
+            //}
 
             if ( mTileManager != null )
             {
@@ -158,9 +158,9 @@ namespace Mojo
 
             mTileManager.GetTileCache().ToList().ForEach( tileCacheEntry => RenderTileCacheEntry( deviceContext, camera, datasetExtentDataSpaceX, datasetExtentDataSpaceY, tileCacheEntry ) );
 
-            mTinyTextContext.Print( viewport, "Frame Time: " + FrameTimeString, 10, 10 );
-            mTinyTextContext.Print( viewport, "Number of Active Cache Entries: " + mTileManager.GetTileCache().Count, 10, 30 );
-            mTinyTextContext.Render();
+            //mTinyTextContext.Print( viewport, "Frame Time: " + FrameTimeString, 10, 10 );
+            //mTinyTextContext.Print( viewport, "Number of Active Cache Entries: " + mTileManager.GetTileCache().Count, 10, 30 );
+            //mTinyTextContext.Render();
 
             mStopwatch.Reset();
             mStopwatch.Start();

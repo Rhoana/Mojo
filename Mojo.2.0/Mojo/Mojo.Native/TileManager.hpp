@@ -1,14 +1,16 @@
 #pragma once
 
+#define NOMINMAX
 #include "Mojo.Core/Stl.hpp"
+#include "Mojo.Core/MojoVectors.hpp"
 
 #include <marray/marray.hxx>
 #include <marray/marray_hdf5.hxx>
 
 #include "Mojo.Core/Boost.hpp"
-#include "Mojo.Core/OpenCV.hpp"
+//#include "Mojo.Core/OpenCV.hpp"
 #include "Mojo.Core/D3D11.hpp"
-#include "Mojo.Core/Cuda.hpp"
+//#include "Mojo.Core/Cuda.hpp"
 #include "Mojo.Core/ID3D11CudaTexture.hpp"
 #include "Mojo.Core/PrimitiveMap.hpp"
 #include "Mojo.Core/D3D11CudaTextureMap.hpp"
@@ -70,36 +72,37 @@ public:
 	unsigned int                                          GetSegmentInfoCurrentListLocation( unsigned int segId );
     std::list< SegmentInfo >                              GetSegmentInfoRange( int begin, int end );
 
-    unsigned int                                          GetSegmentationLabelId( const TiledDatasetView& tiledDatasetView, float3 pDataSpace );
-    int4                                                  GetSegmentationLabelColor( unsigned int segId );
-    int3                                                  GetSegmentCentralTileLocation( unsigned int segId );
-    int4                                                  GetSegmentZTileBounds( unsigned int segId, int zIndex );
+    unsigned int                                          GetSegmentationLabelId( const TiledDatasetView& tiledDatasetView, MojoFloat3 pDataSpace );
+    MojoInt3                                                  GetSegmentationLabelColor( unsigned int segId );
+    std::string                                           GetSegmentationLabelColorString( unsigned int segId );
+    MojoInt3                                                  GetSegmentCentralTileLocation( unsigned int segId );
+    MojoInt4                                                  GetSegmentZTileBounds( unsigned int segId, int zIndex );
 
 
     void                                                  ReplaceSegmentationLabel( unsigned int oldId, unsigned int newId );
-    void                                                  ReplaceSegmentationLabelCurrentSlice( unsigned int oldId, unsigned int newId, float3 pDataSpace );
-    void                                                  ReplaceSegmentationLabelCurrentConnectedComponent( unsigned int oldId, unsigned int newId, float3 pDataSpace );
+    void                                                  ReplaceSegmentationLabelCurrentSlice( unsigned int oldId, unsigned int newId, MojoFloat3 pDataSpace );
+    void                                                  ReplaceSegmentationLabelCurrentConnectedComponent( unsigned int oldId, unsigned int newId, MojoFloat3 pDataSpace );
 
-    void                                                  DrawSplit( float3 pointTileSpace, float radius );
-    void                                                  DrawErase( float3 pointTileSpace, float radius );
-    void                                                  DrawRegionB( float3 pointTileSpace, float radius );
-    void                                                  DrawRegionA( float3 pointTileSpace, float radius );
+    void                                                  DrawSplit( MojoFloat3 pointTileSpace, float radius );
+    void                                                  DrawErase( MojoFloat3 pointTileSpace, float radius );
+    void                                                  DrawRegionB( MojoFloat3 pointTileSpace, float radius );
+    void                                                  DrawRegionA( MojoFloat3 pointTileSpace, float radius );
 
-    void                                                  AddSplitSource( float3 pointTileSpace );
+    void                                                  AddSplitSource( MojoFloat3 pointTileSpace );
     void                                                  RemoveSplitSource();
-    void                                                  ResetSplitState();
-    void                                                  PrepForSplit( unsigned int segId, float3 pointTileSpace );
-	void                                                  FindBoundaryJoinPoints2D( unsigned int segId );
-	void                                                  FindBoundaryWithinRegion2D( unsigned int segId );
-	void                                                  FindBoundaryBetweenRegions2D( unsigned int segId );
-    int                                                   CompletePointSplit( unsigned int segId, float3 pointTileSpace );
-    int                                                   CompleteDrawSplit( unsigned int segId, float3 pointTileSpace, bool join3D, int splitStartZ );
-    void                                                  RecordSplitState( unsigned int segId, float3 pointTileSpace );
-    void                                                  PredictSplit( unsigned int segId, float3 pointTileSpace, float radius );
+    void                                                  ResetSplitState( MojoFloat3 pointTileSpace );
+    void                                                  PrepForSplit( unsigned int segId, MojoFloat3 pointTileSpace );
+	void                                                  FindBoundaryJoinPoints2D( unsigned int segId, MojoFloat3 pointTileSpace );
+	void                                                  FindBoundaryWithinRegion2D( unsigned int segId, MojoFloat3 pointTileSpace );
+	void                                                  FindBoundaryBetweenRegions2D( unsigned int segId, MojoFloat3 pointTileSpace );
+    int                                                   CompletePointSplit( unsigned int segId, MojoFloat3 pointTileSpace );
+    int                                                   CompleteDrawSplit( unsigned int segId, MojoFloat3 pointTileSpace, bool join3D, int splitStartZ );
+    void                                                  RecordSplitState( unsigned int segId, MojoFloat3 pointTileSpace );
+    void                                                  PredictSplit( unsigned int segId, MojoFloat3 pointTileSpace, float radius );
 
-    void                                                  ResetAdjustState();
-    void                                                  PrepForAdjust( unsigned int segId, float3 pointTileSpace );
-    void                                                  CommitAdjustChange( unsigned int segId, float3 pointTileSpace );
+    void                                                  ResetAdjustState( MojoFloat3 pointTileSpace );
+    void                                                  PrepForAdjust( unsigned int segId, MojoFloat3 pointTileSpace );
+    void                                                  CommitAdjustChange( unsigned int segId, MojoFloat3 pointTileSpace );
 
 	void                                                  UndoChange();
 	void                                                  RedoChange();
@@ -114,15 +117,15 @@ private:
     void                                                  LoadSegmentationInternal( TiledDatasetDescription& tiledDatasetDescription );
     void                                                  UnloadSegmentationInternal();
 
-    int3                                                  GetZoomLevel( const TiledDatasetView& tiledDatasetView );
-    std::list< int4 >                                     GetTileIndicesIntersectedByView( const TiledDatasetView& tiledDatasetView );
+    MojoInt3                                                  GetZoomLevel( const TiledDatasetView& tiledDatasetView );
+    std::list< MojoInt4 >                                     GetTileIndicesIntersectedByView( const TiledDatasetView& tiledDatasetView );
 
-    void                                                  GetIndexTileSpace( int3 zoomLevel, float3 pointDataSpace, float4& pointTileSpace, int4& tileIndex );
-    int3                                                  GetIndexVoxelSpace( float4 pointTileSpace, int3 numVoxelsPerTile );
-    int3                                                  GetOffsetVoxelSpace( float4 pTileSpace, int4 pTileIndex, int3 numVoxelsPerTile );
+    void                                                  GetIndexTileSpace( MojoInt3 zoomLevel, MojoFloat3 pointDataSpace, MojoFloat4& pointTileSpace, MojoInt4& tileIndex );
+    MojoInt3                                                  GetIndexVoxelSpace( MojoFloat4 pointTileSpace, MojoInt3 numVoxelsPerTile );
+    MojoInt3                                                  GetOffsetVoxelSpace( MojoFloat4 pTileSpace, MojoInt4 pTileIndex, MojoInt3 numVoxelsPerTile );
 
     void                                                  ReloadTileCache();
-    void                                                  ReloadTileCacheOverlayMapOnly();
+    void                                                  ReloadTileCacheOverlayMapOnly( int currentZ );
 
     ID3D11Device*                                         mD3D11Device;
     ID3D11DeviceContext*                                  mD3D11DeviceContext;
@@ -140,6 +143,9 @@ private:
 
     boost::array< TileCacheEntry,
         DEVICE_TILE_CACHE_SIZE >                          mTileCache;
+
+    int                                                   mTileCacheSearchStart;
+
     marray::Marray< int >                                 mTileCachePageTable;
     marray::Marray< unsigned char >*                      mIdColorMap;
     marray::Marray< unsigned char >*                      mIdConfidenceMap;
@@ -154,14 +160,22 @@ inline void TileManager::LoadTiledDatasetInternal( TiledDatasetDescription& tile
     //
     // output memory stats to the console
     //
-    size_t freeMemory, totalMemory;
-    CUresult     memInfoResult;
-    memInfoResult = cuMemGetInfo( &freeMemory, &totalMemory );
-    RELEASE_ASSERT( memInfoResult == CUDA_SUCCESS );
-    Core::Printf( "\nLoading tiled dataset...\n" );
+    //size_t freeMemory, totalMemory;
+    //CUresult     memInfoResult;
+    //memInfoResult = cuMemGetInfo( &freeMemory, &totalMemory );
+    //RELEASE_ASSERT( memInfoResult == CUDA_SUCCESS );
+
+    IDXGIDevice * pDXGIDevice;
+    mD3D11Device->QueryInterface(__uuidof(IDXGIDevice), (void **)&pDXGIDevice);
+    IDXGIAdapter * pDXGIAdapter;
+    pDXGIDevice->GetAdapter(&pDXGIAdapter);
+    DXGI_ADAPTER_DESC adapterDesc;
+    pDXGIAdapter->GetDesc(&adapterDesc);
+
+    Core::Printf( "\nUnloading segmentation...\n" );
     Core::Printf( "\n    Before allocating GPU memory:\n",
-                  "        Free memory:  ", (unsigned int) freeMemory  / ( 1024 * 1024 ), " MBytes.\n",
-                  "        Total memory: ", (unsigned int) totalMemory / ( 1024 * 1024 ), " MBytes.\n" );
+        "        Free memory:  ", (unsigned int) adapterDesc.DedicatedVideoMemory  / ( 1024 * 1024 ), " MBytes.\n" );
+        //"        Total memory: ", (unsigned int) totalMemory / ( 1024 * 1024 ), " MBytes.\n" );
 
     //
     // inform the tile server
@@ -175,6 +189,9 @@ inline void TileManager::LoadTiledDatasetInternal( TiledDatasetDescription& tile
     //
     mTiledDatasetDescription = tiledDatasetDescription;
 
+    TiledVolumeDescription tiledVolumeDescriptionId = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "IdMap" );
+    TiledVolumeDescription tiledVolumeDescriptionSource = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "SourceMap" );
+
     //
     // initialize the tile cache
     //
@@ -186,25 +203,21 @@ inline void TileManager::LoadTiledDatasetInternal( TiledDatasetDescription& tile
 		//
 		// Assume tile sizes are the same
 		// 
-        int numVoxelsPerTile =
-            mTiledDatasetDescription.tiledVolumeDescriptions.Get( "IdMap" ).numVoxelsPerTile.x *
-            mTiledDatasetDescription.tiledVolumeDescriptions.Get( "IdMap" ).numVoxelsPerTile.y *
-            mTiledDatasetDescription.tiledVolumeDescriptions.Get( "IdMap" ).numVoxelsPerTile.z;
+        int numVoxelsPerTile = tiledVolumeDescriptionId.numVoxelsPerTileX * tiledVolumeDescriptionId.numVoxelsPerTileY * tiledVolumeDescriptionId.numVoxelsPerTileZ;
 
-        tileCacheEntry.deviceVectors.Set( "IdMap", thrust::device_vector< int >( numVoxelsPerTile, mConstParameters.Get< int >( "ID_MAP_INITIAL_VALUE" ) ) );
-        tileCacheEntry.deviceVectors.Set( "OverlayMap", thrust::device_vector< int >( numVoxelsPerTile, mConstParameters.Get< int >( "ID_MAP_INITIAL_VALUE" ) ) );
-
+        //tileCacheEntry.deviceVectors.Set( "IdMap", thrust::device_vector< int >( numVoxelsPerTile, mConstParameters.Get< int >( "ID_MAP_INITIAL_VALUE" ) ) );
+        //tileCacheEntry.deviceVectors.Set( "OverlayMap", thrust::device_vector< int >( numVoxelsPerTile, mConstParameters.Get< int >( "ID_MAP_INITIAL_VALUE" ) ) );
 
         D3D11_TEXTURE3D_DESC textureDesc3D;
         ZeroMemory( &textureDesc3D, sizeof( D3D11_TEXTURE3D_DESC ) );
 
-        textureDesc3D.Width     = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "SourceMap" ).numVoxelsPerTile.x;
-        textureDesc3D.Height    = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "SourceMap" ).numVoxelsPerTile.y;
-        textureDesc3D.Depth     = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "SourceMap" ).numVoxelsPerTile.z;
+        textureDesc3D.Width     = tiledVolumeDescriptionSource.numVoxelsPerTileX;
+        textureDesc3D.Height    = tiledVolumeDescriptionSource.numVoxelsPerTileY;
+        textureDesc3D.Depth     = tiledVolumeDescriptionSource.numVoxelsPerTileZ;
         textureDesc3D.MipLevels = 1;
         textureDesc3D.Usage     = D3D11_USAGE_DEFAULT;
         textureDesc3D.BindFlags = D3D11_BIND_SHADER_RESOURCE;
-        textureDesc3D.Format    = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "SourceMap" ).dxgiFormat;
+        textureDesc3D.Format    = tiledVolumeDescriptionSource.dxgiFormat;
         
         tileCacheEntry.d3d11CudaTextures.Set(
             "SourceMap",
@@ -220,39 +233,55 @@ inline void TileManager::LoadTiledDatasetInternal( TiledDatasetDescription& tile
 		//
         ZeroMemory( &textureDesc3D, sizeof( D3D11_TEXTURE3D_DESC ) );
 
-        textureDesc3D.Width     = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "IdMap" ).numVoxelsPerTile.x;
-        textureDesc3D.Height    = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "IdMap" ).numVoxelsPerTile.y;
-        textureDesc3D.Depth     = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "IdMap" ).numVoxelsPerTile.z;
+        textureDesc3D.Width     = tiledVolumeDescriptionId.numVoxelsPerTileX;
+        textureDesc3D.Height    = tiledVolumeDescriptionId.numVoxelsPerTileY;
+        textureDesc3D.Depth     = tiledVolumeDescriptionId.numVoxelsPerTileZ;
         textureDesc3D.MipLevels = 1;
         textureDesc3D.Usage     = D3D11_USAGE_DEFAULT;
         textureDesc3D.BindFlags = D3D11_BIND_SHADER_RESOURCE;
-        textureDesc3D.Format    = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "IdMap" ).dxgiFormat;
+        textureDesc3D.Format    = tiledVolumeDescriptionId.dxgiFormat;
         
+        //tileCacheEntry.d3d11CudaTextures.Set(
+        //    "IdMap",
+        //    new Core::D3D11CudaTexture< ID3D11Texture3D, int >(
+        //        mD3D11Device,
+        //        mD3D11DeviceContext,
+        //        textureDesc3D,
+        //        tiledVolumeDescriptionId.numVoxelsPerTile(),
+        //        tileCacheEntry.deviceVectors.Get< int >( "IdMap" ) ) );
+        //
+        //tileCacheEntry.d3d11CudaTextures.Set(
+        //    "OverlayMap",
+        //    new Core::D3D11CudaTexture< ID3D11Texture3D, int >(
+        //        mD3D11Device,
+        //        mD3D11DeviceContext,
+        //        textureDesc3D,
+        //        tiledVolumeDescriptionId.numVoxelsPerTile(),
+        //        tileCacheEntry.deviceVectors.Get< int >( "OverlayMap" ) ) );
+
         tileCacheEntry.d3d11CudaTextures.Set(
             "IdMap",
             new Core::D3D11CudaTexture< ID3D11Texture3D, int >(
                 mD3D11Device,
                 mD3D11DeviceContext,
-                textureDesc3D,
-                mTiledDatasetDescription.tiledVolumeDescriptions.Get( "IdMap" ).numVoxelsPerTile,
-                tileCacheEntry.deviceVectors.Get< int >( "IdMap" ) ) );
+                textureDesc3D ) );
         
         tileCacheEntry.d3d11CudaTextures.Set(
             "OverlayMap",
             new Core::D3D11CudaTexture< ID3D11Texture3D, int >(
                 mD3D11Device,
                 mD3D11DeviceContext,
-                textureDesc3D,
-                mTiledDatasetDescription.tiledVolumeDescriptions.Get( "IdMap" ).numVoxelsPerTile,
-                tileCacheEntry.deviceVectors.Get< int >( "OverlayMap" ) ) );
+                textureDesc3D ) );
 
         mTileCache[ i ] = tileCacheEntry;
     }
 
+    mTileCacheSearchStart = 0;
+
     //
     // initialize the page table
     //
-    int4 numTiles = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "SourceMap" ).numTiles;
+    MojoInt4 numTiles = tiledVolumeDescriptionSource.numTiles();
 
     size_t shape[] = { numTiles.w, numTiles.z, numTiles.y, numTiles.x };
     mTileCachePageTable = marray::Marray< int >( shape, shape + 4 );
@@ -276,11 +305,14 @@ inline void TileManager::LoadTiledDatasetInternal( TiledDatasetDescription& tile
     //
     // output memory stats to the console
     //
-    memInfoResult = cuMemGetInfo( &freeMemory, &totalMemory );
-    RELEASE_ASSERT( memInfoResult == CUDA_SUCCESS );
+    //memInfoResult = cuMemGetInfo( &freeMemory, &totalMemory );
+    //RELEASE_ASSERT( memInfoResult == CUDA_SUCCESS );
+
+    pDXGIAdapter->GetDesc(&adapterDesc);
+
     Core::Printf( "    After allocating GPU memory:\n",
-                  "        Free memory:  ", (unsigned int) freeMemory  / ( 1024 * 1024 ), " MBytes.\n",
-                  "        Total memory: ", (unsigned int) totalMemory / ( 1024 * 1024 ), " MBytes.\n" );
+        "        Free memory:  ", (unsigned int) adapterDesc.DedicatedVideoMemory  / ( 1024 * 1024 ), " MBytes.\n" );
+        //"        Total memory: ", (unsigned int) totalMemory / ( 1024 * 1024 ), " MBytes.\n" );
 }
 
 template < typename TCudaType >
@@ -290,14 +322,22 @@ inline void TileManager::LoadSegmentationInternal( TiledDatasetDescription& tile
     //
     // output memory stats to the console
     //
-    size_t freeMemory, totalMemory;
-    CUresult     memInfoResult;
-    memInfoResult = cuMemGetInfo( &freeMemory, &totalMemory );
-    RELEASE_ASSERT( memInfoResult == CUDA_SUCCESS );
-    Core::Printf( "\nLoading segmentation...\n" );
+    //size_t freeMemory, totalMemory;
+    //CUresult     memInfoResult;
+    //memInfoResult = cuMemGetInfo( &freeMemory, &totalMemory );
+    //RELEASE_ASSERT( memInfoResult == CUDA_SUCCESS );
+
+    IDXGIDevice * pDXGIDevice;
+    mD3D11Device->QueryInterface(__uuidof(IDXGIDevice), (void **)&pDXGIDevice);
+    IDXGIAdapter * pDXGIAdapter;
+    pDXGIDevice->GetAdapter(&pDXGIAdapter);
+    DXGI_ADAPTER_DESC adapterDesc;
+    pDXGIAdapter->GetDesc(&adapterDesc);
+
+    Core::Printf( "\nUnloading segmentation...\n" );
     Core::Printf( "\n    Before allocating GPU memory:\n",
-                  "        Free memory:  ", (unsigned int) freeMemory  / ( 1024 * 1024 ), " MBytes.\n",
-                  "        Total memory: ", (unsigned int) totalMemory / ( 1024 * 1024 ), " MBytes.\n" );
+        "        Free memory:  ", (unsigned int) adapterDesc.DedicatedVideoMemory  / ( 1024 * 1024 ), " MBytes.\n" );
+        //"        Total memory: ", (unsigned int) totalMemory / ( 1024 * 1024 ), " MBytes.\n" );
 
     //
     // inform the tile server
@@ -311,47 +351,12 @@ inline void TileManager::LoadSegmentationInternal( TiledDatasetDescription& tile
     //
     mTiledDatasetDescription = tiledDatasetDescription;
 
-    //
-    // initialize the tile cache
-	// (Overrides initial allocation done in LoadTiledDatasetInternal)
-    //
-    //for ( int i = 0; i < DEVICE_TILE_CACHE_SIZE; i++ )
-    //{
-
-    //    int numVoxelsPerTile =
-    //        mTiledDatasetDescription.tiledVolumeDescriptions.Get( "IdMap" ).numVoxelsPerTile.x *
-    //        mTiledDatasetDescription.tiledVolumeDescriptions.Get( "IdMap" ).numVoxelsPerTile.y *
-    //        mTiledDatasetDescription.tiledVolumeDescriptions.Get( "IdMap" ).numVoxelsPerTile.z;
-
-    //    mTileCache[ i ].deviceVectors.Set( "IdMap", thrust::device_vector< int >( numVoxelsPerTile, mConstParameters.Get< int >( "ID_MAP_INITIAL_VALUE" ) ) );
-
-
-    //    D3D11_TEXTURE3D_DESC textureDesc3D;
-    //    ZeroMemory( &textureDesc3D, sizeof( D3D11_TEXTURE3D_DESC ) );
-
-    //    textureDesc3D.Width     = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "IdMap" ).numVoxelsPerTile.x;
-    //    textureDesc3D.Height    = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "IdMap" ).numVoxelsPerTile.y;
-    //    textureDesc3D.Depth     = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "IdMap" ).numVoxelsPerTile.z;
-    //    textureDesc3D.MipLevels = 1;
-    //    textureDesc3D.Usage     = D3D11_USAGE_DEFAULT;
-    //    textureDesc3D.BindFlags = D3D11_BIND_SHADER_RESOURCE;
-    //    textureDesc3D.Format    = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "IdMap" ).dxgiFormat;
-    //    
-    //    mTileCache[ i ].d3d11CudaTextures.Set(
-    //        "IdMap",
-    //        new Core::D3D11CudaTexture< ID3D11Texture3D, int >(
-    //            mD3D11Device,
-    //            mD3D11DeviceContext,
-    //            textureDesc3D,
-    //            mTiledDatasetDescription.tiledVolumeDescriptions.Get( "IdMap" ).numVoxelsPerTile,
-    //            mTileCache[ i ].deviceVectors.Get< int >( "IdMap" ) ) );
-
-    //}
+    TiledVolumeDescription tiledVolumeDescriptionSource = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "SourceMap" );
 
     //
     // reinitialize the page table
     //
-    int4 numTiles = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "SourceMap" ).numTiles;
+    MojoInt4 numTiles = tiledVolumeDescriptionSource.numTiles();
 
     //size_t shape[] = { numTiles.w, numTiles.z, numTiles.y, numTiles.x };
     //mTileCachePageTable = marray::Marray< int >( shape, shape + 4 );
@@ -409,7 +414,7 @@ inline void TileManager::LoadSegmentationInternal( TiledDatasetDescription& tile
 
     uchar1* idConfidenceMap = new uchar1[ mIdConfidenceMap->shape( 0 ) ];
 
-	Core::Printf( "Loading locks for  ", mIdConfidenceMap->shape( 0 ), " segments.");
+	Core::Printf( "Loading locks for  ", (unsigned int) mIdConfidenceMap->shape( 0 ), " segments.");
 
     for ( i = 0; i < mIdConfidenceMap->shape( 0 ); i++ )
 	{
@@ -447,8 +452,6 @@ inline void TileManager::LoadSegmentationInternal( TiledDatasetDescription& tile
         (UINT) mIdConfidenceMap->shape( 0 ) * sizeof( uchar1 ),
         (UINT) mIdConfidenceMap->shape( 0 ) * sizeof( uchar1 ) );
 
-    delete idColorMap;
-
     //
     // initialize all state
     //
@@ -472,11 +475,14 @@ inline void TileManager::LoadSegmentationInternal( TiledDatasetDescription& tile
     //
     // output memory stats to the console
     //
-    memInfoResult = cuMemGetInfo( &freeMemory, &totalMemory );
-    RELEASE_ASSERT( memInfoResult == CUDA_SUCCESS );
+    //memInfoResult = cuMemGetInfo( &freeMemory, &totalMemory );
+    //RELEASE_ASSERT( memInfoResult == CUDA_SUCCESS );
+
+    pDXGIAdapter->GetDesc(&adapterDesc);
+
     Core::Printf( "    After allocating GPU memory:\n",
-                  "        Free memory:  ", (unsigned int) freeMemory  / ( 1024 * 1024 ), " MBytes.\n",
-                  "        Total memory: ", (unsigned int) totalMemory / ( 1024 * 1024 ), " MBytes.\n" );
+        "        Free memory:  ", (unsigned int) adapterDesc.DedicatedVideoMemory  / ( 1024 * 1024 ), " MBytes.\n" );
+        //"        Total memory: ", (unsigned int) totalMemory / ( 1024 * 1024 ), " MBytes.\n" );
 }
 
 }

@@ -1,9 +1,10 @@
 #pragma once
 
 #include "Mojo.Core/D3D11.hpp"
-#include "Mojo.Core/Cuda.hpp"
+//#include "Mojo.Core/Cuda.hpp"
 #include "Mojo.Core/D3D11CudaTextureMap.hpp"
-#include "Mojo.Core/DeviceVectorMap.hpp"
+//#include "Mojo.Core/DeviceVectorMap.hpp"
+#include "Mojo.Core/MojoVectors.hpp"
 
 namespace Mojo
 {
@@ -24,11 +25,11 @@ struct TileCacheEntry
     TileCacheEntry();
 
     Core::D3D11CudaTextureMap d3d11CudaTextures;
-    Core::DeviceVectorMap     deviceVectors;
+    //Core::DeviceVectorMap     deviceVectors;
     TileCacheEntryKeepState   keepState;
-    int4                      indexTileSpace;
-    float3                    centerDataSpace;
-    float3                    extentDataSpace;
+    Mojo::Core::MojoInt4                      indexTileSpace;
+    Mojo::Core::MojoFloat3                    centerDataSpace;
+    Mojo::Core::MojoFloat3                    extentDataSpace;
     bool                      active;
 };
 

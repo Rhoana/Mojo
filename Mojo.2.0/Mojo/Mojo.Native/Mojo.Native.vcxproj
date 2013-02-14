@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\Sdk\SQLite\sqlite-amalgamation-3071502\sqlite3.h" />
     <ClInclude Include="Constants.hpp" />
     <ClInclude Include="FileSystemSegmentInfoManager.hpp" />
     <ClInclude Include="FileSystemSplitState.hpp" />
@@ -35,6 +36,7 @@
     <ClInclude Include="FileSystemTileServer.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\Sdk\SQLite\sqlite-amalgamation-3071502\sqlite3.c" />
     <ClCompile Include="FileSystemSegmentInfoManager.cpp" />
     <ClCompile Include="FileSystemSplitState.cpp" />
     <ClCompile Include="SegmentInfo.cpp" />
@@ -50,14 +52,6 @@
   <ItemGroup>
     <ProjectReference Include="..\Mojo.Core\Mojo.Core.vcxproj">
       <Project>{cc8440eb-75bf-400b-b29a-df5b961efce0}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\Mojo.Cuda\Mojo.Cuda.vcxproj">
-      <Project>{eb624a2e-6fcd-4885-b55b-4feceb582514}</Project>
-      <Private>false</Private>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-      <CopyLocalSatelliteAssemblies>false</CopyLocalSatelliteAssemblies>
-      <LinkLibraryDependencies>false</LinkLibraryDependencies>
-      <UseLibraryDependencyInputs>false</UseLibraryDependencyInputs>
     </ProjectReference>
   </ItemGroup>
   <PropertyGroup Label="Globals">
@@ -273,7 +267,7 @@
       <ExceptionHandling>Async</ExceptionHandling>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
       <ObjectFileName>$(IntDir)</ObjectFileName>
-      <AdditionalIncludeDirectories>..\;..\Sdk\Marray\v1.0\marray\include\;..\Sdk\Hdf5\1.8.8\include\;..\Sdk\OpenCV\OpenCV2.4\build\include\;..\Sdk\Thrust\thrust-v1.3.0\;..\Sdk\Cutil\NVIDIA GPU Computing SDK 4.2\C\common\inc\;..\Sdk\Cuda\v4.2\include\;..\Sdk\Boost\boost_1_44\;..\Sdk\DirectX\Microsoft DirectX SDK (June 2010)\Include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\;..\Sdk\SQLite\sqlite-amalgamation-3071502\;..\;..\Sdk\Marray\v1.0\marray\include\;..\Sdk\Hdf5\1.8.8\include\;..\Sdk\OpenCV\OpenCV2.4\build\include\;..\Sdk\Thrust\thrust-v1.3.0\;..\Sdk\Cutil\NVIDIA GPU Computing SDK 4.2\C\common\inc\;..\Sdk\Cuda\v4.2\include\;..\Sdk\Boost\boost_1_44\;..\Sdk\DirectX\Microsoft DirectX SDK (June 2010)\Include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
