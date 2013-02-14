@@ -4652,7 +4652,12 @@ void FileSystemTileServer::UnloadSegmentationInternal()
     // release id maps
     //
     mSegmentInfoManager.CloseDB();
-    mSegmentInfoManager = FileSystemSegmentInfoManager();
+
+    //
+    // Not necessary if we are closing
+    //
+    //mSegmentInfoManager = FileSystemSegmentInfoManager();
+
     mTiledDatasetDescription.maxLabelId = 0;
 
     mIsSegmentationLoaded    = false;
