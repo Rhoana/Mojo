@@ -38,6 +38,16 @@ namespace Mojo
             }
         }
 
+        public override void MoveZ()
+        {
+            var centerDataSpace = mTileManager.TiledDatasetView.CenterDataSpace;
+            var p = new Vector3( centerDataSpace.X, centerDataSpace.Y, centerDataSpace.Z );
+            if ( mTileManager.SelectedSegmentId != 0 )
+            {
+                mTileManager.Internal.PrepForAdjust( mTileManager.SelectedSegmentId, p );
+            }
+        }
+
         public override void OnKeyDown( System.Windows.Input.KeyEventArgs keyEventArgs, int width, int height )
         {
             base.OnKeyDown( keyEventArgs, width, height );
@@ -77,20 +87,6 @@ namespace Mojo
                 case System.Windows.Input.Key.Escape:
                     mTileManager.CancelAdjustChange();
                     mTileManager.SelectedSegmentId = 0;
-                    break;
-
-                //Base class will move the view - make sure we prep again
-                case System.Windows.Input.Key.W:
-                    if ( mTileManager.SelectedSegmentId != 0 )
-                    {
-                        mTileManager.Internal.PrepForAdjust( mTileManager.SelectedSegmentId, p );
-                    }
-                    break;
-                case System.Windows.Input.Key.S:
-                    if ( mTileManager.SelectedSegmentId != 0 )
-                    {
-                        mTileManager.Internal.PrepForAdjust( mTileManager.SelectedSegmentId, p );
-                    }
                     break;
 
                 case System.Windows.Input.Key.OemComma:

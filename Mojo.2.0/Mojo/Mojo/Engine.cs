@@ -172,7 +172,7 @@ namespace Mojo
 
                 Tools.Get( ViewerMode.TileManager2D ).Get( CurrentToolMode ).MoveZ();
 
-                TileManager.UpdateView();
+                TileManager.UpdateZ();
                 Update();
             }
         }
@@ -195,7 +195,7 @@ namespace Mojo
 
                 Tools.Get( ViewerMode.TileManager2D ).Get( CurrentToolMode ).MoveZ();
 
-                TileManager.UpdateView();
+                TileManager.UpdateZ();
                 Update();
             }
         }
@@ -294,7 +294,7 @@ namespace Mojo
 
             Tools.Get( ViewerMode.TileManager2D ).Get( CurrentToolMode ).Select();
 
-            TileManager.UpdateView();
+            TileManager.UpdateZ();
             Update();
         }
 

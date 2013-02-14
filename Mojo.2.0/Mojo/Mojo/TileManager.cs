@@ -469,6 +469,11 @@ namespace Mojo
             OnPropertyChanged( "JoinSplits3D" );
         }
 
+        public void UpdateZ()
+        {
+            OnPropertyChanged( "TiledDatasetView" );
+        }
+
         public void LoadTiledDataset( string datasetRootDirectory )
         {
             if ( TiledDatasetLoaded )
