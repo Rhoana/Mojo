@@ -105,10 +105,10 @@ void TileManager::UnloadSegmentation()
     mTileServer->UnloadSegmentation();
 
     UnloadIdColorMap();
-    LoadIdColorMap();
+    //LoadIdColorMap();
 
 	UnloadIdConfidenceMap();
-	LoadIdConfidenceMap();
+	//LoadIdConfidenceMap();
 }
 
 bool TileManager::IsSegmentationLoaded()

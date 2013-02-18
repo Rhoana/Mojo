@@ -713,7 +713,7 @@ namespace Mojo
             {
                 Internal.DeleteTempFiles();
                 UnloadSegmentation();
-                LoadSegmentation( TiledDatasetDescription );
+                //LoadSegmentation( TiledDatasetDescription );
             }
         }
 
