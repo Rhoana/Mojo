@@ -51,12 +51,14 @@ public:
 
     Collections::Generic::IList< TileCacheEntry^ >^         GetTileCache();
     SlimDX::Direct3D11::ShaderResourceView^                 GetIdColorMap();
+    SlimDX::Direct3D11::ShaderResourceView^                 GetLabelIdMap();
     SlimDX::Direct3D11::ShaderResourceView^                 GetIdConfidenceMap();
 
     void                                                    SortSegmentInfoById( bool reverse );
     void                                                    SortSegmentInfoByName( bool reverse );
     void                                                    SortSegmentInfoBySize( bool reverse );
     void                                                    SortSegmentInfoByConfidence( bool reverse );
+	void                                                    RemapSegmentLabel( unsigned int fromSegId, unsigned int toSegId );
 	void                                                    LockSegmentLabel( unsigned int segId );
 	void                                                    UnlockSegmentLabel( unsigned int segId );
 	unsigned int                                            GetSegmentInfoCount();
@@ -66,8 +68,8 @@ public:
     unsigned int                                            GetSegmentationLabelId( TiledDatasetView^ tiledDatasetView, Vector3^ pDataSpace );
     String^                                                 GetSegmentationLabelColorString( unsigned int segId );
     Vector3                                                 GetSegmentationLabelColor( unsigned int segId );
-    Vector3                                             GetSegmentCentralTileLocation( unsigned int segId );
-    Vector4                                             GetSegmentZTileBounds( unsigned int segId, int zIndex );
+    Vector3                                                 GetSegmentCentralTileLocation( unsigned int segId );
+    Vector4                                                 GetSegmentZTileBounds( unsigned int segId, int zIndex );
 
     void                                                    ReplaceSegmentationLabel( unsigned int oldId, unsigned int newId );
     void                                                    ReplaceSegmentationLabelCurrentSlice( unsigned int oldId, unsigned int newId, TiledDatasetView^ tiledDatasetView, Vector3^ pDataSpace );
@@ -94,6 +96,10 @@ public:
     void                                                    PrepForAdjust( unsigned int segId, Vector3^ pDataSpace );
     void                                                    CommitAdjustChange( unsigned int segId, Vector3^ pDataSpace );
 
+    void                                                    ResetDrawMergeState( Vector3^ pDataSpace );
+    void                                                    PrepForDrawMerge( Vector3^ pDataSpace );
+    unsigned int                                            CommitDrawMerge( Vector3^ pDataSpace );
+
 	void                                                    UndoChange();
 	void                                                    RedoChange();
     void                                                    SaveAndClearFileSystemTileCache();
@@ -106,6 +112,9 @@ private:
     void LoadIdColorMap();
     void UnloadIdColorMap();
 
+    void LoadLabelIdMap();
+    void UnloadLabelIdMap();
+
     void LoadIdConfidenceMap();
     void UnloadIdConfidenceMap();
 
@@ -114,6 +123,7 @@ private:
 
     Collections::Generic::IList< TileCacheEntry^ >^         mTileCache;
     SlimDX::Direct3D11::ShaderResourceView^                 mIdColorMap;
+    SlimDX::Direct3D11::ShaderResourceView^                 mLabelIdMap;
     SlimDX::Direct3D11::ShaderResourceView^                 mIdConfidenceMap;
 
 };

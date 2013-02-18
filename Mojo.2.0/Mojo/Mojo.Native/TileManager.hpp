@@ -21,11 +21,10 @@
 #include "TileCacheEntry.hpp"
 #include "ITileServer.hpp"
 #include "SegmentInfo.hpp"
+#include "Constants.hpp"
 
 struct ID3D11Device;
 struct ID3D11DeviceContext;
-
-const int DEVICE_TILE_CACHE_SIZE = 128;
 
 namespace Mojo
 {
@@ -60,12 +59,14 @@ public:
     boost::array< TileCacheEntry,
         DEVICE_TILE_CACHE_SIZE >&                         GetTileCache();
     ID3D11ShaderResourceView*                             GetIdColorMap();
+    ID3D11ShaderResourceView*                             GetLabelIdMap();
     ID3D11ShaderResourceView*                             GetIdConfidenceMap();
 
     void                                                  SortSegmentInfoById( bool reverse );
     void                                                  SortSegmentInfoByName( bool reverse );
     void                                                  SortSegmentInfoBySize( bool reverse );
     void                                                  SortSegmentInfoByConfidence( bool reverse );
+    void                                                  RemapSegmentLabel( unsigned int fromSegId, unsigned int toSegId );
     void                                                  LockSegmentLabel( unsigned int segId );
     void                                                  UnlockSegmentLabel( unsigned int segId );
 	unsigned int                                          GetSegmentInfoCount();
@@ -104,6 +105,10 @@ public:
     void                                                  PrepForAdjust( unsigned int segId, MojoFloat3 pointTileSpace );
     void                                                  CommitAdjustChange( unsigned int segId, MojoFloat3 pointTileSpace );
 
+    void                                                  ResetDrawMergeState( MojoFloat3 pointTileSpace );
+    void                                                  PrepForDrawMerge( MojoFloat3 pointTileSpace );
+    unsigned int                                          CommitDrawMerge( MojoFloat3 pointTileSpace );
+
 	void                                                  UndoChange();
 	void                                                  RedoChange();
     void                                                  SaveAndClearFileSystemTileCache();
@@ -124,6 +129,7 @@ private:
     MojoInt3                                                  GetIndexVoxelSpace( MojoFloat4 pointTileSpace, MojoInt3 numVoxelsPerTile );
     MojoInt3                                                  GetOffsetVoxelSpace( MojoFloat4 pTileSpace, MojoInt4 pTileIndex, MojoInt3 numVoxelsPerTile );
 
+	void                                                  UpdateLabelIdMap( unsigned int fromSegId );
     void                                                  ReloadTileCache();
     void                                                  ReloadTileCacheOverlayMapOnly( int currentZ );
 
@@ -132,6 +138,9 @@ private:
 
     ID3D11Buffer*                                         mIdColorMapBuffer;
     ID3D11ShaderResourceView*                             mIdColorMapShaderResourceView;
+
+    ID3D11Buffer*                                         mLabelIdMapBuffer;
+    ID3D11ShaderResourceView*                             mLabelIdMapShaderResourceView;
 
     ID3D11Buffer*                                         mIdConfidenceMapBuffer;
     ID3D11ShaderResourceView*                             mIdConfidenceMapShaderResourceView;
@@ -148,6 +157,7 @@ private:
 
     marray::Marray< int >                                 mTileCachePageTable;
     marray::Marray< unsigned char >*                      mIdColorMap;
+	marray::Marray< unsigned int >*                       mLabelIdMap;
     marray::Marray< unsigned char >*                      mIdConfidenceMap;
 
     bool                                                  mIsTiledDatasetLoaded;
@@ -405,30 +415,77 @@ inline void TileManager::LoadSegmentationInternal( TiledDatasetDescription& tile
         (UINT) mIdColorMap->shape( 0 ) * sizeof( uchar4 ),
         (UINT) mIdColorMap->shape( 0 ) * sizeof( uchar4 ) );
 
-    delete idColorMap;
+    delete[] idColorMap;
 
 	//
-    // load the id lock map
+    // load the label id map
     //
-    mIdConfidenceMap = mTileServer->GetIdConfidenceMap();
 
-    uchar1* idConfidenceMap = new uchar1[ mIdConfidenceMap->shape( 0 ) ];
+	Core::Printf( "Loading Label Id map.");
 
-	Core::Printf( "Loading locks for  ", (unsigned int) mIdConfidenceMap->shape( 0 ), " segments.");
+    mLabelIdMap = mTileServer->GetLabelIdMap();
 
-    for ( i = 0; i < mIdConfidenceMap->shape( 0 ); i++ )
+	size_t nSegmentsToAllocate = mLabelIdMap->shape( 0 );
+
+	uint1* labelIdMap = new uint1 [ nSegmentsToAllocate ];
+
+	for ( i = 0; i < mLabelIdMap->shape( 0 ); ++i )
 	{
-        idConfidenceMap[ i ] = make_uchar1( (*mIdConfidenceMap)( i ) );
-		if ( (*mIdConfidenceMap)( i ) > 0 )
-		{
-			Core::Printf( "Segment ", i, " is locked(", (*mIdConfidenceMap)( i ), ").");
-		}
+		labelIdMap[ i ] = make_uint1( (*mLabelIdMap)( i ) );
 	}
 
     //D3D11_BUFFER_DESC bufferDesc;
     ZeroMemory( &bufferDesc, sizeof( D3D11_BUFFER_DESC ) );
 
-    bufferDesc.ByteWidth           = (UINT) mIdConfidenceMap->shape( 0 ) * sizeof( uchar1 );
+    bufferDesc.ByteWidth           = (UINT) nSegmentsToAllocate * sizeof( uint1 );
+    bufferDesc.Usage               = D3D11_USAGE_DEFAULT;
+    bufferDesc.BindFlags           = (UINT) D3D11_BIND_SHADER_RESOURCE;
+    bufferDesc.StructureByteStride = (UINT) sizeof( uint1 );
+    
+    //D3D11_SHADER_RESOURCE_VIEW_DESC shaderResourceViewDesc;
+    ZeroMemory( &shaderResourceViewDesc, sizeof( D3D11_SHADER_RESOURCE_VIEW_DESC ) );
+
+	shaderResourceViewDesc.Format               = DXGI_FORMAT_R32_UINT;
+    shaderResourceViewDesc.ViewDimension        = D3D11_SRV_DIMENSION_BUFFER;
+    shaderResourceViewDesc.Buffer.FirstElement  = (UINT) 0;
+    shaderResourceViewDesc.Buffer.NumElements   = (UINT) nSegmentsToAllocate;
+
+    MOJO_D3D_SAFE( mD3D11Device->CreateBuffer( &bufferDesc, NULL, &mLabelIdMapBuffer ) );
+	MOJO_D3D_SAFE( mD3D11Device->CreateShaderResourceView( mLabelIdMapBuffer, &shaderResourceViewDesc, &mLabelIdMapShaderResourceView ) );
+
+    mD3D11DeviceContext->UpdateSubresource(
+        mLabelIdMapBuffer,
+        0,
+        NULL,
+        labelIdMap,
+        (UINT) nSegmentsToAllocate * sizeof( uint1 ),
+        (UINT) nSegmentsToAllocate * sizeof( uint1 ) );
+
+	delete[] labelIdMap;
+
+	//
+    // load the id lock map
+    //
+
+	Core::Printf( "Loading Lock Map.");
+
+    mIdConfidenceMap = mTileServer->GetIdConfidenceMap();
+
+    uchar1* idConfidenceMap = new uchar1[ mIdConfidenceMap->shape( 0 ) ];
+
+	for ( i = 0; i < mIdConfidenceMap->shape( 0 ); ++i )
+	{
+		idConfidenceMap[ i ] = make_uchar1( (*mIdConfidenceMap)( i ) );
+		//if ( (*mIdConfidenceMap)( i ) > 0 )
+		//{
+		//	Core::Printf( "Segment ", i, " is locked(", (*mIdConfidenceMap)( i ), ").");
+		//}
+	}
+
+    //D3D11_BUFFER_DESC bufferDesc;
+    ZeroMemory( &bufferDesc, sizeof( D3D11_BUFFER_DESC ) );
+
+    bufferDesc.ByteWidth           = (UINT) nSegmentsToAllocate * sizeof( uchar1 );
     bufferDesc.Usage               = D3D11_USAGE_DEFAULT;
     bufferDesc.BindFlags           = (UINT) D3D11_BIND_SHADER_RESOURCE;
     bufferDesc.StructureByteStride = (UINT) sizeof( uchar1 );
@@ -439,7 +496,7 @@ inline void TileManager::LoadSegmentationInternal( TiledDatasetDescription& tile
 	shaderResourceViewDesc.Format               = DXGI_FORMAT_R8_UNORM;
     shaderResourceViewDesc.ViewDimension        = D3D11_SRV_DIMENSION_BUFFER;
     shaderResourceViewDesc.Buffer.FirstElement  = (UINT) 0;
-    shaderResourceViewDesc.Buffer.NumElements   = (UINT) mIdConfidenceMap->shape( 0 );
+    shaderResourceViewDesc.Buffer.NumElements   = (UINT) nSegmentsToAllocate;
 
     MOJO_D3D_SAFE( mD3D11Device->CreateBuffer( &bufferDesc, NULL, &mIdConfidenceMapBuffer ) );
 	MOJO_D3D_SAFE( mD3D11Device->CreateShaderResourceView( mIdConfidenceMapBuffer, &shaderResourceViewDesc, &mIdConfidenceMapShaderResourceView ) );
@@ -449,8 +506,10 @@ inline void TileManager::LoadSegmentationInternal( TiledDatasetDescription& tile
         0,
         NULL,
         idConfidenceMap,
-        (UINT) mIdConfidenceMap->shape( 0 ) * sizeof( uchar1 ),
-        (UINT) mIdConfidenceMap->shape( 0 ) * sizeof( uchar1 ) );
+        (UINT) nSegmentsToAllocate * sizeof( uchar1 ),
+        (UINT) nSegmentsToAllocate * sizeof( uchar1 ) );
+
+	delete[] idConfidenceMap;
 
     //
     // initialize all state

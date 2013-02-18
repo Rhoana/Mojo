@@ -76,6 +76,7 @@ public:
 	void                                              CloseDB();
 
     marray::Marray< unsigned char >*                  GetIdColorMap();
+    marray::Marray< unsigned int >*                   GetLabelIdMap();
     marray::Marray< unsigned char >*                  GetIdConfidenceMap();
 	FileSystemTileSet                                 GetTiles( unsigned int segid );
 	unsigned int                                      GetTileCount ( unsigned int segid );
@@ -92,6 +93,10 @@ public:
     void                                              SortSegmentInfoByName( bool reverse );
     void                                              SortSegmentInfoBySize( bool reverse );
     void                                              SortSegmentInfoByConfidence( bool reverse );
+
+    void                                              RemapSegmentLabel( unsigned int fromSegId, unsigned int toSegId );
+	unsigned int                                      GetIdForLabel( unsigned int label );
+
     void                                              LockSegmentLabel( unsigned int segId );
     void                                              UnlockSegmentLabel( unsigned int segId );
 
@@ -114,9 +119,13 @@ private:
 
 	unsigned int                                      mIdMax;
     marray::Marray< unsigned char >                   mIdColorMap;
+	marray::Marray< unsigned int >                    mLabelIdMap;
     marray::Marray< unsigned char >                   mIdConfidenceMap;
 	SegmentMultiIndex                                 mSegmentMultiIndex;
 	FileSystemIdTileMap                               mCacheIdTileMap;
+
+	unsigned int                                      mPreviousLabelQuery;
+	unsigned int                                      mPreviousIdResult;
 
 
 };

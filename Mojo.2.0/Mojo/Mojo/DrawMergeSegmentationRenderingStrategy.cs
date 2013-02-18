@@ -8,7 +8,7 @@ using SlimDX.Direct3D11;
 
 namespace Mojo
 {
-    public class SplitSegmentationRenderingStrategy : NotifyPropertyChanged, IRenderingStrategy
+    class DrawMergeSegmentationRenderingStrategy : NotifyPropertyChanged, IRenderingStrategy
     {
         private const int POSITION_SLOT = 0;
         private const int POSITION_NUM_BYTES_PER_COMPONENT = 4;
@@ -44,12 +44,12 @@ namespace Mojo
             }
         }
 
-        public SplitSegmentationRenderingStrategy( SlimDX.Direct3D11.Device device, DeviceContext deviceContext, TileManager tileManager )
+        public DrawMergeSegmentationRenderingStrategy( SlimDX.Direct3D11.Device device, DeviceContext deviceContext, TileManager tileManager )
         {
             mTileManager = tileManager;
             mDebugRenderer = new DebugRenderer( device );
 
-            mEffect = EffectUtil.CompileEffect( device, @"Shaders\SplitRenderer2D.fx" );
+            mEffect = EffectUtil.CompileEffect( device, @"Shaders\DrawMergeRenderer2D.fx" );
 
             var positionTexcoordInputElements = new[]
                                                 {
@@ -266,19 +266,18 @@ namespace Mojo
             mEffect.GetVariableByName( "gTransform" ).AsMatrix().SetMatrix( camera.GetLookAtMatrix() * camera.GetProjectionMatrix() );
             mEffect.GetVariableByName( "gSegmentationRatio" ).AsScalar().Set( mTileManager.SegmentationVisibilityRatio );
             mEffect.GetVariableByName( "gBoundaryLinesVisible" ).AsScalar().Set( mTileManager.ShowBoundaryLines );
-            mEffect.GetVariableByName( "gBrushVisible" ).AsScalar().Set( mTileManager.CurrentSplitMode != SplitMode.JoinPoints );
-            mEffect.GetVariableByName( "gCrosshairVisible" ).AsScalar().Set( mTileManager.CurrentSplitMode == SplitMode.JoinPoints );
+            mEffect.GetVariableByName( "gBrushVisible" ).AsScalar().Set( true );
             mEffect.GetVariableByName( "gSelectedSegmentId" ).AsScalar().Set( mTileManager.SelectedSegmentId );
             mEffect.GetVariableByName( "gMouseOverSegmentId" ).AsScalar().Set( mTileManager.MouseOverSegmentId );
 
             mEffect.GetVariableByName( "gMouseOverX" ).AsScalar().Set( ( mTileManager.MouseOverX - tileMinExtentX ) / tileCacheEntry.ExtentDataSpace.X );
             mEffect.GetVariableByName( "gMouseOverY" ).AsScalar().Set( ( mTileManager.MouseOverY - tileMinExtentY ) / tileCacheEntry.ExtentDataSpace.Y );
-            mEffect.GetVariableByName( "gMouseHighlightSize" ).AsScalar().Set( mTileManager.BrushSize );
+            mEffect.GetVariableByName( "gMouseHighlightSize" ).AsScalar().Set( mTileManager.MergeBrushSize );
 
             mPass.Apply( deviceContext );
             deviceContext.Draw( QUAD_NUM_VERTICES, 0 );
             
-            mDebugRenderer.RenderQuadWireframeOnly( deviceContext, p1, p2, p3, p4, new Vector3( 1, 0, 0 ), camera );
+            //mDebugRenderer.RenderQuadWireframeOnly( deviceContext, p1, p2, p3, p4, new Vector3( 1, 0, 0 ), camera );
 
         }
     }

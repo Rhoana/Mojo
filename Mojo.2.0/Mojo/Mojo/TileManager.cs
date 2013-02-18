@@ -311,6 +311,36 @@ namespace Mojo
             }
         }
 
+        private float mMergeBrushSize = 20;
+        public float MergeBrushSize
+        {
+            get
+            {
+                return mMergeBrushSize;
+            }
+            set
+            {
+                mMergeBrushSize = value;
+                OnPropertyChanged( "MergeBrushSize" );
+            }
+        }
+
+        public void IncreaseMergeBrushSize()
+        {
+            if ( MergeBrushSize < 64 )
+            {
+                MergeBrushSize += 4;
+            }
+        }
+
+        public void DecreaseMergeBrushSize()
+        {
+            if ( MergeBrushSize > 4 )
+            {
+                MergeBrushSize -= 4;
+            }
+        }
+
         private MergeMode mCurrentMergeMode = MergeMode.Fill2D;
         public MergeMode CurrentMergeMode
         {
@@ -398,6 +428,12 @@ namespace Mojo
             Internal.ResetAdjustState( new Vector3( mMouseOverX, mMouseOverY, mTiledDatasetView.CenterDataSpace.Z ) );
         }
 
+        public uint CommmitDrawMerge()
+        {
+            ChangesMade = true;
+            return Internal.CommitDrawMerge( new Vector3( mMouseOverX, mMouseOverY, mTiledDatasetView.CenterDataSpace.Z ) );
+        }
+
         public void UndoChange()
         {
             Internal.UndoChange();
@@ -477,6 +513,7 @@ namespace Mojo
         public void UpdateSegmentListFocus()
         {
             OnPropertyChanged( "SegmentListFocus" );
+            OnPropertyChanged( "SelectedSegmentId" );
         }
 
         public void LoadTiledDataset( string datasetRootDirectory )
@@ -712,8 +749,8 @@ namespace Mojo
             if ( Internal != null && SegmentationLoaded )
             {
                 Internal.DeleteTempFiles();
-                UnloadSegmentation();
-                LoadSegmentation( TiledDatasetDescription );
+                //UnloadSegmentation();
+                //LoadSegmentation( TiledDatasetDescription );
             }
         }
 
@@ -721,7 +758,6 @@ namespace Mojo
         {
             return Internal.GetTileCache().Where( tileCacheEntry => tileCacheEntry.Active ).OrderBy( tileCacheEntry => tileCacheEntry.CenterDataSpace.Z ).ToList();
         }
-
 
     }
 }

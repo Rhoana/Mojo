@@ -47,6 +47,9 @@ namespace Mojo
                     mEngine.CurrentToolMode = ToolMode.MergeSegmentation;
                     break;
                 case Key.D3:
+                    mEngine.CurrentToolMode = ToolMode.DrawMergeSegmentation;
+                    break;
+                case Key.D4:
                     mEngine.CurrentToolMode = ToolMode.SplitSegmentation;
                     break;
 
