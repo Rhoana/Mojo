@@ -1,4 +1,5 @@
 #include "FileSystemSegmentInfoManager.hpp"
+#include "Constants.hpp"
 
 #include "Mojo.Core/Boost.hpp"
 
@@ -102,11 +103,18 @@ void FileSystemSegmentInfoManager::OpenDB()
             sqlite3_finalize(statement);
 
             //
-            // Round confidence map size up to the nearest 1024
+            // Round label id / confidence map size up to the nearest (+1) EXTRA_SEGMENTS_PER_SESSION
             //
-			size_t shape[] = { ( mIdMax / 1024 + 1 ) * 1024 };
+			size_t shape[] = { ( mIdMax / EXTRA_SEGMENTS_PER_SESSION + 2 ) * EXTRA_SEGMENTS_PER_SESSION };
             unsigned char defaultConfidence = 0;
 			mIdConfidenceMap = marray::Marray< unsigned char >( shape, shape + 1, defaultConfidence );
+
+			mLabelIdMap = marray::Marray< unsigned char >( shape, shape + 1 );
+
+			for ( unsigned int i = 0; i < shape[0]; ++i )
+			{
+				mLabelIdMap( i ) = i;
+			}
 
 			//
 			// Load the Segment Info 
@@ -133,6 +141,32 @@ void FileSystemSegmentInfoManager::OpenDB()
 					mIdConfidenceMap( sqlite3_column_int(statement, 0) ) = sqlite3_column_int(statement, 3);
                 }
                 Core::Printf( "Read ", (int)mSegmentMultiIndex.size(), " segment info entries from db." );
+            }
+
+            sqlite3_finalize(statement);
+
+			//
+			// Load the label id map
+			//
+            converter.str("");
+            converter << "SELECT fromId, toId FROM relabelMap WHERE fromId != toId ORDER BY fromId;";
+            query = converter.str();
+
+            sqlReturn = sqlite3_prepare_v2(mIdTileIndexDB, query.c_str(), (int)query.size(), &statement, NULL); 
+
+            if ( sqlReturn )
+            {
+                Core::Printf( "Error preparing SQLite3 query (", sqlReturn, "): ", sqlite3_errmsg( mIdTileIndexDB ) );
+            }
+            else
+            {
+				unsigned int relabelCount = 0;
+                while ( sqlite3_step( statement ) == SQLITE_ROW )
+                {
+					mLabelIdMap( sqlite3_column_int(statement, 0) ) = sqlite3_column_int(statement, 1);
+					++relabelCount;
+                }
+                Core::Printf( "Read ", relabelCount, " label remap entries from db." );
             }
 
             sqlite3_finalize(statement);
@@ -218,6 +252,20 @@ void FileSystemSegmentInfoManager::Save()
         }
     }
 
+	//
+	// Update remap info
+	//
+
+    converter << "CREATE TABLE IF NOT EXISTS relabelMap ( fromId int PRIMARY KEY, toId int);\n";
+
+	for ( unsigned int i = 0; i < mIdMax; ++i )
+	{
+		if ( mLabelIdMap( i ) != i )
+		{
+		    converter << "INSERT or REPLACE INTO relabelMap (fromId, toId) VALUES (" << i << "," << mLabelIdMap( i ) << ");\n";
+		}
+	}
+
 	converter << "END TRANSACTION;\n";
 
     Core::Printf( "Removing ", numDeletes, " and adding ", numInserts, " tile index entries." );
@@ -250,6 +298,11 @@ void FileSystemSegmentInfoManager::Save()
 marray::Marray< unsigned char >* FileSystemSegmentInfoManager::GetIdColorMap()
 {
     return &mIdColorMap;
+}
+
+marray::Marray< unsigned int >* FileSystemSegmentInfoManager::GetLabelIdMap()
+{
+    return &mLabelIdMap;
 }
 
 marray::Marray< unsigned char >* FileSystemSegmentInfoManager::GetIdConfidenceMap()
@@ -347,11 +400,24 @@ unsigned int FileSystemSegmentInfoManager::AddNewId()
     mSegmentMultiIndex.push_back( SegmentInfo( mIdMax, name, 0, 0, true ) );
 
     //
+    // Resize the label id map if necessary
+    //
+    if ( mIdMax > mLabelIdMap.shape( 0 ) )
+    {
+    	size_t shape[] = { ( mIdMax / EXTRA_SEGMENTS_PER_SESSION + 2 ) * EXTRA_SEGMENTS_PER_SESSION };
+        mLabelIdMap.resize( shape, shape + 1 );
+		for ( unsigned int i = mIdMax; i < shape[0]; ++i )
+		{
+			mLabelIdMap( i ) = i;
+		}
+    }
+
+    //
     // Resize the confidence map if necessary
     //
     if ( mIdMax > mIdConfidenceMap.shape( 0 ) )
     {
-    	size_t shape[] = { ( mIdMax / 1024 + 1 ) * 1024 };
+    	size_t shape[] = { ( mIdMax / EXTRA_SEGMENTS_PER_SESSION + 2 ) * EXTRA_SEGMENTS_PER_SESSION };
         unsigned char defaultConfidence = 0;
         mIdConfidenceMap.resize( shape, shape + 1, defaultConfidence );
     }
@@ -416,6 +482,32 @@ void FileSystemSegmentInfoManager::SortSegmentInfoByConfidence( bool reverse )
     {
         mSegmentMultiIndex.get<0>().reverse();
     }
+}
+
+void FileSystemSegmentInfoManager::RemapSegmentLabel( unsigned int fromSegId, unsigned int toSegId )
+{
+    if ( fromSegId <= mIdMax && toSegId <= mIdMax )
+    {
+		mLabelIdMap( fromSegId ) = toSegId;
+    }
+}
+
+unsigned int FileSystemSegmentInfoManager::GetIdForLabel( unsigned int label )
+{
+	if ( label == mPreviousLabelQuery && mPreviousIdResult != 0 )
+		return mPreviousIdResult;
+
+	mPreviousLabelQuery = label;
+	mPreviousIdResult = mLabelIdMap( label );
+
+	while ( mPreviousIdResult != label )
+	{
+		label = mPreviousIdResult;
+		mPreviousIdResult = mLabelIdMap( label );
+	}
+    
+	return mPreviousIdResult;
+
 }
 
 void FileSystemSegmentInfoManager::LockSegmentLabel( unsigned int segId )

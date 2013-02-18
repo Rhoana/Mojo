@@ -47,12 +47,13 @@ public:
     virtual void                                                  DeleteTempFiles();
 
     virtual int                                                   GetTileCountForId( unsigned int segId );
-    virtual MojoInt3                                                  GetSegmentCentralTileLocation( unsigned int segId );
-    virtual MojoInt4                                                  GetSegmentZTileBounds( unsigned int segId, int zIndex );
+    virtual MojoInt3                                              GetSegmentCentralTileLocation( unsigned int segId );
+    virtual MojoInt4                                              GetSegmentZTileBounds( unsigned int segId, int zIndex );
 
     virtual Core::HashMap< std::string, Core::VolumeDescription > LoadTile( MojoInt4 tileIndex );
     virtual void                                                  UnloadTile( MojoInt4 tileIndex );
 
+    virtual void                                                  RemapSegmentLabels( std::set< unsigned int > fromSegId, unsigned int toSegId );
     virtual void                                                  ReplaceSegmentationLabel( unsigned int oldId, unsigned int newId );
     virtual void                                                  ReplaceSegmentationLabelCurrentSlice( unsigned int oldId, unsigned int newId, MojoFloat3 pointTileSpace );
     virtual void                                                  ReplaceSegmentationLabelCurrentConnectedComponent( unsigned int oldId, unsigned int newId, MojoFloat3 pointTileSpace );
@@ -81,12 +82,18 @@ public:
     virtual void                                                  PrepForAdjust( unsigned int segId, MojoFloat3 pointTileSpace );
     virtual void                                                  CommitAdjustChange( unsigned int segId, MojoFloat3 pointTileSpace );
 
-	virtual void                                                  UndoChange();
-	virtual void                                                  RedoChange();
+    virtual void                                                  ResetDrawMergeState();
+    virtual void                                                  PrepForDrawMerge( MojoFloat3 pointTileSpace );
+	virtual std::set< unsigned int >                              GetDrawMergeIds( MojoFloat3 pointTileSpace );
+	virtual unsigned int                                          CommitDrawMerge( std::set< unsigned int > mergeIds, MojoFloat3 pointTileSpace );
+
+	virtual std::list< unsigned int >                             UndoChange();
+	virtual std::list< unsigned int >                             RedoChange();
     virtual void                                                  FlushFileSystemTileCacheChanges();
     virtual void                                                  SaveAndClearFileSystemTileCache();
 
     virtual marray::Marray< unsigned char >*                      GetIdColorMap();
+    virtual marray::Marray< unsigned int >*                       GetLabelIdMap();
     virtual marray::Marray< unsigned char >*                      GetIdConfidenceMap();
 
     virtual void                                                  SortSegmentInfoById( bool reverse );
@@ -99,6 +106,7 @@ public:
 	virtual unsigned int                                          GetSegmentInfoCurrentListLocation( unsigned int segId );
     virtual std::list< SegmentInfo >                              GetSegmentInfoRange( int begin, int end );
 
+    virtual FileSystemSegmentInfoManager*                         GetSegmentInfoManager();
 
 private:
     void                                                          LoadTiledDatasetInternal( TiledDatasetDescription& tiledDatasetDescription );
@@ -122,7 +130,7 @@ private:
     void                                                          UnloadTileHdf5( Core::VolumeDescription& volumeDescription );
 
     std::string                                                   CreateTileString( MojoInt4 tileIndex );
-	MojoInt4                                                          CreateTileIndex( std::string tileString );
+	MojoInt4                                                      CreateTileIndex( std::string tileString );
     void                                                          ReduceCacheSize();
     void                                                          ReduceCacheSizeIfNecessary();
 
@@ -156,15 +164,13 @@ private:
 
     Core::HashMap < std::string, FileSystemTileCacheEntry >       mFileSystemTileCache;
 
-    FileSystemSegmentInfoManager                                  mSegmentInfoManager;
-
     //
     // simple split variables
     //
-    std::vector< MojoInt3 >                                           mSplitSourcePoints;
+    std::vector< MojoInt3 >                                       mSplitSourcePoints;
     int                                                           mSplitNPerimiters;
-    MojoInt3                                                          mSplitWindowStart;
-    MojoInt3                                                          mSplitWindowNTiles;
+    MojoInt3                                                      mSplitWindowStart;
+    MojoInt3                                                      mSplitWindowNTiles;
     int                                                           mSplitWindowWidth;
     int                                                           mSplitWindowHeight;
     int                                                           mSplitWindowNPix;
@@ -177,12 +183,13 @@ private:
     char*                                                         mSplitDrawArea;
     unsigned int*                                                 mSplitResultArea;
 
+    FileSystemSegmentInfoManager                                  mSegmentInfoManager;
 
-    MojoFloat2                                                        mCentroid;
+    MojoFloat2                                                    mCentroid;
     int                                                           mPrevSplitId;
     int                                                           mPrevSplitZ;
-    std::vector< MojoFloat2 >                                         mPrevSplitLine;
-    std::vector< std::pair< MojoFloat2, int >>                        mPrevSplitCentroids;
+    std::vector< MojoFloat2 >                                     mPrevSplitLine;
+    std::vector< std::pair< MojoFloat2, int >>                    mPrevSplitCentroids;
 
     std::map< int, FileSystemSplitState >                         mSplitStates;
 

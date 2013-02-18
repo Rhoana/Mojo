@@ -15,22 +15,25 @@ namespace Mojo
 namespace Native
 {
 
+typedef std::set< Core::MojoInt2, Core::Int2Comparator > UndoRedoChangeSet;
+
 struct FileSystemUndoRedoItem
 {
     FileSystemUndoRedoItem();
 
-    int                                                                 oldId;
-    int                                                                 newId;
+    unsigned int                                                        oldId;
+    unsigned int                                                        newId;
+
+	std::map< unsigned int, long >                                      remapFromIdsAndSizes;
+
     FileSystemTileSet                                                   idTileMapAddNewId;
+	Core::HashMap< unsigned int, FileSystemTileSet >                    idTileMapRemoveOldIdSets;
 
-	Core::HashMap< int, FileSystemTileSet >                             idTileMapRemoveOldIdSets;
+	//Core::HashMap< std::string,
+	//	std::bitset< TILE_SIZE * TILE_SIZE > >                          changePixels;
 
-	Core::HashMap< std::string,
-		std::bitset< TILE_SIZE * TILE_SIZE > >
-		                                                                changePixels;
-	Core::HashMap< std::string,
-		std::set< Core::MojoInt2, Core::Int2Comparator > >
-		                                                                changeSets;
+	Core::HashMap< std::string, UndoRedoChangeSet >                     changeSets;
+
 };
 
 }

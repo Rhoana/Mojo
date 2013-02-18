@@ -61,11 +61,14 @@ void TileManager::LoadTiledDataset( TiledDatasetDescription^ tiledDatasetDescrip
     UnloadTileCache();
     LoadTileCache();
 
-    UnloadIdColorMap();
-    LoadIdColorMap();
+    //UnloadIdColorMap();
+    //LoadIdColorMap();
 
-	UnloadIdConfidenceMap();
-	LoadIdConfidenceMap();
+    //UnloadLabelIdMap();
+    //LoadLabelIdMap();
+
+	//UnloadIdConfidenceMap();
+	//LoadIdConfidenceMap();
 }
 
 void TileManager::UnloadTiledDataset()
@@ -76,10 +79,13 @@ void TileManager::UnloadTiledDataset()
     LoadTileCache();
 
     UnloadIdColorMap();
-    LoadIdColorMap();
+    //LoadIdColorMap();
+
+    UnloadLabelIdMap();
+    //LoadLabelIdMap();
 
 	UnloadIdConfidenceMap();
-	LoadIdConfidenceMap();
+	//LoadIdConfidenceMap();
 }
 
 bool TileManager::IsTiledDatasetLoaded()
@@ -94,6 +100,9 @@ void TileManager::LoadSegmentation( TiledDatasetDescription^ tiledDatasetDescrip
     UnloadIdColorMap();
     LoadIdColorMap();
 
+    UnloadLabelIdMap();
+    LoadLabelIdMap();
+
 	UnloadIdConfidenceMap();
 	LoadIdConfidenceMap();
 }
@@ -106,6 +115,9 @@ void TileManager::UnloadSegmentation()
 
     UnloadIdColorMap();
     //LoadIdColorMap();
+
+    UnloadLabelIdMap();
+    //LoadLabelIdMap();
 
 	UnloadIdConfidenceMap();
 	//LoadIdConfidenceMap();
@@ -173,6 +185,13 @@ void TileManager::SortSegmentInfoByConfidence( bool reverse )
 	mTileManager->SortSegmentInfoByConfidence( reverse );
 }
 
+void TileManager::RemapSegmentLabel( unsigned int fromSegId, unsigned int toSegId )
+{
+
+	mTileManager->RemapSegmentLabel( fromSegId, toSegId );
+
+}
+
 void TileManager::LockSegmentLabel( unsigned int segId )
 {
 	mTileManager->LockSegmentLabel( segId );
@@ -211,6 +230,11 @@ Collections::Generic::IList< SegmentInfo^ >^ TileManager::GetSegmentInfoRange( i
 SlimDX::Direct3D11::ShaderResourceView^ TileManager::GetIdColorMap()
 {
     return mIdColorMap;
+}
+
+SlimDX::Direct3D11::ShaderResourceView^ TileManager::GetLabelIdMap()
+{
+    return mLabelIdMap;
 }
 
 SlimDX::Direct3D11::ShaderResourceView^ TileManager::GetIdConfidenceMap()
@@ -371,6 +395,24 @@ void TileManager::CommitAdjustChange( unsigned int segId, Vector3^ pDataSpace )
     mTileManager->CommitAdjustChange( segId, pDataSpaceFloat3 );
 }
 
+void TileManager::ResetDrawMergeState( Vector3^ pDataSpace )
+{
+    MojoFloat3 pDataSpaceFloat3 = MojoFloat3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
+    mTileManager->ResetDrawMergeState( pDataSpaceFloat3 );
+}
+
+void TileManager::PrepForDrawMerge( Vector3^ pDataSpace )
+{
+    MojoFloat3 pDataSpaceFloat3 = MojoFloat3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
+    mTileManager->PrepForDrawMerge( pDataSpaceFloat3 );
+}
+
+unsigned int TileManager::CommitDrawMerge( Vector3^ pDataSpace )
+{
+    MojoFloat3 pDataSpaceFloat3 = MojoFloat3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
+    return mTileManager->CommitDrawMerge( pDataSpaceFloat3 );
+}
+
 void TileManager::UndoChange()
 {
     mTileManager->UndoChange();
@@ -452,6 +494,26 @@ void TileManager::UnloadIdColorMap()
     {
         delete mIdColorMap;
         mIdColorMap = nullptr;
+    }
+}
+
+void TileManager::LoadLabelIdMap()
+{
+    ID3D11ShaderResourceView* labelIdMap =  mTileManager->GetLabelIdMap();
+
+    if ( labelIdMap != NULL )
+    {
+        RELEASE_ASSERT( mLabelIdMap == nullptr );
+        mLabelIdMap = ShaderResourceView::FromPointer( IntPtr( labelIdMap ) );
+    }
+}
+
+void TileManager::UnloadLabelIdMap()
+{
+    if ( mLabelIdMap != nullptr )
+    {
+        delete mLabelIdMap;
+        mLabelIdMap = nullptr;
     }
 }
 

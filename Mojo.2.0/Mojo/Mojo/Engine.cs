@@ -15,6 +15,7 @@ namespace Mojo
         Null,
         AdjustSegmentation,
         MergeSegmentation,
+        DrawMergeSegmentation,
         SplitSegmentation,
     }
 
@@ -93,6 +94,7 @@ namespace Mojo
                                 { ToolMode.Null, new NullTool() },
                                 { ToolMode.AdjustSegmentation, new AdjustSegmentationTool( TileManager, this ) },
                                 { ToolMode.MergeSegmentation, new MergeSegmentationTool( TileManager, this ) },
+                                { ToolMode.DrawMergeSegmentation, new DrawMergeSegmentationTool( TileManager, this ) },
                                 { ToolMode.SplitSegmentation, new SplitSegmentationTool( TileManager, this ) }
                             }
                             }
@@ -107,6 +109,7 @@ namespace Mojo
                                               { ToolMode.Null, new NullRenderingStrategy( mD3D11Device, mD3D11Device.ImmediateContext ) },
                                               { ToolMode.AdjustSegmentation, new AdjustSegmentationRenderingStrategy( mD3D11Device, mD3D11Device.ImmediateContext, TileManager ) },
                                               { ToolMode.MergeSegmentation, new MergeSegmentationRenderingStrategy( mD3D11Device, mD3D11Device.ImmediateContext, TileManager ) },
+                                              { ToolMode.DrawMergeSegmentation, new DrawMergeSegmentationRenderingStrategy( mD3D11Device, mD3D11Device.ImmediateContext, TileManager ) },
                                               { ToolMode.SplitSegmentation, new SplitSegmentationRenderingStrategy( mD3D11Device, mD3D11Device.ImmediateContext, TileManager ) }
                                           }
                                           }

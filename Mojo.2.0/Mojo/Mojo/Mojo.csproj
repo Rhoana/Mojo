@@ -95,10 +95,16 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AdjustSegmentationRenderingStrategy.cs" />
-    <Compile Include="AdjustSegmentationTool.cs" />
+    <Compile Include="AdjustSegmentationRenderingStrategy.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="AdjustSegmentationTool.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Camera.cs" />
     <Compile Include="Constants.cs" />
+    <Compile Include="DrawMergeSegmentationRenderingStrategy.cs" />
+    <Compile Include="DrawMergeSegmentationTool.cs" />
     <Compile Include="NullRenderingStrategy.cs" />
     <Compile Include="NullTool.cs" />
     <Compile Include="ITool.cs" />

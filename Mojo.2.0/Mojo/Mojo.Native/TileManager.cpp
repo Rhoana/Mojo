@@ -19,6 +19,8 @@ namespace Native
 TileManager::TileManager( ID3D11Device* d3d11Device, ID3D11DeviceContext* d3d11DeviceContext, ITileServer* tileServer, Core::PrimitiveMap constParameters ) :
     mIdColorMapBuffer            ( NULL ),
     mIdColorMapShaderResourceView( NULL ),
+    mLabelIdMapBuffer            ( NULL ),
+    mLabelIdMapShaderResourceView( NULL ),
     mIdConfidenceMapBuffer            ( NULL ),
     mIdConfidenceMapShaderResourceView( NULL ),
     mTileServer                  ( tileServer ),
@@ -281,6 +283,11 @@ ID3D11ShaderResourceView* TileManager::GetIdColorMap()
     return mIdColorMapShaderResourceView;
 }
 
+ID3D11ShaderResourceView* TileManager::GetLabelIdMap()
+{
+    return mLabelIdMapShaderResourceView;
+}
+
 ID3D11ShaderResourceView* TileManager::GetIdConfidenceMap()
 {
     return mIdConfidenceMapShaderResourceView;
@@ -291,7 +298,7 @@ unsigned int TileManager::GetSegmentationLabelId( const TiledDatasetView& tiledD
 	MojoInt3   zoomLevel = GetZoomLevel( tiledDatasetView );
 	MojoFloat4 pointTileSpace;
 	MojoInt4   tileIndex;
-	int segmentId = 0;
+	unsigned int segmentId = 0;
 
 	if ( mIsSegmentationLoaded )
 	{
@@ -315,8 +322,11 @@ unsigned int TileManager::GetSegmentationLabelId( const TiledDatasetView& tiledD
 			int  offsetVoxelSpace1D = Core::Index3DToIndex1D( offsetVoxelSpace, numVoxelsPerTile );
 
 			Core::HashMap< std::string, Core::VolumeDescription > thisTile = mTileServer->LoadTile( tileIndex );
-			segmentId = ( (int*) thisTile.Get( "IdMap" ).data )[ offsetVoxelSpace1D ];
+
+			segmentId = mTileServer->GetSegmentInfoManager()->GetIdForLabel( ( (int*) thisTile.Get( "IdMap" ).data )[ offsetVoxelSpace1D ] );
+
 			mTileServer->UnloadTile( tileIndex );
+
 		}
 	}
 
@@ -342,6 +352,48 @@ void TileManager::SortSegmentInfoBySize( bool reverse )
 void TileManager::SortSegmentInfoByConfidence( bool reverse )
 {
 	mTileServer->SortSegmentInfoByConfidence( reverse );
+}
+
+void TileManager::RemapSegmentLabel( unsigned int fromSegId, unsigned int toSegId )
+{
+	Core::Printf( "From ", fromSegId, " before -> ", (*mLabelIdMap)( fromSegId ), "." );	
+	Core::Printf( "To ", toSegId, " before -> ", (*mLabelIdMap)( toSegId ), "." );
+
+	std::set< unsigned int > fromSegIds;
+	fromSegIds.insert( fromSegId );
+	mTileServer->RemapSegmentLabels( fromSegIds, toSegId );
+
+	Core::Printf( "From ", fromSegId, " after -> ", (*mLabelIdMap)( fromSegId ), "." );
+	Core::Printf( "To ", toSegId, " after -> ", (*mLabelIdMap)( toSegId ), "." );
+
+	UpdateLabelIdMap( fromSegId );
+
+}
+
+void TileManager::UpdateLabelIdMap( unsigned int fromSegId )
+{
+    //
+    // Update label id map shader buffer
+    //
+    uint1 labelIdMapEntry = make_uint1( (*mLabelIdMap)( fromSegId ) );
+
+    D3D11_BOX updateBox;
+    ZeroMemory( &updateBox, sizeof( D3D11_BOX ) );
+
+    updateBox.left = fromSegId * sizeof( uint1 );
+    updateBox.top = 0;
+    updateBox.front = 0;
+    updateBox.right = ( fromSegId + 1 ) * sizeof( uint1 );
+    updateBox.bottom = 1;
+    updateBox.back = 1;
+
+    mD3D11DeviceContext->UpdateSubresource(
+    mLabelIdMapBuffer,
+    0,
+    &updateBox,
+    &labelIdMapEntry,
+    (UINT) mLabelIdMap->shape( 0 ) * sizeof( uint1 ),
+    (UINT) mLabelIdMap->shape( 0 ) * sizeof( uint1 ) );
 }
 
 void TileManager::LockSegmentLabel( unsigned int segId )
@@ -599,6 +651,39 @@ void TileManager::CommitAdjustChange( unsigned int segId, MojoFloat3 pointTileSp
     ReloadTileCache();
 }
 
+void TileManager::ResetDrawMergeState( MojoFloat3 pointTileSpace )
+{
+    mTileServer->ResetDrawMergeState();
+
+    ReloadTileCacheOverlayMapOnly( (int)pointTileSpace.z );
+}
+
+void TileManager::PrepForDrawMerge( MojoFloat3 pointTileSpace )
+{
+    mTileServer->PrepForDrawMerge( pointTileSpace );
+
+    ReloadTileCacheOverlayMapOnly( (int)pointTileSpace.z );
+}
+
+unsigned int TileManager::CommitDrawMerge( MojoFloat3 pointTileSpace )
+{
+	std::set< unsigned int > remapIds = mTileServer->GetDrawMergeIds( pointTileSpace );
+
+	unsigned int newId = mTileServer->CommitDrawMerge( remapIds, pointTileSpace );
+
+	for ( std::set< unsigned int >::iterator updateIt = remapIds.begin(); updateIt != remapIds.end(); ++updateIt )
+	{
+		UpdateLabelIdMap( *updateIt );
+	}
+
+    mTileServer->PrepForDrawMerge( pointTileSpace );
+
+	ReloadTileCacheOverlayMapOnly( (int)pointTileSpace.z );
+
+	return newId;
+
+}
+
 void TileManager::ReplaceSegmentationLabelCurrentConnectedComponent( unsigned int oldId, unsigned int newId, MojoFloat3 pDataSpace )
 {
     mTileServer->ReplaceSegmentationLabelCurrentConnectedComponent( oldId, newId, pDataSpace );
@@ -608,14 +693,24 @@ void TileManager::ReplaceSegmentationLabelCurrentConnectedComponent( unsigned in
 
 void TileManager::UndoChange()
 {
-	mTileServer->UndoChange();
+	std::list< unsigned int > remappedIds = mTileServer->UndoChange();
+
+	for ( std::list< unsigned int >::iterator updateIt = remappedIds.begin(); updateIt != remappedIds.end(); ++updateIt )
+	{
+		UpdateLabelIdMap( *updateIt );
+	}
 
     ReloadTileCache();
 }
 
 void TileManager::RedoChange()
 {
-    mTileServer->RedoChange();
+    std::list< unsigned int > remappedIds = mTileServer->RedoChange();
+
+	for ( std::list< unsigned int >::iterator updateIt = remappedIds.begin(); updateIt != remappedIds.end(); ++updateIt )
+	{
+		UpdateLabelIdMap( *updateIt );
+	}
 
     ReloadTileCache();
 }
@@ -730,6 +825,15 @@ void TileManager::UnloadSegmentationInternal()
 
         mIdColorMapBuffer->Release();
         mIdColorMapBuffer = NULL;
+
+        //
+        // release label id map
+        //
+        mLabelIdMapShaderResourceView->Release();
+        mLabelIdMapShaderResourceView = NULL;
+
+        mLabelIdMapBuffer->Release();
+        mLabelIdMapBuffer = NULL;
 
         //
         // release id lock map
