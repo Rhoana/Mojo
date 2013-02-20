@@ -168,7 +168,9 @@ namespace Mojo
 
         private void RenderTileCacheEntry( DeviceContext deviceContext, Camera camera, int datasetExtentDataSpaceX, int datasetExtentDataSpaceY, TileCacheEntry tileCacheEntry, Viewport viewport )
         {
-            //Check if this tile is over the edge of the image
+            //
+            // Check if this tile is over the edge of the image
+            //
             var tileMinExtentX = tileCacheEntry.CenterDataSpace.X - ( tileCacheEntry.ExtentDataSpace.X / 2f );
             var tileMinExtentY = tileCacheEntry.CenterDataSpace.Y - ( tileCacheEntry.ExtentDataSpace.Y / 2f );
             var tileMaxExtentX = tileCacheEntry.CenterDataSpace.X + ( tileCacheEntry.ExtentDataSpace.X / 2f );

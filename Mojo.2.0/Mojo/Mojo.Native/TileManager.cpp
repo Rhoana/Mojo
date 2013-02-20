@@ -669,14 +669,23 @@ unsigned int TileManager::CommitDrawMerge( MojoFloat3 pointTileSpace )
 {
 	std::set< unsigned int > remapIds = mTileServer->GetDrawMergeIds( pointTileSpace );
 
-	unsigned int newId = mTileServer->CommitDrawMerge( remapIds, pointTileSpace );
+	unsigned int newId = 0;
 
-	for ( std::set< unsigned int >::iterator updateIt = remapIds.begin(); updateIt != remapIds.end(); ++updateIt )
+	if ( remapIds.size() == 1 )
 	{
-		UpdateLabelIdMap( *updateIt );
+		newId = *remapIds.begin();
+	}
+	else if ( remapIds.size() > 1 )
+	{
+		newId = mTileServer->CommitDrawMerge( remapIds, pointTileSpace );
+
+		for ( std::set< unsigned int >::iterator updateIt = remapIds.begin(); updateIt != remapIds.end(); ++updateIt )
+		{
+			UpdateLabelIdMap( *updateIt );
+		}
 	}
 
-    mTileServer->PrepForDrawMerge( pointTileSpace );
+	mTileServer->PrepForDrawMerge( pointTileSpace );
 
 	ReloadTileCacheOverlayMapOnly( (int)pointTileSpace.z );
 
@@ -880,7 +889,7 @@ std::list< MojoInt4 > TileManager::GetTileIndicesIntersectedByView( const TiledD
     //
     // figure out what the current zoom level is
     //
-    MojoInt3 zoomLevel   = GetZoomLevel( tiledDatasetView );
+    MojoInt3 zoomLevel = GetZoomLevel( tiledDatasetView );
     int  zoomLevelXY = std::min( zoomLevel.x, zoomLevel.y );
     int  zoomLevelZ  = zoomLevel.z;
 

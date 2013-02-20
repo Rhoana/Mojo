@@ -62,6 +62,12 @@ namespace Mojo.Wpf.ViewModel
             public String DisplayName { get; set; }
         }
 
+        public class MergeControlModeItem
+        {
+            public MergeControlMode MergeControlMode { get; set; }
+            public String DisplayName { get; set; }
+        }
+
         public class SplitModeItem
         {
             public SplitMode SplitMode { get; set; }
@@ -69,6 +75,7 @@ namespace Mojo.Wpf.ViewModel
         }
 
         public List<MergeModeItem> MergeModes { get; private set; }
+        public List<MergeControlModeItem> MergeControlModes { get; private set; }
         public List<SplitModeItem> SplitModes { get; private set; }
 
 
@@ -122,19 +129,26 @@ namespace Mojo.Wpf.ViewModel
 
             MergeModes = new List<MergeModeItem>
             {
+                new MergeModeItem() {MergeMode = MergeMode.GlobalReplace, DisplayName = "Global Replace"},
                 new MergeModeItem() {MergeMode = MergeMode.Fill2D, DisplayName = "2D Region Fill"},
                 new MergeModeItem() {MergeMode = MergeMode.Fill3D, DisplayName = "3D Region Fill (slow)"},
-                new MergeModeItem() {MergeMode = MergeMode.GlobalReplace, DisplayName = "Global Replace"}
+            };
+
+            MergeControlModes = new List<MergeControlModeItem>
+            {
+                new MergeControlModeItem() {MergeControlMode = MergeControlMode.Draw, DisplayName = "Draw"},
+                new MergeControlModeItem() {MergeControlMode = MergeControlMode.Click, DisplayName = "Click"},
             };
 
             SplitModes = new List<SplitModeItem>
             {
                 new SplitModeItem() {SplitMode = SplitMode.DrawSplit, DisplayName = "Draw Split Line"},
                 new SplitModeItem() {SplitMode = SplitMode.DrawRegions, DisplayName = "Draw Regions"},
-                new SplitModeItem() {SplitMode = SplitMode.JoinPoints, DisplayName = "Points (2D only)"}
+                new SplitModeItem() {SplitMode = SplitMode.JoinPoints, DisplayName = "Points"}
             };
 
             OnPropertyChanged( "MergeModes" );
+            OnPropertyChanged( "MergeControlModes" );
             OnPropertyChanged( "SplitModes" );
 
         }

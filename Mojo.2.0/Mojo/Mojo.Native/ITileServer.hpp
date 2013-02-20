@@ -62,8 +62,8 @@ public:
 	virtual void                                                  FindBoundaryJoinPoints2D( unsigned int segId )                                                                         = 0;
 	virtual void                                                  FindBoundaryWithinRegion2D( unsigned int segId )                                                                       = 0;
 	virtual void                                                  FindBoundaryBetweenRegions2D( unsigned int segId )                                                                     = 0;
-    virtual int                                                   CompletePointSplit( unsigned int segId, MojoFloat3 pointTileSpace )                                                    = 0;
-    virtual int                                                   CompleteDrawSplit( unsigned int segId, MojoFloat3 pointTileSpace, bool join3D, int splitStartZ )                       = 0;
+    virtual unsigned int                                          CompletePointSplit( unsigned int segId, MojoFloat3 pointTileSpace )                                                    = 0;
+    virtual unsigned int                                          CompleteDrawSplit( unsigned int segId, MojoFloat3 pointTileSpace, bool join3D, int splitStartZ )                       = 0;
 
     virtual void                                                  RecordSplitState( unsigned int segId, MojoFloat3 pointTileSpace )                                                      = 0;
     virtual void                                                  PredictSplit( unsigned int segId, MojoFloat3 pointTileSpace, float radius )                                            = 0;

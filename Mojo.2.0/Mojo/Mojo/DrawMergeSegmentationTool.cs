@@ -216,5 +216,27 @@ namespace Mojo
             }
         }
 
+        public override void OnMouseWheel( System.Windows.Forms.MouseEventArgs mouseEventArgs, int width, int height )
+        {
+            base.OnMouseWheel( mouseEventArgs, width, height );
+
+            var centerDataSpace = mTileManager.TiledDatasetView.CenterDataSpace;
+            var extentDataSpace = mTileManager.TiledDatasetView.ExtentDataSpace;
+
+            var topLeftDataSpaceX = centerDataSpace.X - ( extentDataSpace.X / 2f );
+            var topLeftDataSpaceY = centerDataSpace.Y - ( extentDataSpace.Y / 2f );
+
+            var offsetDataSpaceX = ( (float)mouseEventArgs.X / width ) * extentDataSpace.X;
+            var offsetDataSpaceY = ( (float)mouseEventArgs.Y / height ) * extentDataSpace.Y;
+
+            var x = topLeftDataSpaceX + offsetDataSpaceX;
+            var y = topLeftDataSpaceY + offsetDataSpaceY;
+            var z = centerDataSpace.Z;
+
+            var p = new Vector3( x, y, z );
+            mTileManager.Internal.PrepForDrawMerge( p );
+        }
+
+
     }
 }

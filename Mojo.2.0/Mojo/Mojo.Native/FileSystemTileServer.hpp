@@ -72,8 +72,8 @@ public:
 	virtual void                                                  FindBoundaryJoinPoints2D( unsigned int segId );
 	virtual void                                                  FindBoundaryWithinRegion2D( unsigned int segId );
 	virtual void                                                  FindBoundaryBetweenRegions2D( unsigned int segId );
-    virtual int                                                   CompletePointSplit( unsigned int segId, MojoFloat3 pointTileSpace );
-    virtual int                                                   CompleteDrawSplit( unsigned int segId, MojoFloat3 pointTileSpace, bool join3D, int splitStartZ );
+    virtual unsigned int                                          CompletePointSplit( unsigned int segId, MojoFloat3 pointTileSpace );
+    virtual unsigned int                                          CompleteDrawSplit( unsigned int segId, MojoFloat3 pointTileSpace, bool join3D, int splitStartZ );
 
     virtual void                                                  RecordSplitState( unsigned int segId, MojoFloat3 pointTileSpace );
     virtual void                                                  PredictSplit( unsigned int segId, MojoFloat3 pointTileSpace, float radius );
@@ -134,7 +134,7 @@ private:
     void                                                          ReduceCacheSize();
     void                                                          ReduceCacheSizeIfNecessary();
 
-    bool                                                          TileContainsId ( MojoInt3 numVoxelsPerTile, MojoInt3 currentIdNumVoxels, int* currentIdVolume, int segId );
+    bool                                                          TileContainsId ( MojoInt3 numVoxelsPerTile, MojoInt3 currentIdNumVoxels, unsigned int* currentIdVolume, unsigned int segId );
 
     //
     // tile loading and saving internals
@@ -156,6 +156,8 @@ private:
 	void                                                          UpdateOverlayTilesBoundingBox( MojoInt2 upperLeft, MojoInt2 lowerRight );
 	void                                                          ResetOverlayTiles();
 	void                                                          PrepForNextUndoRedoChange();
+
+	void														  StrideUpIdTileChange( MojoInt4 numTiles, MojoInt3 numVoxelsPerTile, MojoInt4 tileIndex, unsigned int* data );
 
     Core::PrimitiveMap                                            mConstParameters;
     TiledDatasetDescription                                       mTiledDatasetDescription;
