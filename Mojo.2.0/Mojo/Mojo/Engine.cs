@@ -26,6 +26,12 @@ namespace Mojo
         GlobalReplace
     }
 
+    public enum MergeControlMode
+    {
+        Draw,
+        Click
+    }
+
     public enum SplitMode
     {
         JoinPoints,
@@ -58,9 +64,13 @@ namespace Mojo
                  * On change from Split to Merge mode using keyboard shortcut this method is called twice and ends up back in Split mode.
                  */
 
+                if ( value == ToolMode.MergeSegmentation && CurrentMergeControlMode == MergeControlMode.Draw )
+                {
+                    value = ToolMode.DrawMergeSegmentation;
+                }
+
                 if ( value != mCurrentToolMode && !mToolModeChanging )
                 {
-                    mToolModeChanging = true;
                     mCurrentToolMode = value;
 
                     Tools.Internal.ToList().ForEach( viewerModeToolsMap => viewerModeToolsMap.Value.Internal[mCurrentToolMode].Select() );
@@ -71,6 +81,24 @@ namespace Mojo
 
                     OnPropertyChanged( "CurrentToolMode" );
                     mToolModeChanging = false;
+                }
+            }
+        }
+
+        private MergeControlMode mCurrentMergeControlMode = MergeControlMode.Draw;
+        public MergeControlMode CurrentMergeControlMode
+        {
+            get { return mCurrentMergeControlMode; }
+            set
+            {
+                if ( mCurrentMergeControlMode != value )
+                {
+                    mCurrentMergeControlMode = value;
+                    if ( CurrentToolMode == ToolMode.DrawMergeSegmentation || CurrentToolMode == ToolMode.MergeSegmentation )
+                    {
+                        CurrentToolMode = ToolMode.MergeSegmentation;
+                    }
+                    OnPropertyChanged( "CurrentMergeControlMode" );
                 }
             }
         }

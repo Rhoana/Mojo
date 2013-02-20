@@ -291,25 +291,29 @@ void TileManager::ReplaceSegmentationLabelCurrentConnectedComponent( unsigned in
 void TileManager::DrawSplit( TiledDatasetView^ tiledDatasetView, Vector3^ pDataSpace, float radius )
 {
     MojoFloat3 pDataSpaceFloat3 = MojoFloat3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
-    mTileManager->DrawSplit( pDataSpaceFloat3, radius );
+	MojoInt3 zoomLevel = mTileManager->GetZoomLevel( tiledDatasetView->ToNative() );
+    mTileManager->DrawSplit( pDataSpaceFloat3, radius * (float) pow( 2.0, std::min( zoomLevel.x, zoomLevel.y ) ) );
 }
 
 void TileManager::DrawErase( TiledDatasetView^ tiledDatasetView, Vector3^ pDataSpace, float radius )
 {
     MojoFloat3 pDataSpaceFloat3 = MojoFloat3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
-    mTileManager->DrawErase( pDataSpaceFloat3, radius );
+	MojoInt3 zoomLevel = mTileManager->GetZoomLevel( tiledDatasetView->ToNative() );
+    mTileManager->DrawErase( pDataSpaceFloat3, radius * (float) pow( 2.0, std::min( zoomLevel.x, zoomLevel.y ) ) );
 }
 
 void TileManager::DrawRegionA( TiledDatasetView^ tiledDatasetView, Vector3^ pDataSpace, float radius )
 {
     MojoFloat3 pDataSpaceFloat3 = MojoFloat3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
-    mTileManager->DrawRegionA( pDataSpaceFloat3, radius );
+	MojoInt3 zoomLevel = mTileManager->GetZoomLevel( tiledDatasetView->ToNative() );
+    mTileManager->DrawRegionA( pDataSpaceFloat3, radius * (float) pow( 2.0, std::min( zoomLevel.x, zoomLevel.y ) ) );
 }
 
 void TileManager::DrawRegionB( TiledDatasetView^ tiledDatasetView, Vector3^ pDataSpace, float radius )
 {
     MojoFloat3 pDataSpaceFloat3 = MojoFloat3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
-    mTileManager->DrawRegionB( pDataSpaceFloat3, radius );
+	MojoInt3 zoomLevel = mTileManager->GetZoomLevel( tiledDatasetView->ToNative() );
+    mTileManager->DrawRegionB( pDataSpaceFloat3, radius * (float) pow( 2.0, std::min( zoomLevel.x, zoomLevel.y ) ) );
 }
 
 void TileManager::AddSplitSource( TiledDatasetView^ tiledDatasetView, Vector3^ pDataSpace )

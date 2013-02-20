@@ -16,7 +16,7 @@ public:
 
     void*       data;
 
-    MojoInt3        numVoxels;
+    MojoInt3    numVoxels;
 
     DXGI_FORMAT dxgiFormat;
     int         numBytesPerVoxel;

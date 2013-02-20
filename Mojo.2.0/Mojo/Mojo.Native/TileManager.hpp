@@ -74,10 +74,10 @@ public:
     std::list< SegmentInfo >                              GetSegmentInfoRange( int begin, int end );
 
     unsigned int                                          GetSegmentationLabelId( const TiledDatasetView& tiledDatasetView, MojoFloat3 pDataSpace );
-    MojoInt3                                                  GetSegmentationLabelColor( unsigned int segId );
+    MojoInt3                                              GetSegmentationLabelColor( unsigned int segId );
     std::string                                           GetSegmentationLabelColorString( unsigned int segId );
-    MojoInt3                                                  GetSegmentCentralTileLocation( unsigned int segId );
-    MojoInt4                                                  GetSegmentZTileBounds( unsigned int segId, int zIndex );
+    MojoInt3                                              GetSegmentCentralTileLocation( unsigned int segId );
+    MojoInt4                                              GetSegmentZTileBounds( unsigned int segId, int zIndex );
 
 
     void                                                  ReplaceSegmentationLabel( unsigned int oldId, unsigned int newId );
@@ -113,6 +113,8 @@ public:
 	void                                                  RedoChange();
     void                                                  SaveAndClearFileSystemTileCache();
 
+    MojoInt3                                              GetZoomLevel( const TiledDatasetView& tiledDatasetView );
+
 private:
     template < typename TCudaType >
     void                                                  LoadTiledDatasetInternal( TiledDatasetDescription& tiledDatasetDescription );
@@ -122,12 +124,11 @@ private:
     void                                                  LoadSegmentationInternal( TiledDatasetDescription& tiledDatasetDescription );
     void                                                  UnloadSegmentationInternal();
 
-    MojoInt3                                                  GetZoomLevel( const TiledDatasetView& tiledDatasetView );
-    std::list< MojoInt4 >                                     GetTileIndicesIntersectedByView( const TiledDatasetView& tiledDatasetView );
+    std::list< MojoInt4 >                                 GetTileIndicesIntersectedByView( const TiledDatasetView& tiledDatasetView );
 
     void                                                  GetIndexTileSpace( MojoInt3 zoomLevel, MojoFloat3 pointDataSpace, MojoFloat4& pointTileSpace, MojoInt4& tileIndex );
-    MojoInt3                                                  GetIndexVoxelSpace( MojoFloat4 pointTileSpace, MojoInt3 numVoxelsPerTile );
-    MojoInt3                                                  GetOffsetVoxelSpace( MojoFloat4 pTileSpace, MojoInt4 pTileIndex, MojoInt3 numVoxelsPerTile );
+    MojoInt3                                              GetIndexVoxelSpace( MojoFloat4 pointTileSpace, MojoInt3 numVoxelsPerTile );
+    MojoInt3                                              GetOffsetVoxelSpace( MojoFloat4 pTileSpace, MojoInt4 pTileIndex, MojoInt3 numVoxelsPerTile );
 
 	void                                                  UpdateLabelIdMap( unsigned int fromSegId );
     void                                                  ReloadTileCache();
@@ -201,6 +202,7 @@ inline void TileManager::LoadTiledDatasetInternal( TiledDatasetDescription& tile
 
     TiledVolumeDescription tiledVolumeDescriptionId = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "IdMap" );
     TiledVolumeDescription tiledVolumeDescriptionSource = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "SourceMap" );
+    TiledVolumeDescription tiledVolumeDescriptionOverlay = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "OverlayMap" );
 
     //
     // initialize the tile cache
@@ -250,24 +252,6 @@ inline void TileManager::LoadTiledDatasetInternal( TiledDatasetDescription& tile
         textureDesc3D.Usage     = D3D11_USAGE_DEFAULT;
         textureDesc3D.BindFlags = D3D11_BIND_SHADER_RESOURCE;
         textureDesc3D.Format    = tiledVolumeDescriptionId.dxgiFormat;
-        
-        //tileCacheEntry.d3d11CudaTextures.Set(
-        //    "IdMap",
-        //    new Core::D3D11CudaTexture< ID3D11Texture3D, int >(
-        //        mD3D11Device,
-        //        mD3D11DeviceContext,
-        //        textureDesc3D,
-        //        tiledVolumeDescriptionId.numVoxelsPerTile(),
-        //        tileCacheEntry.deviceVectors.Get< int >( "IdMap" ) ) );
-        //
-        //tileCacheEntry.d3d11CudaTextures.Set(
-        //    "OverlayMap",
-        //    new Core::D3D11CudaTexture< ID3D11Texture3D, int >(
-        //        mD3D11Device,
-        //        mD3D11DeviceContext,
-        //        textureDesc3D,
-        //        tiledVolumeDescriptionId.numVoxelsPerTile(),
-        //        tileCacheEntry.deviceVectors.Get< int >( "OverlayMap" ) ) );
 
         tileCacheEntry.d3d11CudaTextures.Set(
             "IdMap",
@@ -276,6 +260,16 @@ inline void TileManager::LoadTiledDatasetInternal( TiledDatasetDescription& tile
                 mD3D11DeviceContext,
                 textureDesc3D ) );
         
+        ZeroMemory( &textureDesc3D, sizeof( D3D11_TEXTURE3D_DESC ) );
+
+        textureDesc3D.Width     = tiledVolumeDescriptionOverlay.numVoxelsPerTileX;
+        textureDesc3D.Height    = tiledVolumeDescriptionOverlay.numVoxelsPerTileY;
+        textureDesc3D.Depth     = tiledVolumeDescriptionOverlay.numVoxelsPerTileZ;
+        textureDesc3D.MipLevels = 1;
+        textureDesc3D.Usage     = D3D11_USAGE_DEFAULT;
+        textureDesc3D.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+        textureDesc3D.Format    = tiledVolumeDescriptionOverlay.dxgiFormat;
+
         tileCacheEntry.d3d11CudaTextures.Set(
             "OverlayMap",
             new Core::D3D11CudaTexture< ID3D11Texture3D, int >(

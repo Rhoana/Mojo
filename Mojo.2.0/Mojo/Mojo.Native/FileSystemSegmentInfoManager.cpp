@@ -434,17 +434,25 @@ void FileSystemSegmentInfoManager::SetVoxelCount ( unsigned int segid, long voxe
 {
     SegmentMultiIndexById& idIndex = mSegmentMultiIndex.get<id>();
     SegmentMultiIndexById::iterator segIt = idIndex.find( segid );
-    SegmentInfo segInfo = *segIt;
 
-    segInfo.size = voxelCount;
-    segInfo.changed = true;
+	if ( segIt == idIndex.end() )
+	{
+		Core::Printf( "WARNING: Could not update voxel count for id  ", segid, " to size ", voxelCount, " - id not found in multi index." );
+	}
+	else
+	{	
+		SegmentInfo segInfo = *segIt;
+
+		segInfo.size = voxelCount;
+		segInfo.changed = true;
     
-    bool success = idIndex.replace( segIt, segInfo );
+		bool success = idIndex.replace( segIt, segInfo );
 
-    if ( !success )
-    {
-        Core::Printf( "WARNING: Could not update voxel count for id  ", segid, " to size ", voxelCount, "." );
-    }
+		if ( !success )
+		{
+			Core::Printf( "WARNING: Could not update voxel count for id  ", segid, " to size ", voxelCount, "." );
+		}
+	}
 
 }
 

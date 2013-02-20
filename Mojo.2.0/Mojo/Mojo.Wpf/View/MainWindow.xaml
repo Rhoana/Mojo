@@ -162,12 +162,6 @@
                             <Label Content="Merge Tool"/>
                         </StackPanel>
                     </RadioButton>
-                    <RadioButton Focusable="False" GroupName="SegmenterToolGroup" IsEnabled="{Binding Path=Engine.TileManager.SegmentationControlsEnabled}" Margin="0,5,5,5" IsChecked="{Binding Path=Engine.CurrentToolMode, Converter={StaticResource EnumBooleanConverter}, ConverterParameter=DrawMergeSegmentation }">
-                        <StackPanel Orientation="Horizontal">
-                            <Image Width="32" Height="32" Source="{StaticResource SegmentationMerge}"/>
-                            <Label Content="Draw Merge Tool"/>
-                        </StackPanel>
-                    </RadioButton>
                     <RadioButton Focusable="False" GroupName="SegmenterToolGroup" IsEnabled="{Binding Path=Engine.TileManager.SegmentationControlsEnabled}" Margin="0,5,5,5" IsChecked="{Binding Path=Engine.CurrentToolMode, Converter={StaticResource EnumBooleanConverter}, ConverterParameter=SplitSegmentation }">
                         <StackPanel Orientation="Horizontal">
                             <Image Width="32" Height="32" Source="{StaticResource SegmentationSplit}"/>
@@ -224,6 +218,12 @@
                     <Border Width="1" BorderBrush="Gray" BorderThickness="1,0,0,0" Margin="5,5,5,5" />
 
                     <Label Content="Merge Method" VerticalAlignment="Center"></Label>
+                    <ComboBox Name="MergeControlCombo" Margin="5,5,5,5" Width="60" Padding="3,3,3,3"
+                        ItemsSource="{Binding Path=MergeControlModes}"
+                        DisplayMemberPath="DisplayName"
+                        SelectedValuePath="MergeControlMode"
+                        SelectedValue="{Binding Path=Engine.CurrentMergeControlMode, Mode=TwoWay}">
+                    </ComboBox>
                     <ComboBox Name="MergeCombo" Margin="5,5,5,5" Width="120" Padding="3,3,3,3"
                         ItemsSource="{Binding Path=MergeModes}"
                         DisplayMemberPath="DisplayName"

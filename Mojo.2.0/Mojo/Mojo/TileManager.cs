@@ -341,7 +341,7 @@ namespace Mojo
             }
         }
 
-        private MergeMode mCurrentMergeMode = MergeMode.Fill2D;
+        private MergeMode mCurrentMergeMode = MergeMode.GlobalReplace;
         public MergeMode CurrentMergeMode
         {
             get { return mCurrentMergeMode; }

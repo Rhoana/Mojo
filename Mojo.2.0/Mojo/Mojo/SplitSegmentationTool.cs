@@ -265,7 +265,8 @@ namespace Mojo
                                 mTileManager.Internal.ReplaceSegmentationLabelCurrentConnectedComponent( clickedId, mTileManager.SelectedSegmentId, mTileManager.TiledDatasetView, p );
                                 break;
                             default:
-                                mTileManager.Internal.ReplaceSegmentationLabel( clickedId, mTileManager.SelectedSegmentId );
+                                mTileManager.Internal.RemapSegmentLabel( clickedId, mTileManager.SelectedSegmentId );
+                                //mTileManager.Internal.ReplaceSegmentationLabel( clickedId, mTileManager.SelectedSegmentId );
                                 break;
                         }
                         mTileManager.ChangesMade = true;

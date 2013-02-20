@@ -25,6 +25,11 @@ namespace Mojo.Wpf.ViewModel
                 return DependencyProperty.UnsetValue;                
             }
 
+            if ( ((ToolMode)value) == ToolMode.DrawMergeSegmentation )
+            {
+                value = ToolMode.MergeSegmentation;
+            }
+
             var parameterValue = Enum.Parse( value.GetType(), parameterString );
 
             return parameterValue.Equals( value );
