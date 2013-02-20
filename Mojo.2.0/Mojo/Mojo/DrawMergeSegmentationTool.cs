@@ -129,10 +129,10 @@ namespace Mojo
 
                 var p = new Vector3( x, y, z );
 
-                mCurrentlyDrawing = true;
-
                 if ( mouseEventArgs.Button == MouseButtons.Left || mouseEventArgs.Button == MouseButtons.Right )
                 {
+                    mTileManager.Internal.PrepForDrawMerge( p );
+                    mCurrentlyDrawing = true;
                     mTileManager.Internal.DrawRegionA( mTileManager.TiledDatasetView, p, mTileManager.MergeBrushSize );
                     mEngine.QuickRender();
                 }
@@ -158,16 +158,15 @@ namespace Mojo
 
             var p = new Vector3( x, y, z );
 
-            if ( mCurrentlyDrawing )
-            {
-                mCurrentlyDrawing = false;
-                mTileManager.SelectedSegmentId = mTileManager.CommmitDrawMerge();
-                mTileManager.Internal.ResetDrawMergeState( p );
-            }
             if ( mouseEventArgs.Button == MouseButtons.Middle )
             {
                 mTileManager.Internal.PrepForDrawMerge( p );
             }
+            else if ( mCurrentlyDrawing && ( mouseEventArgs.Button == MouseButtons.Left || mouseEventArgs.Button == MouseButtons.Right ) )
+            {
+                mTileManager.SelectedSegmentId = mTileManager.CommmitDrawMerge();
+            }
+            mCurrentlyDrawing = false;
         }
 
         public override void OnMouseMove( MouseEventArgs mouseEventArgs, int width, int height )

@@ -188,7 +188,7 @@ private:
     FileSystemSegmentInfoManager                                  mSegmentInfoManager;
 
     MojoFloat2                                                    mCentroid;
-    int                                                           mPrevSplitId;
+    unsigned int                                                  mPrevSplitId;
     int                                                           mPrevSplitZ;
     std::vector< MojoFloat2 >                                     mPrevSplitLine;
     std::vector< std::pair< MojoFloat2, int >>                    mPrevSplitCentroids;

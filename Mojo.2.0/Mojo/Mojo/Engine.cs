@@ -71,6 +71,7 @@ namespace Mojo
 
                 if ( value != mCurrentToolMode && !mToolModeChanging )
                 {
+                    mToolModeChanging = true;
                     mCurrentToolMode = value;
 
                     Tools.Internal.ToList().ForEach( viewerModeToolsMap => viewerModeToolsMap.Value.Internal[mCurrentToolMode].Select() );

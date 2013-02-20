@@ -35,8 +35,8 @@ FileSystemTileServer::FileSystemTileServer( Core::PrimitiveMap constParameters )
 	mSplitBorderTargets = 0;
     mSplitResultArea = 0;
 
-    mPrevSplitId = -1;
-    mPrevSplitZ = -1;
+    mPrevSplitId = 0;
+    mPrevSplitZ = -2;
 }
 
 FileSystemTileServer::~FileSystemTileServer()
@@ -1716,6 +1716,17 @@ void FileSystemTileServer::PrepForSplit( unsigned int segId, MojoFloat3 pointTil
 
     if ( mIsSegmentationLoaded )
     {
+        //
+        // Reset split state if we are more than 2 tiles away
+        //
+        if ( mPrevSplitId != 0 && abs( mPrevSplitZ - (int)pointTileSpace.z ) > 2 )
+        {
+            mPrevSplitId = 0;
+            mPrevSplitZ = -2;
+            mPrevSplitLine.clear();
+            mPrevSplitCentroids.clear();
+        }
+
         bool success = false;
         int attempts = 0;
 
@@ -3889,6 +3900,9 @@ unsigned int FileSystemTileServer::CommitDrawMerge( std::set< unsigned int > mer
 			mergeIds.erase( largestSegId );
 			RemapSegmentLabels( mergeIds, largestSegId );
 		}
+
+        ResetDrawMergeState();
+
 	}
 
 	return largestSegId;
@@ -4475,6 +4489,17 @@ std::list< unsigned int > FileSystemTileServer::UndoChange()
 		return remappedIds;
 	}
 
+    //
+    // Reset predict split
+    //
+    if ( mPrevSplitId != 0 )
+    {
+        mPrevSplitId = 0;
+        mPrevSplitZ = -2;
+        mPrevSplitLine.clear();
+        mPrevSplitCentroids.clear();
+    }
+
     if ( mUndoDeque.size() > 0 )
     {
         long voxelChangeCount = 0;
@@ -4603,7 +4628,7 @@ std::list< unsigned int > FileSystemTileServer::UndoChange()
 					// save tile
 					//
 					SaveTile( tileIndex, volumeDescriptions );
-					//StrideUpIdTileChange( numTiles, numVoxelsPerTile, tileIndex, currentIdVolume );
+					StrideUpIdTileChange( numTiles, numVoxelsPerTile, tileIndex, currentIdVolume );
 
 					//
 					// unload tile
