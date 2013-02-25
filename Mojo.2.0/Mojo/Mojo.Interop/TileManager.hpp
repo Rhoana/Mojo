@@ -99,6 +99,8 @@ public:
     void                                                    ResetDrawMergeState( Vector3^ pDataSpace );
     void                                                    PrepForDrawMerge( Vector3^ pDataSpace );
     unsigned int                                            CommitDrawMerge( Vector3^ pDataSpace );
+    unsigned int                                            CommitDrawMergeCurrentSlice( Vector3^ pDataSpace );
+    unsigned int                                            CommitDrawMergeCurrentConnectedComponent( Vector3^ pDataSpace );
 
 	void                                                    UndoChange();
 	void                                                    RedoChange();

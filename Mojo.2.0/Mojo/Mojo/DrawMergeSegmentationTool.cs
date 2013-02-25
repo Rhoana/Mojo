@@ -164,7 +164,19 @@ namespace Mojo
             }
             else if ( mCurrentlyDrawing && ( mouseEventArgs.Button == MouseButtons.Left || mouseEventArgs.Button == MouseButtons.Right ) )
             {
-                mTileManager.SelectedSegmentId = mTileManager.CommmitDrawMerge();
+                switch ( mTileManager.CurrentMergeMode )
+                {
+                    case MergeMode.Fill2D:
+                        mTileManager.SelectedSegmentId = mTileManager.CommitDrawMergeCurrentSlice();
+                        break;
+                    case MergeMode.Fill3D:
+                        mTileManager.SelectedSegmentId = mTileManager.CommitDrawMergeCurrentConnectedComponent();
+                        break;
+                    default:
+                        mTileManager.SelectedSegmentId = mTileManager.CommitDrawMerge();
+                        break;
+                }
+                mTileManager.ChangesMade = true;
             }
             mCurrentlyDrawing = false;
         }

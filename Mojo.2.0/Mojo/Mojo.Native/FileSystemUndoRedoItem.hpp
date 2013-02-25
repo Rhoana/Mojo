@@ -2,37 +2,49 @@
 
 #include <time.h>
 #include <bitset>
+#include <functional>
 
 #include "Mojo.Core/Comparator.hpp"
 #include "Mojo.Core/HashMap.hpp"
 #include "Mojo.Core/VolumeDescription.hpp"
 #include "Mojo.Core/MojoVectors.hpp"
+#include "Mojo.Core/Boost.hpp"
 #include "FileSystemSegmentInfoManager.hpp"
 #include "Constants.hpp"
+
+using namespace Mojo::Core;
 
 namespace Mojo
 {
 namespace Native
 {
 
-typedef std::set< Core::MojoInt2, Core::Int2Comparator > UndoRedoChangeSet;
+typedef std::bitset < TILE_SIZE * TILE_SIZE >                  TileChangeBits;
+
+typedef std::map<
+	unsigned int,
+	TileChangeBits,
+	std::less<unsigned int>,
+	boost::fast_pool_allocator <
+	std::pair< unsigned int, TileChangeBits > > >              TileChangeIdMap;
+
+typedef std::map<
+	MojoInt4,
+	TileChangeIdMap,
+	Core::Int4Comparator >                                     TileChangeMap;
 
 struct FileSystemUndoRedoItem
 {
     FileSystemUndoRedoItem();
 
-    unsigned int                                                        oldId;
-    unsigned int                                                        newId;
-
-	std::map< unsigned int, long >                                      remapFromIdsAndSizes;
-
-    FileSystemTileSet                                                   idTileMapAddNewId;
-	Core::HashMap< unsigned int, FileSystemTileSet >                    idTileMapRemoveOldIdSets;
-
-	//Core::HashMap< std::string,
-	//	std::bitset< TILE_SIZE * TILE_SIZE > >                          changePixels;
-
-	Core::HashMap< std::string, UndoRedoChangeSet >                     changeSets;
+    unsigned int                                               newId;
+															   
+	TileChangeMap                                              tileChangeMap;
+	std::map< unsigned int, long >                             remapFromIdsAndSizes;
+															   
+    FileSystemTileSet                                          idTileMapAddNewId;
+	std::map< unsigned int, FileSystemTileSet >                idTileMapRemoveOldIdSets;
+															   
 
 };
 
