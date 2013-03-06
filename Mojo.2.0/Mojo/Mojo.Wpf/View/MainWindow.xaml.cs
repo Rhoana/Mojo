@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Windows.Controls.Primitives;
+using System.Windows.Forms.Integration;
 using System.Windows.Input;
 using System.Windows.Controls;
 
@@ -54,14 +56,6 @@ namespace Mojo.Wpf.View
                 changedSegment.Confidence = 100;
                 ( (ViewModel.EngineDataContext)DataContext ).Engine.TileManager.LockSegmentLabel( changedSegment.Id );
             }
-        }
-
-        private void SegmentList_OnMouseWheel( object sender, System.Windows.Input.MouseWheelEventArgs e )
-        {
-            //
-            // Take the focus so that the main window does not zoom.
-            //
-            Keyboard.Focus( (ListView)sender );
         }
 
         private void SegmentListViewItem_OnMouseEnter( object sender, MouseEventArgs e )

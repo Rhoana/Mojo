@@ -216,8 +216,14 @@ namespace Mojo.Wpf.ViewModel
                 mSegmentInfoPageCount = (int) ( 1 + ( totalSegments - 1 ) / mItemsPerPage );
 
                 SegmentInfoList = mTileManager.Internal.GetSegmentInfoRange( mSegmentInfoCurrentPageIndex * mItemsPerPage, ( mSegmentInfoCurrentPageIndex + 1 ) * mItemsPerPage );
-                UpdateSegmentListCurrentPageString();
             }
+            else
+            {
+                mSegmentInfoCurrentPageIndex = 0;
+                mSegmentInfoPageCount = 0;
+                SegmentInfoList = null;
+            }
+            UpdateSegmentListCurrentPageString();
         }
 
         public void SortSegmentListBy( String fieldName )

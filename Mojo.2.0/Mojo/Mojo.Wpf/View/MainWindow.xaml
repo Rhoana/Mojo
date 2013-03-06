@@ -286,7 +286,6 @@
                     <ListView Name="SegmentList"
                               ItemsSource="{Binding Path=TileManagerDataContext.SegmentInfoList}" 
                               SelectionChanged="SegmentList_OnSelectionChanged"
-                              MouseWheel="SegmentList_OnMouseWheel"
                               SelectedValue="{Binding Path=Engine.TileManager.SelectedSegmentId, Mode=OneWay}"
                               SelectedValuePath="Id"
                               >

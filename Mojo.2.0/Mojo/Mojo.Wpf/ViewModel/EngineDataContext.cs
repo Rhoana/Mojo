@@ -179,6 +179,22 @@ namespace Mojo.Wpf.ViewModel
 
         private void LoadDataset()
         {
+            if ( Engine.TileManager.ChangesMade )
+            {
+                var mbresult = MessageBox.Show( "Changes were made to this segmentation. Do you want to save the changes?", "Save Changes?", MessageBoxButton.YesNoCancel, MessageBoxImage.Warning );
+                switch ( mbresult )
+                {
+                    case MessageBoxResult.Yes:
+                        Engine.TileManager.SaveSegmentation();
+                        break;
+                    case MessageBoxResult.No:
+                        Engine.TileManager.DiscardChanges();
+                        break;
+                    default:
+                        return;
+                }
+            }
+
             var initialPath = Settings.Default.LoadDatasetPath;
             if ( string.IsNullOrEmpty( initialPath ) || !Directory.Exists( initialPath ) )
             {
@@ -220,11 +236,33 @@ namespace Mojo.Wpf.ViewModel
                     Engine.CurrentToolMode = ToolMode.SplitSegmentation;
 
                 }
+
+                //
+                // Reset the segment info list
+                //
+                TileManagerDataContext.SortSegmentListBy( "Size", true );
+
             }
         }
 
         private void LoadSegmentation()
         {
+            if ( Engine.TileManager.ChangesMade )
+            {
+                var mbresult = MessageBox.Show( "Changes were made to this segmentation. Do you want to save the changes?", "Save Changes?", MessageBoxButton.YesNoCancel, MessageBoxImage.Warning );
+                switch ( mbresult )
+                {
+                    case MessageBoxResult.Yes:
+                        Engine.TileManager.SaveSegmentation();
+                        break;
+                    case MessageBoxResult.No:
+                        Engine.TileManager.DiscardChanges();
+                        break;
+                    default:
+                        return;
+                }
+            }
+
             var initialPath = Settings.Default.LoadSegmentationPath;
             if ( string.IsNullOrEmpty( initialPath ) || !Directory.Exists( initialPath ) )
             {

@@ -166,6 +166,15 @@ namespace Mojo
 
         public virtual void OnMouseWheel( System.Windows.Forms.MouseEventArgs mouseEventArgs, int width, int height )
         {
+            //
+            // Only scroll if the mouse within the extent
+            //
+            if ( mouseEventArgs.X < 0 || mouseEventArgs.X > width ||
+                 mouseEventArgs.Y < 0 || mouseEventArgs.Y > height )
+            {
+                return;
+            }
+
             var centerDataSpace = mTileManager.TiledDatasetView.CenterDataSpace;
             var extentDataSpace = mTileManager.TiledDatasetView.ExtentDataSpace;
             var tiledVolumeDescription = mTileManager.TiledDatasetDescription.TiledVolumeDescriptions.Get( "SourceMap" );
