@@ -5,13 +5,16 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{b0725c50-90e7-4634-846f-5c793765168a}</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>SegmentationTileCalculator.py</StartupFile>
+    <StartupFile>SubvolumeCalculator.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
     <Name>MojoImportTools</Name>
     <RootNamespace>MojoImportTools</RootNamespace>
+    <IsWindowsApplication>False</IsWindowsApplication>
+    <InterpreterId>9a7a9026-48c1-4688-9d5d-e5699d47d074</InterpreterId>
+    <InterpreterVersion>2.7</InterpreterVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DebugSymbols>true</DebugSymbols>
@@ -23,6 +26,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="ImageTileCalculator.py" />
+    <Compile Include="SubvolumeCalculator.py" />
     <Compile Include="MojoImportTools.py" />
     <Compile Include="SegmentationTileCalculator.py" />
   </ItemGroup>

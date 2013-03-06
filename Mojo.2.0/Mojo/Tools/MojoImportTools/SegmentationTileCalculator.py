@@ -5,7 +5,7 @@ import math
 import mahotas
 import PIL
 import PIL.Image
-import numpy
+import numpy as np
 import scipy
 import scipy.io
 import cv2
@@ -21,17 +21,18 @@ tile_num_pixels_x             = 512
 
 generate_memorable_names      = True
 
-#original_input_ids_path       = 'C:\\dev\\datasets\\NewPipelineResults1\\output_labels'
-#output_path                   = 'C:\\dev\\datasets\\NewPipelineResults1\\mojo'
-#nimages_to_process            = 168
-#ncolors                       = 10000
-#input_file_format             = 'tif'
-
-original_input_ids_path       = 'C:\\dev\\datasets\\conn\\main_dataset\\cube2\\diced_xy=512_z=32_xyOv=128_zOv=12_dwnSmp=1\\res_from_Nov29_PF\\FS=1\\stitched\\labels_grow'
-output_path                    = 'C:\\dev\\datasets\\Cube2x100\\mojo'
-nimages_to_process            = 100
+original_input_ids_path       = 'D:\\dev\\datasets\\NewPipelineResults2\\output_labels'
+output_path                   = 'D:\\dev\\datasets\\NewPipelineResults2x20\\mojo'
+#nimages_to_process            = 1104
+nimages_to_process            = 20
 ncolors                       = 10000
-input_file_format             = 'png'
+input_file_format             = 'tif'
+
+##original_input_ids_path       = 'C:\\dev\\datasets\\conn\\main_dataset\\cube2\\diced_xy=512_z=32_xyOv=128_zOv=12_dwnSmp=1\\res_from_Nov29_PF\\FS=1\\stitched\\labels_grow'
+##output_path                    = 'C:\\dev\\datasets\\Cube2x100\\mojo'
+##nimages_to_process            = 100
+##ncolors                       = 10000
+##input_file_format             = 'png'
 
 #original_input_ids_path       = 'C:\\dev\\datasets\\conn\\main_dataset\\5K_cube\\diced_xy=512_z=32_xyOv=128_zOv=12_dwnSmp=1\\res_from_0ct15_PF\\FS=1\\stitched\\labels_grow'
 #output_path                   = 'C:\\dev\\datasets\\Cube1x10\\mojo'
@@ -123,44 +124,76 @@ if len(files) > 0:
 
 
     id_max               = 0;
-    id_counts            = numpy.zeros( 0, dtype=numpy.uint32 );
+    id_counts            = np.zeros( 0, dtype=np.uint32 );
     id_tile_list         = [];
     tile_index_z         = 0
 
     # Make a color index
     #id_label = id_color_map[ :, 0 ] + id_color_map[ :, 1 ] * 2**8 + id_color_map[ :, 2 ] * 2**16
-    #id_label_index = numpy.zeros( numpy.max(id_label) + 1, dtype=int )
+    #id_label_index = np.zeros( np.max(id_label) + 1, dtype=int )
     #id_label_index[ id_label ] = range(len(id_label))
 
     # Make a color map
-    color_map = numpy.zeros( (ncolors + 1, 3), dtype=numpy.uint8 );
+    color_map = np.zeros( (ncolors + 1, 3), dtype=np.uint8 );
     for color_i in xrange( 1, ncolors + 1 ):
-        rand_vals = numpy.random.rand(3);
+        rand_vals = np.random.rand(3);
         #color_map[ color_i ] = [ x*255 for x in colorsys.hsv_to_rgb( rand_vals[0], rand_vals[1] * 0.3 + 0.7, rand_vals[2] * 0.3 + 0.7 ) ];
         color_map[ color_i ] = [ rand_vals[0]*255, rand_vals[1]*255, rand_vals[2]*255 ];
-
 
     for file in files:
 
         original_input_ids_name = file
 
-        original_ids = numpy.int32( numpy.array( mahotas.imread( original_input_ids_name ) ) )
+        original_ids = np.int32( np.array( mahotas.imread( original_input_ids_name ) ) )
 
         if len( original_ids.shape ) == 3:
             original_ids = original_ids[ :, :, 0 ] + original_ids[ :, :, 1 ] * 2**8 + original_ids[ :, :, 2 ] * 2**16
         else:
             original_ids = original_ids.transpose() - 1
 
+        ## Grow regions until there are no boundaries
 
-        current_image_counts = numpy.bincount( original_ids.flatten() )
-        current_image_counts_ids = numpy.nonzero( current_image_counts )[0]
-        current_max = numpy.max( current_image_counts_ids )
+        ## Method 4 - watershed
+        original_ids = mahotas.cwatershed(np.zeros(original_ids.shape, dtype=np.int32), original_ids, return_lines=False)
+
+        #boundaries = original_ids == 0
+        #boundary_indices = np.nonzero(boundaries)
+        #grow_count = 0
+        #while len(boundary_indices[0]) > 0:
+
+        #    ## Method 1 - dilate (slow)
+        #    #original_ids[boundary_indices] = mahotas.dilate(original_ids)[boundary_indices] - 1
+
+        #    ## Method 2 - conditional dilate (doesn't work)
+        #    #original_ids[boundary_indices] = mahotas.cdilate(original_ids, boundaries==0)[boundary_indices] - 1
+
+        #    ## Method 3 - direct shift
+        #    shift_left = np.roll(original_ids, -1, 0);
+        #    shift_left[-1,:] = 0
+        #    shift_right = np.roll(original_ids, 1, 0);
+        #    shift_right[0,:] = 0
+        #    shift_up = np.roll(original_ids, -1, 1);
+        #    shift_up[:,-1] = 0
+        #    shift_down = np.roll(original_ids, 1, 1);
+        #    shift_down[:,0] = 0
+        #    original_ids[boundary_indices] = np.maximum(shift_left[boundary_indices], np.maximum(shift_right[boundary_indices], np.maximum(shift_up[boundary_indices], shift_down[boundary_indices])))
+
+
+        #    boundaries = original_ids == 0
+        #    boundary_indices = np.nonzero(boundaries)
+
+        #    grow_count = grow_count + 1
+        #    print "Grow count {0}: {1} boundary pixels remaining.".format(grow_count, len(boundary_indices[0]))
+
+        current_image_counts = np.bincount( original_ids.ravel() )
+        current_image_counts_ids = np.nonzero( current_image_counts )[0]
+        current_max = np.max( current_image_counts_ids )
         
         if id_max < current_max:
             id_max = current_max;
             id_counts.resize( id_max + 1 );
             
-        id_counts[ current_image_counts_ids ] = id_counts[ current_image_counts_ids ] + numpy.uint32( current_image_counts [ current_image_counts_ids ] )
+        id_counts[ current_image_counts_ids ] = id_counts[ current_image_counts_ids ] + np.uint32( current_image_counts [ current_image_counts_ids ] )
         
         ( original_image_num_pixels_x, original_image_num_pixels_y ) = original_ids.shape
 
@@ -205,7 +238,7 @@ if len(files) > 0:
                     current_tile_ids_name    = current_tile_ids_path    + '\\' + 'y=' + '%08d' % ( tile_index_y ) + ','  + 'x=' + '%08d' % ( tile_index_x ) + '.hdf5'
                     #current_tile_colors_name = current_tile_colors_path + '\\' + 'y=' + '%08d' % ( tile_index_y ) + ','  + 'x=' + '%08d' % ( tile_index_x ) + '.png'
 
-                    tile_ids                                                                   = numpy.zeros( ( tile_num_pixels_y, tile_num_pixels_x ), numpy.uint32 )
+                    tile_ids                                                                   = np.zeros( ( tile_num_pixels_y, tile_num_pixels_x ), np.uint32 )
                     tile_ids_non_padded                                                        = current_ids[ y : y + tile_num_pixels_y, x : x + tile_num_pixels_x ]
                     tile_ids[ 0:tile_ids_non_padded.shape[0], 0:tile_ids_non_padded.shape[1] ] = tile_ids_non_padded[:,:]
                     save_hdf5( current_tile_ids_name, 'IdMap', tile_ids )
@@ -215,7 +248,7 @@ if len(files) > 0:
                     #save_image( current_tile_colors_name, tile_colors_image )
 
                     #tile_index      = ( tile_index_x, tile_index_y, tile_index_z, tile_index_w )                
-                    unique_tile_ids = numpy.unique( tile_ids )
+                    unique_tile_ids = np.unique( tile_ids )
                     
                     for unique_tile_id in unique_tile_ids:
 
@@ -242,9 +275,9 @@ if len(files) > 0:
 
 
     ## Sort the tile list so that the same id appears together
-    id_tile_list = numpy.array( sorted( id_tile_list ), numpy.uint32 )
+    id_tile_list = np.array( sorted( id_tile_list ), np.uint32 )
 
-    max_id = numpy.max( [ id_tile_list[ 0, -1 ], id_counts.shape[0] - 1 ] )
+    max_id = np.max( [ id_tile_list[ 0, -1 ], id_counts.shape[0] - 1 ] )
     print 'Got id max of:'
     print id_tile_list[ -1, 0 ]
     print id_counts.shape[0] - 1
@@ -284,6 +317,9 @@ if len(files) > 0:
     cur.execute('DROP TABLE IF EXISTS segmentInfo;')
     cur.execute('CREATE TABLE segmentInfo (id int, name text, size int, confidence int);')
     cur.execute('CREATE UNIQUE INDEX I_segmentInfo ON segmentInfo (id);')
+
+    cur.execute('DROP TABLE IF EXISTS relabelMap;')
+    cur.execute('CREATE TABLE relabelMap ( fromId int PRIMARY KEY, toId int);')
 
     for entry_index in xrange(0, id_tile_list.shape[0]):
         cur.execute("INSERT INTO idTileIndex VALUES({0}, {1}, {2}, {3}, {4});".format( *id_tile_list[entry_index, :] ))
