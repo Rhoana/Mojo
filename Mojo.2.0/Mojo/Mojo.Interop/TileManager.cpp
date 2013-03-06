@@ -439,9 +439,14 @@ void TileManager::RedoChange()
     mTileManager->RedoChange();
 }
 
-void TileManager::SaveAndClearFileSystemTileCache()
+void TileManager::TempSaveAndClearFileSystemTileCache()
 {
-	mTileManager->SaveAndClearFileSystemTileCache();
+	mTileManager->TempSaveAndClearFileSystemTileCache();
+}
+
+void TileManager::ClearFileSystemTileCache()
+{
+	mTileManager->ClearFileSystemTileCache();
 }
 
 void TileManager::LoadTileCache()

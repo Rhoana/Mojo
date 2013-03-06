@@ -104,7 +104,8 @@ public:
 
 	void                                                    UndoChange();
 	void                                                    RedoChange();
-    void                                                    SaveAndClearFileSystemTileCache();
+    void                                                    TempSaveAndClearFileSystemTileCache();
+    void                                                    ClearFileSystemTileCache();
 
 private:
     void LoadTileCache();

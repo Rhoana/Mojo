@@ -20,11 +20,14 @@ import colorsys
 ## Open existing volume and create a series of subvolumes
 ## (with the same ids / names etc)
 
-input_mojo_path               = 'D:\\dev\\datasets\\NewPipelineResults2\\mojo'
-input_image_extension        = '.tif'
+#input_mojo_path               = 'D:\\dev\\datasets\\NewPipelineResults2\\mojo'
+#output_subvolume_path         = 'D:\\dev\\datasets\\NewPipelineResults2_Subvolumes'
+#min_slices_per_subvolume      = 100
+#overlap_slices                = 1
 
-output_subvolume_path         = 'D:\\dev\\datasets\\NewPipelineResults2_Subvolumes'
-min_slices_per_subvolume      = 100
+input_mojo_path               = 'C:\\dev\\datasets\\ac3x75_compress\\mojo'
+output_subvolume_path         = 'C:\\dev\\datasets\\ac3x75_compress_subvolumes'
+min_slices_per_subvolume      = 25
 overlap_slices                = 1
 
 
@@ -75,7 +78,7 @@ cur.execute('SELECT MAX(id) FROM segmentInfo;')
 id_max = cur.fetchone()[0]
 
 segment_sizes = np.zeros(id_max + 1, dtype=np.int64)
-segment_remap = np.arange(0, id_max, dtype=np.uint32)
+segment_remap = np.arange(0, id_max + 1, dtype=np.uint32)
 segment_confidence = np.zeros(id_max + 1, dtype=np.int8)
 segment_names = (id_max + 1) * [ None ]
 
@@ -145,7 +148,7 @@ for subvolume_i in range(len(subvolume_start_indices)):
     id_tile_list         = [];
 
     for tile_index_z in range(subvolume_last_z - subvolume_first_z):
-        from_tile_index_z = subvolume_last_z + tile_index_z
+        from_tile_index_z = subvolume_first_z + tile_index_z
 
         ## Copy tile images (measure segment sizes for w=0)
 
@@ -157,11 +160,11 @@ for subvolume_i in range(len(subvolume_start_indices)):
 
         while current_image_num_pixels_y > tile_num_pixels_y / 2 or current_image_num_pixels_x > tile_num_pixels_x / 2:
 
-            from_tile_ids_path       = input_tile_ids_path           + '\\' + 'w=' + '%08d' % ( tile_index_w ) + '\\' + 'z=' + '%08d' % ( tile_index_z )
+            from_tile_ids_path       = input_tile_ids_path           + '\\' + 'w=' + '%08d' % ( tile_index_w ) + '\\' + 'z=' + '%08d' % ( from_tile_index_z )
             current_tile_ids_path    = output_tile_ids_path     + '\\' + 'w=' + '%08d' % ( tile_index_w ) + '\\' + 'z=' + '%08d' % ( tile_index_z )
             mkdir_safe( current_tile_ids_path )
 
-            from_tile_images_path       = input_tile_images_path           + '\\' + 'w=' + '%08d' % ( tile_index_w ) + '\\' + 'z=' + '%08d' % ( tile_index_z )
+            from_tile_images_path       = input_tile_images_path           + '\\' + 'w=' + '%08d' % ( tile_index_w ) + '\\' + 'z=' + '%08d' % ( from_tile_index_z )
             current_tile_images_path    = output_tile_images_path     + '\\' + 'w=' + '%08d' % ( tile_index_w ) + '\\' + 'z=' + '%08d' % ( tile_index_z )
             mkdir_safe( current_tile_images_path )
 
@@ -174,11 +177,11 @@ for subvolume_i in range(len(subvolume_start_indices)):
                     y = tile_index_y * tile_num_pixels_y
                     x = tile_index_x * tile_num_pixels_x
                     
-                    from_tile_ids_name       = from_tile_ids_path       + '\\' + 'y=' + '%08d' % ( tile_index_y ) + ','  + 'x=' + '%08d' % ( tile_index_x ) + '.hdf5'
-                    current_tile_ids_name    = current_tile_ids_path    + '\\' + 'y=' + '%08d' % ( tile_index_y ) + ','  + 'x=' + '%08d' % ( tile_index_x ) + '.hdf5'
+                    from_tile_ids_name       = from_tile_ids_path       + '\\' + 'y=' + '%08d' % ( tile_index_y ) + ','  + 'x=' + '%08d' % ( tile_index_x ) + '.' + idTiledVolumeDescription.xpath('@fileExtension')[0]
+                    current_tile_ids_name    = current_tile_ids_path    + '\\' + 'y=' + '%08d' % ( tile_index_y ) + ','  + 'x=' + '%08d' % ( tile_index_x ) + '.' + idTiledVolumeDescription.xpath('@fileExtension')[0]
 
-                    from_tile_images_name    = from_tile_images_path       + '\\' + 'y=' + '%08d' % ( tile_index_y ) + ','  + 'x=' + '%08d' % ( tile_index_x ) + input_image_extension
-                    current_tile_images_name = current_tile_images_path    + '\\' + 'y=' + '%08d' % ( tile_index_y ) + ','  + 'x=' + '%08d' % ( tile_index_x ) + input_image_extension
+                    from_tile_images_name    = from_tile_images_path       + '\\' + 'y=' + '%08d' % ( tile_index_y ) + ','  + 'x=' + '%08d' % ( tile_index_x ) + '.' + imageTiledVolumeDescription.xpath('@fileExtension')[0]
+                    current_tile_images_name = current_tile_images_path    + '\\' + 'y=' + '%08d' % ( tile_index_y ) + ','  + 'x=' + '%08d' % ( tile_index_x ) + '.' + imageTiledVolumeDescription.xpath('@fileExtension')[0]
 
                     tile_hdf5        = h5py.File( from_tile_ids_name, 'r' )
                     tile_ids         = tile_hdf5['IdMap'][:,:]

@@ -92,8 +92,9 @@ public:
 
 	virtual std::list< unsigned int >                             UndoChange();
 	virtual std::list< unsigned int >                             RedoChange();
-    virtual void                                                  FlushFileSystemTileCacheChanges();
-    virtual void                                                  SaveAndClearFileSystemTileCache();
+    virtual void                                                  TempSaveFileSystemTileCacheChanges();
+    virtual void                                                  TempSaveAndClearFileSystemTileCache();
+    virtual void                                                  ClearFileSystemTileCache();
 
     virtual marray::Marray< unsigned char >*                      GetIdColorMap();
     virtual marray::Marray< unsigned int >*                       GetLabelIdMap();

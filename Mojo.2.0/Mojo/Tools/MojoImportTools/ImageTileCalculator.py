@@ -7,17 +7,18 @@ import PIL.Image
 import lxml
 import lxml.etree
 import glob
+import numpy as np
 
 tile_num_pixels_y = 512
 tile_num_pixels_x = 512
 
-original_input_images_path = 'H:\\dev\\datasets\\conn\\main_dataset\\cube2\\input_images'
-output_tile_image_path     = 'D:\\dev\\datasets\\NewPipelineResults2x20\\mojo\\images\\tiles'
-output_tile_volume_file    = 'D:\\dev\\datasets\\NewPipelineResults2x20\\mojo\\images\\tiledVolumeDescription.xml'
-input_image_extension      = '.tif'
-output_image_extension     = '.tif'
-image_resize_filter        = PIL.Image.ANTIALIAS
-nimages_to_process         = 20
+#original_input_images_path = 'H:\\dev\\datasets\\conn\\main_dataset\\cube2\\input_images'
+#output_tile_image_path     = 'D:\\dev\\datasets\\NewPipelineResults2x20\\mojo\\images\\tiles'
+#output_tile_volume_file    = 'D:\\dev\\datasets\\NewPipelineResults2x20\\mojo\\images\\tiledVolumeDescription.xml'
+#input_image_extension      = '.tif'
+#output_image_extension     = '.tif'
+#image_resize_filter        = PIL.Image.ANTIALIAS
+#nimages_to_process         = 20
 
 ##original_input_images_path = 'C:\\dev\\datasets\\conn\\main_dataset\\cube2\\input_images'
 ##output_tile_image_path     = 'C:\\dev\\datasets\\Cube2x100\\mojo\\images\\tiles'
@@ -27,13 +28,13 @@ nimages_to_process         = 20
 ##nimages_to_process            = 100
 #nimages_to_process            = 1124
 
-#original_input_images_path = 'C:\\dev\\datasets\\conn\\main_dataset\\ac3train\\input_images'
-#output_tile_image_path     = 'C:\\dev\\datasets\\ac3x10\\mojo\\images\\tiles'
-#output_tile_volume_file    = 'C:\\dev\\datasets\\ac3x10\\mojo\\images\\tiledVolumeDescription.xml'
-#input_image_extension      = '.tif'
-#output_image_extension     = '.tif'
-#image_resize_filter        = PIL.Image.ANTIALIAS
-#nimages_to_process         = 10
+original_input_images_path = 'C:\\dev\\datasets\\conn\\main_dataset\\ac3train\\input_images'
+output_tile_image_path     = 'C:\\dev\\datasets\\ac3x75_compress\\mojo\\images\\tiles'
+output_tile_volume_file    = 'C:\\dev\\datasets\\ac3x75_compress\\mojo\\images\\tiledVolumeDescription.xml'
+input_image_extension      = '.tif'
+output_image_extension     = '.tif'
+image_resize_filter        = PIL.Image.ANTIALIAS
+nimages_to_process         = 75
 
 #original_input_images_path = 'C:\\dev\\datasets\\challengeCubeV2x20\\images'
 #output_tile_image_path     = 'C:\\dev\\datasets\\Cube1x10\\mojo\\images\\tiles'
@@ -67,9 +68,18 @@ files = sorted( glob.glob( original_input_images_path + '\\*' + input_image_exte
 tile_index_z = 0
 
 for file in files:
+
     original_image = PIL.Image.open( file )
 
     ( original_image_num_pixels_x, original_image_num_pixels_y ) = original_image.size
+
+    # Enhance contrast to 2% saturation
+    saturation_level = 0.02
+    sorted = np.sort( np.uint8(original_image).ravel() )
+    minval = np.float32( sorted[ len(sorted) * ( saturation_level / 2 ) ] )
+    maxval = np.float32( sorted[ len(sorted) * ( 1 - saturation_level / 2 ) ] )
+
+    original_image = original_image = original_image.point(lambda i: (i - minval) * ( 255 / (maxval - minval)))
 
     current_image_num_pixels_y = original_image_num_pixels_y
     current_image_num_pixels_x = original_image_num_pixels_x

@@ -131,7 +131,7 @@ void FileSystemTileServer::SaveSegmentation()
 
     Core::Printf( "Saving tiles (temp)." );
 
-    FlushFileSystemTileCacheChanges();
+    TempSaveFileSystemTileCacheChanges();
 
     //
     // move changed tiles to the save directory
@@ -239,7 +239,7 @@ void FileSystemTileServer::AutosaveSegmentation()
 
                 Core::Printf( "Autosaving tiles (temp)." );
 
-                FlushFileSystemTileCacheChanges();
+                TempSaveFileSystemTileCacheChanges();
 
                 //
                 // move changed tiles to the autosave directory
@@ -5011,20 +5011,6 @@ MojoInt4 FileSystemTileServer::CreateTileIndex( std::string tileString )
 	return MojoInt4( x, y, z, w );
 }
 
-void FileSystemTileServer::FlushFileSystemTileCacheChanges()
-{
-    for( stdext::hash_map < std::string, FileSystemTileCacheEntry > :: iterator i = mFileSystemTileCache.GetHashMap().begin(); i != mFileSystemTileCache.GetHashMap().end(); i++ )
-    {
-        if ( i->second.needsSaving )
-        {
-            //Core::Printf("Saving tile ", i->first, ".");
-            SaveTileHdf5( i->second.tileIndex, "TempIdMap", "IdMap", i->second.volumeDescriptions.Get( "IdMap" ) );
-            i->second.needsSaving = false;
-        }
-    }
-}
-
-
 void FileSystemTileServer::ReduceCacheSize()
 {
     Core::Printf("Flushing Cache...");
@@ -5096,10 +5082,9 @@ void FileSystemTileServer::ReduceCacheSizeIfNecessary()
 
 }
 
-void FileSystemTileServer::SaveAndClearFileSystemTileCache( )
+void FileSystemTileServer::TempSaveFileSystemTileCacheChanges()
 {
-    stdext::hash_map < std::string, FileSystemTileCacheEntry > :: iterator i = mFileSystemTileCache.GetHashMap().begin();
-    while( i != mFileSystemTileCache.GetHashMap().end() )
+    for( stdext::hash_map < std::string, FileSystemTileCacheEntry > :: iterator i = mFileSystemTileCache.GetHashMap().begin(); i != mFileSystemTileCache.GetHashMap().end(); i++ )
     {
         //
 		// Save this tile if necessary
@@ -5110,7 +5095,14 @@ void FileSystemTileServer::SaveAndClearFileSystemTileCache( )
             SaveTileHdf5( i->second.tileIndex, "TempIdMap", "IdMap", i->second.volumeDescriptions.Get( "IdMap" ) );
             i->second.needsSaving = false;
         }
+    }
+}
 
+void FileSystemTileServer::ClearFileSystemTileCache()
+{
+    stdext::hash_map < std::string, FileSystemTileCacheEntry > :: iterator i = mFileSystemTileCache.GetHashMap().begin();
+    while( i != mFileSystemTileCache.GetHashMap().end() )
+    {
         //
 		// Unload the tile
 		//
@@ -5125,6 +5117,7 @@ void FileSystemTileServer::SaveAndClearFileSystemTileCache( )
         }
 
         UnloadTileImage( i->second.volumeDescriptions.Get( "SourceMap" ) );
+
         i->second.volumeDescriptions.GetHashMap().clear();
 
         stdext::hash_map < std::string, FileSystemTileCacheEntry > :: iterator tempi = i;
@@ -5132,6 +5125,12 @@ void FileSystemTileServer::SaveAndClearFileSystemTileCache( )
 
         mFileSystemTileCache.GetHashMap().erase( tempi );
     }
+}
+
+void FileSystemTileServer::TempSaveAndClearFileSystemTileCache( )
+{
+	TempSaveFileSystemTileCacheChanges();
+	ClearFileSystemTileCache();
     RELEASE_ASSERT( mFileSystemTileCache.GetHashMap().size() == 0 );
 }
 

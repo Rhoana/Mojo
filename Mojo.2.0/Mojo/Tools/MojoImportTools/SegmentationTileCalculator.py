@@ -20,13 +20,14 @@ tile_num_pixels_y             = 512
 tile_num_pixels_x             = 512
 
 generate_memorable_names      = True
+compress_ids                  = True
 
-original_input_ids_path       = 'D:\\dev\\datasets\\NewPipelineResults2\\output_labels'
-output_path                   = 'D:\\dev\\datasets\\NewPipelineResults2x20\\mojo'
-#nimages_to_process            = 1104
-nimages_to_process            = 20
-ncolors                       = 10000
-input_file_format             = 'tif'
+#original_input_ids_path       = 'D:\\dev\\datasets\\NewPipelineResults2\\output_labels'
+#output_path                   = 'D:\\dev\\datasets\\NewPipelineResults2x20\\mojo'
+##nimages_to_process            = 1104
+#nimages_to_process            = 20
+#ncolors                       = 10000
+#input_file_format             = 'tif'
 
 ##original_input_ids_path       = 'C:\\dev\\datasets\\conn\\main_dataset\\cube2\\diced_xy=512_z=32_xyOv=128_zOv=12_dwnSmp=1\\res_from_Nov29_PF\\FS=1\\stitched\\labels_grow'
 ##output_path                    = 'C:\\dev\\datasets\\Cube2x100\\mojo'
@@ -40,11 +41,11 @@ input_file_format             = 'tif'
 #ncolors                       = 10000
 #input_file_format             = 'png'
 
-#original_input_ids_path       = 'C:\\dev\\datasets\\conn\\main_dataset\\ac3train\\diced_xy=512_z=32_xyOv=128_zOv=12_dwnSmp=1\\res_from_sept_30_minotrC_PF\\FS=1\\stitched\\labels_grow'
-#output_path                   = 'C:\\dev\\datasets\\ac3x20\\mojo'
-#nimages_to_process            = 20
-#ncolors                       = 1000
-#input_file_format             = 'png'
+original_input_ids_path       = 'C:\\dev\\datasets\\conn\\main_dataset\\ac3train\\diced_xy=512_z=32_xyOv=128_zOv=12_dwnSmp=1\\res_from_sept_30_minotrC_PF\\FS=1\\stitched\\labels_grow'
+output_path                   = 'C:\\dev\\datasets\\ac3x75_compress\\mojo'
+nimages_to_process            = 75
+ncolors                       = 1000
+input_file_format             = 'png'
 
 #original_input_ids_path       = 'C:\\dev\\datasets\\conn\\main_dataset\\ac3train\\diced_xy=512_z=32_xyOv=128_zOv=12_dwnSmp=1\\res_from_sept_30_minotrC_PF\\FS=1\\stitched\\labels_grow'
 #output_path                   = 'C:\\dev\\datasets\\ac3x20\\mojo'
@@ -61,7 +62,6 @@ output_segment_info_db_file   = output_ids_path + '\\segmentInfo.db'
 
 #color_map_variable_name       = 'cmap'
 ids_upscale_factor            = 1
-
 
 def mkdir_safe( dir_to_make ):
 
@@ -91,6 +91,27 @@ def save_image( file_path, image ):
     print file_path
     print
 
+
+
+def load_id_image ( file_path ):
+
+    ids = np.int32( np.array( mahotas.imread( file_path ) ) )
+
+    if len( ids.shape ) == 3:
+        ids = ids[ :, :, 0 ] + ids[ :, :, 1 ] * 2**8 + ids[ :, :, 2 ] * 2**16
+    else:
+        # Read from pipeline format
+        ids = ids.transpose() - 1
+
+    return ids
+
+
+    
+def sbdm_string_hash( in_string ):
+    hash = 0
+    for i in xrange(len(in_string)):
+        hash = ord(in_string[i]) + (hash << 6) + (hash << 16) - hash
+    return np.uint32(hash % 2**32)
     
 
 #color_map_mat_dict   = scipy.io.loadmat( original_input_color_map_path )
@@ -108,23 +129,38 @@ if len(files) > 0:
         import random
         from nltk.corpus import wordnet
         
-        random.seed()
+        # Seed based on input path so that names will be the same for multiple volumes
+        random.seed( sbdm_string_hash( original_input_ids_path ) )
 
         nouns, verbs, adjectives, adverbs = [list(wordnet.all_synsets(pos=POS)) for POS in [wordnet.NOUN, wordnet.VERB, wordnet.ADJ, wordnet.ADV]]
         nouns_verbs = nouns + verbs
         adjectives_adverbs = adjectives + adverbs
 
-        #remove hyphenated words
         nouns_verbs = [x for x in nouns_verbs if not ( '_' in x.lemmas[0].name or '-' in x.lemmas[0].name )]
         adjectives_adverbs = [x for x in adjectives_adverbs if not ( '_' in x.lemmas[0].name or '-' in x.lemmas[0].name )]
         
-        def make_memorable_name(): return random.choice(adjectives_adverbs).lemmas[0].name.capitalize() + random.choice(nouns_verbs).lemmas[0].name.capitalize()
+        def make_memorable_name():
+
+            while True:
+                word1 = random.choice(random.choice(adjectives_adverbs).lemmas).name
+                #ignore hyphenated words
+                if not ('_' in word1 or '-' in word1):
+                    break
+
+            while True:
+                word2 = random.choice(random.choice(nouns_verbs).lemmas).name
+                #ignore hyphenated words
+                if not ('_' in word2 or '-' in word2):
+                    break
+
+            return word1.capitalize() + word2.capitalize()
+
     else:
         print 'Using boring names.'
 
 
     id_max               = 0;
-    id_counts            = np.zeros( 0, dtype=np.uint32 );
+    id_counts            = np.zeros( 0, dtype=np.int64 );
     id_tile_list         = [];
     tile_index_z         = 0
 
@@ -140,21 +176,46 @@ if len(files) > 0:
         #color_map[ color_i ] = [ x*255 for x in colorsys.hsv_to_rgb( rand_vals[0], rand_vals[1] * 0.3 + 0.7, rand_vals[2] * 0.3 + 0.7 ) ];
         color_map[ color_i ] = [ rand_vals[0]*255, rand_vals[1]*255, rand_vals[2]*255 ];
 
+
+    # Make a compressed id map
+    if compress_ids:
+        print "Compressing ids..."
+        compressed_id_map = np.zeros( 1, dtype=np.uint32 );
+        # Read all files so that ids will be consistent across for multiple volumes
+        for file in files:
+            original_input_ids_name = file
+            original_ids = load_id_image( original_input_ids_name )
+
+            unique_ids = np.unique( original_ids )
+            max_unique = np.max( unique_ids )
+
+            if max_unique >= compressed_id_map.shape[0]:
+                compressed_id_map.resize( max_unique + 1 )
+
+            compressed_id_map[ unique_ids ] = 1
+
+            print "Read file {0}. Max id = {1}.".format(file, compressed_id_map.shape[0])
+
+        compressed_id_map[ 0 ] = 0
+        valid_ids = np.nonzero(compressed_id_map)[0]
+        compressed_id_map[ valid_ids ] = np.arange(1, len(valid_ids) + 1, dtype=np.uint32)
+
+        print "Compressing {0} ids down to {1}.".format(compressed_id_map.shape[0], len(valid_ids))
+
+
     for file in files:
 
         original_input_ids_name = file
 
-        original_ids = np.int32( np.array( mahotas.imread( original_input_ids_name ) ) )
-
-        if len( original_ids.shape ) == 3:
-            original_ids = original_ids[ :, :, 0 ] + original_ids[ :, :, 1 ] * 2**8 + original_ids[ :, :, 2 ] * 2**16
-        else:
-            original_ids = original_ids.transpose() - 1
+        original_ids = load_id_image( original_input_ids_name )
 
         ## Grow regions until there are no boundaries
 
         ## Method 4 - watershed
-        original_ids = mahotas.cwatershed(np.zeros(original_ids.shape, dtype=np.int32), original_ids, return_lines=False)
+        original_ids = mahotas.cwatershed(np.zeros(original_ids.shape, dtype=np.uint32), original_ids, return_lines=False)
+
+        if compress_ids:
+            original_ids = compressed_id_map[original_ids]
 
         #boundaries = original_ids == 0
         #boundary_indices = np.nonzero(boundaries)
@@ -193,7 +254,7 @@ if len(files) > 0:
             id_max = current_max;
             id_counts.resize( id_max + 1 );
             
-        id_counts[ current_image_counts_ids ] = id_counts[ current_image_counts_ids ] + np.uint32( current_image_counts [ current_image_counts_ids ] )
+        id_counts[ current_image_counts_ids ] = id_counts[ current_image_counts_ids ] + np.int64( current_image_counts [ current_image_counts_ids ] )
         
         ( original_image_num_pixels_x, original_image_num_pixels_y ) = original_ids.shape
 
@@ -277,11 +338,6 @@ if len(files) > 0:
     ## Sort the tile list so that the same id appears together
     id_tile_list = np.array( sorted( id_tile_list ), np.uint32 )
 
-    max_id = np.max( [ id_tile_list[ 0, -1 ], id_counts.shape[0] - 1 ] )
-    print 'Got id max of:'
-    print id_tile_list[ -1, 0 ]
-    print id_counts.shape[0] - 1
-
     ## Write all segment info to a single file
 
     print 'Writing colorMap file (hdf5)'
@@ -326,7 +382,7 @@ if len(files) > 0:
 
     taken_names = {}
 
-    for segment_index in xrange( 1, max_id ):
+    for segment_index in xrange( 1, id_max + 1 ):
         if len( id_counts ) > segment_index and id_counts[ segment_index ] > 0:
             if segment_index == 0:
                 new_name = '__boundary__'

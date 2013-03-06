@@ -113,7 +113,8 @@ public:
 
 	void                                                  UndoChange();
 	void                                                  RedoChange();
-    void                                                  SaveAndClearFileSystemTileCache();
+    void                                                  TempSaveAndClearFileSystemTileCache();
+    void                                                  ClearFileSystemTileCache();
 
     MojoInt3                                              GetZoomLevel( const TiledDatasetView& tiledDatasetView );
 
@@ -303,7 +304,17 @@ inline void TileManager::LoadTiledDatasetInternal( TiledDatasetDescription& tile
     //
     mIsTiledDatasetLoaded = true;
 
-    //
+	//
+	// Clear file system tile cache
+	//
+	mTileServer->ClearFileSystemTileCache();
+
+	//
+	// Reload the device cache
+	//
+	ReloadTileCache();
+
+	//
     // load tiles into the cache
     //
     Update();
@@ -515,7 +526,7 @@ inline void TileManager::LoadSegmentationInternal( TiledDatasetDescription& tile
 	//
 	// Clear file system tile cache
 	//
-	mTileServer->SaveAndClearFileSystemTileCache();
+	mTileServer->ClearFileSystemTileCache();
 
 	//
 	// Reload the device cache

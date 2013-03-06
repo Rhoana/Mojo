@@ -752,9 +752,14 @@ void TileManager::RedoChange()
 }
 
 
-void TileManager::SaveAndClearFileSystemTileCache()
+void TileManager::TempSaveAndClearFileSystemTileCache()
 {
-    mTileServer->SaveAndClearFileSystemTileCache();
+    mTileServer->TempSaveAndClearFileSystemTileCache();
+}
+
+void TileManager::ClearFileSystemTileCache()
+{
+    mTileServer->ClearFileSystemTileCache();
 }
 
 void TileManager::UnloadTiledDatasetInternal()
@@ -1098,6 +1103,7 @@ void TileManager::ReloadTileCache()
             // unload image data from from host memory
             //
             mTileServer->UnloadTile( tileIndex );
+
         }
     }
 }
