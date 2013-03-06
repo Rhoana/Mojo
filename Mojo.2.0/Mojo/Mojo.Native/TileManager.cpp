@@ -674,6 +674,7 @@ unsigned int TileManager::CommitDrawMerge( MojoFloat3 pointTileSpace )
 	if ( remapIds.size() == 1 )
 	{
 		newId = *remapIds.begin();
+        mTileServer->ResetDrawMergeState();
 	}
 	else if ( remapIds.size() > 1 )
 	{
