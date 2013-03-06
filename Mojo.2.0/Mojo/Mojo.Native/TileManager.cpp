@@ -693,6 +693,32 @@ unsigned int TileManager::CommitDrawMerge( MojoFloat3 pointTileSpace )
 
 }
 
+unsigned int TileManager::CommitDrawMergeCurrentSlice( MojoFloat3 pointTileSpace )
+{
+
+	unsigned int newId = mTileServer->CommitDrawMergeCurrentSlice( pointTileSpace );
+
+	mTileServer->PrepForDrawMerge( pointTileSpace );
+
+	ReloadTileCache();
+
+	return newId;
+
+}
+
+unsigned int TileManager::CommitDrawMergeCurrentConnectedComponent( MojoFloat3 pointTileSpace )
+{
+
+	unsigned int newId = mTileServer->CommitDrawMergeCurrentConnectedComponent( pointTileSpace );
+
+	mTileServer->PrepForDrawMerge( pointTileSpace );
+
+	ReloadTileCache();
+
+	return newId;
+
+}
+
 void TileManager::ReplaceSegmentationLabelCurrentConnectedComponent( unsigned int oldId, unsigned int newId, MojoFloat3 pDataSpace )
 {
     mTileServer->ReplaceSegmentationLabelCurrentConnectedComponent( oldId, newId, pDataSpace );

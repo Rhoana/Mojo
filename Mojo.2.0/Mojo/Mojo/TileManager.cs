@@ -428,10 +428,22 @@ namespace Mojo
             Internal.ResetAdjustState( new Vector3( mMouseOverX, mMouseOverY, mTiledDatasetView.CenterDataSpace.Z ) );
         }
 
-        public uint CommmitDrawMerge()
+        public uint CommitDrawMerge()
         {
             ChangesMade = true;
             return Internal.CommitDrawMerge( new Vector3( mMouseOverX, mMouseOverY, mTiledDatasetView.CenterDataSpace.Z ) );
+        }
+
+        public uint CommitDrawMergeCurrentSlice()
+        {
+            ChangesMade = true;
+            return Internal.CommitDrawMergeCurrentSlice( new Vector3( mMouseOverX, mMouseOverY, mTiledDatasetView.CenterDataSpace.Z ) );
+        }
+
+        public uint CommitDrawMergeCurrentConnectedComponent()
+        {
+            ChangesMade = true;
+            return Internal.CommitDrawMergeCurrentConnectedComponent( new Vector3( mMouseOverX, mMouseOverY, mTiledDatasetView.CenterDataSpace.Z ) );
         }
 
         public void UndoChange()

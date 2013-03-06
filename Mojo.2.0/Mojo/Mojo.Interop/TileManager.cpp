@@ -417,6 +417,18 @@ unsigned int TileManager::CommitDrawMerge( Vector3^ pDataSpace )
     return mTileManager->CommitDrawMerge( pDataSpaceFloat3 );
 }
 
+unsigned int TileManager::CommitDrawMergeCurrentSlice( Vector3^ pDataSpace )
+{
+    MojoFloat3 pDataSpaceFloat3 = MojoFloat3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
+    return mTileManager->CommitDrawMergeCurrentSlice( pDataSpaceFloat3 );
+}
+
+unsigned int TileManager::CommitDrawMergeCurrentConnectedComponent( Vector3^ pDataSpace )
+{
+    MojoFloat3 pDataSpaceFloat3 = MojoFloat3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
+    return mTileManager->CommitDrawMergeCurrentConnectedComponent( pDataSpaceFloat3 );
+}
+
 void TileManager::UndoChange()
 {
     mTileManager->UndoChange();

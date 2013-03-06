@@ -85,7 +85,10 @@ public:
     virtual void                                                  ResetDrawMergeState();
     virtual void                                                  PrepForDrawMerge( MojoFloat3 pointTileSpace );
 	virtual std::set< unsigned int >                              GetDrawMergeIds( MojoFloat3 pointTileSpace );
+	virtual std::map< unsigned int, MojoFloat3 >                  GetDrawMergeIdsAndPoints( MojoFloat3 pointTileSpace );
 	virtual unsigned int                                          CommitDrawMerge( std::set< unsigned int > mergeIds, MojoFloat3 pointTileSpace );
+	virtual unsigned int                                          CommitDrawMergeCurrentSlice( MojoFloat3 pointTileSpace );
+	virtual unsigned int                                          CommitDrawMergeCurrentConnectedComponent( MojoFloat3 pointTileSpace );
 
 	virtual std::list< unsigned int >                             UndoChange();
 	virtual std::list< unsigned int >                             RedoChange();

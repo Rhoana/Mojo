@@ -459,7 +459,7 @@ void FileSystemTileServer::RemapSegmentLabels( std::set< unsigned int > fromSegI
 		//
 		PrepForNextUndoRedoChange();
 		mNextUndoItem->newId = toSegId;
-		mNextUndoItem->oldId = 0;
+		//mNextUndoItem->oldId = 0;
 
 		for ( std::set< unsigned int >::iterator fromIt = fromSegIds.begin(); fromIt != fromSegIds.end(); ++fromIt )
 		{
@@ -474,7 +474,7 @@ void FileSystemTileServer::RemapSegmentLabels( std::set< unsigned int > fromSegI
 				//
 				// Keep track of tile operations
 				//
-				mNextUndoItem->idTileMapRemoveOldIdSets.GetHashMap()[ fromSegId ].insert( tilesContainingOldId.begin(), tilesContainingOldId.end() );
+				mNextUndoItem->idTileMapRemoveOldIdSets[ fromSegId ].insert( tilesContainingOldId.begin(), tilesContainingOldId.end() );
 
 				for ( FileSystemTileSet::iterator addIterator = tilesContainingOldId.begin(); addIterator != tilesContainingOldId.end(); ++addIterator )
 				{
@@ -533,8 +533,8 @@ void FileSystemTileServer::ReplaceSegmentationLabel( unsigned int oldId, unsigne
 
 		PrepForNextUndoRedoChange();
 		mNextUndoItem->newId = newId;
-		mNextUndoItem->oldId = oldId;
-        mNextUndoItem->idTileMapRemoveOldIdSets.GetHashMap()[ oldId ].insert( tilesContainingOldId.begin(), tilesContainingOldId.end() );
+
+		mNextUndoItem->idTileMapRemoveOldIdSets[ oldId ].insert( tilesContainingOldId.begin(), tilesContainingOldId.end() );
 		mNextUndoItem->idTileMapAddNewId.insert( tilesContainingOldId.begin(), tilesContainingOldId.end() );
 		for ( FileSystemTileSet::iterator eraseIterator = tilesContainingNewId.begin(); eraseIterator != tilesContainingNewId.end(); ++eraseIterator )
 		{
@@ -553,10 +553,9 @@ void FileSystemTileServer::ReplaceSegmentationLabel( unsigned int oldId, unsigne
 				unsigned int* currentIdVolume = (unsigned int*)volumeDescriptions.Get( "IdMap" ).data;
 
 				//
-				// Get or create the change bitset for this tile
+				// Get or create the change record for this tile
 				//
-				UndoRedoChangeSet *changeSet = 
-					&mNextUndoItem->changeSets.GetHashMap()[ CreateTileString( tileIndex ) ];
+				TileChangeIdMap *tileChange = &mNextUndoItem->tileChangeMap[ tileIndex ];
 
 				//
 				// replace the old id and color with the new id and color...
@@ -574,7 +573,7 @@ void FileSystemTileServer::ReplaceSegmentationLabel( unsigned int oldId, unsigne
 
 							if ( idValue == oldId )
 							{
-								changeSet->insert( MojoInt2( index1D, currentIdVolume[ index1D ] ) );
+								(*tileChange)[ currentIdVolume[ index1D ] ].set( index1D );
 								currentIdVolume[ index1D ] = newId;
 								if ( tileIndex.w == 0 )
 									++voxelChangeCount;
@@ -672,8 +671,8 @@ void FileSystemTileServer::ReplaceSegmentationLabelCurrentSlice( unsigned int ol
 
 		PrepForNextUndoRedoChange();
 		mNextUndoItem->newId = newId;
-		mNextUndoItem->oldId = oldId;
-		UndoRedoChangeSet *changeSet;
+
+		TileChangeIdMap *tileChange;
 
 		MojoInt4 previousTileIndex;
         bool tileLoaded = false;
@@ -756,7 +755,7 @@ void FileSystemTileServer::ReplaceSegmentationLabelCurrentSlice( unsigned int ol
                             if ( !TileContainsId( numVoxelsPerTile, currentIdNumVoxels, currentIdVolume, oldId ) )
                             {
                                 tilesContainingOldId.erase( previousTileIndex );
-                                mNextUndoItem->idTileMapRemoveOldIdSets.GetHashMap()[ oldId ].insert( previousTileIndex );
+                                mNextUndoItem->idTileMapRemoveOldIdSets[ oldId ].insert( previousTileIndex );
                             }
 
                         }
@@ -774,10 +773,9 @@ void FileSystemTileServer::ReplaceSegmentationLabelCurrentSlice( unsigned int ol
                     tileChanged = false;
 
 					//
-					// Get or create the change bitset for this tile
+					// Get or create the change record for this tile
 					//
-					changeSet = 
-						&mNextUndoItem->changeSets.GetHashMap()[ CreateTileString( tileIndex ) ];
+					tileChange = &mNextUndoItem->tileChangeMap[ tileIndex ];
                 }
 
                 int tileX = thisVoxel.x % numVoxelsPerTile.x;
@@ -790,7 +788,7 @@ void FileSystemTileServer::ReplaceSegmentationLabelCurrentSlice( unsigned int ol
 
                 if ( idValue == oldId )
                 {
-					changeSet->insert( MojoInt2( index1D, currentIdVolume[ index1D ] ) );
+					(*tileChange)[ currentIdVolume[ index1D ] ].set( index1D );
                     currentIdVolume[ index1D ] = newId;
                     tileChanged = true;
 
@@ -899,7 +897,7 @@ void FileSystemTileServer::ReplaceSegmentationLabelCurrentSlice( unsigned int ol
                 if ( !TileContainsId( numVoxelsPerTile, currentIdNumVoxels, currentIdVolume, oldId ) )
                 {
                     tilesContainingOldId.erase( previousTileIndex );
-					mNextUndoItem->idTileMapRemoveOldIdSets.GetHashMap()[ oldId ].insert( previousTileIndex );
+					mNextUndoItem->idTileMapRemoveOldIdSets[ oldId ].insert( previousTileIndex );
                 }
 
             }
@@ -939,7 +937,7 @@ void FileSystemTileServer::ReplaceSegmentationLabelCurrentConnectedComponent( un
             (int)floor( pointTileSpace.y * numVoxelsPerTile.y ),
             (int)floor( pointTileSpace.z * numVoxelsPerTile.z ) );
 
-        Core::Printf( "\nReplacing segmentation label ", oldId, " conencted to voxel (x", pVoxelSpace.x, ", y", pVoxelSpace.y, " z", pVoxelSpace.z, ") with segmentation label ", newId, " for zslice ", pVoxelSpace.z, "...\n" );
+        Core::Printf( "\nReplacing segmentation label ", oldId, " conencted to voxel (x", pVoxelSpace.x, ", y", pVoxelSpace.y, " z", pVoxelSpace.z, ") with segmentation label ", newId, " in 3D from zslice ", pVoxelSpace.z, "...\n" );
 
         FileSystemTileSet tilesContainingOldId = mSegmentInfoManager.GetTiles( oldId );
         FileSystemTileSet tilesContainingNewId = mSegmentInfoManager.GetTiles( newId );
@@ -948,8 +946,8 @@ void FileSystemTileServer::ReplaceSegmentationLabelCurrentConnectedComponent( un
 
 		PrepForNextUndoRedoChange();
 		mNextUndoItem->newId = newId;
-		mNextUndoItem->oldId = oldId;
-		UndoRedoChangeSet *changeSet;
+		
+		TileChangeIdMap *tileChange;
 
 		MojoInt4 previousTileIndex;
         bool tileLoaded = false;
@@ -1032,7 +1030,7 @@ void FileSystemTileServer::ReplaceSegmentationLabelCurrentConnectedComponent( un
                             if ( !TileContainsId( numVoxelsPerTile, currentIdNumVoxels, currentIdVolume, oldId ) )
                             {
                                 tilesContainingOldId.erase( previousTileIndex );
-								mNextUndoItem->idTileMapRemoveOldIdSets.GetHashMap()[ oldId ].insert ( previousTileIndex );
+								mNextUndoItem->idTileMapRemoveOldIdSets[ oldId ].insert ( previousTileIndex );
                             }
 
                         }
@@ -1050,10 +1048,9 @@ void FileSystemTileServer::ReplaceSegmentationLabelCurrentConnectedComponent( un
                     tileChanged = false;
 
 					//
-					// Get or create the change bitset for this tile
+					// Get or create the change record for this tile
 					//
-					changeSet = 
-						&mNextUndoItem->changeSets.GetHashMap()[ CreateTileString( tileIndex ) ];
+					tileChange = &mNextUndoItem->tileChangeMap[ tileIndex ];
                 }
 
                 int tileX = thisVoxel.x % numVoxelsPerTile.x;
@@ -1065,7 +1062,7 @@ void FileSystemTileServer::ReplaceSegmentationLabelCurrentConnectedComponent( un
 
                 if ( idValue == oldId )
                 {
-					changeSet->insert( MojoInt2( index1D, currentIdVolume[ index1D ] ) );
+					(*tileChange)[ currentIdVolume[ index1D ] ].set( index1D );
                     currentIdVolume[ index1D ] = newId;
                     tileChanged = true;
 
@@ -1190,7 +1187,7 @@ void FileSystemTileServer::ReplaceSegmentationLabelCurrentConnectedComponent( un
                 if ( !TileContainsId( numVoxelsPerTile, currentIdNumVoxels, currentIdVolume, oldId ) )
                 {
                     tilesContainingOldId.erase( previousTileIndex );
-					mNextUndoItem->idTileMapRemoveOldIdSets.GetHashMap()[ oldId ].insert ( previousTileIndex );
+					mNextUndoItem->idTileMapRemoveOldIdSets[ oldId ].insert ( previousTileIndex );
                 }
 
             }
@@ -1209,7 +1206,7 @@ void FileSystemTileServer::ReplaceSegmentationLabelCurrentConnectedComponent( un
         mSegmentInfoManager.SetTiles( oldId, tilesContainingOldId );
         mSegmentInfoManager.SetTiles( newId, tilesContainingNewId );
 
-        Core::Printf( "\nFinished replacing segmentation label ", oldId, " conencted to voxel (x", pVoxelSpace.x, ", y", pVoxelSpace.y, " z", pVoxelSpace.z, ") with segmentation label ", newId, " for zslice ", pVoxelSpace.z, ".\n" );
+        Core::Printf( "\nFinished replacing segmentation label ", oldId, " conencted to voxel (x", pVoxelSpace.x, ", y", pVoxelSpace.y, " z", pVoxelSpace.z, ") with segmentation label ", newId, " in 3D from zslice ", pVoxelSpace.z, ".\n" );
     }
 }
 
@@ -1515,8 +1512,8 @@ void FileSystemTileServer::StrideUpIdTileChange( MojoInt4 numTiles, MojoInt3 num
 				int fromIndex1D = tileX + tileY * numVoxelsPerTile.x;
 				int toIndex1D = wTileX + wTileY * numVoxelsPerTile.x;
 
-				RELEASE_ASSERT( toIndex1D < TILE_SIZE * TILE_SIZE );
-				RELEASE_ASSERT( fromIndex1D < TILE_SIZE * TILE_SIZE );
+				//RELEASE_ASSERT( toIndex1D < TILE_SIZE * TILE_SIZE );
+				//RELEASE_ASSERT( fromIndex1D < TILE_SIZE * TILE_SIZE );
 
 				strideData[ toIndex1D ] = data[ fromIndex1D ];
 				++wTileX;
@@ -2280,7 +2277,7 @@ unsigned int FileSystemTileServer::CompletePointSplit( unsigned int segId, MojoF
 
 		PrepForNextUndoRedoChange();
 
-		UndoRedoChangeSet *changeSet;
+		TileChangeIdMap *tileChange;
 
 		MojoInt4 previousTileIndex;
         bool tileLoaded = false;
@@ -2360,9 +2357,9 @@ unsigned int FileSystemTileServer::CompletePointSplit( unsigned int segId, MojoF
                 tileLoaded = true;
 
 				//
-				// Get or create the change bitset for this tile
+				// Get or create the change record for this tile
 				//
-				changeSet = &mNextUndoItem->changeSets.GetHashMap()[ CreateTileString( tileIndex ) ];
+				tileChange = &mNextUndoItem->tileChangeMap[ tileIndex ];
             }
 
             int tileX = thisVoxel.x % numVoxelsPerTile.x;
@@ -2381,11 +2378,9 @@ unsigned int FileSystemTileServer::CompletePointSplit( unsigned int segId, MojoF
 				isSplitBorder = mSplitResultArea[ areaIndex1D ] != 0;
 			}
 
-			MojoInt2 change = MojoInt2( index1D, currentIdVolume[ index1D ] );
-
-			if ( idValue == segId && !isSplitBorder && changeSet->find( change ) == changeSet->end() )
+			if ( idValue == segId && !isSplitBorder && !(*tileChange)[ currentIdVolume[ index1D ] ][ index1D ] )
             {
-				changeSet->insert( change );
+				(*tileChange)[ currentIdVolume[ index1D ] ].set( index1D );
 				wQueue.push( thisVoxel );
 				++nPixChanged;
 
@@ -2497,10 +2492,9 @@ unsigned int FileSystemTileServer::CompletePointSplit( unsigned int segId, MojoF
 							int areaY = yOffset + tileIndex1D / numVoxelsPerTile.x;
 							seedIndex1D = areaX + areaY * mSplitWindowWidth;
 
-							MojoInt2 change = MojoInt2( seedIndex1D, currentIdVolume[ seedIndex1D ] );
-
 							if ( mSegmentInfoManager.GetIdForLabel( currentIdVolume[ tileIndex1D ] ) == segId &&
-								mNextUndoItem->changeSets.GetHashMap()[ CreateTileString( tileIndex ) ].find( change ) == mNextUndoItem->changeSets.GetHashMap()[ CreateTileString( tileIndex ) ].end() &&
+								( mNextUndoItem->tileChangeMap.find( tileIndex ) == mNextUndoItem->tileChangeMap.end() || 
+								!mNextUndoItem->tileChangeMap[ tileIndex ][ currentIdVolume[ index1D ] ][ index1D ] ) &&
 								mSplitResultArea[ seedIndex1D ] == 0 )
 							{
 								//
@@ -2526,7 +2520,7 @@ unsigned int FileSystemTileServer::CompletePointSplit( unsigned int segId, MojoF
 				//
 				// Reset the Undo Item
 				//
-                mNextUndoItem->changeSets.GetHashMap().clear();
+				mNextUndoItem->tileChangeMap.clear();
 
 				if ( !seedFound )
 				{
@@ -2576,7 +2570,6 @@ unsigned int FileSystemTileServer::CompletePointSplit( unsigned int segId, MojoF
         FileSystemTileSet tilesContainingNewId;
 
 		mNextUndoItem->newId = newId;
-		mNextUndoItem->oldId = segId;
 
 		bool tileChanged;
 
@@ -2645,7 +2638,7 @@ unsigned int FileSystemTileServer::CompletePointSplit( unsigned int segId, MojoF
 							if ( !TileContainsId( numVoxelsPerTile, currentIdNumVoxels, currentIdVolume, segId ) )
 							{
 								tilesContainingOldId.erase( previousTileIndex );
-								mNextUndoItem->idTileMapRemoveOldIdSets.GetHashMap()[ segId ].insert( previousTileIndex );
+								mNextUndoItem->idTileMapRemoveOldIdSets[ segId ].insert( previousTileIndex );
 							}
 
 						}
@@ -2663,10 +2656,9 @@ unsigned int FileSystemTileServer::CompletePointSplit( unsigned int segId, MojoF
 					tileChanged = false;
 
 					//
-					// Get or create the change bitset for this tile
+					// Get or create the change record for this tile
 					//
-					changeSet = 
-						&mNextUndoItem->changeSets.GetHashMap()[ CreateTileString( tileIndex ) ];
+					tileChange = &mNextUndoItem->tileChangeMap[ tileIndex ];
 				}
 				int tileX = thisVoxel.x % numVoxelsPerTile.x;
 				int tileY = thisVoxel.y % numVoxelsPerTile.y;
@@ -2677,7 +2669,7 @@ unsigned int FileSystemTileServer::CompletePointSplit( unsigned int segId, MojoF
 
 				if ( idValue == segId )
 				{
-					changeSet->insert( MojoInt2( index1D, currentIdVolume[ index1D ] ) );
+					(*tileChange)[ currentIdVolume[ index1D ] ].set( index1D );
 					currentIdVolume[ index1D ] = newId;
 					tileChanged = true;
                     if ( currentW == 0 )
@@ -2723,7 +2715,7 @@ unsigned int FileSystemTileServer::CompletePointSplit( unsigned int segId, MojoF
                 if ( !TileContainsId( numVoxelsPerTile, currentIdNumVoxels, currentIdVolume, segId ) )
                 {
                     tilesContainingOldId.erase( previousTileIndex );
-					mNextUndoItem->idTileMapRemoveOldIdSets.GetHashMap()[ segId ].insert( previousTileIndex );
+					mNextUndoItem->idTileMapRemoveOldIdSets[ segId ].insert( previousTileIndex );
                 }
 
             }
@@ -2857,7 +2849,7 @@ unsigned int FileSystemTileServer::CompleteDrawSplit( unsigned int segId, MojoFl
 
 			    PrepForNextUndoRedoChange();
 
-			    UndoRedoChangeSet *changeSet;
+			    TileChangeIdMap *tileChange;
 
 			    MojoInt4 previousTileIndex;
 			    bool tileLoaded = false;
@@ -2936,10 +2928,10 @@ unsigned int FileSystemTileServer::CompleteDrawSplit( unsigned int segId, MojoFl
 					    currentIdNumVoxels = volumeDescriptions.Get( "IdMap" ).numVoxels;
 					    tileLoaded = true;
 
-					    //
-					    // Get or create the change bitset for this tile
-					    //
-					    changeSet = &mNextUndoItem->changeSets.GetHashMap()[ CreateTileString( tileIndex ) ];
+						//
+						// Get or create the change record for this tile
+						//
+						tileChange = &mNextUndoItem->tileChangeMap[ tileIndex ];
 				    }
 
 				    int tileX = thisVoxel.x % numVoxelsPerTile.x;
@@ -2957,12 +2949,10 @@ unsigned int FileSystemTileServer::CompleteDrawSplit( unsigned int segId, MojoFl
 				    {
 					    isSplitBorder = mSplitResultArea[ areaIndex1D ] != 0;
 				    }
-
-					MojoInt2 change = MojoInt2( index1D, currentIdVolume[ index1D ] );
-
-					if ( idValue == segId && changeSet->find( change ) == changeSet->end() )
+					
+					if ( idValue == segId && !(*tileChange)[ currentIdVolume[ index1D ] ][ index1D ] )
 				    {
-					    changeSet->insert( change );
+						(*tileChange)[ currentIdVolume[ index1D ] ].set( index1D );
 					    wQueue.push( thisVoxel );
 					    ++nPixChanged;
 
@@ -3134,10 +3124,9 @@ unsigned int FileSystemTileServer::CompleteDrawSplit( unsigned int segId, MojoFl
 								            int areaY = yOffset + tileIndex1D / numVoxelsPerTile.x;
 								            seedIndex1D = areaX + areaY * mSplitWindowWidth;
 
-											MojoInt2 change = MojoInt2( tileIndex1D, currentIdVolume[ tileIndex1D ] );
-
 											if ( mSegmentInfoManager.GetIdForLabel( currentIdVolume[ tileIndex1D ] ) == segId &&
-												mNextUndoItem->changeSets.GetHashMap()[ CreateTileString( tileIndex ) ].find( change ) == mNextUndoItem->changeSets.GetHashMap()[ CreateTileString( tileIndex ) ].end() &&
+												( mNextUndoItem->tileChangeMap.find( tileIndex ) == mNextUndoItem->tileChangeMap.end() || 
+												 !mNextUndoItem->tileChangeMap[ tileIndex ][ currentIdVolume[ tileIndex1D ] ][ tileIndex1D ] ) &&
 												mSplitResultArea[ seedIndex1D ] == 0 )
 								            {
 									            //
@@ -3163,7 +3152,7 @@ unsigned int FileSystemTileServer::CompleteDrawSplit( unsigned int segId, MojoFl
 					            //
 					            // Reset the Undo Item
 					            //
-					            mNextUndoItem->changeSets.GetHashMap().clear();
+								mNextUndoItem->tileChangeMap.clear();
 
 					            if ( !seedFound )
 					            {
@@ -3225,7 +3214,6 @@ unsigned int FileSystemTileServer::CompleteDrawSplit( unsigned int segId, MojoFl
 			    FileSystemTileSet tilesContainingNewId = mSegmentInfoManager.GetTiles( newId );
 
 			    mNextUndoItem->newId = newId;
-			    mNextUndoItem->oldId = segId;
 
 			    bool tileChanged;
 
@@ -3294,7 +3282,7 @@ unsigned int FileSystemTileServer::CompleteDrawSplit( unsigned int segId, MojoFl
 								    if ( !TileContainsId( numVoxelsPerTile, currentIdNumVoxels, currentIdVolume, segId ) )
 								    {
 									    tilesContainingOldId.erase( previousTileIndex );
-									    mNextUndoItem->idTileMapRemoveOldIdSets.GetHashMap()[ segId ].insert( previousTileIndex );
+									    mNextUndoItem->idTileMapRemoveOldIdSets[ segId ].insert( previousTileIndex );
 								    }
 
 							    }
@@ -3311,11 +3299,10 @@ unsigned int FileSystemTileServer::CompleteDrawSplit( unsigned int segId, MojoFl
 						    tileLoaded = true;
 						    tileChanged = false;
 
-						    //
-						    // Get or create the change bitset for this tile
-						    //
-						    changeSet = 
-							    &mNextUndoItem->changeSets.GetHashMap()[ CreateTileString( tileIndex ) ];
+							//
+							// Get or create the change record for this tile
+							//
+							tileChange = &mNextUndoItem->tileChangeMap[ tileIndex ];
 					    }
 					    int tileX = thisVoxel.x % numVoxelsPerTile.x;
 					    int tileY = thisVoxel.y % numVoxelsPerTile.y;
@@ -3326,7 +3313,7 @@ unsigned int FileSystemTileServer::CompleteDrawSplit( unsigned int segId, MojoFl
 
 					    if ( idValue == segId )
 					    {
-							changeSet->insert( MojoInt2( index1D, currentIdVolume[ index1D ] ) );
+							(*tileChange)[ currentIdVolume[ index1D ] ].set( index1D );
 						    currentIdVolume[ index1D ] = newId;
 						    tileChanged = true;
                             if ( currentW == 0 )
@@ -3372,7 +3359,7 @@ unsigned int FileSystemTileServer::CompleteDrawSplit( unsigned int segId, MojoFl
 					    if ( !TileContainsId( numVoxelsPerTile, currentIdNumVoxels, currentIdVolume, segId ) )
 					    {
 						    tilesContainingOldId.erase( previousTileIndex );
-						    mNextUndoItem->idTileMapRemoveOldIdSets.GetHashMap()[ segId ].insert( previousTileIndex );
+						    mNextUndoItem->idTileMapRemoveOldIdSets[ segId ].insert( previousTileIndex );
 					    }
 
 				    }
@@ -3475,8 +3462,8 @@ void FileSystemTileServer::CommitAdjustChange( unsigned int segId, MojoFloat3 po
 
 		PrepForNextUndoRedoChange();
 		mNextUndoItem->newId = segId;
-		mNextUndoItem->oldId = 0;
-        std::set< MojoInt2, Core::Int2Comparator > *changeSet;
+
+		TileChangeIdMap *tileChange;
 
         int currentW = 0;
         std::queue< MojoInt4 > tileQueue;
@@ -3524,13 +3511,12 @@ void FileSystemTileServer::CommitAdjustChange( unsigned int segId, MojoFloat3 po
                         if ( !tileChanged )
                         {
                             //
-                            // Create the undo change set for this tile
+                            // Get or create the change record for this tile
                             //
-					        changeSet = 
-						        &mNextUndoItem->changeSets.GetHashMap()[ CreateTileString( tileIndex ) ];
+							tileChange = &mNextUndoItem->tileChangeMap[ tileIndex ];
                         }
 
-                        changeSet->insert( MojoInt2( tileIndex1D, currentIdVolume[ tileIndex1D ] ) );
+						(*tileChange)[ currentIdVolume[ tileIndex1D ] ].set( tileIndex1D );
                         currentIdVolume[ tileIndex1D ] = segId;
                         tileChanged = true;
 
@@ -3578,7 +3564,7 @@ void FileSystemTileServer::CommitAdjustChange( unsigned int segId, MojoFloat3 po
 
                     for ( std::map< unsigned int, long >::iterator removedIt = idChangeCounts.begin(); removedIt != idChangeCounts.end(); ++removedIt )
                     {
-                        mNextUndoItem->idTileMapRemoveOldIdSets.GetHashMap()[ removedIt->first ].insert( tileIndex );
+                        mNextUndoItem->idTileMapRemoveOldIdSets[ removedIt->first ].insert( tileIndex );
 
                         FileSystemTileSet tilesContainingOldId = mSegmentInfoManager.GetTiles( removedIt->first );
                         tilesContainingOldId.erase( tileIndex );
@@ -3593,200 +3579,6 @@ void FileSystemTileServer::CommitAdjustChange( unsigned int segId, MojoFloat3 po
 
             }
         }
-
-
-  //      //
-		//// fill up in w
-		////
-
-  //      currentW = currentW + 1;
-  //      std::swap(tileQueue, wQueue);
-
-		//tileLoaded = false;
-		//tileChanged = false;
-
-  //      MojoInt4 thisVoxel;
-  //      MojoInt4 tileIndex;
-		//MojoInt4 previousTileIndex;
-  //      MojoInt3 currentIdNumVoxels;
-
-  //      std::set< int >oldIds;
-
-		//while ( currentW < numTiles.w )
-		//{
-		//	Core::Printf( "Adjusting at w=", currentW, "." );
-		//	while ( tileQueue.size() > 0 )
-		//	{
-		//		thisVoxel = tileQueue.front();
-		//		tileQueue.pop();
-
-		//		//
-		//		// Find the tile for this pixel
-		//		//
-		//		tileIndex = MojoInt4( thisVoxel.x / numVoxelsPerTile.x,
-		//			thisVoxel.y / numVoxelsPerTile.y,
-		//			thisVoxel.z / numVoxelsPerTile.z,
-		//			currentW);
-
-		//		//
-		//		// Load tile if necessary
-		//		//
-		//		if ( !tileLoaded || previousTileIndex.x != tileIndex.x ||
-		//			previousTileIndex.y != tileIndex.y ||
-		//			previousTileIndex.z != tileIndex.z ||
-		//			previousTileIndex.w != tileIndex.w )
-		//		{
-		//			if ( tileLoaded )
-		//			{
-		//				//
-		//				// Save and unload the previous tile
-		//				//
-		//				if ( tileChanged )
-		//				{
-		//					SaveTile( previousTileIndex, volumeDescriptions );
-
-		//					//
-		//					// Update the idTileMap
-		//					//
-
-		//					//
-		//					// Add this tile to the newId map
-		//					//
-		//					if ( tilesContainingNewId.find( previousTileIndex ) == tilesContainingNewId.end() )
-		//					{
-		//						mNextUndoItem->idTileMapAddNewId.insert ( previousTileIndex );
-		//					}
-		//					tilesContainingNewId.insert( previousTileIndex );
-
-  //                          //
-  //                          // Check overwritten ids to see if they should be removed from the idTileMap
-  //                          //
-  //                          for ( int tileIndex1D = 0; tileIndex1D < nVoxels; ++tileIndex1D )
-  //                          {
-		//						std::set< int >::iterator matchIt = oldIds.find( mSegmentInfoManager.GetIdForLabel( currentIdVolume[ tileIndex1D ] ) );
-  //                              if ( matchIt != oldIds.end() )
-  //                              {
-  //                                  oldIds.erase( matchIt );
-
-  //                                  if ( oldIds.size() == 0 )
-  //                                      break;
-  //                              }
-  //                          }
-
-  //                          for ( std::set< int >::iterator removedIt = oldIds.begin(); removedIt != oldIds.end(); ++removedIt )
-  //                          {
-  //                              mNextUndoItem->idTileMapRemoveOldIdSets.GetHashMap()[ *removedIt ].insert( tileIndex );
-
-  //                              FileSystemTileSet tilesContainingOldId = mSegmentInfoManager.GetTiles( *removedIt );
-  //                              tilesContainingOldId.erase( tileIndex );
-  //                              mSegmentInfoManager.SetTiles( *removedIt, tilesContainingOldId );
-  //                          }
-
-		//				}
-		//				UnloadTile( previousTileIndex );
-  //                      oldIds.clear();
-		//			}
-
-		//			//
-		//			// Load the current tile
-		//			//
-		//			volumeDescriptions = LoadTile( tileIndex );
-		//			previousTileIndex = tileIndex;
-		//			currentIdVolume = (int*)volumeDescriptions.Get( "IdMap" ).data;
-		//			currentIdNumVoxels = volumeDescriptions.Get( "IdMap" ).numVoxels;
-		//			tileLoaded = true;
-		//			tileChanged = false;
-
-		//		}
-		//		int tileX = thisVoxel.x % numVoxelsPerTile.x;
-		//		int tileY = thisVoxel.y % numVoxelsPerTile.y;
-
-		//		MojoInt3 index3D = MojoInt3( tileX, tileY, 0 );
-		//		int  index1D = Mojo::Core::Index3DToIndex1D( index3D, currentIdNumVoxels );
-		//		int  idValue = mSegmentInfoManager.GetIdForLabel( currentIdVolume[ index1D ] );
-
-  //              if ( idValue != segId )
-  //              {
-  //                  if ( !tileChanged )
-  //                  {
-  //                      //
-  //                      // Create the undo change set for this tile
-  //                      //
-		//			    changeSet = 
-		//				    &mNextUndoItem->changeSets.GetHashMap()[ CreateTileString( tileIndex ) ];
-  //                  }
-
-  //                  changeSet->insert( MojoInt2( index1D, currentIdVolume[ index1D ] ) );
-  //                  oldIds.insert( idValue );
-  //                  currentIdVolume[ index1D ] = segId;
-  //                  tileChanged = true;
-
-  //                  if ( tilesContainingNewId.find( tileIndex ) == tilesContainingNewId.end() )
-  //                  {
-  //                      tilesContainingNewId.insert( tileIndex );
-  //                  }
-
-  //                  //
-		//			// Add a scaled-down w to the queue
-		//			//
-		//			if (currentW < numTiles.w-1) wQueue.push( MojoInt4(thisVoxel.x / 2, thisVoxel.y / 2, thisVoxel.z, currentW+1) );
-  //              }
-
-		//	}
-		//	std::swap(tileQueue, wQueue);
-		//	++currentW;
-		//}
-
-  //      if ( tileLoaded )
-  //      {
-  //          //
-		//	// Save and unload the previous tile
-		//	//
-  //          if ( tileChanged )
-  //          {
-  //              SaveTile( previousTileIndex, volumeDescriptions );
-
-  //              //
-		//		// Update the idTileMap
-		//		//
-
-  //              //
-		//		// Add this tile to the newId map
-		//		//
-		//		if ( tilesContainingNewId.find( previousTileIndex ) == tilesContainingNewId.end() )
-		//		{
-		//			mNextUndoItem->idTileMapAddNewId.insert ( previousTileIndex );
-		//		}
-  //              tilesContainingNewId.insert( previousTileIndex );
-
-  //              //
-  //              // Check overwritten ids to see if they should be removed from the idTileMap
-  //              //
-  //              for ( int tileIndex1D = 0; tileIndex1D < nVoxels; ++tileIndex1D )
-  //              {
-		//			std::set< int >::iterator matchIt = oldIds.find( mSegmentInfoManager.GetIdForLabel( currentIdVolume[ tileIndex1D ] ) );
-  //                  if ( matchIt != oldIds.end() )
-  //                  {
-  //                      oldIds.erase( matchIt );
-
-  //                      if ( oldIds.size() == 0 )
-  //                          break;
-  //                  }
-  //              }
-
-  //              for ( std::set< int >::iterator removedIt = oldIds.begin(); removedIt != oldIds.end(); ++removedIt )
-  //              {
-  //                  mNextUndoItem->idTileMapRemoveOldIdSets.GetHashMap()[ *removedIt ].insert( tileIndex );
-
-  //                  FileSystemTileSet tilesContainingOldId = mSegmentInfoManager.GetTiles( *removedIt );
-  //                  tilesContainingOldId.erase( tileIndex );
-  //                  mSegmentInfoManager.SetTiles( *removedIt, tilesContainingOldId );
-  //              }
-
-  //          }
-  //          UnloadTile( previousTileIndex );
-  //          oldIds.clear();
-  //      }
 
         //
         // Update segment size
@@ -3871,6 +3663,77 @@ std::set< unsigned int > FileSystemTileServer::GetDrawMergeIds( MojoFloat3 point
 
 }
 
+std::map< unsigned int, MojoFloat3 > FileSystemTileServer::GetDrawMergeIdsAndPoints( MojoFloat3 pointTileSpace )
+{
+	std::map< unsigned int, MojoFloat3 > mergeIdsAndPoints;
+
+	if ( mIsSegmentationLoaded )
+    {
+
+        Core::Printf( "\nFinding Merge Ids.\n" );
+
+        Core::HashMap< std::string, Core::VolumeDescription > volumeDescriptions;
+
+        TiledVolumeDescription tiledVolumeDescription = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "IdMap" );
+
+        MojoInt3 numVoxelsPerTile = tiledVolumeDescription.numVoxelsPerTile();
+        int* currentIdVolume;
+        int nVoxels = numVoxelsPerTile.x * numVoxelsPerTile.y;
+
+        int tileCount = 0;
+
+        //
+        // Loop over buffer tiles at w=0
+        //
+        for ( int xd = 0; xd < mSplitWindowNTiles.x; ++xd )
+        {
+            for (int yd = 0; yd < mSplitWindowNTiles.y; ++yd )
+            {
+
+                ++tileCount;
+                //Core::Printf( "Loading distance tile ", tileCount, "." );
+
+                MojoInt4 tileIndex = MojoInt4( mSplitWindowStart.x + xd, mSplitWindowStart.y + yd, mSplitWindowStart.z, 0 );
+                volumeDescriptions = LoadTile( tileIndex );
+                currentIdVolume = (int*)volumeDescriptions.Get( "IdMap" ).data;
+
+                //
+                // Copy distance values into the buffer
+                //
+                int xOffset = xd * numVoxelsPerTile.x;
+                int yOffset = yd * numVoxelsPerTile.y;
+
+                for ( int tileIndex1D = 0; tileIndex1D < nVoxels; ++tileIndex1D )
+                {
+                    int areaX = xOffset + tileIndex1D % numVoxelsPerTile.x;
+                    int areaY = yOffset + tileIndex1D / numVoxelsPerTile.x;
+                    int areaIndex1D = areaX + areaY * mSplitWindowWidth;
+
+                    //RELEASE_ASSERT( areaIndex1D < mSplitWindowNPix );
+
+					if ( mSplitDrawArea[ areaIndex1D ] == REGION_A )
+					{
+						unsigned int idValue = mSegmentInfoManager.GetIdForLabel( currentIdVolume[ tileIndex1D ] );
+						if ( mSegmentInfoManager.GetConfidence( idValue ) < 100 )
+						{
+							mergeIdsAndPoints[ idValue ] = MojoFloat3(
+								((float) tileIndex.x * numVoxelsPerTile.x + tileIndex1D % numVoxelsPerTile.x ) / ((float) numVoxelsPerTile.x ),
+								((float) tileIndex.y * numVoxelsPerTile.y + tileIndex1D / numVoxelsPerTile.x ) / ((float) numVoxelsPerTile.y ),
+								(float)mSplitWindowStart.z );
+						}
+					}
+                }
+
+                UnloadTile( tileIndex );
+
+            }
+        }
+    }
+
+	return mergeIdsAndPoints;
+
+}
+
 unsigned int FileSystemTileServer::CommitDrawMerge( std::set< unsigned int > mergeIds, MojoFloat3 pointTileSpace )
 {
 	unsigned int largestSegId = 0;
@@ -3901,14 +3764,108 @@ unsigned int FileSystemTileServer::CommitDrawMerge( std::set< unsigned int > mer
 			RemapSegmentLabels( mergeIds, largestSegId );
 		}
 
-        ResetDrawMergeState();
-
 	}
+
+    ResetDrawMergeState();
 
 	return largestSegId;
 
 }
 
+unsigned int FileSystemTileServer::CommitDrawMergeCurrentSlice( MojoFloat3 pointTileSpace )
+{
+	std::map< unsigned int, MojoFloat3 > mergeIdsAndPoints = GetDrawMergeIdsAndPoints( pointTileSpace );
+
+	unsigned int largestSegId = 0;
+
+	if ( mIsSegmentationLoaded && mergeIdsAndPoints.size() == 1 )
+	{
+		largestSegId = mergeIdsAndPoints.begin()->first;
+	}
+    else if ( mIsSegmentationLoaded && mergeIdsAndPoints.size() > 1 )
+	{
+		//
+		// Find the largest segId to merge segments to
+		//
+
+		long maxSize = 0;
+
+		for ( std::map< unsigned int, MojoFloat3 >::iterator mergeIt = mergeIdsAndPoints.begin(); mergeIt != mergeIdsAndPoints.end(); ++mergeIt )
+		{
+			if ( mergeIt->first != 0 && mSegmentInfoManager.GetVoxelCount( mergeIt->first ) > maxSize )
+			{
+				maxSize = mSegmentInfoManager.GetVoxelCount( mergeIt->first );
+				largestSegId = mergeIt->first;
+			}
+		}
+
+		//
+		// Merge to this segment
+		//
+		if ( largestSegId != 0 )
+		{
+			mergeIdsAndPoints.erase( largestSegId );
+			for ( std::map< unsigned int, MojoFloat3 >::iterator mergeIt = mergeIdsAndPoints.begin(); mergeIt != mergeIdsAndPoints.end(); ++mergeIt )
+			{
+				ReplaceSegmentationLabelCurrentSlice( mergeIt->first, largestSegId, mergeIt->second );
+			}
+		}
+
+	}
+
+    ResetDrawMergeState();
+
+	return largestSegId;
+
+}
+
+unsigned int FileSystemTileServer::CommitDrawMergeCurrentConnectedComponent( MojoFloat3 pointTileSpace )
+{
+	std::map< unsigned int, MojoFloat3 > mergeIdsAndPoints = GetDrawMergeIdsAndPoints( pointTileSpace );
+
+	unsigned int largestSegId = 0;
+
+
+	if ( mIsSegmentationLoaded && mergeIdsAndPoints.size() == 1 )
+	{
+		largestSegId = mergeIdsAndPoints.begin()->first;
+	}
+    else if ( mIsSegmentationLoaded && mergeIdsAndPoints.size() > 1 )
+	{
+		//
+		// Find the largest segId to merge segments to
+		//
+
+		long maxSize = 0;
+
+		for ( std::map< unsigned int, MojoFloat3 >::iterator mergeIt = mergeIdsAndPoints.begin(); mergeIt != mergeIdsAndPoints.end(); ++mergeIt )
+		{
+			if ( mergeIt->first != 0 && mSegmentInfoManager.GetVoxelCount( mergeIt->first ) > maxSize )
+			{
+				maxSize = mSegmentInfoManager.GetVoxelCount( mergeIt->first );
+				largestSegId = mergeIt->first;
+			}
+		}
+
+		//
+		// Merge to this segment
+		//
+		if ( largestSegId != 0 )
+		{
+			mergeIdsAndPoints.erase( largestSegId );
+			for ( std::map< unsigned int, MojoFloat3 >::iterator mergeIt = mergeIdsAndPoints.begin(); mergeIt != mergeIdsAndPoints.end(); ++mergeIt )
+			{
+				ReplaceSegmentationLabelCurrentConnectedComponent( mergeIt->first, largestSegId, mergeIt->second );
+			}
+		}
+
+	}
+
+    ResetDrawMergeState();
+
+	return largestSegId;
+
+}
 void FileSystemTileServer::FindBoundaryJoinPoints2D( unsigned int segId )
 {
 	//
@@ -4510,7 +4467,6 @@ std::list< unsigned int > FileSystemTileServer::UndoChange()
 		MojoInt4 numTiles = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "IdMap" ).numTiles();
 		MojoInt3 numVoxelsPerTile = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "IdMap" ).numVoxelsPerTile();
 
-	    unsigned int oldId = UndoItem.oldId;
 	    unsigned int newId = UndoItem.newId;
 
 	    if ( newId != 0 && mIsSegmentationLoaded )
@@ -4528,113 +4484,54 @@ std::list< unsigned int > FileSystemTileServer::UndoChange()
 				}
 			}
 
-			//if ( oldId != 0 && newId != oldId )
-			//{
-			//	Core::Printf( "\nUndo operation: Changing segmentation label ", newId, " back to segmentation label ", oldId, "...\n" );
-			//	stdext::hash_map < std::string, std::bitset< TILE_SIZE * TILE_SIZE > >::iterator changeIt;
-
-			//	for ( changeIt = UndoItem.changePixels.GetHashMap().begin(); changeIt != UndoItem.changePixels.GetHashMap().end(); ++changeIt )
-			//	{
-
-			//		MojoInt4 tileIndex = CreateTileIndex( changeIt->first );
-
-			//		//
-			//		// load tile
-			//		//
-			//		Core::HashMap< std::string, Core::VolumeDescription > volumeDescriptions = LoadTile( tileIndex );
-			//		int* currentIdVolume    = (int*)volumeDescriptions.Get( "IdMap" ).data;
-
-			//		//
-			//		// Get or create the change bitset for this tile
-			//		//
-			//		std::bitset< TILE_SIZE * TILE_SIZE > *changeBits = &changeIt->second;
-
-			//		//
-			//		// replace the old id and color with the new id and color...
-			//		//
-			//		MojoInt3 numVoxels = volumeDescriptions.Get( "IdMap" ).numVoxels;
-			//		for ( int zv = 0; zv < numVoxels.z; zv++ )
-			//		{
-			//			for ( int yv = 0; yv < numVoxels.y; yv++ )
-			//			{
-			//				for ( int xv = 0; xv < numVoxels.x; xv++ )
-			//				{
-			//					MojoInt3 index3D = MojoInt3( xv, yv, zv );
-			//					int  index1D = Core::Index3DToIndex1D( index3D, numVoxels );
-
-			//					if ( changeBits->test( index1D ) )
-			//					{
-			//						if ( tileIndex.w == 0 )
-			//						{
-			//							++voxelChangeCount;
-			//							++idChangeCounts[ oldId ];
-			//						}
-			//						currentIdVolume[ index1D ] = oldId;
-			//					}
-			//				}
-			//			}
-			//		}
-
-			//		//
-			//		// save tile
-			//		//
-			//		SaveTile( tileIndex, volumeDescriptions );
-
-			//		//
-			//		// unload tile
-			//		//
-			//		UnloadTile( tileIndex );
-
-			//	}
-			//}
-
-			if ( UndoItem.changeSets.GetHashMap().size() > 0 )
+			if ( UndoItem.tileChangeMap.size() > 0 )
 			{
 				Core::Printf( "\nUndo operation: changing segmentation label ", newId, " back to multiple segmentation labels...\n" );
 
 				stdext::hash_map< std::string, std::set< MojoInt2, Core::Int2Comparator > >::iterator changeSetIt;
 
-				for ( changeSetIt = UndoItem.changeSets.GetHashMap().begin(); changeSetIt != UndoItem.changeSets.GetHashMap().end(); ++changeSetIt )
+				for ( TileChangeMap::iterator tileChangeIt = UndoItem.tileChangeMap.begin(); tileChangeIt != UndoItem.tileChangeMap.end(); ++tileChangeIt )
 				{
 
-					MojoInt4 tileIndex = CreateTileIndex( changeSetIt->first );
+					MojoInt4 tileIndex = tileChangeIt->first;
 
-					//
-					// load tile
-					//
-					Core::HashMap< std::string, Core::VolumeDescription > volumeDescriptions = LoadTile( tileIndex );
-					unsigned int* currentIdVolume = (unsigned int*)volumeDescriptions.Get( "IdMap" ).data;
-
-					//
-					// Get the changes
-					//
-					std::set< MojoInt2, Core::Int2Comparator > *changeBits = &changeSetIt->second;
-
-					//
-					// replace the new id and color with the previous id and color...
-					//
-					for ( std::set< MojoInt2, Core::Int2Comparator >::iterator indexIt = changeSetIt->second.begin(); indexIt != changeSetIt->second.end(); ++indexIt )
+					if ( tileIndex.w == 0 )
 					{
-						if ( tileIndex.w == 0 )
+						//
+						// load tile
+						//
+						Core::HashMap< std::string, Core::VolumeDescription > volumeDescriptions = LoadTile( tileIndex );
+						unsigned int* currentIdVolume = (unsigned int*)volumeDescriptions.Get( "IdMap" ).data;
+
+						//
+						// replace the new id and color with the previous id and color(s)...
+						//
+						for ( TileChangeIdMap::iterator changeBitsIt = tileChangeIt->second.begin(); changeBitsIt != tileChangeIt->second.end(); ++changeBitsIt )
 						{
-							++voxelChangeCount;
-							++idChangeCounts[ mSegmentInfoManager.GetIdForLabel( indexIt->y ) ];
+							for ( int i = 0; i < changeBitsIt->second.size(); ++i )
+							{
+								if ( changeBitsIt->second[ i ] )
+								{
+									++voxelChangeCount;
+									++idChangeCounts[ mSegmentInfoManager.GetIdForLabel( changeBitsIt->first ) ];
+									//RELEASE_ASSERT( indexIt->x < TILE_SIZE * TILE_SIZE );
+									currentIdVolume[ i ] = changeBitsIt->first;
+								}
+							}
 						}
-						RELEASE_ASSERT( indexIt->x < TILE_SIZE * TILE_SIZE );
-						currentIdVolume[ indexIt->x ] = indexIt->y;
+
+						//
+						// save tile
+						//
+						SaveTile( tileIndex, volumeDescriptions );
+						StrideUpIdTileChange( numTiles, numVoxelsPerTile, tileIndex, currentIdVolume );
+
+						//
+						// unload tile
+						//
+						UnloadTile( tileIndex );
+
 					}
-
-					//
-					// save tile
-					//
-					SaveTile( tileIndex, volumeDescriptions );
-					StrideUpIdTileChange( numTiles, numVoxelsPerTile, tileIndex, currentIdVolume );
-
-					//
-					// unload tile
-					//
-					UnloadTile( tileIndex );
-			 
 				}
 			}
 
@@ -4660,7 +4557,7 @@ std::list< unsigned int > FileSystemTileServer::UndoChange()
 		    //
 		    // put removed tiles back into the "oldId" idTileMap (create a new idTileMap if necessary)
 		    //
-            for ( std::hash_map< unsigned int, FileSystemTileSet >::iterator oldIdIt = UndoItem.idTileMapRemoveOldIdSets.GetHashMap().begin(); oldIdIt != UndoItem.idTileMapRemoveOldIdSets.GetHashMap().end(); ++oldIdIt )
+            for ( std::map< unsigned int, FileSystemTileSet >::iterator oldIdIt = UndoItem.idTileMapRemoveOldIdSets.begin(); oldIdIt != UndoItem.idTileMapRemoveOldIdSets.end(); ++oldIdIt )
             {
                 FileSystemTileSet oldTiles = mSegmentInfoManager.GetTiles( oldIdIt->first );
                 oldTiles.insert( oldIdIt->second.begin(), oldIdIt->second.end() );
@@ -4702,7 +4599,6 @@ std::list< unsigned int > FileSystemTileServer::RedoChange()
 		MojoInt4 numTiles = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "IdMap" ).numTiles();
 		MojoInt3 numVoxelsPerTile = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "IdMap" ).numVoxelsPerTile();
 
-	    int oldId = RedoItem.oldId;
 	    int newId = RedoItem.newId;
 
 	    if ( newId != 0 && mIsSegmentationLoaded )
@@ -4720,113 +4616,56 @@ std::list< unsigned int > FileSystemTileServer::RedoChange()
 				}
 			}
 
-			//if ( oldId != 0 && newId != oldId )
-			//{
-			//	Core::Printf( "\nRedo operation: changing segmentation label ", oldId, " back to segmentation label ", newId, "...\n" );
-			//	stdext::hash_map < std::string, std::bitset< TILE_SIZE * TILE_SIZE > >::iterator changeIt;
-
-			//	for ( changeIt = RedoItem.changePixels.GetHashMap().begin(); changeIt != RedoItem.changePixels.GetHashMap().end(); ++changeIt )
-			//	{
-
-			//		MojoInt4 tileIndex = CreateTileIndex( changeIt->first );
-
-			//		//
-			//		// load tile
-			//		//
-			//		Core::HashMap< std::string, Core::VolumeDescription > volumeDescriptions = LoadTile( tileIndex );
-			//		int* currentIdVolume    = (int*)volumeDescriptions.Get( "IdMap" ).data;
-
-			//		//
-			//		// Get or create the change bitset for this tile
-			//		//
-			//		std::bitset< TILE_SIZE * TILE_SIZE > *changeBits = &changeIt->second;
-
-			//		//
-			//		// replace the old id and color with the new id and color...
-			//		//
-			//		MojoInt3 numVoxels = volumeDescriptions.Get( "IdMap" ).numVoxels;
-			//		for ( int zv = 0; zv < numVoxels.z; zv++ )
-			//		{
-			//			for ( int yv = 0; yv < numVoxels.y; yv++ )
-			//			{
-			//				for ( int xv = 0; xv < numVoxels.x; xv++ )
-			//				{
-			//					MojoInt3 index3D = MojoInt3( xv, yv, zv );
-			//					int  index1D = Core::Index3DToIndex1D( index3D, numVoxels );
-
-			//					if ( changeBits->test( index1D ) )
-			//					{
-			//						if ( tileIndex.w == 0 )
-			//						{
-			//							++voxelChangeCount;
-			//							++idChangeCounts[ currentIdVolume[ index1D ] ];
-			//						}
-			//						currentIdVolume[ index1D ] = newId;
-			//					}
-			//				}
-			//			}
-			//		}
-
-			//		//
-			//		// save tile
-			//		//
-			//		SaveTile( tileIndex, volumeDescriptions );
-
-			//		//
-			//		// unload tile
-			//		//
-			//		UnloadTile( tileIndex );
-			// 
-			//	}
-			//}
-
-			if ( RedoItem.changeSets.GetHashMap().size() > 0 )
+			if ( RedoItem.tileChangeMap.size() > 0 )
 			{
 
 				Core::Printf( "\nRedo operation: changing multiple segmentation labels back to ", newId, "...\n" );
 				stdext::hash_map< std::string, std::set< MojoInt2, Core::Int2Comparator > >::iterator changeSetIt;
 
-				for ( changeSetIt = RedoItem.changeSets.GetHashMap().begin(); changeSetIt != RedoItem.changeSets.GetHashMap().end(); ++changeSetIt )
+				for ( TileChangeMap::iterator tileChangeIt = RedoItem.tileChangeMap.begin(); tileChangeIt != RedoItem.tileChangeMap.end(); ++tileChangeIt )
 				{
 
-					MojoInt4 tileIndex = CreateTileIndex( changeSetIt->first );
+					MojoInt4 tileIndex = tileChangeIt->first;
 
-					//
-					// load tile
-					//
-					Core::HashMap< std::string, Core::VolumeDescription > volumeDescriptions = LoadTile( tileIndex );
-					unsigned int* currentIdVolume = (unsigned int*)volumeDescriptions.Get( "IdMap" ).data;
-
-					//
-					// Get or create the change bitset for this tile
-					//
-					std::set< MojoInt2, Core::Int2Comparator > *changeBits = &changeSetIt->second;
-
-					//
-					// replace the old id and color with the new id and color...
-					//
-					for ( std::set< MojoInt2, Core::Int2Comparator >::iterator indexIt = changeSetIt->second.begin(); indexIt != changeSetIt->second.end(); ++indexIt )
+					if ( tileIndex.w == 0 )
 					{
-						if ( tileIndex.w == 0 )
+
+						//
+						// load tile
+						//
+						Core::HashMap< std::string, Core::VolumeDescription > volumeDescriptions = LoadTile( tileIndex );
+						unsigned int* currentIdVolume = (unsigned int*)volumeDescriptions.Get( "IdMap" ).data;
+
+						//
+						// replace the old id and color with the new id and color...
+						//
+						for ( TileChangeIdMap::iterator changeBitsIt = tileChangeIt->second.begin(); changeBitsIt != tileChangeIt->second.end(); ++changeBitsIt )
 						{
-							++voxelChangeCount;
-							++idChangeCounts[ mSegmentInfoManager.GetIdForLabel( currentIdVolume[ indexIt->x ] ) ];
+							for ( int i = 0; i < changeBitsIt->second.size(); ++i )
+							{
+								if ( changeBitsIt->second[ i ] )
+								{
+									++voxelChangeCount;
+									++idChangeCounts[ mSegmentInfoManager.GetIdForLabel( changeBitsIt->first ) ];
+									//RELEASE_ASSERT( indexIt->x < TILE_SIZE * TILE_SIZE );
+									//RELEASE_ASSERT( currentIdVolume[ i ] == changeBitsIt->first );
+									currentIdVolume[ i ] = newId;
+								}
+							}
 						}
-						RELEASE_ASSERT( indexIt->x < TILE_SIZE * TILE_SIZE );
-						currentIdVolume[ indexIt->x ] = newId;
+
+						//
+						// save tile
+						//
+						SaveTile( tileIndex, volumeDescriptions );
+						StrideUpIdTileChange( numTiles, numVoxelsPerTile, tileIndex, currentIdVolume );
+
+						//
+						// unload tile
+						//
+						UnloadTile( tileIndex );
+
 					}
-
-					//
-					// save tile
-					//
-					SaveTile( tileIndex, volumeDescriptions );
-					StrideUpIdTileChange( numTiles, numVoxelsPerTile, tileIndex, currentIdVolume );
-
-					//
-					// unload tile
-					//
-					UnloadTile( tileIndex );
-			 
 				}
 			}
 
@@ -4849,7 +4688,7 @@ std::list< unsigned int > FileSystemTileServer::RedoChange()
             //
             // remove tiles from the "oldId" idTileMap
             //
-            for ( std::hash_map< unsigned int, FileSystemTileSet >::iterator oldIdIt = RedoItem.idTileMapRemoveOldIdSets.GetHashMap().begin(); oldIdIt != RedoItem.idTileMapRemoveOldIdSets.GetHashMap().end(); ++oldIdIt )
+            for ( std::map< unsigned int, FileSystemTileSet >::iterator oldIdIt = RedoItem.idTileMapRemoveOldIdSets.begin(); oldIdIt != RedoItem.idTileMapRemoveOldIdSets.end(); ++oldIdIt )
             {
                 FileSystemTileSet oldTiles = mSegmentInfoManager.GetTiles( oldIdIt->first );
                 for ( FileSystemTileSet::iterator eraseIterator = oldIdIt->second.begin(); eraseIterator != oldIdIt->second.end(); ++eraseIterator )

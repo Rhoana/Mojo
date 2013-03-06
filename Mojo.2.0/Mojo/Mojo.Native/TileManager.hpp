@@ -108,6 +108,8 @@ public:
     void                                                  ResetDrawMergeState( MojoFloat3 pointTileSpace );
     void                                                  PrepForDrawMerge( MojoFloat3 pointTileSpace );
     unsigned int                                          CommitDrawMerge( MojoFloat3 pointTileSpace );
+    unsigned int                                          CommitDrawMergeCurrentSlice( MojoFloat3 pointTileSpace );
+    unsigned int                                          CommitDrawMergeCurrentConnectedComponent( MojoFloat3 pointTileSpace );
 
 	void                                                  UndoChange();
 	void                                                  RedoChange();

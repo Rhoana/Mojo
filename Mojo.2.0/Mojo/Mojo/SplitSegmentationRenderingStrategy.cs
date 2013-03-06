@@ -278,7 +278,7 @@ namespace Mojo
             mPass.Apply( deviceContext );
             deviceContext.Draw( QUAD_NUM_VERTICES, 0 );
             
-            mDebugRenderer.RenderQuadWireframeOnly( deviceContext, p1, p2, p3, p4, new Vector3( 1, 0, 0 ), camera );
+            //mDebugRenderer.RenderQuadWireframeOnly( deviceContext, p1, p2, p3, p4, new Vector3( 1, 0, 0 ), camera );
 
         }
     }
