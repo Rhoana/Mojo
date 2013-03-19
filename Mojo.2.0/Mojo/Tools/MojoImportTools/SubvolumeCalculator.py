@@ -25,10 +25,15 @@ import colorsys
 #min_slices_per_subvolume      = 100
 #overlap_slices                = 1
 
-input_mojo_path               = 'C:\\dev\\datasets\\ac3x75_compress\\mojo'
-output_subvolume_path         = 'C:\\dev\\datasets\\ac3x75_compress_subvolumes'
-min_slices_per_subvolume      = 25
+input_mojo_path               = 'D:\\dev\\datasets\\Cube2\\mojo'
+output_subvolume_path         = 'D:\\dev\\datasets\\Cube2_Subvolumes'
+min_slices_per_subvolume      = 100
 overlap_slices                = 1
+
+#input_mojo_path               = 'C:\\dev\\datasets\\ac3x75_compress\\mojo'
+#output_subvolume_path         = 'C:\\dev\\datasets\\ac3x75_compress_subvolumes'
+#min_slices_per_subvolume      = 25
+#overlap_slices                = 1
 
 
 
@@ -77,7 +82,6 @@ cur = in_con.cursor()
 cur.execute('SELECT MAX(id) FROM segmentInfo;')
 id_max = cur.fetchone()[0]
 
-segment_sizes = np.zeros(id_max + 1, dtype=np.int64)
 segment_remap = np.arange(0, id_max + 1, dtype=np.uint32)
 segment_confidence = np.zeros(id_max + 1, dtype=np.int8)
 segment_names = (id_max + 1) * [ None ]
@@ -125,11 +129,11 @@ subvolume_start_indices = range(0, n_subvolumes * subvolume_size, subvolume_size
 
 
 ## Loop for each subvolume
-for subvolume_i in range(len(subvolume_start_indices)):
+for subvolume_i in [len(subvolume_start_indices) - 1]: #range(len(subvolume_start_indices)):
 
     subvolume_first_z = subvolume_start_indices[subvolume_i]
     if subvolume_i == len(subvolume_start_indices) - 1:
-        subvolume_last_z = original_image_num_tiles_z
+        subvolume_last_z = original_image_num_tiles_z - 1
     else:
         subvolume_last_z = subvolume_start_indices[subvolume_i + 1] - 1 + overlap_slices
 
@@ -145,9 +149,10 @@ for subvolume_i in range(len(subvolume_start_indices)):
     output_color_map_file          = output_ids_path + '\\colorMap.hdf5'
     output_segment_info_db_file    = output_ids_path + '\\segmentInfo.db'
 
+    segment_sizes = np.zeros(id_max + 1, dtype=np.int64)
     id_tile_list         = [];
 
-    for tile_index_z in range(subvolume_last_z - subvolume_first_z):
+    for tile_index_z in range(subvolume_last_z - subvolume_first_z + 1):
         from_tile_index_z = subvolume_first_z + tile_index_z
 
         ## Copy tile images (measure segment sizes for w=0)
