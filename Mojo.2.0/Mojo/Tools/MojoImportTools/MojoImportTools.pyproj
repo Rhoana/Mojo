@@ -5,7 +5,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{b0725c50-90e7-4634-846f-5c793765168a}</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>SubvolumeCalculator.py</StartupFile>
+    <StartupFile>ImageTileCalculator.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
