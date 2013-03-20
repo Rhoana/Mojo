@@ -389,19 +389,24 @@ inline void TileManager::LoadSegmentationInternal( TiledDatasetDescription& tile
     //
     mIdColorMap = mTileServer->GetIdColorMap();
 
-    uchar4* idColorMap = new uchar4[ mIdColorMap->shape( 0 ) ];
+    unsigned char* idColorMap = new unsigned char[ mIdColorMap->shape( 0 ) * 4 ];
 
     unsigned int i;
     for ( i = 0; i < mIdColorMap->shape( 0 ); i++ )
-        idColorMap[ i ] = make_uchar4( (*mIdColorMap)( i, 0 ), (*mIdColorMap)( i, 1 ), (*mIdColorMap)( i, 2 ), 255 );
+	{
+        idColorMap[ i * 4 ] = (*mIdColorMap)( i, 0 );
+		idColorMap[ i * 4 + 1 ] = (*mIdColorMap)( i, 1 );
+		idColorMap[ i * 4 + 2 ] = (*mIdColorMap)( i, 2 );
+		idColorMap[ i * 4 + 3 ] = 255;
+	}
 
     D3D11_BUFFER_DESC bufferDesc;
     ZeroMemory( &bufferDesc, sizeof( D3D11_BUFFER_DESC ) );
 
-    bufferDesc.ByteWidth           = (UINT) mIdColorMap->shape( 0 ) * sizeof( uchar4 );
+    bufferDesc.ByteWidth           = (UINT) mIdColorMap->shape( 0 ) * sizeof( unsigned char ) * 4;
     bufferDesc.Usage               = D3D11_USAGE_DEFAULT;
     bufferDesc.BindFlags           = (UINT) D3D11_BIND_SHADER_RESOURCE;
-    bufferDesc.StructureByteStride = (UINT) sizeof( uchar4 );
+    bufferDesc.StructureByteStride = (UINT) sizeof( unsigned char ) * 4;
     
     D3D11_SHADER_RESOURCE_VIEW_DESC shaderResourceViewDesc;
     ZeroMemory( &shaderResourceViewDesc, sizeof( D3D11_SHADER_RESOURCE_VIEW_DESC ) );
@@ -419,8 +424,8 @@ inline void TileManager::LoadSegmentationInternal( TiledDatasetDescription& tile
         0,
         NULL,
         idColorMap,
-        (UINT) mIdColorMap->shape( 0 ) * sizeof( uchar4 ),
-        (UINT) mIdColorMap->shape( 0 ) * sizeof( uchar4 ) );
+        (UINT) mIdColorMap->shape( 0 ) * sizeof( unsigned char ) * 4,
+        (UINT) mIdColorMap->shape( 0 ) * sizeof( unsigned char ) * 4 );
 
     delete[] idColorMap;
 
@@ -434,20 +439,20 @@ inline void TileManager::LoadSegmentationInternal( TiledDatasetDescription& tile
 
 	size_t nSegmentsToAllocate = mLabelIdMap->shape( 0 );
 
-	uint1* labelIdMap = new uint1 [ nSegmentsToAllocate ];
+	unsigned int* labelIdMap = new unsigned int [ nSegmentsToAllocate ];
 
 	for ( i = 0; i < mLabelIdMap->shape( 0 ); ++i )
 	{
-		labelIdMap[ i ] = make_uint1( (*mLabelIdMap)( i ) );
+		labelIdMap[ i ] = ( (*mLabelIdMap)( i ) );
 	}
 
     //D3D11_BUFFER_DESC bufferDesc;
     ZeroMemory( &bufferDesc, sizeof( D3D11_BUFFER_DESC ) );
 
-    bufferDesc.ByteWidth           = (UINT) nSegmentsToAllocate * sizeof( uint1 );
+    bufferDesc.ByteWidth           = (UINT) nSegmentsToAllocate * sizeof( unsigned int );
     bufferDesc.Usage               = D3D11_USAGE_DEFAULT;
     bufferDesc.BindFlags           = (UINT) D3D11_BIND_SHADER_RESOURCE;
-    bufferDesc.StructureByteStride = (UINT) sizeof( uint1 );
+    bufferDesc.StructureByteStride = (UINT) sizeof( unsigned int );
     
     //D3D11_SHADER_RESOURCE_VIEW_DESC shaderResourceViewDesc;
     ZeroMemory( &shaderResourceViewDesc, sizeof( D3D11_SHADER_RESOURCE_VIEW_DESC ) );
@@ -465,8 +470,8 @@ inline void TileManager::LoadSegmentationInternal( TiledDatasetDescription& tile
         0,
         NULL,
         labelIdMap,
-        (UINT) nSegmentsToAllocate * sizeof( uint1 ),
-        (UINT) nSegmentsToAllocate * sizeof( uint1 ) );
+        (UINT) nSegmentsToAllocate * sizeof( unsigned int ),
+        (UINT) nSegmentsToAllocate * sizeof( unsigned int ) );
 
 	delete[] labelIdMap;
 
@@ -478,11 +483,11 @@ inline void TileManager::LoadSegmentationInternal( TiledDatasetDescription& tile
 
     mIdConfidenceMap = mTileServer->GetIdConfidenceMap();
 
-    uchar1* idConfidenceMap = new uchar1[ mIdConfidenceMap->shape( 0 ) ];
+    unsigned char* idConfidenceMap = new unsigned char[ mIdConfidenceMap->shape( 0 ) ];
 
 	for ( i = 0; i < mIdConfidenceMap->shape( 0 ); ++i )
 	{
-		idConfidenceMap[ i ] = make_uchar1( (*mIdConfidenceMap)( i ) );
+		idConfidenceMap[ i ] = ( (*mIdConfidenceMap)( i ) );
 		//if ( (*mIdConfidenceMap)( i ) > 0 )
 		//{
 		//	Core::Printf( "Segment ", i, " is locked(", (*mIdConfidenceMap)( i ), ").");
@@ -492,10 +497,10 @@ inline void TileManager::LoadSegmentationInternal( TiledDatasetDescription& tile
     //D3D11_BUFFER_DESC bufferDesc;
     ZeroMemory( &bufferDesc, sizeof( D3D11_BUFFER_DESC ) );
 
-    bufferDesc.ByteWidth           = (UINT) nSegmentsToAllocate * sizeof( uchar1 );
+    bufferDesc.ByteWidth           = (UINT) nSegmentsToAllocate * sizeof( unsigned char );
     bufferDesc.Usage               = D3D11_USAGE_DEFAULT;
     bufferDesc.BindFlags           = (UINT) D3D11_BIND_SHADER_RESOURCE;
-    bufferDesc.StructureByteStride = (UINT) sizeof( uchar1 );
+    bufferDesc.StructureByteStride = (UINT) sizeof( unsigned char );
     
     //D3D11_SHADER_RESOURCE_VIEW_DESC shaderResourceViewDesc;
     ZeroMemory( &shaderResourceViewDesc, sizeof( D3D11_SHADER_RESOURCE_VIEW_DESC ) );
@@ -513,8 +518,8 @@ inline void TileManager::LoadSegmentationInternal( TiledDatasetDescription& tile
         0,
         NULL,
         idConfidenceMap,
-        (UINT) nSegmentsToAllocate * sizeof( uchar1 ),
-        (UINT) nSegmentsToAllocate * sizeof( uchar1 ) );
+        (UINT) nSegmentsToAllocate * sizeof( unsigned char ),
+        (UINT) nSegmentsToAllocate * sizeof( unsigned char ) );
 
 	delete[] idConfidenceMap;
 

@@ -1,5 +1,0 @@
-C:\dev\Mojo\Mojo.2.0\Mojo\Tools\Mojo.Xml\bin\x86\Release\Mojo.Xml.dll
-C:\dev\Mojo\Mojo.2.0\Mojo\Tools\Mojo.Xml\bin\x86\Release\Mojo.Xml.pdb
-C:\dev\Mojo\Mojo.2.0\Mojo\Tools\Mojo.Xml\obj\x86\Release\ResolveAssemblyReference.cache
-C:\dev\Mojo\Mojo.2.0\Mojo\Tools\Mojo.Xml\obj\x86\Release\Mojo.Xml.dll
-C:\dev\Mojo\Mojo.2.0\Mojo\Tools\Mojo.Xml\obj\x86\Release\Mojo.Xml.pdb

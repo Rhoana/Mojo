@@ -25,7 +25,7 @@ private:
 template< typename K, typename V >
 inline V& HashMap< K, V >::Get( const K& key )
 {
-    RELEASE_ASSERT( mHashMap.find( key ) != mHashMap.end() );
+    //RELEASE_ASSERT( mHashMap.find( key ) != mHashMap.end() );
     return mHashMap[ key ];
 };
 

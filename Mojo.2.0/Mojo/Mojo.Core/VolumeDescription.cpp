@@ -6,7 +6,7 @@ namespace Core
 {
 
 VolumeDescription::VolumeDescription() :
-    data            ( NULL ),
+    data            ( 0 ),
     numVoxels       ( MojoInt3( -1, -1, -1 ) ),
     dxgiFormat      ( DXGI_FORMAT_UNKNOWN ),
     numBytesPerVoxel( -1 ),

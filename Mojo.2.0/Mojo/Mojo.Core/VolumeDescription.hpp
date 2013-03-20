@@ -1,7 +1,7 @@
 #pragma once
 
 #include "MojoVectors.hpp"
-#include <cuda_runtime.h>
+//#include <cuda_runtime.h>
 #include <DXGIFormat.h>
 
 namespace Mojo

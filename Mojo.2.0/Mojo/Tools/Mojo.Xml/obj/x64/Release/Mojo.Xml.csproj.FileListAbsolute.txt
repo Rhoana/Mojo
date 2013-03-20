@@ -1,5 +1,0 @@
-C:\dev\MojoGit\Mojo.2.0\Mojo\Tools\Mojo.Xml\bin\x64\Release\Mojo.Xml.dll
-C:\dev\MojoGit\Mojo.2.0\Mojo\Tools\Mojo.Xml\bin\x64\Release\Mojo.Xml.pdb
-C:\dev\MojoGit\Mojo.2.0\Mojo\Tools\Mojo.Xml\obj\x64\Release\ResolveAssemblyReference.cache
-C:\dev\MojoGit\Mojo.2.0\Mojo\Tools\Mojo.Xml\obj\x64\Release\Mojo.Xml.dll
-C:\dev\MojoGit\Mojo.2.0\Mojo\Tools\Mojo.Xml\obj\x64\Release\Mojo.Xml.pdb

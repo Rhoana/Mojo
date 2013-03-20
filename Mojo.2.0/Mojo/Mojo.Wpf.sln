@@ -4,22 +4,20 @@ Microsoft Visual Studio Solution File, Format Version 11.00
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{0B642C1A-78C9-41F6-B3A8-2DBB380E636E}"
 	ProjectSection(SolutionItems) = preProject
 		Bin\Shaders\AdjustRenderer2D.fx = Bin\Shaders\AdjustRenderer2D.fx
-		Bin\Shaders\DrawMergeRenderer2D.fx = Bin\Shaders\DrawMergeRenderer2D.fx
 		Bin\Shaders\DebugRenderer.fx = Bin\Shaders\DebugRenderer.fx
+		Bin\Shaders\DrawMergeRenderer2D.fx = Bin\Shaders\DrawMergeRenderer2D.fx
 		Bin\Shaders\MergeRenderer2D.fx = Bin\Shaders\MergeRenderer2D.fx
 		Bin\Shaders\SplitRenderer2D.fx = Bin\Shaders\SplitRenderer2D.fx
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mojo.Wpf", "Mojo.Wpf\Mojo.Wpf.csproj", "{552D7904-F69F-489A-8113-EE7EF753FA99}"
 	ProjectSection(ProjectDependencies) = postProject
-		{EB624A2E-6FCD-4885-B55B-4FECEB582514} = {EB624A2E-6FCD-4885-B55B-4FECEB582514}
 		{8DD92DA7-F3EE-4334-AFA2-3CBF59D6518A} = {8DD92DA7-F3EE-4334-AFA2-3CBF59D6518A}
 		{CC8440EB-75BF-400B-B29A-DF5B961EFCE0} = {CC8440EB-75BF-400B-B29A-DF5B961EFCE0}
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mojo", "Mojo\Mojo.csproj", "{26CFD5D4-94BD-40F3-BABA-E5FC7B6DB623}"
 	ProjectSection(ProjectDependencies) = postProject
-		{EB624A2E-6FCD-4885-B55B-4FECEB582514} = {EB624A2E-6FCD-4885-B55B-4FECEB582514}
 		{4C96C16D-82B7-43BD-829F-650407B660D7} = {4C96C16D-82B7-43BD-829F-650407B660D7}
 		{8DD92DA7-F3EE-4334-AFA2-3CBF59D6518A} = {8DD92DA7-F3EE-4334-AFA2-3CBF59D6518A}
 		{CC8440EB-75BF-400B-B29A-DF5B961EFCE0} = {CC8440EB-75BF-400B-B29A-DF5B961EFCE0}
@@ -27,7 +25,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mojo", "Mojo\Mojo.csproj", 
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Mojo.Native", "Mojo.Native\Mojo.Native.vcxproj", "{8DD92DA7-F3EE-4334-AFA2-3CBF59D6518A}"
 	ProjectSection(ProjectDependencies) = postProject
-		{EB624A2E-6FCD-4885-B55B-4FECEB582514} = {EB624A2E-6FCD-4885-B55B-4FECEB582514}
 		{CC8440EB-75BF-400B-B29A-DF5B961EFCE0} = {CC8440EB-75BF-400B-B29A-DF5B961EFCE0}
 	EndProjectSection
 EndProject
@@ -36,11 +33,6 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Mojo.Interop", "Mojo.Interop\Mojo.Interop.vcxproj", "{4C96C16D-82B7-43BD-829F-650407B660D7}"
 	ProjectSection(ProjectDependencies) = postProject
 		{8DD92DA7-F3EE-4334-AFA2-3CBF59D6518A} = {8DD92DA7-F3EE-4334-AFA2-3CBF59D6518A}
-		{CC8440EB-75BF-400B-B29A-DF5B961EFCE0} = {CC8440EB-75BF-400B-B29A-DF5B961EFCE0}
-	EndProjectSection
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Mojo.Cuda", "Mojo.Cuda\Mojo.Cuda.vcxproj", "{EB624A2E-6FCD-4885-B55B-4FECEB582514}"
-	ProjectSection(ProjectDependencies) = postProject
 		{CC8440EB-75BF-400B-B29A-DF5B961EFCE0} = {CC8440EB-75BF-400B-B29A-DF5B961EFCE0}
 	EndProjectSection
 EndProject
@@ -136,22 +128,6 @@ Global
 		{4C96C16D-82B7-43BD-829F-650407B660D7}.Release|x64.Build.0 = Release|x64
 		{4C96C16D-82B7-43BD-829F-650407B660D7}.Release|x86.ActiveCfg = Release|Win32
 		{4C96C16D-82B7-43BD-829F-650407B660D7}.Release|x86.Build.0 = Release|Win32
-		{EB624A2E-6FCD-4885-B55B-4FECEB582514}.Debug|Mixed Platforms.ActiveCfg = Debug|Win32
-		{EB624A2E-6FCD-4885-B55B-4FECEB582514}.Debug|Mixed Platforms.Build.0 = Debug|Win32
-		{EB624A2E-6FCD-4885-B55B-4FECEB582514}.Debug|Win32.ActiveCfg = Debug|Win32
-		{EB624A2E-6FCD-4885-B55B-4FECEB582514}.Debug|Win32.Build.0 = Debug|Win32
-		{EB624A2E-6FCD-4885-B55B-4FECEB582514}.Debug|x64.ActiveCfg = Debug|x64
-		{EB624A2E-6FCD-4885-B55B-4FECEB582514}.Debug|x64.Build.0 = Debug|x64
-		{EB624A2E-6FCD-4885-B55B-4FECEB582514}.Debug|x86.ActiveCfg = Debug|Win32
-		{EB624A2E-6FCD-4885-B55B-4FECEB582514}.Debug|x86.Build.0 = Debug|Win32
-		{EB624A2E-6FCD-4885-B55B-4FECEB582514}.Release|Mixed Platforms.ActiveCfg = Release|Win32
-		{EB624A2E-6FCD-4885-B55B-4FECEB582514}.Release|Mixed Platforms.Build.0 = Release|Win32
-		{EB624A2E-6FCD-4885-B55B-4FECEB582514}.Release|Win32.ActiveCfg = Release|Win32
-		{EB624A2E-6FCD-4885-B55B-4FECEB582514}.Release|Win32.Build.0 = Release|Win32
-		{EB624A2E-6FCD-4885-B55B-4FECEB582514}.Release|x64.ActiveCfg = Release|x64
-		{EB624A2E-6FCD-4885-B55B-4FECEB582514}.Release|x64.Build.0 = Release|x64
-		{EB624A2E-6FCD-4885-B55B-4FECEB582514}.Release|x86.ActiveCfg = Release|Win32
-		{EB624A2E-6FCD-4885-B55B-4FECEB582514}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

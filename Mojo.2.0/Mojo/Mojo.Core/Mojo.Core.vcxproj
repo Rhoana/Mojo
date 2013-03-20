@@ -22,7 +22,6 @@
     <ClInclude Include="Assert.hpp" />
     <ClInclude Include="Boost.hpp" />
     <ClInclude Include="Comparator.hpp" />
-    <ClInclude Include="HostVectorMap.hpp" />
     <ClInclude Include="D3D11CudaTextureMap.hpp" />
     <ClInclude Include="HashMap.hpp" />
     <ClInclude Include="ID3D11CudaTexture.hpp" />
@@ -33,19 +32,16 @@
     <ClInclude Include="OpenCV.hpp" />
     <ClInclude Include="PrimitiveMap.hpp" />
     <ClInclude Include="Printf.hpp" />
-    <ClInclude Include="SegmenterState.hpp" />
     <ClInclude Include="D3D11CudaTexture.hpp" />
     <ClInclude Include="Stl.hpp" />
     <ClInclude Include="ToString.hpp" />
     <ClInclude Include="VolumeDescription.hpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="HostVectorMap.cpp" />
     <ClCompile Include="D3D11CudaTextureMap.cpp" />
     <ClCompile Include="Index.cpp" />
     <ClCompile Include="PrimitiveMap.cpp" />
     <ClCompile Include="Printf.cpp" />
-    <ClCompile Include="SegmenterState.cpp" />
     <ClCompile Include="ToString.cpp" />
     <ClCompile Include="VolumeDescription.cpp" />
   </ItemGroup>

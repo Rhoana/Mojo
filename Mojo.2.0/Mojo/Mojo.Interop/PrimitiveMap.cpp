@@ -3,7 +3,6 @@
 #include <msclr/marshal_cppstd.h>
 
 #include "Mojo.Core/ForEach.hpp"
-#include "Mojo.Core/SegmenterState.hpp"
 #include "Mojo.Core/ID3D11CudaTexture.hpp"
 
 #using <SlimDX.dll>

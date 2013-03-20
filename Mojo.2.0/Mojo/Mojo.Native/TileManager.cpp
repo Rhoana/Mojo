@@ -49,7 +49,7 @@ void TileManager::LoadTiledDataset( TiledDatasetDescription& tiledDatasetDescrip
     switch ( tiledDatasetDescription.tiledVolumeDescriptions.Get( "SourceMap" ).dxgiFormat )
     {
         case DXGI_FORMAT_R8_UNORM:
-            LoadTiledDatasetInternal< uchar1 >( tiledDatasetDescription );
+            LoadTiledDatasetInternal< unsigned char >( tiledDatasetDescription );
             break;
 
         default:
@@ -73,7 +73,7 @@ void TileManager::LoadSegmentation( TiledDatasetDescription& tiledDatasetDescrip
     switch ( tiledDatasetDescription.tiledVolumeDescriptions.Get( "SourceMap" ).dxgiFormat )
     {
         case DXGI_FORMAT_R8_UNORM:
-            LoadSegmentationInternal< uchar1 >( tiledDatasetDescription );
+            LoadSegmentationInternal< unsigned char >( tiledDatasetDescription );
             break;
 
         default:
@@ -375,15 +375,15 @@ void TileManager::UpdateLabelIdMap( unsigned int fromSegId )
     //
     // Update label id map shader buffer
     //
-    uint1 labelIdMapEntry = make_uint1( (*mLabelIdMap)( fromSegId ) );
+    unsigned int labelIdMapEntry = ( (*mLabelIdMap)( fromSegId ) );
 
     D3D11_BOX updateBox;
     ZeroMemory( &updateBox, sizeof( D3D11_BOX ) );
 
-    updateBox.left = fromSegId * sizeof( uint1 );
+    updateBox.left = fromSegId * sizeof( unsigned int );
     updateBox.top = 0;
     updateBox.front = 0;
-    updateBox.right = ( fromSegId + 1 ) * sizeof( uint1 );
+    updateBox.right = ( fromSegId + 1 ) * sizeof( unsigned int );
     updateBox.bottom = 1;
     updateBox.back = 1;
 
@@ -392,8 +392,8 @@ void TileManager::UpdateLabelIdMap( unsigned int fromSegId )
     0,
     &updateBox,
     &labelIdMapEntry,
-    (UINT) mLabelIdMap->shape( 0 ) * sizeof( uint1 ),
-    (UINT) mLabelIdMap->shape( 0 ) * sizeof( uint1 ) );
+    (UINT) mLabelIdMap->shape( 0 ) * sizeof( unsigned int ),
+    (UINT) mLabelIdMap->shape( 0 ) * sizeof( unsigned int ) );
 }
 
 void TileManager::LockSegmentLabel( unsigned int segId )
@@ -403,7 +403,7 @@ void TileManager::LockSegmentLabel( unsigned int segId )
     //
     // Update confidence map shader buffer
     //
-    uchar1 idConfidenceMapEntry = make_uchar1( (*mIdConfidenceMap)( segId ) );
+    unsigned char idConfidenceMapEntry = ( (*mIdConfidenceMap)( segId ) );
 
     D3D11_BOX updateBox;
     ZeroMemory( &updateBox, sizeof( D3D11_BOX ) );
@@ -420,8 +420,8 @@ void TileManager::LockSegmentLabel( unsigned int segId )
     0,
     &updateBox,
     &idConfidenceMapEntry,
-    (UINT) mIdConfidenceMap->shape( 0 ) * sizeof( uchar1 ),
-    (UINT) mIdConfidenceMap->shape( 0 ) * sizeof( uchar1 ) );
+    (UINT) mIdConfidenceMap->shape( 0 ) * sizeof( unsigned char ),
+    (UINT) mIdConfidenceMap->shape( 0 ) * sizeof( unsigned char ) );
 
 }
 
@@ -432,7 +432,7 @@ void TileManager::UnlockSegmentLabel( unsigned int segId )
     //
     // Update confidence map shader buffer
     //
-    uchar1 idConfidenceMapEntry = make_uchar1( 0 );
+    unsigned char idConfidenceMapEntry = 0;
 
     D3D11_BOX updateBox;
     ZeroMemory( &updateBox, sizeof( D3D11_BOX ) );
@@ -449,8 +449,8 @@ void TileManager::UnlockSegmentLabel( unsigned int segId )
     0,
     &updateBox,
     &idConfidenceMapEntry,
-    (UINT) mIdConfidenceMap->shape( 0 ) * sizeof( uchar1 ),
-    (UINT) mIdConfidenceMap->shape( 0 ) * sizeof( uchar1 ) );
+    (UINT) mIdConfidenceMap->shape( 0 ) * sizeof( unsigned char ),
+    (UINT) mIdConfidenceMap->shape( 0 ) * sizeof( unsigned char ) );
 
 }
 
