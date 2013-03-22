@@ -190,6 +190,13 @@
     <PreBuildEvent>
     </PreBuildEvent>
   </PropertyGroup>
+  <PropertyGroup>
+    <PostBuildEvent>copy ..\..\..\..\Sdk\OpenCV\OpenCV2.4\build\x64\vc10\bin\opencv_core240.dll .
+copy ..\..\..\..\Sdk\OpenCV\OpenCV2.4\build\x64\vc10\bin\opencv_highgui240.dll .
+copy ..\..\..\..\Sdk\OpenCV\OpenCV2.4\build\common\tbb\intel64\vc10\tbb.dll .
+mkdir Shaders
+copy ..\..\..\Shaders\*.fx Shaders\</PostBuildEvent>
+  </PropertyGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.0">
       <Visible>False</Visible>
@@ -269,6 +276,13 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Icons\SegmentationBorderLinesCrop.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Shaders\AdjustRenderer2D.fx" />
+    <Content Include="Shaders\DebugRenderer.fx" />
+    <Content Include="Shaders\DrawMergeRenderer2D.fx" />
+    <Content Include="Shaders\MergeRenderer2D.fx" />
+    <Content Include="Shaders\SplitRenderer2D.fx" />
   </ItemGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
