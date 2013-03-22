@@ -1521,6 +1521,7 @@ void FileSystemTileServer::StrideUpIdTileChange( MojoInt4 numTiles, MojoInt3 num
 			++wTileY;
 		}
 
+		SaveTile( strideTileIndex, strideVolumeDescriptions );
 		UnloadTile( strideTileIndex );
 
 	}
