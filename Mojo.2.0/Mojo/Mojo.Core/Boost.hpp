@@ -4,7 +4,7 @@
     
     #undef _DEBUG
     
-    #include <boost/array.hpp>
+    //#include <boost/array.hpp>
     #include <boost/filesystem.hpp>
     #include <boost/lexical_cast.hpp>
 
@@ -12,7 +12,7 @@
 
 #else
 
-    #include <boost/array.hpp>
+    //#include <boost/array.hpp>
     #include <boost/filesystem.hpp>
     #include <boost/lexical_cast.hpp>
 

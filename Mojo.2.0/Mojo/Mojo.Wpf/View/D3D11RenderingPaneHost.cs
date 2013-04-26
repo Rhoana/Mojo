@@ -4,6 +4,12 @@ namespace Mojo.Wpf.View
 {
     internal class D3D11RenderingPaneHost : UserControl
     {
+        public D3D11RenderingPaneHost()
+        {
+            AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
+            AutoScaleDimensions = new System.Drawing.SizeF( 96F, 96F );
+        }
+
         public ViewerContext ViewerContext { get; set; }
 
         protected override void OnPaintBackground( PaintEventArgs e )
@@ -56,6 +62,11 @@ namespace Mojo.Wpf.View
             {
                 ViewerContext.OnMouseWheel( e, Width, Height );
             }
+        }
+
+        public System.Drawing.SizeF GetAutoScaleFactor()
+        {
+            return AutoScaleFactor;
         }
     }
 }

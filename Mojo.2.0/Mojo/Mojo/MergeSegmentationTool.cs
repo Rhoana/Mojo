@@ -23,8 +23,6 @@ namespace Mojo
 
         public override void OnKeyDown( System.Windows.Input.KeyEventArgs keyEventArgs, int width, int height )
         {
-            base.OnKeyDown( keyEventArgs, width, height );
-
             switch ( keyEventArgs.Key )
             {
                 case System.Windows.Input.Key.Q:
@@ -53,6 +51,9 @@ namespace Mojo
                     break;
 
             }
+
+            base.OnKeyDown( keyEventArgs, width, height );
+
         }
 
         public override void OnMouseClick( System.Windows.Forms.MouseEventArgs mouseEventArgs, int width, int height )

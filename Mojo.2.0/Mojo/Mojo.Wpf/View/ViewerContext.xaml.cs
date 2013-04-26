@@ -1,5 +1,6 @@
 ﻿using System.Windows;
 using System.Windows.Input;
+using System.Windows.Media;
 
 namespace Mojo.Wpf.View
 {
@@ -90,16 +91,25 @@ namespace Mojo.Wpf.View
             }
         }
 
-        protected override void OnKeyDown( KeyEventArgs e )
+        protected override void OnKeyDown(KeyEventArgs e)
         {
-            if ( Viewer != null )
+            if (Viewer != null)
             {
-                Viewer.UserInputHandler.OnKeyDown( e, D3D11RenderingPaneHost.Width, D3D11RenderingPaneHost.Height );
+                Viewer.UserInputHandler.OnKeyDown(e, D3D11RenderingPaneHost.Width, D3D11RenderingPaneHost.Height);
                 AquireKeyboardFocusAndLogicalFocus();
             }
         }
 
-        private void LoadedHandler( object sender, RoutedEventArgs e )
+        protected override void OnKeyUp(KeyEventArgs e)
+        {
+            if (Viewer != null)
+            {
+                Viewer.UserInputHandler.OnKeyUp(e, D3D11RenderingPaneHost.Width, D3D11RenderingPaneHost.Height);
+                AquireKeyboardFocusAndLogicalFocus();
+            }
+        }
+
+        private void LoadedHandler(object sender, RoutedEventArgs e)
         {
             D3D11RenderingPaneHost.ViewerContext = this;
 
@@ -135,15 +145,21 @@ namespace Mojo.Wpf.View
                 WindowsFormsHost.Width = newSize.Width;
                 WindowsFormsHost.Height = newSize.Height;
 
+                var source = PresentationSource.FromVisual( WindowsFormsHost );
+                Matrix transformToDevice = source.CompositionTarget.TransformToDevice;
+
+                var oldPixelSize = (Size)transformToDevice.Transform( (Vector)oldSize );
+                var newPixelSize = (Size)transformToDevice.Transform( (Vector)newSize );
+
                 if ( D3D11RenderingPaneHost != null )
                 {
-                    D3D11RenderingPaneHost.Width = (int)newSize.Width;
-                    D3D11RenderingPaneHost.Height = (int)newSize.Height;
+                    D3D11RenderingPaneHost.Width = (int)newPixelSize.Width;
+                    D3D11RenderingPaneHost.Height = (int)newPixelSize.Height;
                 }
 
                 if ( Viewer != null )
                 {
-                    Viewer.SetSize( oldSize, newSize );
+                    Viewer.SetSize( oldPixelSize, newPixelSize );
                 }
             }
         }

@@ -88,6 +88,10 @@ namespace Mojo
             }
         }
 
+        public virtual void OnKeyUp(KeyEventArgs keyEventArgs, int width, int height)
+        {
+        }
+
         public virtual void OnMouseDown( System.Windows.Forms.MouseEventArgs mouseEventArgs, int width, int height )
         {
             if ( mouseEventArgs.Button == System.Windows.Forms.MouseButtons.Middle )

@@ -9,6 +9,7 @@ namespace Mojo
         private readonly Engine mEngine;
 
         private bool mCurrentlyDrawing = false;
+        private bool mCurrentlyMovingZ = false;
 
         public SplitSegmentationTool( TileManager tileManager, Engine engine )
             : base( tileManager, engine )
@@ -43,7 +44,7 @@ namespace Mojo
             //
             // Z index has changed - prep for splitting
             //
-            if ( mTileManager.SelectedSegmentId != 0 )
+            if ( mTileManager.SelectedSegmentId != 0 && !mCurrentlyMovingZ )
             {
                 var centerDataSpace = mTileManager.TiledDatasetView.CenterDataSpace;
                 var p = new Vector3( centerDataSpace.X, centerDataSpace.Y, centerDataSpace.Z );
@@ -57,13 +58,18 @@ namespace Mojo
 
         public override void OnKeyDown( System.Windows.Input.KeyEventArgs keyEventArgs, int width, int height )
         {
-            base.OnKeyDown( keyEventArgs, width, height );
 
             var centerDataSpace = mTileManager.TiledDatasetView.CenterDataSpace;
             var p = new Vector3( centerDataSpace.X, centerDataSpace.Y, centerDataSpace.Z );
 
             switch ( keyEventArgs.Key )
             {
+                case System.Windows.Input.Key.W:
+                    mCurrentlyMovingZ = true;
+                    break;
+                case System.Windows.Input.Key.S:
+                    mCurrentlyMovingZ = true;
+                    break;
                 case System.Windows.Input.Key.Q:
                     mTileManager.ToggleShowBoundaryLines();
                     break;
@@ -110,6 +116,25 @@ namespace Mojo
                     mTileManager.IncreaseBrushSize();
                     break;
 
+            }
+
+            base.OnKeyDown( keyEventArgs, width, height );
+
+        }
+
+        public override void OnKeyUp(System.Windows.Input.KeyEventArgs keyEventArgs, int width, int height)
+        {
+            base.OnKeyUp(keyEventArgs, width, height);
+            switch ( keyEventArgs.Key )
+            {
+                case System.Windows.Input.Key.W:
+                    mCurrentlyMovingZ = false;
+                    MoveZ();
+                    break;
+                case System.Windows.Input.Key.S:
+                    mCurrentlyMovingZ = false;
+                    MoveZ();
+                    break;
             }
         }
 

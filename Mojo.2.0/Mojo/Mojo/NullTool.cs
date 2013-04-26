@@ -14,11 +14,15 @@ namespace Mojo
         {
         }
 
-        public void OnKeyDown( System.Windows.Input.KeyEventArgs keyEventArgs, int width, int height )
+        public void OnKeyDown(System.Windows.Input.KeyEventArgs keyEventArgs, int width, int height)
         {
         }
 
-        public void OnMouseDown( System.Windows.Forms.MouseEventArgs mouseEventArgs, int width, int height )
+        public void OnKeyUp(System.Windows.Input.KeyEventArgs keyEventArgs, int width, int height)
+        {
+        }
+
+        public void OnMouseDown(System.Windows.Forms.MouseEventArgs mouseEventArgs, int width, int height)
         {
         }
 

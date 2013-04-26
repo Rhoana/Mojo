@@ -4,7 +4,8 @@ namespace Mojo
 {
     public interface IUserInputHandler
     {
-        void OnKeyDown( KeyEventArgs keyEventArgs, int width, int height );
+        void OnKeyDown(KeyEventArgs keyEventArgs, int width, int height);
+        void OnKeyUp(KeyEventArgs keyEventArgs, int width, int height);
 
         void OnMouseDown( System.Windows.Forms.MouseEventArgs mouseEventArgs, int width, int height );
         void OnMouseUp( System.Windows.Forms.MouseEventArgs mouseEventArgs, int width, int height );

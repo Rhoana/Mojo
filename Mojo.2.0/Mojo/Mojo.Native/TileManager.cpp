@@ -121,7 +121,7 @@ void TileManager::LoadTiles( const TiledDatasetView& tiledDatasetView )
     //
     // assume that all cache entries can be discarded unless explicitly marked otherwise
     //
-    for ( int cacheIndex = 0; cacheIndex < DEVICE_TILE_CACHE_SIZE; cacheIndex++ )
+    for ( int cacheIndex = 0; cacheIndex < mDeviceTileCacheSize; cacheIndex++ )
     {
         mTileCache[ cacheIndex ].keepState = TileCacheEntryKeepState_CanDiscard;
         mTileCache[ cacheIndex ].active    = false;
@@ -159,19 +159,19 @@ void TileManager::LoadTiles( const TiledDatasetView& tiledDatasetView )
             // find another cache entry to store the tile 
             //
             int newCacheIndex = mTileCacheSearchStart;
-            int lastCacheIndex = ( DEVICE_TILE_CACHE_SIZE + mTileCacheSearchStart - 1 ) % DEVICE_TILE_CACHE_SIZE;
+            int lastCacheIndex = ( mDeviceTileCacheSize + mTileCacheSearchStart - 1 ) % mDeviceTileCacheSize;
 
-            for (; mTileCache[ newCacheIndex ].keepState != TileCacheEntryKeepState_CanDiscard; newCacheIndex = ( newCacheIndex + 1 ) % DEVICE_TILE_CACHE_SIZE )
+            for (; mTileCache[ newCacheIndex ].keepState != TileCacheEntryKeepState_CanDiscard; newCacheIndex = ( newCacheIndex + 1 ) % mDeviceTileCacheSize )
             {
                 //
                 // check if we have run out of tiles
                 //
-                RELEASE_ASSERT ( newCacheIndex != lastCacheIndex );
+                //RELEASE_ASSERT ( newCacheIndex != lastCacheIndex );
             }
 
-            mTileCacheSearchStart = ( newCacheIndex + 1 ) % DEVICE_TILE_CACHE_SIZE;
+            mTileCacheSearchStart = ( newCacheIndex + 1 ) % mDeviceTileCacheSize;
 
-            RELEASE_ASSERT( !mTileCache[ newCacheIndex ].active );
+            //RELEASE_ASSERT( !mTileCache[ newCacheIndex ]->active );
 
             //Core::Printf( "Replacing tile ", newCacheIndex, " in the device cache.");
 
@@ -189,11 +189,6 @@ void TileManager::LoadTiles( const TiledDatasetView& tiledDatasetView )
                  tempTileIndex.z != TILE_CACHE_PAGE_TABLE_BAD_INDEX ||
                  tempTileIndex.w != TILE_CACHE_PAGE_TABLE_BAD_INDEX )
             {
-                RELEASE_ASSERT( tempTileIndex.x != TILE_CACHE_PAGE_TABLE_BAD_INDEX &&
-                                tempTileIndex.y != TILE_CACHE_PAGE_TABLE_BAD_INDEX &&
-                                tempTileIndex.z != TILE_CACHE_PAGE_TABLE_BAD_INDEX &&
-                                tempTileIndex.w != TILE_CACHE_PAGE_TABLE_BAD_INDEX );
-
                 //
                 // mark the tile as not being loaded any more
                 //
@@ -273,7 +268,7 @@ void TileManager::LoadTiles( const TiledDatasetView& tiledDatasetView )
     }
 }
 
-boost::array< TileCacheEntry, DEVICE_TILE_CACHE_SIZE >& TileManager::GetTileCache()
+std::vector< TileCacheEntry >& TileManager::GetTileCache()
 {
     return mTileCache;
 }
@@ -797,14 +792,13 @@ void TileManager::UnloadTiledDatasetInternal()
         pDXGIAdapter->GetDesc(&adapterDesc);
 
         Core::Printf( "\nUnloading tiled dataset...\n" );
-        Core::Printf( "\n    Before freeing GPU memory:\n",
-            "        Free memory:  ", (unsigned int) adapterDesc.DedicatedVideoMemory  / ( 1024 * 1024 ), " MBytes.\n" );
-            //"        Total memory: ", (unsigned int) totalMemory / ( 1024 * 1024 ), " MBytes.\n" );
+        //Core::Printf( "\n    Before freeing GPU memory:\n",
+        //    "        Total memory:  ", (unsigned int) adapterDesc.DedicatedVideoMemory  / ( 1024 * 1024 ), " MBytes.\n" );
 
         //
         // delete textures in the tile cache
         //
-        for ( int i = 0; i < DEVICE_TILE_CACHE_SIZE; i++ )
+        for ( int i = 0; i < mDeviceTileCacheSize; i++ )
         {
             //mTileCache[ i ].deviceVectors.Clear();
 
@@ -823,9 +817,9 @@ void TileManager::UnloadTiledDatasetInternal()
 
         pDXGIAdapter->GetDesc(&adapterDesc);
 
-        Core::Printf( "    After freeing GPU memory:\n",
-            "        Free memory:  ", (unsigned int) adapterDesc.DedicatedVideoMemory  / ( 1024 * 1024 ), " MBytes.\n" );
-            //"        Total memory: ", (unsigned int) totalMemory / ( 1024 * 1024 ), " MBytes.\n" );
+        //Core::Printf( "    After freeing GPU memory:\n",
+        //    "        Total memory:  ", (unsigned int) adapterDesc.DedicatedVideoMemory  / ( 1024 * 1024 ), " MBytes.\n" );
+
     }
 }
 
@@ -854,9 +848,8 @@ void TileManager::UnloadSegmentationInternal()
         pDXGIAdapter->GetDesc(&adapterDesc);
 
         Core::Printf( "\nUnloading segmentation...\n" );
-        Core::Printf( "\n    Before freeing GPU memory:\n",
-            "        Free memory:  ", (unsigned int) adapterDesc.DedicatedVideoMemory  / ( 1024 * 1024 ), " MBytes.\n" );
-            //"        Total memory: ", (unsigned int) totalMemory / ( 1024 * 1024 ), " MBytes.\n" );
+        //Core::Printf( "\n    Before freeing GPU memory:\n",
+        //    "        Total memory:  ", (unsigned int) adapterDesc.DedicatedVideoMemory  / ( 1024 * 1024 ), " MBytes.\n" );
 
         //
         // release id color map
@@ -893,9 +886,9 @@ void TileManager::UnloadSegmentationInternal()
 
         pDXGIAdapter->GetDesc(&adapterDesc);
 
-        Core::Printf( "    After freeing GPU memory:\n",
-            "        Free memory:  ", (unsigned int) adapterDesc.DedicatedVideoMemory  / ( 1024 * 1024 ), " MBytes.\n" );
-            //"        Total memory: ", (unsigned int) totalMemory / ( 1024 * 1024 ), " MBytes.\n" );
+        //Core::Printf( "    After freeing GPU memory:\n",
+        //    "        Total memory:  ", (unsigned int) adapterDesc.DedicatedVideoMemory  / ( 1024 * 1024 ), " MBytes.\n" );
+
     }
 }
 
@@ -1058,7 +1051,7 @@ MojoInt3 TileManager::GetOffsetVoxelSpace( MojoFloat4 pointTileSpace, MojoInt4 t
 
 void TileManager::ReloadTileCache()
 {
-    for ( int cacheIndex = 0; cacheIndex < DEVICE_TILE_CACHE_SIZE; cacheIndex++ )
+    for ( int cacheIndex = 0; cacheIndex < mDeviceTileCacheSize; cacheIndex++ )
     {
         if ( mTileCache[ cacheIndex ].indexTileSpace.x != TILE_CACHE_PAGE_TABLE_BAD_INDEX &&
              mTileCache[ cacheIndex ].indexTileSpace.y != TILE_CACHE_PAGE_TABLE_BAD_INDEX &&
@@ -1110,7 +1103,7 @@ void TileManager::ReloadTileCache()
 
 void TileManager::ReloadTileCacheOverlayMapOnly( int currentZ )
 {
-    for ( int cacheIndex = 0; cacheIndex < DEVICE_TILE_CACHE_SIZE; cacheIndex++ )
+    for ( int cacheIndex = 0; cacheIndex < mDeviceTileCacheSize; cacheIndex++ )
     {
         if ( mTileCache[ cacheIndex ].indexTileSpace.x != TILE_CACHE_PAGE_TABLE_BAD_INDEX &&
              mTileCache[ cacheIndex ].indexTileSpace.y != TILE_CACHE_PAGE_TABLE_BAD_INDEX &&

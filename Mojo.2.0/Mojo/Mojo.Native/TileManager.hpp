@@ -56,8 +56,7 @@ public:
 
     void                                                  LoadTiles( const TiledDatasetView& tiledDatasetView );
 
-    boost::array< TileCacheEntry,
-        DEVICE_TILE_CACHE_SIZE >&                         GetTileCache();
+    std::vector< TileCacheEntry >&                        GetTileCache();
     ID3D11ShaderResourceView*                             GetIdColorMap();
     ID3D11ShaderResourceView*                             GetLabelIdMap();
     ID3D11ShaderResourceView*                             GetIdConfidenceMap();
@@ -154,8 +153,7 @@ private:
     Core::PrimitiveMap                                    mConstParameters;                                                
     TiledDatasetDescription                               mTiledDatasetDescription;
 
-    boost::array< TileCacheEntry,
-        DEVICE_TILE_CACHE_SIZE >                          mTileCache;
+    std::vector< TileCacheEntry >                         mTileCache;
 
     int                                                   mTileCacheSearchStart;
 
@@ -166,6 +164,9 @@ private:
 
     bool                                                  mIsTiledDatasetLoaded;
     bool                                                  mIsSegmentationLoaded;
+
+	int                                                   mDeviceTileCacheSize;
+
 };
 
 template < typename TCudaType >
@@ -186,10 +187,8 @@ inline void TileManager::LoadTiledDatasetInternal( TiledDatasetDescription& tile
     DXGI_ADAPTER_DESC adapterDesc;
     pDXGIAdapter->GetDesc(&adapterDesc);
 
-    Core::Printf( "\nUnloading segmentation...\n" );
-    Core::Printf( "\n    Before allocating GPU memory:\n",
-        "        Free memory:  ", (unsigned int) adapterDesc.DedicatedVideoMemory  / ( 1024 * 1024 ), " MBytes.\n" );
-        //"        Total memory: ", (unsigned int) totalMemory / ( 1024 * 1024 ), " MBytes.\n" );
+    Core::Printf( "\nLoading segmentation...\n" );
+    Core::Printf( "        Total memory:    ", (unsigned int) adapterDesc.DedicatedVideoMemory  / ( 1024 * 1024 ), " MB\n" );
 
     //
     // inform the tile server
@@ -207,13 +206,35 @@ inline void TileManager::LoadTiledDatasetInternal( TiledDatasetDescription& tile
     TiledVolumeDescription tiledVolumeDescriptionSource = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "SourceMap" );
     TiledVolumeDescription tiledVolumeDescriptionOverlay = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "OverlayMap" );
 
+	//
+	// determine the device tile cache size
+	//
+	int bytesPerTile = tiledVolumeDescriptionSource.numVoxelsPerTileX * tiledVolumeDescriptionSource.numVoxelsPerTileY * tiledVolumeDescriptionSource.numVoxelsPerTileZ * tiledVolumeDescriptionSource.numBytesPerVoxel;
+	bytesPerTile += tiledVolumeDescriptionId.numVoxelsPerTileX * tiledVolumeDescriptionId.numVoxelsPerTileY * tiledVolumeDescriptionId.numVoxelsPerTileZ * tiledVolumeDescriptionId.numBytesPerVoxel;
+	bytesPerTile += tiledVolumeDescriptionOverlay.numVoxelsPerTileX * tiledVolumeDescriptionOverlay.numVoxelsPerTileY * tiledVolumeDescriptionOverlay.numVoxelsPerTileZ * tiledVolumeDescriptionOverlay.numBytesPerVoxel;
+
+    Core::Printf( "        Bytes per tile:  ", bytesPerTile, "\n" );
+
+	//
+	// Try to leave at least 100MB video memory free
+	//
+	mDeviceTileCacheSize = MAX_DEVICE_TILE_CACHE_SIZE;
+	while ( mDeviceTileCacheSize * bytesPerTile > adapterDesc.DedicatedVideoMemory - ( 1024 * 1024 * 100 ) )
+	{
+		mDeviceTileCacheSize /= 2;
+	}
+
+	Core::Printf( "        Tile cache size: ", mDeviceTileCacheSize, " (", mDeviceTileCacheSize * bytesPerTile / ( 1024 * 1024 ), " MB)\n" );
+
+	mTileCache.reserve( mDeviceTileCacheSize );
+
     //
     // initialize the tile cache
     //
-    for ( int i = 0; i < DEVICE_TILE_CACHE_SIZE; i++ )
+    for ( int i = 0; i < mDeviceTileCacheSize; i++ )
     {
-        TileCacheEntry tileCacheEntry;
 
+        TileCacheEntry tileCacheEntry;
 
 		//
 		// Assume tile sizes are the same
@@ -258,7 +279,7 @@ inline void TileManager::LoadTiledDatasetInternal( TiledDatasetDescription& tile
 
         tileCacheEntry.d3d11CudaTextures.Set(
             "IdMap",
-            new Core::D3D11CudaTexture< ID3D11Texture3D, int >(
+            new Core::D3D11CudaTexture< ID3D11Texture3D, unsigned int >(
                 mD3D11Device,
                 mD3D11DeviceContext,
                 textureDesc3D ) );
@@ -280,7 +301,7 @@ inline void TileManager::LoadTiledDatasetInternal( TiledDatasetDescription& tile
                 mD3D11DeviceContext,
                 textureDesc3D ) );
 
-        mTileCache[ i ] = tileCacheEntry;
+        mTileCache.push_back ( tileCacheEntry );
     }
 
     mTileCacheSearchStart = 0;
@@ -325,11 +346,11 @@ inline void TileManager::LoadTiledDatasetInternal( TiledDatasetDescription& tile
     //memInfoResult = cuMemGetInfo( &freeMemory, &totalMemory );
     //RELEASE_ASSERT( memInfoResult == CUDA_SUCCESS );
 
-    pDXGIAdapter->GetDesc(&adapterDesc);
+    //pDXGIAdapter->GetDesc(&adapterDesc);
 
-    Core::Printf( "    After allocating GPU memory:\n",
-        "        Free memory:  ", (unsigned int) adapterDesc.DedicatedVideoMemory  / ( 1024 * 1024 ), " MBytes.\n" );
-        //"        Total memory: ", (unsigned int) totalMemory / ( 1024 * 1024 ), " MBytes.\n" );
+    //Core::Printf( "    After allocating GPU memory:\n",
+    //    "        Total memory:  ", (unsigned int) adapterDesc.DedicatedVideoMemory  / ( 1024 * 1024 ), " MBytes.\n" );
+
 }
 
 template < typename TCudaType >
@@ -352,9 +373,8 @@ inline void TileManager::LoadSegmentationInternal( TiledDatasetDescription& tile
     pDXGIAdapter->GetDesc(&adapterDesc);
 
     Core::Printf( "\nUnloading segmentation...\n" );
-    Core::Printf( "\n    Before allocating GPU memory:\n",
-        "        Free memory:  ", (unsigned int) adapterDesc.DedicatedVideoMemory  / ( 1024 * 1024 ), " MBytes.\n" );
-        //"        Total memory: ", (unsigned int) totalMemory / ( 1024 * 1024 ), " MBytes.\n" );
+    //Core::Printf( "\n    Before allocating GPU memory:\n",
+    //    "        Total memory:  ", (unsigned int) adapterDesc.DedicatedVideoMemory  / ( 1024 * 1024 ), " MBytes.\n" );
 
     //
     // inform the tile server
@@ -551,9 +571,9 @@ inline void TileManager::LoadSegmentationInternal( TiledDatasetDescription& tile
 
     pDXGIAdapter->GetDesc(&adapterDesc);
 
-    Core::Printf( "    After allocating GPU memory:\n",
-        "        Free memory:  ", (unsigned int) adapterDesc.DedicatedVideoMemory  / ( 1024 * 1024 ), " MBytes.\n" );
-        //"        Total memory: ", (unsigned int) totalMemory / ( 1024 * 1024 ), " MBytes.\n" );
+    //Core::Printf( "    After allocating GPU memory:\n",
+    //    "        Total memory:  ", (unsigned int) adapterDesc.DedicatedVideoMemory  / ( 1024 * 1024 ), " MBytes.\n" );
+
 }
 
 }

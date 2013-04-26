@@ -9,6 +9,7 @@ namespace Mojo
         private readonly Engine mEngine;
 
         private bool mCurrentlyDrawing = false;
+        private bool mCurrentlyMovingZ = false;
 
         public AdjustSegmentationTool( TileManager tileManager, Engine engine )
             : base( tileManager, engine )
@@ -40,23 +41,27 @@ namespace Mojo
 
         public override void MoveZ()
         {
-            var centerDataSpace = mTileManager.TiledDatasetView.CenterDataSpace;
-            var p = new Vector3( centerDataSpace.X, centerDataSpace.Y, centerDataSpace.Z );
-            if ( mTileManager.SelectedSegmentId != 0 )
+            if ( mTileManager.SelectedSegmentId != 0 && !mCurrentlyMovingZ )
             {
+                var centerDataSpace = mTileManager.TiledDatasetView.CenterDataSpace;
+                var p = new Vector3( centerDataSpace.X, centerDataSpace.Y, centerDataSpace.Z );
                 mTileManager.Internal.PrepForAdjust( mTileManager.SelectedSegmentId, p );
             }
         }
 
         public override void OnKeyDown( System.Windows.Input.KeyEventArgs keyEventArgs, int width, int height )
         {
-            base.OnKeyDown( keyEventArgs, width, height );
-
             var centerDataSpace = mTileManager.TiledDatasetView.CenterDataSpace;
             var p = new Vector3( centerDataSpace.X, centerDataSpace.Y, centerDataSpace.Z );
 
             switch ( keyEventArgs.Key )
             {
+                case System.Windows.Input.Key.W:
+                    mCurrentlyMovingZ = true;
+                    break;
+                case System.Windows.Input.Key.S:
+                    mCurrentlyMovingZ = true;
+                    break;
                 case System.Windows.Input.Key.Q:
                     mTileManager.ToggleShowBoundaryLines();
                     break;
@@ -105,9 +110,28 @@ namespace Mojo
                     break;
 
             }
+
+            base.OnKeyDown( keyEventArgs, width, height );
+
         }
 
-        public override void OnMouseDown( System.Windows.Forms.MouseEventArgs mouseEventArgs, int width, int height )
+        public override void OnKeyUp(System.Windows.Input.KeyEventArgs keyEventArgs, int width, int height)
+        {
+            base.OnKeyUp(keyEventArgs, width, height);
+            switch ( keyEventArgs.Key )
+            {
+                case System.Windows.Input.Key.W:
+                    mCurrentlyMovingZ = false;
+                    MoveZ();
+                    break;
+                case System.Windows.Input.Key.S:
+                    mCurrentlyMovingZ = false;
+                    MoveZ();
+                    break;
+            }
+        }
+        
+        public override void OnMouseDown(System.Windows.Forms.MouseEventArgs mouseEventArgs, int width, int height)
         {
             base.OnMouseDown( mouseEventArgs, width, height );
             if ( mTileManager.SegmentationLoaded && mTileManager.SelectedSegmentId != 0 )
