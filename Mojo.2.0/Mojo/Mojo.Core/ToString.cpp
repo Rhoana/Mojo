@@ -39,6 +39,30 @@ std::string ToStringHelper( int x )
     return boost::lexical_cast< std::string >( x );
 }
 
+std::string ToStringHelper( std::set< unsigned int > x )
+{
+    std::ostringstream stringStream;
+	stringStream << "[";
+
+	if ( x.begin() == x.end() )
+	{
+		stringStream << " empty ";
+	}
+	else
+	{
+		stringStream << *x.begin();
+	}
+
+	for ( std::set< unsigned int >::iterator sit = ++x.begin(); sit != x.end(); ++sit )
+	{
+		stringStream << ",";
+		stringStream << *sit;
+	}
+
+	stringStream << "]";
+	return stringStream.str();
+}
+
 std::string ToStringZeroPad( int x, int totalNumChars )
 {
     std::ostringstream stringStream;
@@ -52,6 +76,8 @@ std::string ToStringZeroPad( unsigned int x, int totalNumChars )
     stringStream << std::setw( totalNumChars ) << std::setfill( '0' ) << x;
     return stringStream.str();
 }
+
+
 
 }
 

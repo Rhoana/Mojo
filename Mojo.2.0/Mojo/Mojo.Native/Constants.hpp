@@ -1,8 +1,15 @@
 #pragma once
 
+#if _WIN64 
 const int MAX_UNDO_OPERATIONS = 20;
 const int FILE_SYSTEM_TILE_CACHE_SIZE = 1024;
-const int TILE_SIZE = 512;
+const int MAX_DEVICE_TILE_CACHE_SIZE = 512;
 const int SPLIT_ADJUST_BUFFER_TILE_HALO = 2;
-const int MAX_DEVICE_TILE_CACHE_SIZE = 128;
+#else
+const int MAX_UNDO_OPERATIONS = 5;
+const int FILE_SYSTEM_TILE_CACHE_SIZE = 512;
+const int MAX_DEVICE_TILE_CACHE_SIZE = 256;
+const int SPLIT_ADJUST_BUFFER_TILE_HALO = 1;
+#endif
+const int TILE_PIXELS = 512;
 const int EXTRA_SEGMENTS_PER_SESSION = 1024;

@@ -48,9 +48,10 @@ namespace Mojo.Wpf.ViewModel
             {
                 case "TiledDatasetView":
                     UpdateCurrentZLocationString();
+                    UpdateCurrentXYZLocationString();
                     break;
                 case "SelectedSegmentId":
-                    UpdateSelectedSegmentBrush();
+                    UpdateSelectedSegmentInfo();
                     break;
                 case "SegmentListFocus":
                     JumpToSelectedSegmentInfoPage();
@@ -74,20 +75,70 @@ namespace Mojo.Wpf.ViewModel
             set
             {
                 mSelectedSegmentBrush = value;
-                OnPropertyChanged("SelectedSegmentBrush");
+                OnPropertyChanged( "SelectedSegmentBrush" );
             }
         }
 
-        public void UpdateSelectedSegmentBrush( )
+        private String mSelectedSegmentName = "";
+        public String SelectedSegmentName
+        {
+            get
+            {
+                return mSelectedSegmentName;
+            }
+            set
+            {
+                mSelectedSegmentName = value;
+                OnPropertyChanged( "SelectedSegmentName" );
+            }
+        }
+
+        private int mSelectedSegmentConfidence = 0;
+        public int SelectedSegmentConfidence
+        {
+            get
+            {
+                return mSelectedSegmentConfidence;
+            }
+            set
+            {
+                mSelectedSegmentConfidence = value;
+                OnPropertyChanged( "SelectedSegmentConfidence" );
+            }
+        }
+
+        private long mSelectedSegmentSize = 0;
+        public long SelectedSegmentSize
+        {
+            get
+            {
+                return mSelectedSegmentSize;
+            }
+            set
+            {
+                mSelectedSegmentSize = value;
+                OnPropertyChanged( "SelectedSegmentSize" );
+            }
+        }
+
+        public void UpdateSelectedSegmentInfo()
         {
             if ( mTileManager.SelectedSegmentId == 0 )
             {
                 SelectedSegmentBrush = new SolidColorBrush();
+                SelectedSegmentConfidence = 0;
+                SelectedSegmentName = "";
+                SelectedSegmentSize = 0;
             }
             else
             {
                 SlimDX.Vector3 segmentColor = mTileManager.Internal.GetSegmentationLabelColor( mTileManager.SelectedSegmentId );
                 SelectedSegmentBrush = new SolidColorBrush( Color.FromRgb( (byte)( segmentColor.X ), (byte)( segmentColor.Y ), (byte)( segmentColor.Z ) ) );
+
+                var segInfo = mTileManager.Internal.GetSegmentInfo( mTileManager.SelectedSegmentId );
+                SelectedSegmentConfidence = segInfo.Confidence;
+                SelectedSegmentName = segInfo.Name;
+                SelectedSegmentSize = segInfo.Size;
             }
         }
 
@@ -144,6 +195,37 @@ namespace Mojo.Wpf.ViewModel
                 CurrentZLocationString = "";
             }
         }
+
+        private string mCurrentXYZLocationString = "";
+        public string CurrentXYZLocationString
+        {
+            get
+            {
+                return mCurrentXYZLocationString;
+            }
+            set
+            {
+                mCurrentXYZLocationString = value;
+                OnPropertyChanged( "CurrentXYZLocationString" );
+            }
+        }
+
+        public void UpdateCurrentXYZLocationString()
+        {
+            if ( mTileManager.TiledDatasetLoaded )
+            {
+                CurrentXYZLocationString =
+                    Math.Round( mTileManager.TiledDatasetView.CenterDataSpace.X * Constants.ConstParameters.GetInt( "TILE_PIXELS_X" ) ) + "," +
+                    Math.Round( mTileManager.TiledDatasetView.CenterDataSpace.Y * Constants.ConstParameters.GetInt( "TILE_PIXELS_Y" ) ) + "," +
+                    ( mTileManager.TiledDatasetView.CenterDataSpace.Z * Constants.ConstParameters.GetInt( "TILE_PIXELS_Z" ) );
+            }
+            else
+            {
+                CurrentZLocationString = "";
+            }
+        }
+
+
 
         private string mSegmentListCurrentPageString;
         public string SegmentListCurrentPageString

@@ -103,6 +103,7 @@ public:
     unsigned int                                      GetSegmentInfoCount();
     unsigned int                                      GetSegmentInfoCurrentListLocation( unsigned int segId );
     std::list< SegmentInfo >                          GetSegmentInfoRange( unsigned int startIndex, unsigned int endIndex );
+    SegmentInfo                                       GetSegmentInfo( unsigned int segId );
                                                
 private:                                       
 

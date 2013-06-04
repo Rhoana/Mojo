@@ -458,6 +458,11 @@ namespace Mojo
             ChangesMade = true;
         }
 
+        public void SelectNewId()
+        {
+            SelectedSegmentId = Internal.GetNewId();
+        }
+
         public void LockSegmentLabel( uint segId )
         {
             Internal.LockSegmentLabel( segId );
@@ -498,7 +503,14 @@ namespace Mojo
             if ( TiledDatasetLoaded )
             {
                 Internal.LoadTiles( TiledDatasetView );
-                Internal.Update();
+            }
+        }
+
+        public void UpdateOneTile()
+        {
+            if ( TiledDatasetLoaded )
+            {
+                Internal.LoadOverTile( TiledDatasetView );
             }
         }
 
@@ -518,6 +530,11 @@ namespace Mojo
         }
 
         public void UpdateZ()
+        {
+            OnPropertyChanged( "TiledDatasetView" );
+        }
+
+        public void UpdateXYZ()
         {
             OnPropertyChanged( "TiledDatasetView" );
         }
@@ -620,6 +637,9 @@ namespace Mojo
 
             var idTileIndexPath = Path.Combine( segmentationRootDirectory, Constants.SEGMENT_INFO_PATH );
             TiledDatasetDescription.Paths.Set( "SegmentInfo", idTileIndexPath );
+
+            var logPath = Path.Combine( segmentationRootDirectory, Constants.LOG_PATH );
+            TiledDatasetDescription.Paths.Set( "Log", logPath );
 
             LoadSegmentation( TiledDatasetDescription );
 
@@ -768,7 +788,7 @@ namespace Mojo
 
         public IList<TileCacheEntry> GetTileCache()
         {
-            return Internal.GetTileCache().Where( tileCacheEntry => tileCacheEntry.Active ).OrderBy( tileCacheEntry => tileCacheEntry.CenterDataSpace.Z ).ToList();
+            return Internal.GetTileCache().Where( tileCacheEntry => tileCacheEntry.Active ).OrderBy( tileCacheEntry => tileCacheEntry.IndexTileSpace.W ).ToList();
         }
 
     }

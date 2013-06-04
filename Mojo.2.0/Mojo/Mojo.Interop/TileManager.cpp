@@ -148,9 +148,9 @@ void TileManager::DeleteTempFiles()
     return mTileManager->DeleteTempFiles();
 }
 
-void TileManager::Update()
+void TileManager::LoadOverTile( TiledDatasetView^ tiledDatasetView )
 {
-    mTileManager->Update();
+    mTileManager->LoadOverTile( tiledDatasetView->ToNative() );
 }
 
 void TileManager::LoadTiles( TiledDatasetView^ tiledDatasetView )
@@ -226,6 +226,11 @@ Collections::Generic::IList< SegmentInfo^ >^ TileManager::GetSegmentInfoRange( i
     return interopSegmentInfoPage;
 }
 
+SegmentInfo^ TileManager::GetSegmentInfo( unsigned int segId )
+{
+	Native::SegmentInfo segInfo = mTileManager->GetSegmentInfo( segId );
+	return gcnew SegmentInfo( segInfo, mTileManager->GetSegmentationLabelColorString( segInfo.id ) );
+}
 
 SlimDX::Direct3D11::ShaderResourceView^ TileManager::GetIdColorMap()
 {
@@ -427,6 +432,11 @@ unsigned int TileManager::CommitDrawMergeCurrentConnectedComponent( Vector3^ pDa
 {
     MojoFloat3 pDataSpaceFloat3 = MojoFloat3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
     return mTileManager->CommitDrawMergeCurrentConnectedComponent( pDataSpaceFloat3 );
+}
+
+unsigned int TileManager::GetNewId()
+{
+    return mTileManager->GetNewId();
 }
 
 void TileManager::UndoChange()

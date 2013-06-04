@@ -96,7 +96,11 @@
     <Reference Include="Ookii.Dialogs.Wpf">
       <HintPath>..\Sdk\Ookii\v1.0\Ookii.Dialogs.Wpf.dll</HintPath>
     </Reference>
-    <Reference Include="SlimDX, Version=2.0.10.43, Culture=neutral, PublicKeyToken=b1b0c32fd1ffe4f9, processorArchitecture=x86">
+    <Reference Condition="'$(Platform)'=='x86'" Include="SlimDX, Version=2.0.10.43, Culture=neutral, PublicKeyToken=b1b0c32fd1ffe4f9, processorArchitecture=x86">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Sdk\SlimDX\SlimDX SDK (October 2010)\Bin\net20\x86\SlimDX.dll</HintPath>
+    </Reference>
+    <Reference Condition="'$(Platform)'=='x64'" Include="SlimDX, Version=2.0.10.43, Culture=neutral, PublicKeyToken=b1b0c32fd1ffe4f9, processorArchitecture=x64">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\Sdk\SlimDX\SlimDX SDK (October 2010)\Bin\net20\x64\SlimDX.dll</HintPath>
     </Reference>
@@ -191,9 +195,9 @@
     </PreBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
-    <PostBuildEvent>copy ..\..\..\..\Sdk\OpenCV\OpenCV2.4\build\x64\vc10\bin\opencv_core240.dll .
-copy ..\..\..\..\Sdk\OpenCV\OpenCV2.4\build\x64\vc10\bin\opencv_highgui240.dll .
-copy ..\..\..\..\Sdk\OpenCV\OpenCV2.4\build\common\tbb\intel64\vc10\tbb.dll .
+    <PostBuildEvent>copy ..\..\..\..\Sdk\OpenCV\OpenCV2.4\build\$(PlatformName)\vc10\bin\opencv_core240.dll .
+copy ..\..\..\..\Sdk\OpenCV\OpenCV2.4\build\$(PlatformName)\vc10\bin\opencv_highgui240.dll .
+copy ..\..\..\..\Sdk\OpenCV\OpenCV2.4\build\common\tbb\$(PlatformName)\vc10\tbb.dll .
 mkdir Shaders
 copy ..\..\..\Shaders\*.fx Shaders\</PostBuildEvent>
   </PropertyGroup>

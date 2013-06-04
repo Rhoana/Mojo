@@ -45,9 +45,8 @@ public:
     void                                                    AutosaveSegmentation();
     void                                                    DeleteTempFiles();
 
-    void                                                    Update();
-
     void                                                    LoadTiles( TiledDatasetView^ tiledDatasetView );
+    void                                                    LoadOverTile( TiledDatasetView^ tiledDatasetView );
 
     Collections::Generic::IList< TileCacheEntry^ >^         GetTileCache();
     SlimDX::Direct3D11::ShaderResourceView^                 GetIdColorMap();
@@ -64,6 +63,7 @@ public:
 	unsigned int                                            GetSegmentInfoCount();
 	unsigned int                                            GetSegmentInfoCurrentListLocation( unsigned int segId );
     Collections::Generic::IList< SegmentInfo^ >^            GetSegmentInfoRange( int begin, int end );
+    SegmentInfo^                                            GetSegmentInfo( unsigned int segId );
 
     unsigned int                                            GetSegmentationLabelId( TiledDatasetView^ tiledDatasetView, Vector3^ pDataSpace );
     String^                                                 GetSegmentationLabelColorString( unsigned int segId );
@@ -102,6 +102,7 @@ public:
     unsigned int                                            CommitDrawMergeCurrentSlice( Vector3^ pDataSpace );
     unsigned int                                            CommitDrawMergeCurrentConnectedComponent( Vector3^ pDataSpace );
 
+	unsigned int                                            GetNewId();
 	void                                                    UndoChange();
 	void                                                    RedoChange();
     void                                                    TempSaveAndClearFileSystemTileCache();

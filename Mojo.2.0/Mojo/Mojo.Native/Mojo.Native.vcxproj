@@ -21,6 +21,7 @@
   <ItemGroup>
     <ClInclude Include="..\Sdk\SQLite\sqlite-amalgamation-3071502\sqlite3.h" />
     <ClInclude Include="Constants.hpp" />
+    <ClInclude Include="FileSystemLogger.hpp" />
     <ClInclude Include="FileSystemSegmentInfoManager.hpp" />
     <ClInclude Include="FileSystemSplitState.hpp" />
     <ClInclude Include="SegmentInfo.hpp" />
@@ -37,6 +38,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Sdk\SQLite\sqlite-amalgamation-3071502\sqlite3.c" />
+    <ClCompile Include="FileSystemLogger.cpp" />
     <ClCompile Include="FileSystemSegmentInfoManager.cpp" />
     <ClCompile Include="FileSystemSplitState.cpp" />
     <ClCompile Include="SegmentInfo.cpp" />

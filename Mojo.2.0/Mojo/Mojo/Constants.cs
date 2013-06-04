@@ -67,6 +67,11 @@ namespace Mojo
                 { PrimitiveType.Float, "SCRATCHPAD_MAP_INITIAL_VALUE", 0f },                                       
 
                 { PrimitiveType.Int, "ID_MAP_INITIAL_VALUE", 0 },
+
+                { PrimitiveType.Int, "TILE_PIXELS_X", 512 },
+                { PrimitiveType.Int, "TILE_PIXELS_Y", 512 },
+                { PrimitiveType.Int, "TILE_PIXELS_Z", 1 },
+
                 { PrimitiveType.Int, "TILE_SIZE_X", 1 },
                 { PrimitiveType.Int, "TILE_SIZE_Y", 1 },
                 { PrimitiveType.Int, "TILE_SIZE_Z", 1 },
@@ -133,6 +138,7 @@ namespace Mojo
 
         public static readonly string COLOR_MAP_PATH = @"ids\colorMap.hdf5";
         public static readonly string SEGMENT_INFO_PATH = @"ids\segmentInfo.db";
+        public static readonly string LOG_PATH = @"ids\changelog.txt";
 
         public static readonly string TEMP_ID_MAP_ROOT_DIRECTORY_NAME = @"temp\ids\tiles";
 

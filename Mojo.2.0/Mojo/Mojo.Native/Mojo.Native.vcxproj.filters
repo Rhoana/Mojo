@@ -13,6 +13,7 @@
     <ClCompile Include="FileSystemSegmentInfoManager.cpp" />
     <ClCompile Include="SegmentInfo.cpp" />
     <ClCompile Include="..\Sdk\SQLite\sqlite-amalgamation-3071502\sqlite3.c" />
+    <ClCompile Include="FileSystemLogger.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="TileCacheEntry.hpp" />
@@ -30,5 +31,6 @@
     <ClInclude Include="FileSystemSegmentInfoManager.hpp" />
     <ClInclude Include="SegmentInfo.hpp" />
     <ClInclude Include="..\Sdk\SQLite\sqlite-amalgamation-3071502\sqlite3.h" />
+    <ClInclude Include="FileSystemLogger.hpp" />
   </ItemGroup>
 </Project>

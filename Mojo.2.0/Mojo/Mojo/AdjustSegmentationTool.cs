@@ -88,6 +88,13 @@ namespace Mojo
                         mTileManager.Internal.PrepForAdjust( mTileManager.SelectedSegmentId, p );
                     }
                     break;
+                case System.Windows.Input.Key.N:
+                    if ( keyEventArgs.KeyboardDevice.Modifiers == System.Windows.Input.ModifierKeys.Control )
+                    {
+                        mTileManager.SelectNewId();
+                        mTileManager.Internal.PrepForAdjust( mTileManager.SelectedSegmentId, p );
+                    }
+                    break;
                 case System.Windows.Input.Key.Tab:
                     mTileManager.CommmitAdjustChange();
                     keyEventArgs.Handled = true;

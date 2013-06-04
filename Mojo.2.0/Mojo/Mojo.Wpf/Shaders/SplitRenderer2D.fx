@@ -88,6 +88,9 @@ float4 PS( PS_IN input ) : SV_Target
     float4 idColor        = gIdColorMapBuffer.Load( id % gIdColorMapBuffer.Length );
     float1 idConfidence   = gIdConfidenceMapBuffer.Load( id );
 
+	if ( idConfidence.x > 0.0f && index3D.x % 16 < 12 && index3D.y % 16 < 12 )
+		idColor = float4( 0.0f, 0.0f, 0.3f, 0.0f );
+
 	float4 returnColor    = ( ( 1.0f - gSegmentationRatio ) * sourceColor ) + ( gSegmentationRatio * idColor );
 
     float xDist           = ( (float) index3D.x ) - gMouseOverX * 512.0f + 0.5f;
@@ -96,9 +99,6 @@ float4 PS( PS_IN input ) : SV_Target
 
     bool border           = false;
     bool selectBorder     = false;
-
-	if ( idConfidence.x > 0.0f ) 
-		return float4( 0.0f, 0.0f, 0.3f, 0.0f );
 
 	if ( gBoundaryLinesVisible )
 	{
@@ -169,18 +169,18 @@ float4 PS( PS_IN input ) : SV_Target
 
     if ( border && gSegmentationRatio > 0.0f )
     {
-        if ( selectBorder && mouseDistance < gMouseHighlightSize )
+        if ( selectBorder && mouseDistance < gMouseHighlightSize && idConfidence.x == 0.0f )
 		    returnColor = float4( 0.4f, 0.4f, 0.8f, 0.0f );
         else if ( selectBorder )
 		    returnColor = float4( 1.0f, 1.0f, 1.0f, 0.0f );
         else
 		    returnColor = float4( 0.0f, 0.0f, 0.0f, 0.0f );
     }
-	else if ( gBrushVisible && id != 0 && id == gSelectedSegmentId && ( mouseDistance < gMouseHighlightSize ) )
+	else if ( gBrushVisible && id != 0 && id == gSelectedSegmentId && ( mouseDistance < gMouseHighlightSize ) && idConfidence.x == 0.0f )
 	{
 		returnColor = sourceColor + float4( -0.2f, 0.2f, -0.2f, 0.0f);
 	}
-	else if ( gCrosshairVisible && id != 0 && id == gSelectedSegmentId && ( abs( xDist ) < 0.5f || abs( yDist ) < 0.5f ) )
+	else if ( gCrosshairVisible && id != 0 && id == gSelectedSegmentId && ( abs( xDist ) < 0.5f || abs( yDist ) < 0.5f ) && idConfidence.x == 0.0f )
 	{
 		returnColor = sourceColor + float4( -0.2f, -0.2f, 0.2f, 0.0f);
 	}
@@ -190,22 +190,21 @@ float4 PS( PS_IN input ) : SV_Target
         {
             returnColor = float4( 0.0f, 0.0f, 0.0f, 0.0f );
         }
-		else if ( id == gSelectedSegmentId )
+		else if ( id == gSelectedSegmentId && idConfidence.x == 0.0f )
 		{
 			returnColor = sourceColor * 1.2;
+		}
+		else if ( id == gSelectedSegmentId )
+		{
+			returnColor *= 1.4;
 		}
 		else if ( id == gMouseOverSegmentId )
 		{
 			returnColor *= 1.2;
 		}
-
-		//if ( gSelectedSegmentId != 0 )
-		//{
-		//	returnColor /= 1.2;
-		//}
 	}
 
-	if ( gSegmentationRatio > 0.0f )
+	if ( gSegmentationRatio > 0.0f && idConfidence.x == 0.0f )
 	{
 		if ( overlay == BORDER_TARGET )
 		{

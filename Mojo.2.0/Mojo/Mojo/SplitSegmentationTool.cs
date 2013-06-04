@@ -96,6 +96,13 @@ namespace Mojo
                         mTileManager.Internal.PrepForSplit( mTileManager.SelectedSegmentId, p );
                     }
                     break;
+                case System.Windows.Input.Key.N:
+                    if ( keyEventArgs.KeyboardDevice.Modifiers == System.Windows.Input.ModifierKeys.Control )
+                    {
+                        mTileManager.SelectNewId();
+                        mTileManager.Internal.PrepForSplit( mTileManager.SelectedSegmentId, p );
+                    }
+                    break;
                 case System.Windows.Input.Key.Tab:
                     mTileManager.CommmitSplitChange();
                     keyEventArgs.Handled = true;

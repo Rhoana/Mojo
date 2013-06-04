@@ -28,6 +28,7 @@ namespace Mojo.Wpf.ViewModel
         //
         public RelayCommand UndoChangeCommand { get; private set; }
         public RelayCommand RedoChangeCommand { get; private set; }
+        public RelayCommand SelectNewIdCommand { get; private set; }
         public RelayCommand ToggleJoinSplits3DCommand { get; private set; }
         public RelayCommand CommitChangeCommand { get; private set; }
         public RelayCommand CancelChangeCommand { get; private set; }
@@ -41,6 +42,7 @@ namespace Mojo.Wpf.ViewModel
         public RelayCommand PreviousImageCommand { get; private set; }
         public RelayCommand ZoomInCommand { get; private set; }
         public RelayCommand ZoomOutCommand { get; private set; }
+        public RelayCommand UpdateLocationFromTextCommand { get; private set; }
         public RelayCommand ToggleShowSegmentationCommand { get; private set; }
         public RelayCommand ToggleShowBoundaryLinesCommand { get; private set; }
         public RelayCommand IncreaseSegmentationVisibilityCommand { get; private set; }
@@ -78,7 +80,6 @@ namespace Mojo.Wpf.ViewModel
         public List<MergeControlModeItem> MergeControlModes { get; private set; }
         public List<SplitModeItem> SplitModes { get; private set; }
 
-
         public EngineDataContext( Engine engine, TileManagerDataContext tileManagerDataContext )
         {
             Engine = engine;
@@ -99,6 +100,7 @@ namespace Mojo.Wpf.ViewModel
             //
             UndoChangeCommand = new RelayCommand( param => Engine.TileManager.UndoChange(), param => Engine.TileManager.SegmentationLoaded );
             RedoChangeCommand = new RelayCommand( param => Engine.TileManager.RedoChange(), param => Engine.TileManager.SegmentationLoaded );
+            SelectNewIdCommand = new RelayCommand( param => Engine.TileManager.SelectNewId(), param => Engine.TileManager.SegmentationLoaded );
             CommitChangeCommand = new RelayCommand( param => Engine.CommitChange(), param => Engine.TileManager.SegmentationLoaded );
             CancelChangeCommand = new RelayCommand( param => Engine.CancelChange(), param => Engine.TileManager.SegmentationLoaded );
             IncreaseBrushSizeCommand = new RelayCommand( param => Engine.TileManager.IncreaseBrushSize(), param => Engine.TileManager.SegmentationLoaded );
@@ -111,6 +113,7 @@ namespace Mojo.Wpf.ViewModel
             PreviousImageCommand = new RelayCommand( param => Engine.PreviousImage(), param => Engine.TileManager.TiledDatasetLoaded );
             ZoomInCommand = new RelayCommand( param => Engine.ZoomIn(), param => Engine.TileManager.TiledDatasetLoaded );
             ZoomOutCommand = new RelayCommand( param => Engine.ZoomOut(), param => Engine.TileManager.TiledDatasetLoaded );
+            UpdateLocationFromTextCommand = new RelayCommand( param => Engine.UpdateLocationFromText(param), param => Engine.TileManager.TiledDatasetLoaded );
             ToggleShowSegmentationCommand = new RelayCommand( param => Engine.TileManager.ToggleShowSegmentation(), param => Engine.TileManager.SegmentationLoaded );
             ToggleShowBoundaryLinesCommand = new RelayCommand( param => Engine.TileManager.ToggleShowBoundaryLines(), param => Engine.TileManager.SegmentationLoaded );
             ToggleJoinSplits3DCommand = new RelayCommand( param => Engine.TileManager.ToggleJoinSplits3D(), param => Engine.TileManager.SegmentationLoaded );
@@ -234,6 +237,8 @@ namespace Mojo.Wpf.ViewModel
                     Engine.TileManager.TiledDatasetView.ExtentDataSpace = new Vector3( viewportDataSpaceX / zoomLevel, viewportDataSpaceY / zoomLevel, 0f );
 
                     Engine.CurrentToolMode = ToolMode.SplitSegmentation;
+
+                    Engine.TileManager.UpdateXYZ();
 
                 }
 

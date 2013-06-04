@@ -51,23 +51,27 @@ namespace Mojo
                     break;
 
                 case Key.Left:
-                    centerDataSpace.X += Constants.ARROW_KEY_STEP / dataSpaceUnitWidthNumPixels;
+                    centerDataSpace.X -= Constants.ARROW_KEY_STEP / dataSpaceUnitWidthNumPixels;
                     mTileManager.TiledDatasetView.CenterDataSpace = centerDataSpace;
+                    mTileManager.UpdateXYZ();
                     keyEventArgs.Handled = true;
                     break;
                 case Key.Right:
-                    centerDataSpace.X -= Constants.ARROW_KEY_STEP / dataSpaceUnitWidthNumPixels;
+                    centerDataSpace.X += Constants.ARROW_KEY_STEP / dataSpaceUnitWidthNumPixels;
                     mTileManager.TiledDatasetView.CenterDataSpace = centerDataSpace;
+                    mTileManager.UpdateXYZ();
                     keyEventArgs.Handled = true;
                     break;
                 case Key.Up:
-                    centerDataSpace.Y += Constants.ARROW_KEY_STEP / dataSpaceUnitWidthNumPixels;
+                    centerDataSpace.Y -= Constants.ARROW_KEY_STEP / dataSpaceUnitWidthNumPixels;
                     mTileManager.TiledDatasetView.CenterDataSpace = centerDataSpace;
+                    mTileManager.UpdateXYZ();
                     keyEventArgs.Handled = true;
                     break;
                 case Key.Down:
-                    centerDataSpace.Y -= Constants.ARROW_KEY_STEP / dataSpaceUnitWidthNumPixels;
+                    centerDataSpace.Y += Constants.ARROW_KEY_STEP / dataSpaceUnitWidthNumPixels;
                     mTileManager.TiledDatasetView.CenterDataSpace = centerDataSpace;
+                    mTileManager.UpdateXYZ();
                     keyEventArgs.Handled = true;
                     break;
 
@@ -109,6 +113,7 @@ namespace Mojo
             {
                 case System.Windows.Forms.MouseButtons.Middle:
                     mCurrentlyPanning = false;
+                    mTileManager.UpdateXYZ();
                     break;
                 case System.Windows.Forms.MouseButtons.XButton1:
                     mEngine.PreviousImage();
@@ -165,6 +170,7 @@ namespace Mojo
 
                 mPreviousMousePositionX = mouseEventArgs.X;
                 mPreviousMousePositionY = mouseEventArgs.Y;
+
             }
         }
 
@@ -227,9 +233,9 @@ namespace Mojo
                 centerDataSpace.X = 0;
 
             }
-            if ( centerDataSpace.X > tiledVolumeDescription.NumTilesX )
+            if ( centerDataSpace.X > tiledVolumeDescription.NumTilesX * Constants.ConstParameters.GetInt( "TILE_SIZE_X" ) )
             {
-                centerDataSpace.X = tiledVolumeDescription.NumTilesX;
+                centerDataSpace.X = tiledVolumeDescription.NumTilesX * Constants.ConstParameters.GetInt( "TILE_SIZE_X" );
             }
 
             if ( centerDataSpace.Y < 0 )
@@ -245,6 +251,9 @@ namespace Mojo
             mTileManager.TiledDatasetView.ExtentDataSpace = extentDataSpace;
 
             mEngine.QuickRender();
+
+            mTileManager.UpdateXYZ();
+
         }
 
         public virtual void SetSize( int oldWidth, int oldHeight, int newWidth, int newHeight )

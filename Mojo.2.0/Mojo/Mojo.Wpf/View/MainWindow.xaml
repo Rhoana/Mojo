@@ -100,6 +100,8 @@
                     </MenuItem.Icon>
                 </MenuItem>
                 <Separator />
+                <MenuItem Name="SelectNewIdMenuItem" Header="Select New Id" InputGestureText="Ctrl+N" Focusable="False" Command="{Binding Path=SelectNewIdCommand}" IsEnabled="{Binding Path=Engine.TileManager.SegmentationControlsEnabled}">
+                </MenuItem>
                 <MenuItem Name="MenuJoin3DSplits" Header="3D Splits" Focusable="False" Command="{Binding Path=ToggleJoinSplits3DCommand}" IsEnabled="{Binding Path=Engine.TileManager.SegmentationControlsEnabled}" IsCheckable="True" IsChecked="{Binding Path=Engine.TileManager.JoinSplits3D, Mode=OneWay}">
                     <MenuItem.Icon>
                         <Image Width="16" Height="16" Source="{StaticResource SegmentationJoinSplits3D}"/>
@@ -269,25 +271,84 @@
             <Border Grid.Column="1" Focusable="False" Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}" BorderBrush="Gray" BorderThickness="1,0,1,0" Margin="5,0,0,0">
                 <DockPanel Focusable="False" Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}">
 
+                    <Border DockPanel.Dock="Top" BorderBrush="Gray" BorderThickness="0,0,0,1" >
+                        
+                        <Grid DockPanel.Dock="Top" Background="White" Margin="0,0,0,0" >
+                        
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                        
+                            <Label Grid.Column="0" Grid.Row="0" Focusable="False" MinHeight="20" Content="Location"></Label>
+                            <Label Grid.Column="0" Grid.Row="1" Focusable="False" MinHeight="20" Content="Selection"></Label>
+                            <Label Grid.Column="0" Grid.Row="2" Focusable="False" MinHeight="20" Content="Lock"></Label>
+
+                            <TextBox Grid.Column="1" Grid.Row="0" Margin="3" Text="{Binding Path=TileManagerDataContext.CurrentXYZLocationString}" Width="100" HorizontalAlignment="Left" >
+                                <TextBox.InputBindings>
+                                    <KeyBinding Gesture="Enter" Command="{Binding Path=UpdateLocationFromTextCommand}"
+                                                CommandParameter="{Binding RelativeSource={RelativeSource FindAncestor,AncestorType={x:Type TextBox}},Path=Text}" />
+                                </TextBox.InputBindings>
+                            </TextBox>
+
+                            <Label Grid.Column="1" Grid.Row="1" Content="{Binding Path=TileManagerDataContext.SelectedSegmentName}" HorizontalAlignment="Left" />
+
+                            <StackPanel Grid.Column="1" Grid.Row="2" Orientation="Horizontal">
+                                    
+                                <Grid Background="{Binding Path=TileManagerDataContext.SelectedSegmentBrush}" Margin="3,3,3,3" Width="100" HorizontalAlignment="Left" >
+                                    <CheckBox HorizontalAlignment="Left"
+                                Background="{Binding Path=TileManagerDataContext.SelectedSegmentBrush}" Height="20" Width="100" Margin="5,5,5,5" Name="SelectionLockCheckBox"
+                                IsChecked="{Binding Path=TileManagerDataContext.SelectedSegmentConfidence, Converter={StaticResource SegmentLockConverter}, Mode=OneWay}"
+                                Checked="SelectedSegmentLockCheckBox_OnChecked"
+                                Unchecked="SelectedSegmentLockCheckBox_OnUnchecked" />
+                                </Grid>
+
+                                <Grid>
+                                        
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <Label Grid.Column="0" Grid.Row="0" Focusable="False" MinHeight="20" Content="Size"></Label>
+                                    <Label Grid.Column="0" Grid.Row="1" Focusable="False" MinHeight="20" Content="Id"></Label>
+                                    <Label Grid.Column="1" Grid.Row="0" Content="{Binding Path=TileManagerDataContext.SelectedSegmentSize}" HorizontalAlignment="Left" />
+                                    <Label Grid.Column="1" Grid.Row="1" Content="{Binding Path=Engine.TileManager.SelectedSegmentId}" HorizontalAlignment="Left" />
+                                        
+                                </Grid>
+                                
+                            </StackPanel>
+
+                        </Grid>
+                        
+                    </Border>
                     <StackPanel DockPanel.Dock="Top" Orientation="Horizontal">
-                        <Label DockPanel.Dock="Left" Focusable="False" MinHeight="20" Content="Segment List">
-                        </Label>
-                        <Label DockPanel.Dock="Left" Focusable="False" MinHeight="20" Content="{Binding Path=TileManagerDataContext.SegmentListCurrentPageString}">
-                        </Label>
+                        <StackPanel DockPanel.Dock="Left" Orientation="Horizontal">
+                            <Button Content="&lt;&lt;" Command="{Binding Path=FirstSegmentPageCommand}" Width="30" Margin="5"/>
+                            <Button Content="&lt;" Command="{Binding Path=PreviousSegmentPageCommand}" Width="30" Margin="5"/>
+                            <Button Content="&gt;" Command="{Binding Path=NextSegmentPageCommand}" Width="30" Margin="5"/>
+                            <Button Content="&gt;&gt;" Command="{Binding Path=LastSegmentPageCommand}" Width="30" Margin="5"/>
+                        </StackPanel>
+                        <StackPanel DockPanel.Dock="Left" Orientation="Horizontal">
+                            <Label DockPanel.Dock="Left" Focusable="False" MinHeight="20" Content="{Binding Path=TileManagerDataContext.SegmentListCurrentPageString}">
+                            </Label>
+                        </StackPanel>
                     </StackPanel>
-
-                    <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" HorizontalAlignment="Center">
-                        <Button Content="&lt;&lt;" Command="{Binding Path=FirstSegmentPageCommand}" Width="30" Margin="5"/>
-                        <Button Content="&lt;" Command="{Binding Path=PreviousSegmentPageCommand}" Width="30" Margin="5"/>
-                        <Button Content="&gt;" Command="{Binding Path=NextSegmentPageCommand}" Width="30" Margin="5"/>
-                        <Button Content="&gt;&gt;" Command="{Binding Path=LastSegmentPageCommand}" Width="30" Margin="5"/>
-                    </StackPanel>
-
-                    <ListView Name="SegmentList"
+                    
+                    <ListView DockPanel.Dock="Bottom" Name="SegmentList"
                               ItemsSource="{Binding Path=TileManagerDataContext.SegmentInfoList}" 
                               SelectionChanged="SegmentList_OnSelectionChanged"
                               SelectedValue="{Binding Path=Engine.TileManager.SelectedSegmentId, Mode=OneWay}"
-                              SelectedValuePath="Id"
+                              SelectedValuePath="Id" BorderThickness="0,1,0,0"
                               >
                         
                         <ListView.ItemContainerStyle>
@@ -326,8 +387,8 @@
                                 <Setter Property="BorderBrush">
                                     <Setter.Value>
                                         <MultiBinding Converter="{StaticResource ObjectsEqualBrushConverter}">
-                                            <Binding Path="Id"/>
-                                            <Binding Path="DataContext.Engine.TileManager.MouseOverSegmentId" RelativeSource="{RelativeSource FindAncestor, AncestorType={x:Type Window}}"/>
+                                            <Binding Path="Id" />
+                                            <Binding Path="DataContext.Engine.TileManager.MouseOverSegmentId" RelativeSource="{RelativeSource FindAncestor, AncestorType={x:Type Window}}" />
                                         </MultiBinding>
                                     </Setter.Value>
                                 </Setter>
@@ -357,7 +418,7 @@
                                     <GridViewColumn.CellTemplate>
                                         <DataTemplate>
                                             <Grid HorizontalAlignment="Stretch">
-                                                <Label Content="{Binding Name}" />
+                                                <TextBlock Text="{Binding Name}" />
                                             </Grid>
                                         </DataTemplate>
                                     </GridViewColumn.CellTemplate>
@@ -368,7 +429,7 @@
                                     <GridViewColumn.CellTemplate>
                                         <DataTemplate>
                                             <Grid HorizontalAlignment="Stretch">
-                                                <Label Content="{Binding Size}" />
+                                                <TextBlock Text="{Binding Size}" />
                                             </Grid>
                                         </DataTemplate>
                                     </GridViewColumn.CellTemplate>
@@ -379,7 +440,7 @@
                                     <GridViewColumn.CellTemplate>
                                         <DataTemplate>
                                             <Grid HorizontalAlignment="Stretch" Margin="0,0,0,0">
-                                                <Label Content="{Binding Id}" />
+                                                <TextBlock Text="{Binding Id}" />
                                             </Grid>
                                         </DataTemplate>
                                     </GridViewColumn.CellTemplate>

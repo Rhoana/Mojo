@@ -112,8 +112,143 @@ void TileManager::DeleteTempFiles()
     mTileServer->DeleteTempFiles();
 }
 
-void TileManager::Update()
+void TileManager::LoadOverTile( const TiledDatasetView& tiledDatasetView )
 {
+	//
+	// Find a single tile that will completely cover the current view
+	//
+    MojoInt4 tileIndex = GetTileIndexCoveringView( tiledDatasetView );
+
+    int cacheIndex = mTileCachePageTable( tileIndex.w, tileIndex.z, tileIndex.y, tileIndex.x );
+
+    //
+    // all cache entries can be discarded unless they are in the current z window
+    //
+    for ( int cacheIndex = 0; cacheIndex < mDeviceTileCacheSize; cacheIndex++ )
+    {
+		if ( mTileCache[ cacheIndex ].indexTileSpace.z == tileIndex.z )
+		{
+			mTileCache[ cacheIndex ].keepState = TileCacheEntryKeepState_MustKeep;
+			mTileCache[ cacheIndex ].active    = true;
+		}
+		else
+		{
+			mTileCache[ cacheIndex ].keepState = TileCacheEntryKeepState_CanDiscard;
+			mTileCache[ cacheIndex ].active    = false;
+		}
+    }
+
+    //
+    // if the tile is not loaded...
+    //
+    if ( cacheIndex == TILE_CACHE_BAD_INDEX )
+    {
+
+		//Core::Printf( "Loading single tile at: w=", tileIndex.w, ", z=", tileIndex.z, ", y=", tileIndex.y, ", x=", tileIndex.x, "." );
+
+        //
+        // Overwrite the tile at mTileCacheSearchStart
+        //
+        int newCacheIndex = mTileCacheSearchStart;
+
+        mTileCacheSearchStart = ( newCacheIndex + 1 ) % mDeviceTileCacheSize;
+
+        //RELEASE_ASSERT( !mTileCache[ newCacheIndex ]->active );
+
+        //Core::Printf( "Replacing tile ", newCacheIndex, " in the device cache.");
+
+        //
+        // get the new cache entry's index in tile space
+        //
+        MojoInt4 indexTileSpace = mTileCache[ newCacheIndex ].indexTileSpace;
+        MojoInt4 tempTileIndex = MojoInt4( indexTileSpace.x, indexTileSpace.y, indexTileSpace.z, indexTileSpace.w );
+
+        //
+        // if the new cache entry refers to a tile that is already loaded...
+        //
+        if ( tempTileIndex.x != TILE_CACHE_PAGE_TABLE_BAD_INDEX ||
+                tempTileIndex.y != TILE_CACHE_PAGE_TABLE_BAD_INDEX ||
+                tempTileIndex.z != TILE_CACHE_PAGE_TABLE_BAD_INDEX ||
+                tempTileIndex.w != TILE_CACHE_PAGE_TABLE_BAD_INDEX )
+        {
+            //
+            // mark the tile as not being loaded any more
+            //
+            mTileCachePageTable( tempTileIndex.w, tempTileIndex.z, tempTileIndex.y, tempTileIndex.x ) = TILE_CACHE_BAD_INDEX;
+        }
+
+        //
+        // load image data into host memory
+        //
+        Core::HashMap< std::string, Core::VolumeDescription > volumeDescriptions = mTileServer->LoadTile( tileIndex );
+
+        //
+        // load the new data into into device memory for the new cache entry
+        //
+        mTileCache[ newCacheIndex ].d3d11CudaTextures.Get( "SourceMap" )->Update( volumeDescriptions.Get( "SourceMap" ) );
+
+		if ( IsSegmentationLoaded() )
+		{
+			if ( volumeDescriptions.GetHashMap().find( "IdMap" ) == volumeDescriptions.GetHashMap().end() )
+			{
+				Core::Printf( "Warning: Segmentation is loaded, but volume description is missing an IdMap." );
+			}
+			else
+			{
+				mTileCache[ newCacheIndex ].d3d11CudaTextures.Get( "IdMap" )->Update( volumeDescriptions.Get( "IdMap" ) );
+
+                //TiledVolumeDescription tiledVolumeDescription = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "IdMap" );
+				//int idNumVoxelsPerTile = tiledVolumeDescription.numVoxelsPerTileX * tiledVolumeDescription.numVoxelsPerTileY * tiledVolumeDescription.numVoxelsPerTileZ;
+
+				//Core::Thrust::MemcpyHostToDevice( mTileCache[ newCacheIndex ].deviceVectors.Get< int >( "IdMap" ), volumeDescriptions.Get( "IdMap" ).data, idNumVoxelsPerTile );
+			}
+
+			if ( volumeDescriptions.GetHashMap().find( "OverlayMap" ) != volumeDescriptions.GetHashMap().end() )
+			{
+				mTileCache[ newCacheIndex ].d3d11CudaTextures.Get( "OverlayMap" )->Update( volumeDescriptions.Get( "OverlayMap" ) );
+
+                //TiledVolumeDescription tiledVolumeDescription = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "OverlayMap" );
+				//int idNumVoxelsPerTile = tiledVolumeDescription.numVoxelsPerTileX * tiledVolumeDescription.numVoxelsPerTileY * tiledVolumeDescription.numVoxelsPerTileZ;
+
+				//Core::Thrust::MemcpyHostToDevice( mTileCache[ newCacheIndex ].deviceVectors.Get< int >( "OverlayMap" ), volumeDescriptions.Get( "OverlayMap" ).data, idNumVoxelsPerTile );
+			}
+		}
+
+        //
+        // unload image data from from host memory
+        //
+        mTileServer->UnloadTile( tileIndex );
+
+        //
+        // update tile cache state for the new cache entry
+        //
+        MojoFloat3 extentDataSpace =
+            MojoFloat3(
+                mConstParameters.Get< int >( "TILE_SIZE_X" ) * (float)pow( 2.0, tileIndex.w ),
+                mConstParameters.Get< int >( "TILE_SIZE_Y" ) * (float)pow( 2.0, tileIndex.w ),
+                mConstParameters.Get< int >( "TILE_SIZE_Z" ) * (float)pow( 2.0, tileIndex.w ) );
+
+        MojoFloat3 centerDataSpace =
+            MojoFloat3(
+                ( tileIndex.x + 0.5f ) * extentDataSpace.x,
+                ( tileIndex.y + 0.5f ) * extentDataSpace.y,
+                ( tileIndex.z + 0.5f ) * extentDataSpace.z );
+
+        mTileCache[ newCacheIndex ].keepState       = TileCacheEntryKeepState_MustKeep;
+        mTileCache[ newCacheIndex ].active          = true;
+        mTileCache[ newCacheIndex ].indexTileSpace  = tileIndex;
+        mTileCache[ newCacheIndex ].centerDataSpace = centerDataSpace;
+        mTileCache[ newCacheIndex ].extentDataSpace = extentDataSpace;
+
+        //
+        // mark the new location in tile space as being loaded into the cache
+        //
+        RELEASE_ASSERT( mTileCachePageTable( tileIndex.w, tileIndex.z, tileIndex.y, tileIndex.x ) == TILE_CACHE_BAD_INDEX );
+
+        mTileCachePageTable( tileIndex.w, tileIndex.z, tileIndex.y, tileIndex.x ) = newCacheIndex;
+
+    }
+
 }
 
 void TileManager::LoadTiles( const TiledDatasetView& tiledDatasetView )
@@ -464,6 +599,11 @@ std::list< SegmentInfo > TileManager::GetSegmentInfoRange( int begin, int end )
 	return mTileServer->GetSegmentInfoRange( begin, end );
 }
 
+SegmentInfo TileManager::GetSegmentInfo( unsigned int segId )
+{
+	return mTileServer->GetSegmentInfo( segId );
+}
+
 MojoInt3 TileManager::GetSegmentationLabelColor( unsigned int segId )
 {
 	if ( mIdColorMap->size() > 0 )
@@ -720,6 +860,11 @@ void TileManager::ReplaceSegmentationLabelCurrentConnectedComponent( unsigned in
     mTileServer->ReplaceSegmentationLabelCurrentConnectedComponent( oldId, newId, pDataSpace );
 
     ReloadTileCache();
+}
+
+unsigned int TileManager::GetNewId()
+{
+	return mTileServer->GetNewId();
 }
 
 void TileManager::UndoChange()
@@ -979,6 +1124,115 @@ std::list< MojoInt4 > TileManager::GetTileIndicesIntersectedByView( const TiledD
                 tilesIntersectedByCamera.push_back( MojoInt4( x, y, z, zoomLevelXY ) );
 
     return tilesIntersectedByCamera;
+}
+
+MojoInt4 TileManager::GetTileIndexCoveringView( const TiledDatasetView& tiledDatasetView )
+{
+    MojoInt4 tileCoveringView;
+
+    //
+    // figure out what the current zoom level is
+    //
+    MojoInt3 zoomLevel = GetZoomLevel( tiledDatasetView );
+    int  nextZoomLevelXY = std::min( zoomLevel.x, zoomLevel.y );
+    int  zoomLevelZ  = zoomLevel.z;
+
+	int minX = 0;
+	int maxX = 1;
+	int minY = 0;
+	int maxY = 1;
+	int minZ = 0;
+	int maxZ = 1;
+
+	int zoomLevelXY = 0;
+
+	MojoInt4 numTiles              = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "SourceMap" ).numTiles();
+
+	//
+	// Zoom out until there is only one tile visible
+	//
+	while ( minX < maxX || minY < maxY || minZ < maxZ )
+	{
+		zoomLevelXY = nextZoomLevelXY;
+
+		if ( zoomLevelXY >= numTiles.w - 1 )
+		{
+			zoomLevelXY = numTiles.w - 1;
+			minX = 0;
+			minY = 0;
+			minZ = tiledDatasetView.centerDataSpace.z;
+			break;
+		}
+
+		//
+		// figure out how many tiles there are at the current zoom level
+		//
+		int  numTilesForZoomLevelX = (int)ceil( numTiles.x / pow( 2.0, zoomLevelXY ) );
+		int  numTilesForZoomLevelY = (int)ceil( numTiles.y / pow( 2.0, zoomLevelXY ) );
+		int  numTilesForZoomLevelZ = (int)ceil( numTiles.z / pow( 2.0, zoomLevelZ ) );
+
+		//
+		// figure out the tile size (in data space) at the current zoom level
+		//
+		int tileSizeDataSpaceX = (int)( mConstParameters.Get< int >( "TILE_SIZE_X" ) * pow( 2.0, zoomLevelXY ) );
+		int tileSizeDataSpaceY = (int)( mConstParameters.Get< int >( "TILE_SIZE_Y" ) * pow( 2.0, zoomLevelXY ) );
+		int tileSizeDataSpaceZ = (int)( mConstParameters.Get< int >( "TILE_SIZE_Z" ) * pow( 2.0, zoomLevelZ ) );
+
+		//
+		// compute the top-left-front and bottom-right-back points (in data space) that are currently in view
+		//
+		MojoFloat3 topLeftFrontDataSpace =
+			MojoFloat3(
+				tiledDatasetView.centerDataSpace.x - ( tiledDatasetView.extentDataSpace.x / 2 ),
+				tiledDatasetView.centerDataSpace.y - ( tiledDatasetView.extentDataSpace.y / 2 ),
+				tiledDatasetView.centerDataSpace.z - ( tiledDatasetView.extentDataSpace.z / 2 ) );
+
+		MojoFloat3 bottomRightBackDataSpace =
+			MojoFloat3(
+				tiledDatasetView.centerDataSpace.x + ( tiledDatasetView.extentDataSpace.x / 2 ),
+				tiledDatasetView.centerDataSpace.y + ( tiledDatasetView.extentDataSpace.y / 2 ),
+				tiledDatasetView.centerDataSpace.z + ( tiledDatasetView.extentDataSpace.z / 2 ) );
+
+		//
+		// compute the tile space indices for the top-left-front and bottom-right-back points
+		//
+		MojoInt3 topLeftFrontTileIndex =
+			MojoInt3(
+				(int)floor( topLeftFrontDataSpace.x / tileSizeDataSpaceX ),
+				(int)floor( topLeftFrontDataSpace.y / tileSizeDataSpaceY ),
+				(int)floor( topLeftFrontDataSpace.z / tileSizeDataSpaceZ ) );
+
+		MojoInt3 bottomRightBackTileIndex =
+			MojoInt3(
+				(int)floor( bottomRightBackDataSpace.x / tileSizeDataSpaceX ),
+				(int)floor( bottomRightBackDataSpace.y / tileSizeDataSpaceY ),
+				(int)floor( bottomRightBackDataSpace.z / tileSizeDataSpaceZ ) );
+
+		//
+		// clip the tiles to the appropriate tile space borders
+		//
+		minX = std::max( 0,                         topLeftFrontTileIndex.x );
+		maxX = std::min( numTilesForZoomLevelX - 1, bottomRightBackTileIndex.x );
+		minY = std::max( 0,                         topLeftFrontTileIndex.y );
+		maxY = std::min( numTilesForZoomLevelY - 1, bottomRightBackTileIndex.y );
+		minZ = std::max( 0,                         topLeftFrontTileIndex.z );
+		maxZ = std::min( numTilesForZoomLevelZ - 1, bottomRightBackTileIndex.z );
+
+		int maxTilesXY = std::max(maxX - minX + 1, maxY - minY + 1);
+
+		if ( maxTilesXY > 2 )
+		{
+			nextZoomLevelXY = zoomLevelXY + (int) ceil ( log( (double)maxTilesXY ) / log( 2.0 ) );
+		}
+		else
+		{
+			nextZoomLevelXY = zoomLevelXY + 1;
+		}
+
+	}
+
+    return MojoInt4(minX, minY, minZ, zoomLevelXY);
+
 }
 
 void TileManager::GetIndexTileSpace( MojoInt3 zoomLevel, MojoFloat3 pointDataSpace, MojoFloat4& pointTileSpace, MojoInt4& tileIndex )

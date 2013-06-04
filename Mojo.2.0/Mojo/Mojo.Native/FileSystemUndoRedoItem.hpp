@@ -19,7 +19,7 @@ namespace Mojo
 namespace Native
 {
 
-typedef std::bitset < TILE_SIZE * TILE_SIZE >                  TileChangeBits;
+typedef std::bitset < TILE_PIXELS * TILE_PIXELS >              TileChangeBits;
 
 typedef std::map<
 	unsigned int,

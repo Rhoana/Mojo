@@ -199,6 +199,8 @@ void FileSystemTileServer::SaveSegmentation()
 
     Core::Printf( "Segmentation saved." );
 
+	mLogger.Log( "Segmentation saved." );
+
 }
 
 void FileSystemTileServer::SaveSegmentationAs( std::string savePath )
@@ -216,6 +218,9 @@ void FileSystemTileServer::SaveSegmentationAs( std::string savePath )
     //
 
     Core::Printf( "Segmentation saved to: \"", savePath, "\" (disabled)." );
+
+	mLogger.Log( Core::ToString( "Segmentation saved to: \"", savePath, "\" (disabled)." ) );
+
 }
 
 void FileSystemTileServer::AutosaveSegmentation()
@@ -514,6 +519,9 @@ void FileSystemTileServer::RemapSegmentLabels( std::set< unsigned int > fromSegI
 			}
 		}
 		Core::Printf( "Finished remapping to segmentation label ", toSegId, ".\n" );
+
+		mLogger.Log( Core::ToString( "RemapSegmentLabels: fromId=", fromSegIds, " toId=", toSegId ) );
+
 	}
 }
 
@@ -626,6 +634,9 @@ void FileSystemTileServer::ReplaceSegmentationLabel( unsigned int oldId, unsigne
         mSegmentInfoManager.SetTiles( oldId, tilesContainingOldId );
 
         Core::Printf( "\nFinished replacing segmentation label ", oldId, " with segmentation label ", newId, ".\n" );
+
+		mLogger.Log( Core::ToString( "ReplaceSegmentationLabel: oldId=", oldId, ", newId=", newId ) );
+
     }
 }
 
@@ -917,6 +928,9 @@ void FileSystemTileServer::ReplaceSegmentationLabelCurrentSlice( unsigned int ol
         mSegmentInfoManager.SetTiles( newId, tilesContainingNewId );
 
         Core::Printf( "\nFinished replacing segmentation label ", oldId, " conencted to voxel (x", pVoxelSpace.x, ", y", pVoxelSpace.y, " z", pVoxelSpace.z, ") with segmentation label ", newId, " for zslice ", pVoxelSpace.z, ".\n" );
+
+		mLogger.Log( Core::ToString( "ReplaceSegmentationLabelCurrentSlice: oldId=", oldId, ", newId=", newId, ", x=", pVoxelSpace.x, ", y=", pVoxelSpace.y, ", z=", pVoxelSpace.z ) );
+
     }
 }
 
@@ -1207,6 +1221,9 @@ void FileSystemTileServer::ReplaceSegmentationLabelCurrentConnectedComponent( un
         mSegmentInfoManager.SetTiles( newId, tilesContainingNewId );
 
         Core::Printf( "\nFinished replacing segmentation label ", oldId, " conencted to voxel (x", pVoxelSpace.x, ", y", pVoxelSpace.y, " z", pVoxelSpace.z, ") with segmentation label ", newId, " in 3D from zslice ", pVoxelSpace.z, ".\n" );
+
+		mLogger.Log( Core::ToString( "ReplaceSegmentationLabelCurrentConnectedComponent: oldId=", oldId, ", newId=", newId, ", x=", pVoxelSpace.x, ", y=", pVoxelSpace.y, ", z=", pVoxelSpace.z ) );
+
     }
 }
 
@@ -1512,8 +1529,8 @@ void FileSystemTileServer::StrideUpIdTileChange( MojoInt4 numTiles, MojoInt3 num
 				int fromIndex1D = tileX + tileY * numVoxelsPerTile.x;
 				int toIndex1D = wTileX + wTileY * numVoxelsPerTile.x;
 
-				//RELEASE_ASSERT( toIndex1D < TILE_SIZE * TILE_SIZE );
-				//RELEASE_ASSERT( fromIndex1D < TILE_SIZE * TILE_SIZE );
+				//RELEASE_ASSERT( toIndex1D < TILE_PIXELS * TILE_PIXELS );
+				//RELEASE_ASSERT( fromIndex1D < TILE_PIXELS * TILE_PIXELS );
 
 				strideData[ toIndex1D ] = data[ fromIndex1D ];
 				++wTileX;
@@ -1559,7 +1576,7 @@ void FileSystemTileServer::ResetOverlayTiles()
 				if ( clearedTiles.find( thisTile ) == clearedTiles.end() )
 				{
 					volumeDescriptions = LoadTile( thisTile );
-					memset( volumeDescriptions.Get( "OverlayMap" ).data, 0, TILE_SIZE * TILE_SIZE * sizeof(unsigned int) );
+					memset( volumeDescriptions.Get( "OverlayMap" ).data, 0, TILE_PIXELS * TILE_PIXELS * sizeof(unsigned int) );
 					UnloadTile( thisTile );
 				}
 			}
@@ -1796,7 +1813,7 @@ void FileSystemTileServer::PrepForSplit( unsigned int segId, MojoFloat3 pointTil
 
                 Core::Printf( "mSplitWindowWidth=", mSplitWindowWidth, ", mSplitWindowHeight=", mSplitWindowHeight, ", nPix=", mSplitWindowNPix, ".\n" );
 
-                int maxBufferSize = ( SPLIT_ADJUST_BUFFER_TILE_HALO * 2 + 1 ) * ( SPLIT_ADJUST_BUFFER_TILE_HALO * 2 + 1 ) * TILE_SIZE * TILE_SIZE;
+                int maxBufferSize = ( SPLIT_ADJUST_BUFFER_TILE_HALO * 2 + 1 ) * ( SPLIT_ADJUST_BUFFER_TILE_HALO * 2 + 1 ) * TILE_PIXELS * TILE_PIXELS;
                 RELEASE_ASSERT( mSplitWindowNPix <= maxBufferSize );
 
 		        mSplitLabelCount = 0;
@@ -1949,7 +1966,7 @@ void FileSystemTileServer::PrepForAdjust( unsigned int segId, MojoFloat3 pointTi
 		        mSplitWindowHeight = numVoxelsPerTile.y * mSplitWindowNTiles.y;
 		        mSplitWindowNPix = mSplitWindowWidth * mSplitWindowHeight;
 
-                int maxBufferSize = ( SPLIT_ADJUST_BUFFER_TILE_HALO * 2 + 1 ) * ( SPLIT_ADJUST_BUFFER_TILE_HALO * 2 + 1 ) * TILE_SIZE * TILE_SIZE;
+                int maxBufferSize = ( SPLIT_ADJUST_BUFFER_TILE_HALO * 2 + 1 ) * ( SPLIT_ADJUST_BUFFER_TILE_HALO * 2 + 1 ) * TILE_PIXELS * TILE_PIXELS;
                 RELEASE_ASSERT( mSplitWindowNPix <= maxBufferSize );
 
                 //Core::Printf( "mSplitWindowWidth=", mSplitWindowWidth, ", mSplitWindowHeight=", mSplitWindowHeight, ", nPix=", mSplitWindowNPix, ".\n" );
@@ -2049,7 +2066,7 @@ void FileSystemTileServer::PrepForDrawMerge( MojoFloat3 pointTileSpace )
 		        mSplitWindowHeight = numVoxelsPerTile.y * mSplitWindowNTiles.y;
 		        mSplitWindowNPix = mSplitWindowWidth * mSplitWindowHeight;
 
-                int maxBufferSize = ( SPLIT_ADJUST_BUFFER_TILE_HALO * 2 + 1 ) * ( SPLIT_ADJUST_BUFFER_TILE_HALO * 2 + 1 ) * TILE_SIZE * TILE_SIZE;
+                int maxBufferSize = ( SPLIT_ADJUST_BUFFER_TILE_HALO * 2 + 1 ) * ( SPLIT_ADJUST_BUFFER_TILE_HALO * 2 + 1 ) * TILE_PIXELS * TILE_PIXELS;
                 RELEASE_ASSERT( mSplitWindowNPix <= maxBufferSize );
 
                 //Core::Printf( "mSplitWindowWidth=", mSplitWindowWidth, ", mSplitWindowHeight=", mSplitWindowHeight, ", nPix=", mSplitWindowNPix, ".\n" );
@@ -2736,6 +2753,9 @@ unsigned int FileSystemTileServer::CompletePointSplit( unsigned int segId, MojoF
         mSegmentInfoManager.SetTiles( newId, tilesContainingNewId );
 
         Core::Printf( "\nFinished Splitting segmentation label ", segId, " from voxel (x", pVoxelSpace.x, ", y", pVoxelSpace.y, " z", pVoxelSpace.z, ") to new segmentation label ", newId, "...\n" );
+
+		mLogger.Log( Core::ToString( "CompletePointSplit: segId=", segId, ", newId=", newId, ", z=", pVoxelSpace.z, ", npixels=", voxelChangeCount ) );
+
     }
 
 	//
@@ -2792,6 +2812,8 @@ unsigned int FileSystemTileServer::CompleteDrawSplit( unsigned int segId, MojoFl
 
 		    for ( int perimiter = 1; perimiter <= mSplitNPerimiters; ++ perimiter )
 		    {
+				voxelChangeCount = 0;
+
                 if ( fillSuccesses == mSplitNPerimiters - 1 )
                 {
                     break;
@@ -3027,54 +3049,16 @@ unsigned int FileSystemTileServer::CompleteDrawSplit( unsigned int segId, MojoFl
                     }
                     else if ( tileQueue.size() == 0 && sliceQueue.size() == 0 )
 				    {
+						//
+						// Split is complete
+						//
                         centerX = centerX / (float) nPixChanged;
                         centerY = centerY / (float) nPixChanged;
                         Core::Printf( "Split centroid at ", centerX, "x", centerY, ".");
-			            //
-			            // Check for 3D link
-			            //
-                        float minDist = -1;
-                        int closestId = -1;
-                        std::vector< std::pair< MojoFloat2, int >>::iterator closestIt;
-
-                        if ( join3D && segId == mPrevSplitId && ( mPrevSplitZ == mSplitWindowStart.z - 1 || mPrevSplitZ == mSplitWindowStart.z + 1 ) )
-                        {
-                            Core::Printf( "Checking for 3D link, ", (unsigned int) mPrevSplitCentroids.size(), " candidates." );
-
-                            for ( std::vector< std::pair< MojoFloat2, int >>::iterator centroidIt = mPrevSplitCentroids.begin(); centroidIt != mPrevSplitCentroids.end(); ++centroidIt )
-                            {
-                                float thisDist = sqrt ( ( centroidIt->first.x - centerX ) * ( centroidIt->first.x - centerX ) + ( centroidIt->first.y - centerY ) * ( centroidIt->first.y - centerY ) );
-                                if ( minDist < 0 || thisDist < minDist )
-                                {
-                                    minDist = thisDist;
-                                    closestId = centroidIt->second;
-                                    closestIt = centroidIt;
-                                }
-                            }
-
-                            if ( closestId != segId )
-                            {
-                                newId = closestId;
-                                mPrevSplitCentroids.erase( closestIt );
-                                Core::Printf( "Found centroid at distance ", minDist, " id=", newId, ".");
-                            }
-                            else if ( invert )
-                            {
-                                Core::Printf( "Warning - could not find a 3D link.");
-                            }
-                        }
 
                         if ( !invert )
                         {
-                            if ( join3D && segId == mPrevSplitId && ( mPrevSplitZ == mSplitWindowStart.z - 1 || mPrevSplitZ == mSplitWindowStart.z + 1 ) )
-                            {
-                                if ( closestId == segId )
-                                {
-                                    invert = true;
-                                    Core::Printf( "Inverting (3D join).");
-                                }
-                            }
-                            else if ( foundMouseOverPixel )
+                            if ( foundMouseOverPixel )
                             {
 			                    //
 			                    // Check for inversion ( do not re-label the mouse-over segment )
@@ -3157,9 +3141,9 @@ unsigned int FileSystemTileServer::CompleteDrawSplit( unsigned int segId, MojoFl
 
 					            if ( !seedFound )
 					            {
-						            Core::Printf( "WARNING: Could not find (inverted) seed point - aborting." );
-						            ResetSplitState();
-						            return 0;
+						            Core::Printf( "WARNING: Could not find (inverted) seed point - ignoring." );
+									mUndoDeque.pop_front();
+									break;
 					            }
 					            else
 					            {
@@ -3183,6 +3167,7 @@ unsigned int FileSystemTileServer::CompleteDrawSplit( unsigned int segId, MojoFl
 					            tileQueue.push( MojoInt4(pVoxelSpace.x, pVoxelSpace.y, pVoxelSpace.z, 0) );
 
 					            Core::Printf( "Filling (invert) at w=0." );
+
                             }
                         }
 				    }
@@ -3367,39 +3352,149 @@ unsigned int FileSystemTileServer::CompleteDrawSplit( unsigned int segId, MojoFl
 				    UnloadTile( previousTileIndex );
 			    }
 
-                //
-                // Update the segment sizes
-                //
-                mSegmentInfoManager.SetVoxelCount( newId, mSegmentInfoManager.GetVoxelCount( newId ) + voxelChangeCount );
-                mSegmentInfoManager.SetVoxelCount( segId, mSegmentInfoManager.GetVoxelCount( segId ) - voxelChangeCount );
+				if ( voxelChangeCount > 0 )
+				{
 
-			    //
-			    // Update idTileMap
-			    //
-			    mSegmentInfoManager.SetTiles( segId, tilesContainingOldId );
-			    mSegmentInfoManager.SetTiles( newId, tilesContainingNewId );
+					//
+					// Update the segment sizes
+					//
+					mSegmentInfoManager.SetVoxelCount( newId, mSegmentInfoManager.GetVoxelCount( newId ) + voxelChangeCount );
+					mSegmentInfoManager.SetVoxelCount( segId, mSegmentInfoManager.GetVoxelCount( segId ) - voxelChangeCount );
 
-                //
-                // Record new centroid
-                //
-                newCentroids.push_back( std::pair< MojoFloat2, int >( MojoFloat2( centerX, centerY ), newId ));
+					//
+					// Update idTileMap
+					//
+					mSegmentInfoManager.SetTiles( segId, tilesContainingOldId );
+					mSegmentInfoManager.SetTiles( newId, tilesContainingNewId );
 
-                //
-                // Recalculate centroid of unchanged label
-                //
-                mSplitLabelCount -= nPixChanged;
-                mCentroid.x += ( mCentroid.x - centerX ) * ( (float)nPixChanged / (float)mSplitLabelCount );
-                mCentroid.y += ( mCentroid.y - centerY ) * ( (float)nPixChanged / (float)mSplitLabelCount );
-                Core::Printf( "Remaining centroid at ", mCentroid.x, "x", mCentroid.y, "." );
+					//
+					// Record new centroid
+					//
+					newCentroids.push_back( std::pair< MojoFloat2, int >( MojoFloat2( centerX, centerY ), newId ));
 
-			    Core::Printf( "\nFinished Splitting segmentation label ", segId, " from voxel (x", pVoxelSpace.x, ", y", pVoxelSpace.y, " z", pVoxelSpace.z, ") to new segmentation label ", newId, "...\n" );
+					//
+					// Recalculate centroid of unchanged label
+					//
+					mSplitLabelCount -= voxelChangeCount;
+					mCentroid.x += ( mCentroid.x - centerX ) * ( (float)voxelChangeCount / (float)mSplitLabelCount );
+					mCentroid.y += ( mCentroid.y - centerY ) * ( (float)voxelChangeCount / (float)mSplitLabelCount );
+					Core::Printf( "Remaining centroid at ", mCentroid.x, "x", mCentroid.y, "." );
+
+					Core::Printf( "\nFinished Splitting segmentation label ", segId, " from voxel (x", pVoxelSpace.x, ", y", pVoxelSpace.y, " z", pVoxelSpace.z, ") to new segmentation label ", newId, "...\n" );
+
+					mLogger.Log( Core::ToString( "CompleteDrawSplit: segId=", segId, ", newId=", newId, ", z=", pVoxelSpace.z, ", npixels=", voxelChangeCount ) );
+
+				}
 
 		    }
 
-            newCentroids.push_back( std::pair< MojoFloat2, int>( mCentroid, segId ) );
+			if ( mSplitLabelCount > 0 )
+			{
+				newCentroids.push_back( std::pair< MojoFloat2, int>( mCentroid, segId ) );
+			}
+
+            if ( join3D && segId == mPrevSplitId && ( mPrevSplitZ == mSplitWindowStart.z - 1 || mPrevSplitZ == mSplitWindowStart.z + 1 ) )
+            {
+
+ 				//
+				// Check for 3D links
+				//
+
+				Core::Printf( "Checking for 3D links: ", (unsigned int) newCentroids.size(), " segments, ", (unsigned int) mPrevSplitCentroids.size(), " neighbours." );
+
+				int closestId = -1;
+				std::vector< std::pair< MojoFloat2, int >>::iterator closestIt;
+				std::map< int, std::pair< int, float > > matches;
+
+                for ( std::vector< std::pair< MojoFloat2, int >>::iterator prevCentroidIt = mPrevSplitCentroids.begin(); prevCentroidIt != mPrevSplitCentroids.end(); ++prevCentroidIt )
+                {
+					float minDist = -1;
+					for ( std::vector< std::pair< MojoFloat2, int >>::iterator newCentroidIt = newCentroids.begin(); newCentroidIt != newCentroids.end(); ++newCentroidIt )
+					{
+						float thisDist = sqrt ( ( prevCentroidIt->first.x - newCentroidIt->first.x ) * ( prevCentroidIt->first.x - newCentroidIt->first.x ) + ( prevCentroidIt->first.y - newCentroidIt->first.y ) * ( prevCentroidIt->first.y - newCentroidIt->first.y ) );
+						if ( minDist < 0 || thisDist < minDist )
+						{
+							minDist = thisDist;
+							closestId = newCentroidIt->second;
+							closestIt = newCentroidIt;
+						}
+					}
+
+					std::map< int, std::pair< int, float > >::iterator existingMatch = matches.find( closestId );
+					if ( existingMatch != matches.end() )
+					{
+						//
+						// Already matched - check the score
+						//
+
+						if ( existingMatch->second.second > minDist )
+						{
+							matches[ closestId ] = std::pair< int, float >( prevCentroidIt->second, minDist );
+						}
+					}
+					else
+					{
+						matches[ closestId ] = std::pair< int, float >( prevCentroidIt->second, minDist );
+					}
+				}
+
+
+				//
+				// Remap best matching segment ids for 3d Joins
+				//
+
+				for ( std::map< int, std::pair< int, float > >::iterator matchIt = matches.begin(); matchIt != matches.end(); ++matchIt )
+				{
+					int thisId = matchIt->first;
+					int prevId = matchIt->second.first;
+					float dist = matchIt->second.second;
+
+					if ( thisId != segId && prevId != segId )
+					{
+						Core::Printf( "Found centroid match at distance ", dist, " previd=", prevId, " newid=", thisId, ".");
+						ReplaceSegmentationLabel( thisId, prevId );
+
+						//
+						// Update centroid info
+						//
+						for ( std::vector< std::pair< MojoFloat2, int >>::iterator newCentroidIt = newCentroids.begin(); newCentroidIt != newCentroids.end(); ++newCentroidIt )
+						{
+							if ( newCentroidIt->second == thisId )
+							{
+								newCentroidIt->second = prevId;
+								break;
+							}
+						}
+					}
+					else if ( thisId != segId && prevId == segId )
+					{
+						//
+						// Possible re-merge
+						//
+						Core::Printf( "WARNING: 3d join attempt to remerge back to original id.");
+						Core::Printf( "Found centroid match at distance ", dist, " previd=", prevId, " newid=", thisId, " (not merged).");
+					}
+					else if ( thisId == segId && prevId != segId )
+					{
+						//
+						// Possible re-merge
+						//
+						Core::Printf( "WARNING: 3d join attempt merge original id to new segment - possible mouse over conflict.");
+						Core::Printf( "Found centroid match at distance ", dist, " previd=", prevId, " newid=", thisId, " (not merged).");
+					}
+					else
+					{
+						//
+						// Both segId
+						//
+						Core::Printf( "Found centroid match at distance ", dist, " previd=", prevId, " newid=", thisId, " (nothing to do).");
+					}
+				}
+
+            }
 
             //
-            // Record centroids for next z
+            // Record join info for next split (up or down in z)
             //
             mPrevSplitId = segId;
             mPrevSplitZ = currentZ;
@@ -3407,22 +3502,9 @@ unsigned int FileSystemTileServer::CompleteDrawSplit( unsigned int segId, MojoFl
             mPrevSplitCentroids = newCentroids;
 
 			//
-			// Restrict to one z-step at a time
+			// Restrict 3d joins to one z-step at a time
 			//
 			continueZ = false;
-
-            //currentZ = currentZ + direction;
-            //if ( direction == 0 || !join3D || mSplitStates.find( currentZ ) == mSplitStates.end() )
-            //{
-            //    continueZ = false;
-            //}
-            //else
-            //{
-            //    MojoFloat3 newPointTileSpace = pointTileSpace;
-            //    newPointTileSpace.z = (float) currentZ;
-            //    PrepForSplit( segId, newPointTileSpace );
-            //    PredictSplit( segId, newPointTileSpace, 0 );
-            //}
 
         }
 
@@ -3592,6 +3674,8 @@ void FileSystemTileServer::CommitAdjustChange( unsigned int segId, MojoFloat3 po
         mSegmentInfoManager.SetTiles( segId, tilesContainingNewId );
 
         Core::Printf( "\nFinished Adjusting segmentation label ", segId, " in tile z=", pointTileSpace.z, ".\n" );
+
+		mLogger.Log( Core::ToString( "CommitAdjustChange: segId=", segId, ", z=", pointTileSpace.z, ", npixels=", voxelChangeCount ) );
 
     }
 }
@@ -4430,6 +4514,10 @@ void FileSystemTileServer::FindBoundaryBetweenRegions2D( unsigned int segId )
 	}
 }
 
+unsigned int FileSystemTileServer:: GetNewId()
+{
+	return mSegmentInfoManager.AddNewId();
+}
 
 //
 // Undo / Redo Methods
@@ -4476,6 +4564,8 @@ std::list< unsigned int > FileSystemTileServer::UndoChange()
 			{
 				Core::Printf( "\nUndo operation: Unmapping ", (int) UndoItem.remapFromIdsAndSizes.size(), " segmentation labels away from ", newId, "...\n" );
 
+				mLogger.Log( Core::ToString( "Undo (remap): newId=", newId, " Remaps=", (int)UndoItem.remapFromIdsAndSizes.size() ) );
+
 				for ( std::map< unsigned int, long >::iterator mapIt = UndoItem.remapFromIdsAndSizes.begin(); mapIt != UndoItem.remapFromIdsAndSizes.end(); ++mapIt )
 				{
 					mSegmentInfoManager.RemapSegmentLabel( mapIt->first, mapIt->first );
@@ -4488,6 +4578,8 @@ std::list< unsigned int > FileSystemTileServer::UndoChange()
 			if ( UndoItem.tileChangeMap.size() > 0 )
 			{
 				Core::Printf( "\nUndo operation: changing segmentation label ", newId, " back to multiple segmentation labels...\n" );
+
+				mLogger.Log( Core::ToString( "Undo (tile change): newId=", newId, " Tiles=", (int)UndoItem.tileChangeMap.size() ) );
 
 				stdext::hash_map< std::string, std::set< MojoInt2, Core::Int2Comparator > >::iterator changeSetIt;
 
@@ -4515,7 +4607,7 @@ std::list< unsigned int > FileSystemTileServer::UndoChange()
 								{
 									++voxelChangeCount;
 									++idChangeCounts[ mSegmentInfoManager.GetIdForLabel( changeBitsIt->first ) ];
-									//RELEASE_ASSERT( indexIt->x < TILE_SIZE * TILE_SIZE );
+									//RELEASE_ASSERT( indexIt->x < TILE_PIXELS * TILE_PIXELS );
 									currentIdVolume[ i ] = changeBitsIt->first;
 								}
 							}
@@ -4574,6 +4666,12 @@ std::list< unsigned int > FileSystemTileServer::UndoChange()
             mRedoDeque.push_front( UndoItem );
             mNextUndoItem = &mUndoDeque.front();
         }
+		else
+		{
+			Core::Printf( "\nWarning - invalid undo item - discarding.\n" );
+			mUndoDeque.pop_front();
+			mNextUndoItem = &mUndoDeque.front();
+		}
 	}
 	else
 	{
@@ -4608,6 +4706,8 @@ std::list< unsigned int > FileSystemTileServer::RedoChange()
 			{
 				Core::Printf( "\nRedo operation: Remapping ", (int) RedoItem.remapFromIdsAndSizes.size(), " segmentation labels to ", newId, "...\n" );
 
+				mLogger.Log( Core::ToString( "Redo (remap): newId=", newId, " Remaps=", (int)RedoItem.remapFromIdsAndSizes.size() ) );
+
 				for ( std::map< unsigned int, long >::iterator mapIt = RedoItem.remapFromIdsAndSizes.begin(); mapIt != RedoItem.remapFromIdsAndSizes.end(); ++mapIt )
 				{
 					mSegmentInfoManager.RemapSegmentLabel( mapIt->first, newId );
@@ -4621,6 +4721,9 @@ std::list< unsigned int > FileSystemTileServer::RedoChange()
 			{
 
 				Core::Printf( "\nRedo operation: changing multiple segmentation labels back to ", newId, "...\n" );
+
+				mLogger.Log( Core::ToString( "Redo (tile change): newId=", newId, " Tiles=", (int)RedoItem.tileChangeMap.size() ) );
+
 				stdext::hash_map< std::string, std::set< MojoInt2, Core::Int2Comparator > >::iterator changeSetIt;
 
 				for ( TileChangeMap::iterator tileChangeIt = RedoItem.tileChangeMap.begin(); tileChangeIt != RedoItem.tileChangeMap.end(); ++tileChangeIt )
@@ -4648,7 +4751,7 @@ std::list< unsigned int > FileSystemTileServer::RedoChange()
 								{
 									++voxelChangeCount;
 									++idChangeCounts[ mSegmentInfoManager.GetIdForLabel( changeBitsIt->first ) ];
-									//RELEASE_ASSERT( indexIt->x < TILE_SIZE * TILE_SIZE );
+									//RELEASE_ASSERT( indexIt->x < TILE_PIXELS * TILE_PIXELS );
 									//RELEASE_ASSERT( currentIdVolume[ i ] == changeBitsIt->first );
 									currentIdVolume[ i ] = newId;
 								}
@@ -4708,6 +4811,11 @@ std::list< unsigned int > FileSystemTileServer::RedoChange()
             mUndoDeque.push_front( RedoItem );
             mNextUndoItem = &mUndoDeque.front();
 	    }
+		else
+		{
+			Core::Printf( "\nWarning - invalid redo item - discarding.\n" );
+			mRedoDeque.pop_front();
+		}
     }
 	else
 	{
@@ -4846,6 +4954,12 @@ void FileSystemTileServer::UnloadSegmentationInternal()
     // release id maps
     //
     mSegmentInfoManager.CloseDB();
+
+    //
+    // release log file
+    //
+	mLogger.Log( "Segmentation Unloaded.");
+	mLogger.CloseLog();
 
     //
     // Not necessary if we are closing
@@ -5173,11 +5287,13 @@ void FileSystemTileServer::SortSegmentInfoByConfidence( bool reverse )
 void FileSystemTileServer::LockSegmentLabel( unsigned int segId )
 {
 	mSegmentInfoManager.LockSegmentLabel( segId );
+	mLogger.Log( Core::ToString( "LockSegmentLabel: segId=", segId ) );
 }
 
 void FileSystemTileServer::UnlockSegmentLabel( unsigned int segId )
 {
 	mSegmentInfoManager.UnlockSegmentLabel( segId );
+	mLogger.Log( Core::ToString( "UnlockSegmentLabel: segId=", segId ) );
 }
 
 unsigned int FileSystemTileServer::GetSegmentInfoCount()
@@ -5193,6 +5309,11 @@ unsigned int FileSystemTileServer::GetSegmentInfoCurrentListLocation( unsigned i
 std::list< SegmentInfo > FileSystemTileServer::GetSegmentInfoRange( int begin, int end )
 {
 	return mSegmentInfoManager.GetSegmentInfoRange( begin, end );
+}
+
+SegmentInfo FileSystemTileServer::GetSegmentInfo( unsigned int segId )
+{
+	return mSegmentInfoManager.GetSegmentInfo( segId );
 }
 
 FileSystemSegmentInfoManager* FileSystemTileServer::GetSegmentInfoManager()
@@ -5219,8 +5340,12 @@ void FileSystemTileServer::LoadSegmentationInternal( TiledDatasetDescription& ti
     Core::Printf( "Loading idMaps..." );
 
     mSegmentInfoManager = FileSystemSegmentInfoManager( mTiledDatasetDescription.paths.Get( "ColorMap" ), mTiledDatasetDescription.paths.Get( "SegmentInfo" ) );
-
 	mSegmentInfoManager.OpenDB();
+
+    Core::Printf( "Opening log file (", mTiledDatasetDescription.paths.Get( "Log" ), ")..." );
+
+	mLogger.OpenLog( mTiledDatasetDescription.paths.Get( "Log" ) );
+	mLogger.Log("Segmentation Loaded.");
 
     Core::Printf( "Loaded." );
 

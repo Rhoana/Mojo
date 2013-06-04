@@ -87,6 +87,9 @@ float4 PS( PS_IN input ) : SV_Target
     float4 idColor        = gIdColorMapBuffer.Load( id % gIdColorMapBuffer.Length );
     float1 idConfidence   = gIdConfidenceMapBuffer.Load( id );
 
+	if ( idConfidence.x > 0.0f && index3D.x % 16 < 12 && index3D.y % 16 < 12 )
+		idColor = float4( 0.0f, 0.0f, 0.3f, 0.0f );
+
 	float4 returnColor    = ( ( 1.0f - gSegmentationRatio ) * sourceColor ) + ( gSegmentationRatio * idColor );
 
     float xDist           = ( (float) index3D.x ) - gMouseOverX * 512.0f + 0.5f;
@@ -95,9 +98,6 @@ float4 PS( PS_IN input ) : SV_Target
 
     bool border           = false;
     bool selectBorder     = false;
-
-	if ( idConfidence.x > 0.0f ) 
-		return float4( 0.0f, 0.0f, 0.3f, 0.0f );
 
 	if ( gBoundaryLinesVisible )
 	{

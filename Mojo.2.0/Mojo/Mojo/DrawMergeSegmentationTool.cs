@@ -87,7 +87,13 @@ namespace Mojo
                         mTileManager.Internal.PrepForDrawMerge( p );
                     }
                     break;
-
+                case System.Windows.Input.Key.N:
+                    if ( keyEventArgs.KeyboardDevice.Modifiers == System.Windows.Input.ModifierKeys.Control )
+                    {
+                        mTileManager.SelectNewId();
+                        mTileManager.Internal.PrepForDrawMerge( p );
+                    }
+                    break;
                 case System.Windows.Input.Key.Left:
                 case System.Windows.Input.Key.Right:
                 case System.Windows.Input.Key.Up:

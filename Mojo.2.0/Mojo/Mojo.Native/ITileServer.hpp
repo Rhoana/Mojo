@@ -80,6 +80,7 @@ public:
 	virtual unsigned int                                          CommitDrawMergeCurrentSlice( MojoFloat3 pointTileSpace )                                                               = 0;
 	virtual unsigned int                                          CommitDrawMergeCurrentConnectedComponent( MojoFloat3 pointTileSpace )                                                  = 0;
 
+	virtual unsigned int                                          GetNewId()                                                                                                             = 0;
 	virtual std::list< unsigned int >                             UndoChange()                                                                                                           = 0;
 	virtual std::list< unsigned int >                             RedoChange()                                                                                                           = 0;
     virtual void                                                  TempSaveAndClearFileSystemTileCache()                                                                                  = 0;
@@ -98,6 +99,7 @@ public:
 	virtual unsigned int                                          GetSegmentInfoCount()                                                                                                  = 0;
 	virtual unsigned int                                          GetSegmentInfoCurrentListLocation( unsigned int segId )                                                                = 0;
     virtual std::list< SegmentInfo >                              GetSegmentInfoRange( int begin, int end ) 	                                                                         = 0;
+    virtual SegmentInfo                                           GetSegmentInfo( unsigned int segId )      	                                                                         = 0;
 
     virtual FileSystemSegmentInfoManager*                         GetSegmentInfoManager()                                                                                                = 0;
 

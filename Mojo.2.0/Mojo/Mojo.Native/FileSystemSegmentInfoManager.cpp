@@ -120,7 +120,7 @@ void FileSystemSegmentInfoManager::OpenDB()
 			// Load the Segment Info 
 			//
             converter.str("");
-            converter << "SELECT id, name, size, confidence FROM segmentInfo WHERE size > 0 ORDER BY id;";
+            converter << "SELECT id, name, size, confidence FROM segmentInfo ORDER BY id;";
             query = converter.str();
 
             sqlReturn = sqlite3_prepare_v2(mIdTileIndexDB, query.c_str(), (int)query.size(), &statement, NULL); 
@@ -139,6 +139,12 @@ void FileSystemSegmentInfoManager::OpenDB()
                         sqlite3_column_int(statement, 2),
                         sqlite3_column_int(statement, 3) ) );
 					mIdConfidenceMap( sqlite3_column_int(statement, 0) ) = sqlite3_column_int(statement, 3);
+
+					/*if ( ( sqlite3_column_int(statement, 0) ) < 500 )
+					{
+						Core::Printf( "Segment debug: ", sqlite3_column_int(statement, 0), "=", std::string( reinterpret_cast<const char*>( sqlite3_column_text(statement, 1) ) ), "." );
+					}*/
+
                 }
                 Core::Printf( "Read ", (int)mSegmentMultiIndex.size(), " segment info entries from db." );
             }
@@ -569,6 +575,24 @@ std::list< SegmentInfo > FileSystemSegmentInfoManager::GetSegmentInfoRange( unsi
     }
 
     return segmentInfoPage;
+}
+
+SegmentInfo FileSystemSegmentInfoManager::GetSegmentInfo( unsigned int segId )
+{
+
+	SegmentMultiIndexById& idIndex = mSegmentMultiIndex.get<id>();
+    SegmentMultiIndexById::iterator segIt = idIndex.find( segId );
+
+	if ( segIt == idIndex.end() )
+	{
+		Core::Printf( "WARNING: Could not find segment for id  ", segId, " - id not found in multi index." );
+		return SegmentInfo( 0, "", 0, 0, false );
+	}
+	else
+	{
+		return *segIt;
+	}
+
 }
 
 

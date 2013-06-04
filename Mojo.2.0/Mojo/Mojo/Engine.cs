@@ -202,10 +202,9 @@ namespace Mojo
 
                 TileManager.TiledDatasetView.CenterDataSpace = centerDataSpace;
 
-                Tools.Get( ViewerMode.TileManager2D ).Get( CurrentToolMode ).MoveZ();
-
+                CurrentToolMoveZ();
                 TileManager.UpdateZ();
-                Update();
+                UpdateOneTile();
             }
         }
 
@@ -225,14 +224,44 @@ namespace Mojo
 
                 TileManager.TiledDatasetView.CenterDataSpace = centerDataSpace;
 
-                Tools.Get( ViewerMode.TileManager2D ).Get( CurrentToolMode ).MoveZ();
-
+                CurrentToolMoveZ();
                 TileManager.UpdateZ();
-                Update();
+                UpdateOneTile();
             }
         }
 
-        private void CheckBounds()
+        public void UpdateLocationFromText( object parameter )
+        {
+            var parameterString = parameter as String;
+            if ( parameterString != null )
+            {
+                Console.WriteLine( parameterString );
+                string[] coordinateStrings = parameterString.Split( ',' );
+                if ( coordinateStrings.Length >= 3 )
+                {
+                    try
+                    {
+                        var centerDataSpace = TileManager.TiledDatasetView.CenterDataSpace;
+                        centerDataSpace.X = float.Parse( coordinateStrings[ 0 ] ) / Constants.ConstParameters.GetInt( "TILE_PIXELS_X" );
+                        centerDataSpace.Y = float.Parse( coordinateStrings[ 1 ] ) / Constants.ConstParameters.GetInt( "TILE_PIXELS_Y" );
+                        centerDataSpace.Z = float.Parse( coordinateStrings[ 2 ] ) / Constants.ConstParameters.GetInt( "TILE_PIXELS_Z" );
+                        TileManager.TiledDatasetView.CenterDataSpace = centerDataSpace;
+                    }
+                    catch ( Exception e )
+                    {
+                        Console.WriteLine( "Couldn't parse location string: " + e.Message );
+                    }
+                }
+            }
+
+            CheckBounds();
+            CurrentToolMoveZ();
+            TileManager.UpdateXYZ();
+            Update();
+
+        }
+
+        public void CheckBounds()
         {
             var centerDataSpace = TileManager.TiledDatasetView.CenterDataSpace;
 
@@ -243,22 +272,36 @@ namespace Mojo
                 centerDataSpace.X = 0;
 
             }
-            if ( centerDataSpace.X > tiledVolumeDescription.NumTilesX )
+            else if ( centerDataSpace.X > tiledVolumeDescription.NumTilesX * Constants.ConstParameters.GetInt( "TILE_SIZE_X" ) - 1 )
             {
-                centerDataSpace.X = tiledVolumeDescription.NumTilesX;
+                centerDataSpace.X = tiledVolumeDescription.NumTilesX * Constants.ConstParameters.GetInt( "TILE_SIZE_X" ) - 1;
             }
 
             if ( centerDataSpace.Y < 0 )
             {
                 centerDataSpace.Y = 0;
             }
-            if ( centerDataSpace.Y > tiledVolumeDescription.NumTilesY )
+            else if ( centerDataSpace.Y > tiledVolumeDescription.NumTilesY * Constants.ConstParameters.GetInt( "TILE_SIZE_Y" ) - 1 )
             {
-                centerDataSpace.Y = tiledVolumeDescription.NumTilesY;
+                centerDataSpace.Y = tiledVolumeDescription.NumTilesY * Constants.ConstParameters.GetInt( "TILE_SIZE_Y" ) - 1;
+            }
+
+            if ( centerDataSpace.Z < 0 )
+            {
+                centerDataSpace.Z = 0;
+            }
+            else if ( centerDataSpace.Z > tiledVolumeDescription.NumTilesZ * Constants.ConstParameters.GetInt( "TILE_SIZE_Z" ) - 1 )
+            {
+                centerDataSpace.Z = tiledVolumeDescription.NumTilesZ * Constants.ConstParameters.GetInt( "TILE_SIZE_Z" ) - 1;
             }
 
             TileManager.TiledDatasetView.CenterDataSpace = centerDataSpace;
 
+        }
+
+        public void CurrentToolMoveZ()
+        {
+            Tools.Get( ViewerMode.TileManager2D ).Get( CurrentToolMode ).MoveZ();
         }
 
         public void ZoomIn()
@@ -279,6 +322,9 @@ namespace Mojo
                 CheckBounds();
 
                 QuickRender();
+
+                TileManager.UpdateXYZ();
+
             }
         }
 
@@ -302,6 +348,9 @@ namespace Mojo
                 CheckBounds();
 
                 QuickRender();
+
+                TileManager.UpdateXYZ();
+
             }
         }
 
@@ -326,7 +375,7 @@ namespace Mojo
 
             Tools.Get( ViewerMode.TileManager2D ).Get( CurrentToolMode ).Select();
 
-            TileManager.UpdateZ();
+            TileManager.UpdateXYZ();
             Update();
         }
 
@@ -361,6 +410,7 @@ namespace Mojo
 
             QuickRender();
 
+            TileManager.UpdateXYZ();
             TileManager.UpdateSegmentListFocus();
 
         }
@@ -371,9 +421,24 @@ namespace Mojo
             CenterAndZoomToSegment2D( segId );
         }
 
+        private bool mSkipUpdate = false;
         public void Update()
         {
-            TileManager.Update();
+            if ( mSkipUpdate )
+            {
+                mSkipUpdate = false;
+            }
+            else
+            {
+                TileManager.Update();
+                Viewers.Internal.ToList().ForEach( viewer => viewer.Value.D3D11RenderingPane.Render() );
+            }
+        }
+
+        public void UpdateOneTile()
+        {
+            mSkipUpdate = true;
+            TileManager.UpdateOneTile();
             Viewers.Internal.ToList().ForEach( viewer => viewer.Value.D3D11RenderingPane.Render() );
         }
 
@@ -382,6 +447,7 @@ namespace Mojo
             //
             // Render the tiles we have now without loading anything else
             //
+            mSkipUpdate = true;
             Viewers.Internal.ToList().ForEach( viewer => viewer.Value.D3D11RenderingPane.Render() );
         }
 

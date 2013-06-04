@@ -52,9 +52,8 @@ public:
     void                                                  AutosaveSegmentation();
     void                                                  DeleteTempFiles();
 
-    void                                                  Update();
-
     void                                                  LoadTiles( const TiledDatasetView& tiledDatasetView );
+    void                                                  LoadOverTile( const TiledDatasetView& tiledDatasetView );
 
     std::vector< TileCacheEntry >&                        GetTileCache();
     ID3D11ShaderResourceView*                             GetIdColorMap();
@@ -71,6 +70,7 @@ public:
 	unsigned int                                          GetSegmentInfoCount();
 	unsigned int                                          GetSegmentInfoCurrentListLocation( unsigned int segId );
     std::list< SegmentInfo >                              GetSegmentInfoRange( int begin, int end );
+    SegmentInfo                                           GetSegmentInfo( unsigned int segId );
 
     unsigned int                                          GetSegmentationLabelId( const TiledDatasetView& tiledDatasetView, MojoFloat3 pDataSpace );
     MojoInt3                                              GetSegmentationLabelColor( unsigned int segId );
@@ -110,6 +110,7 @@ public:
     unsigned int                                          CommitDrawMergeCurrentSlice( MojoFloat3 pointTileSpace );
     unsigned int                                          CommitDrawMergeCurrentConnectedComponent( MojoFloat3 pointTileSpace );
 
+	unsigned int                                          GetNewId();
 	void                                                  UndoChange();
 	void                                                  RedoChange();
     void                                                  TempSaveAndClearFileSystemTileCache();
@@ -127,6 +128,7 @@ private:
     void                                                  UnloadSegmentationInternal();
 
     std::list< MojoInt4 >                                 GetTileIndicesIntersectedByView( const TiledDatasetView& tiledDatasetView );
+	MojoInt4                                              GetTileIndexCoveringView( const TiledDatasetView& tiledDatasetView );
 
     void                                                  GetIndexTileSpace( MojoInt3 zoomLevel, MojoFloat3 pointDataSpace, MojoFloat4& pointTileSpace, MojoInt4& tileIndex );
     MojoInt3                                              GetIndexVoxelSpace( MojoFloat4 pointTileSpace, MojoInt3 numVoxelsPerTile );
@@ -334,11 +336,6 @@ inline void TileManager::LoadTiledDatasetInternal( TiledDatasetDescription& tile
 	// Reload the device cache
 	//
 	ReloadTileCache();
-
-	//
-    // load tiles into the cache
-    //
-    Update();
 
     //
     // output memory stats to the console
@@ -557,11 +554,6 @@ inline void TileManager::LoadSegmentationInternal( TiledDatasetDescription& tile
 	// Reload the device cache
 	//
 	ReloadTileCache();
-
-	//
-    // load tiles into the cache
-    //
-    Update();
 
     //
     // output memory stats to the console

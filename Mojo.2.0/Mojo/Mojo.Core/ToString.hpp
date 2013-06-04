@@ -64,6 +64,7 @@ std::string ToStringHelper( float        x );
 std::string ToStringHelper( double       x );
 std::string ToStringHelper( unsigned int x );
 std::string ToStringHelper( int          x );
+std::string ToStringHelper( std::set< unsigned int > x );
 
 std::string ToStringZeroPad( int          x, int totalNumChars );
 std::string ToStringZeroPad( unsigned int x, int totalNumChars );

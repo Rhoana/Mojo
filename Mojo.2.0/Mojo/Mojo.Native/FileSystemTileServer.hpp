@@ -18,6 +18,7 @@
 #include "FileSystemTileCacheEntry.hpp"
 #include "FileSystemUndoRedoItem.hpp"
 #include "FileSystemSplitState.hpp"
+#include "FileSystemLogger.hpp"
 #include "Constants.hpp"
 
 namespace Mojo
@@ -90,6 +91,7 @@ public:
 	virtual unsigned int                                          CommitDrawMergeCurrentSlice( MojoFloat3 pointTileSpace );
 	virtual unsigned int                                          CommitDrawMergeCurrentConnectedComponent( MojoFloat3 pointTileSpace );
 
+	virtual unsigned int                                          GetNewId();
 	virtual std::list< unsigned int >                             UndoChange();
 	virtual std::list< unsigned int >                             RedoChange();
     virtual void                                                  TempSaveFileSystemTileCacheChanges();
@@ -109,6 +111,7 @@ public:
 	virtual unsigned int                                          GetSegmentInfoCount();
 	virtual unsigned int                                          GetSegmentInfoCurrentListLocation( unsigned int segId );
     virtual std::list< SegmentInfo >                              GetSegmentInfoRange( int begin, int end );
+    SegmentInfo                                                   GetSegmentInfo( unsigned int segId );
 
     virtual FileSystemSegmentInfoManager*                         GetSegmentInfoManager();
 
@@ -189,6 +192,7 @@ private:
     char*                                                         mSplitDrawArea;
     unsigned int*                                                 mSplitResultArea;
 
+    FileSystemLogger                                              mLogger;
     FileSystemSegmentInfoManager                                  mSegmentInfoManager;
 
     MojoFloat2                                                    mCentroid;

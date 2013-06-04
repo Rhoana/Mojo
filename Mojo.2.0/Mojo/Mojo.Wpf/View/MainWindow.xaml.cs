@@ -38,13 +38,39 @@ namespace Mojo.Wpf.View
             }
         }
 
+        public void SelectedSegmentLockCheckBox_OnUnchecked( object sender, RoutedEventArgs e )
+        {
+            if ( DataContext != null && ( (ViewModel.EngineDataContext)DataContext ).TileManagerDataContext.SelectedSegmentConfidence != 0 )
+            {
+                var segId = ( (ViewModel.EngineDataContext)DataContext ).Engine.TileManager.SelectedSegmentId;
+                ( (ViewModel.EngineDataContext)DataContext ).Engine.TileManager.UnlockSegmentLabel( segId );
+                ( (ViewModel.EngineDataContext)DataContext ).TileManagerDataContext.SelectedSegmentConfidence = 0;
+                ( (ViewModel.EngineDataContext)DataContext ).TileManagerDataContext.UpdateSegmentInfoList();
+            }
+        }
+
+        public void SelectedSegmentLockCheckBox_OnChecked( object sender, RoutedEventArgs e )
+        {
+            if ( DataContext != null && ( (ViewModel.EngineDataContext)DataContext ).TileManagerDataContext.SelectedSegmentConfidence != 100 )
+            {
+                var segId = ( (ViewModel.EngineDataContext)DataContext ).Engine.TileManager.SelectedSegmentId;
+                ( (ViewModel.EngineDataContext)DataContext ).Engine.TileManager.LockSegmentLabel( segId );
+                ( (ViewModel.EngineDataContext)DataContext ).TileManagerDataContext.SelectedSegmentConfidence = 100;
+                ( (ViewModel.EngineDataContext)DataContext ).TileManagerDataContext.UpdateSegmentInfoList();
+            }
+        }
+
         public void SegmentLockCheckBox_OnUnchecked( object sender, RoutedEventArgs e )
         {
-            var changedSegment = (Interop.SegmentInfo) ( (CheckBox) sender ).DataContext;
+            var changedSegment = (Interop.SegmentInfo)( (CheckBox)sender ).DataContext;
             if ( changedSegment != null && changedSegment.Confidence != 0 )
             {
                 changedSegment.Confidence = 0;
                 ( (ViewModel.EngineDataContext)DataContext ).Engine.TileManager.UnlockSegmentLabel( changedSegment.Id );
+                if ( changedSegment.Id == ( (ViewModel.EngineDataContext)DataContext ).Engine.TileManager.SelectedSegmentId )
+                {
+                    ( (ViewModel.EngineDataContext)DataContext ).TileManagerDataContext.SelectedSegmentConfidence = 0;
+                }
             }
         }
 
@@ -55,6 +81,10 @@ namespace Mojo.Wpf.View
             {
                 changedSegment.Confidence = 100;
                 ( (ViewModel.EngineDataContext)DataContext ).Engine.TileManager.LockSegmentLabel( changedSegment.Id );
+                if ( changedSegment.Id == ( (ViewModel.EngineDataContext)DataContext ).Engine.TileManager.SelectedSegmentId )
+                {
+                    ( (ViewModel.EngineDataContext)DataContext ).TileManagerDataContext.SelectedSegmentConfidence = 100;
+                }
             }
         }
 
@@ -77,6 +107,7 @@ namespace Mojo.Wpf.View
 
         private GridViewColumnHeader mCurrentSortColumHeader = null;
         private bool mSordDescending = true;
+
 
         private void SegmentListColumnHeader_OnClick( object sender, RoutedEventArgs e )
         {

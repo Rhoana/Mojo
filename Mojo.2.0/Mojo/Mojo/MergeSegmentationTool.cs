@@ -45,6 +45,10 @@ namespace Mojo
                     if ( keyEventArgs.KeyboardDevice.Modifiers == System.Windows.Input.ModifierKeys.Control )
                         mTileManager.Internal.RedoChange();
                     break;
+                case System.Windows.Input.Key.N:
+                    if ( keyEventArgs.KeyboardDevice.Modifiers == System.Windows.Input.ModifierKeys.Control )
+                        mTileManager.SelectNewId();
+                    break;
                 case System.Windows.Input.Key.Escape:
                     //Unselect this segment
                     mTileManager.SelectedSegmentId = 0;
