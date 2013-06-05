@@ -138,7 +138,6 @@
     <Compile Include="D3D11.cs" />
     <Compile Include="IRenderingStrategy.cs" />
     <Compile Include="IUserInputHandler.cs" />
-    <Compile Include="XmlReader.cs" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs">

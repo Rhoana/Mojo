@@ -247,15 +247,19 @@
         </Border>
         
         <Border DockPanel.Dock="Bottom" Focusable="False" Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}" BorderBrush="Gray" BorderThickness="1,1,1,1">
-            <StackPanel Focusable="False" Orientation="Horizontal" Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}">
-                <Label Focusable="False" MinHeight="20" MinWidth="150" Content="{Binding Path=TileManagerDataContext.CurrentZLocationString}" />
-                <Label Focusable="False" MinHeight="20" Content="Selection:" />
-                <Rectangle Height="20" Name="SelectionRectangle" Stroke="Black" Width="50" Fill="{Binding Path=TileManagerDataContext.SelectedSegmentBrush}" />
-                <Label Focusable="False" MinHeight="20" MinWidth="100"  Content="{Binding Path=Engine.TileManager.SelectedSegmentId}" />
-                <Label Focusable="False" MinHeight="20" Content="Target:" />
-                <Rectangle Height="20" Name="TargetRectangle" Stroke="Black" Width="50" Fill="{Binding Path=TileManagerDataContext.MouseOverSegmentBrush}" />
-                <Label Focusable="False" MinHeight="20" MinWidth="100" Content="{Binding Path=Engine.TileManager.MouseOverSegmentId}" />
-            </StackPanel>
+            <DockPanel>
+                <StackPanel DockPanel.Dock="Left" Focusable="False" Orientation="Horizontal" Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}">
+                    <Label Focusable="False" MinHeight="20" MinWidth="50" Margin="0,0,10,0" Content="{Binding Path=TileManagerDataContext.CurrentZLocationString}" />
+                    <Label Focusable="False" MinHeight="20" Content="Selection:" />
+                    <Rectangle Height="20" Stroke="Gray" Width="50" Fill="{Binding Path=TileManagerDataContext.SelectedSegmentBrush}" />
+                    <Label Focusable="False" MinHeight="20" MinWidth="150" Margin="0,0,10,0" Content="{Binding Path=TileManagerDataContext.SelectedSegmentNameAndId}" />
+                    <Label Focusable="False" MinHeight="20" Content="Target:" />
+                    <Rectangle Height="20" Stroke="Gray" Width="50" Fill="{Binding Path=TileManagerDataContext.MouseOverSegmentBrush}" />
+                    <Label Focusable="False" MinHeight="20" MinWidth="150" Margin="0,0,10,0" Content="{Binding Path=TileManagerDataContext.MouseOverSegmentNameAndId}" />
+                </StackPanel>
+                <ProgressBar DockPanel.Dock="Right" Width="200" Margin="3,3,3,3" HorizontalAlignment="Right" Value="{Binding Path=TileManagerDataContext.Progress}" Visibility="{Binding Path=TileManagerDataContext.ProgressVisibility}">
+                </ProgressBar>
+            </DockPanel>
         </Border>
 
         <Grid VerticalAlignment="Stretch" HorizontalAlignment="Stretch">

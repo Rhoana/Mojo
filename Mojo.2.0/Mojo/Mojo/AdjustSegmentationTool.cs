@@ -141,7 +141,7 @@ namespace Mojo
         public override void OnMouseDown(System.Windows.Forms.MouseEventArgs mouseEventArgs, int width, int height)
         {
             base.OnMouseDown( mouseEventArgs, width, height );
-            if ( mTileManager.SegmentationLoaded && mTileManager.SelectedSegmentId != 0 )
+            if ( mTileManager.SegmentationLoaded && !mTileManager.SegmentationChangeInProgress && mTileManager.SelectedSegmentId != 0 )
             {
                 //
                 // Draw or erase here
@@ -180,15 +180,12 @@ namespace Mojo
         public override void OnMouseUp( System.Windows.Forms.MouseEventArgs mouseEventArgs, int width, int height )
         {
             base.OnMouseUp( mouseEventArgs, width, height );
-            if ( mCurrentlyDrawing )
-            {
-                mCurrentlyDrawing = false;
-            }
+            mCurrentlyDrawing = false;
         }
 
         public override void OnMouseClick( System.Windows.Forms.MouseEventArgs mouseEventArgs, int width, int height )
         {
-            if ( mTileManager.SegmentationLoaded && mTileManager.SelectedSegmentId == 0 )
+            if ( mTileManager.SegmentationLoaded && !mTileManager.SegmentationChangeInProgress && mTileManager.SelectedSegmentId == 0 )
             {
                 //Get the id of the segment being clicked
 
@@ -223,7 +220,7 @@ namespace Mojo
         public override void OnMouseMove( MouseEventArgs mouseEventArgs, int width, int height )
         {
             base.OnMouseMove( mouseEventArgs, width, height );
-            if ( !mCurrentlyPanning && !mCurrentlyHandlingMouseOver && mTileManager.TiledDatasetLoaded && mTileManager.SegmentationLoaded )
+            if ( !mCurrentlyPanning && !mCurrentlyHandlingMouseOver && mTileManager.TiledDatasetLoaded && mTileManager.SegmentationLoaded && !mTileManager.SegmentationChangeInProgress )
             {
                 mCurrentlyHandlingMouseOver = true;
 

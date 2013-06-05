@@ -52,7 +52,14 @@ void FileSystemLogger::Log( std::string message )
 	if ( mIsLogFileOpen )
 	{
 		std::time_t t = std::time( NULL );
-		std::tm tm = *std::localtime( &t );
+
+		// C++ ISO Compliant
+		//std::tm tm = *std::localtime( &t );
+
+		// Microsoft Compliant
+		std::tm tm;
+		localtime_s( &tm, &t );
+
 		mLogFileStream << std::put_time( &tm, "%Y:%m:%d-%H:%M:%S: " ) << message << std::endl;
 	}
 	else

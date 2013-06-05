@@ -1160,7 +1160,7 @@ MojoInt4 TileManager::GetTileIndexCoveringView( const TiledDatasetView& tiledDat
 			zoomLevelXY = numTiles.w - 1;
 			minX = 0;
 			minY = 0;
-			minZ = tiledDatasetView.centerDataSpace.z;
+			minZ = (int)tiledDatasetView.centerDataSpace.z;
 			break;
 		}
 

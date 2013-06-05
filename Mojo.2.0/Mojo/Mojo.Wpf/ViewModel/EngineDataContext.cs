@@ -219,33 +219,56 @@ namespace Mojo.Wpf.ViewModel
                 Settings.Default.LoadDatasetPath = folderBrowserDialog.SelectedPath;
                 Settings.Default.Save();
 
-                Engine.TileManager.LoadTiledDataset( folderBrowserDialog.SelectedPath );
-
-                if ( Engine.TileManager.TiledDatasetLoaded )
+                try
                 {
+
                     //
-                    // Set the initial view
+                    // Load the dataset and show (approximate) progress
                     //
-                    var viewportDataSpaceX = Engine.Viewers.Internal[ViewerMode.TileManager2D].D3D11RenderingPane.Viewport.Width / Engine.TileManager.TiledDatasetDescription.TiledVolumeDescriptions.Get( "SourceMap" ).NumVoxelsPerTileX;
-                    var viewportDataSpaceY = Engine.Viewers.Internal[ViewerMode.TileManager2D].D3D11RenderingPane.Viewport.Height / Engine.TileManager.TiledDatasetDescription.TiledVolumeDescriptions.Get( "SourceMap" ).NumVoxelsPerTileY;
-                    var maxExtentDataSpaceX = Engine.TileManager.TiledDatasetDescription.TiledVolumeDescriptions.Get( "SourceMap" ).NumTilesX * Constants.ConstParameters.GetInt( "TILE_SIZE_X" );
-                    var maxExtentDataSpaceY = Engine.TileManager.TiledDatasetDescription.TiledVolumeDescriptions.Get( "SourceMap" ).NumTilesY * Constants.ConstParameters.GetInt( "TILE_SIZE_Y" );
 
-                    var zoomLevel = Math.Min( viewportDataSpaceX / maxExtentDataSpaceX, viewportDataSpaceY / maxExtentDataSpaceY );
+                    TileManagerDataContext.Progress = 10;
 
-                    Engine.TileManager.TiledDatasetView.CenterDataSpace = new Vector3( maxExtentDataSpaceX / 2f, maxExtentDataSpaceY / 2f, 0f );
-                    Engine.TileManager.TiledDatasetView.ExtentDataSpace = new Vector3( viewportDataSpaceX / zoomLevel, viewportDataSpaceY / zoomLevel, 0f );
+                    Engine.TileManager.LoadTiledDataset( folderBrowserDialog.SelectedPath );
 
-                    Engine.CurrentToolMode = ToolMode.SplitSegmentation;
+                    TileManagerDataContext.Progress = 70;
 
-                    Engine.TileManager.UpdateXYZ();
+                    if ( Engine.TileManager.TiledDatasetLoaded )
+                    {
+                        //
+                        // Set the initial view
+                        //
+                        var viewportDataSpaceX = Engine.Viewers.Internal[ViewerMode.TileManager2D].D3D11RenderingPane.Viewport.Width / Engine.TileManager.TiledDatasetDescription.TiledVolumeDescriptions.Get( "SourceMap" ).NumVoxelsPerTileX;
+                        var viewportDataSpaceY = Engine.Viewers.Internal[ViewerMode.TileManager2D].D3D11RenderingPane.Viewport.Height / Engine.TileManager.TiledDatasetDescription.TiledVolumeDescriptions.Get( "SourceMap" ).NumVoxelsPerTileY;
+                        var maxExtentDataSpaceX = Engine.TileManager.TiledDatasetDescription.TiledVolumeDescriptions.Get( "SourceMap" ).NumTilesX * Constants.ConstParameters.GetInt( "TILE_SIZE_X" );
+                        var maxExtentDataSpaceY = Engine.TileManager.TiledDatasetDescription.TiledVolumeDescriptions.Get( "SourceMap" ).NumTilesY * Constants.ConstParameters.GetInt( "TILE_SIZE_Y" );
+
+                        var zoomLevel = Math.Min( viewportDataSpaceX / maxExtentDataSpaceX, viewportDataSpaceY / maxExtentDataSpaceY );
+
+                        Engine.TileManager.TiledDatasetView.CenterDataSpace = new Vector3( maxExtentDataSpaceX / 2f, maxExtentDataSpaceY / 2f, 0f );
+                        Engine.TileManager.TiledDatasetView.ExtentDataSpace = new Vector3( viewportDataSpaceX / zoomLevel, viewportDataSpaceY / zoomLevel, 0f );
+
+                        Engine.CurrentToolMode = ToolMode.SplitSegmentation;
+
+                        Engine.TileManager.UpdateXYZ();
+
+                    }
+
+                    TileManagerDataContext.Progress = 90;
+
+                    //
+                    // Reset the segment info list
+                    //
+                    TileManagerDataContext.SortSegmentListBy( "Size", true );
+
+                    TileManagerDataContext.Progress = 100;
 
                 }
-
-                //
-                // Reset the segment info list
-                //
-                TileManagerDataContext.SortSegmentListBy( "Size", true );
+                catch ( Exception e )
+                {
+                    String errorMessage = "Error loading images from:\n" + folderBrowserDialog.SelectedPath + "\n\n" + e.Message + "\n\nPlease check the path and try again.";
+                    MessageBox.Show( errorMessage, "Load Error", MessageBoxButton.OK, MessageBoxImage.Error );
+                    Console.WriteLine( errorMessage );
+                }
 
             }
         }
@@ -289,21 +312,41 @@ namespace Mojo.Wpf.ViewModel
                 Settings.Default.LoadSegmentationPath = folderBrowserDialog.SelectedPath;
                 Settings.Default.Save();
 
-                Engine.TileManager.LoadSegmentation( folderBrowserDialog.SelectedPath );
-
-                if ( Engine.TileManager.SegmentationLoaded )
+                try
                 {
                     //
-                    // Set the initial view
+                    // Load the segmentation and show (approximate) progress
                     //
-                    Engine.CurrentToolMode = ToolMode.SplitSegmentation;
-                    Engine.TileManager.SegmentationVisibilityRatio = 0.5f;
 
-                    //
-                    // Load segment info list
-                    //
-                    TileManagerDataContext.SortSegmentListBy( "Size", true );
+                    TileManagerDataContext.Progress = 10;
 
+                    Engine.TileManager.LoadSegmentation( folderBrowserDialog.SelectedPath );
+
+                    TileManagerDataContext.Progress = 70;
+
+                    if ( Engine.TileManager.SegmentationLoaded )
+                    {
+                        //
+                        // Set the initial view
+                        //
+                        Engine.CurrentToolMode = ToolMode.SplitSegmentation;
+                        Engine.TileManager.SegmentationVisibilityRatio = 0.5f;
+
+                        //
+                        // Load segment info list
+                        //
+                        TileManagerDataContext.SortSegmentListBy( "Size", true );
+
+                    }
+
+                    TileManagerDataContext.Progress = 100;
+
+                }
+                catch ( Exception e )
+                {
+                    String errorMessage = "Error loading segmentation from:\n" + folderBrowserDialog.SelectedPath + "\n\n" + e.Message + "\n\nPlease check the path and try again.";
+                    MessageBox.Show( errorMessage, "Load Error", MessageBoxButton.OK, MessageBoxImage.Error );
+                    Console.WriteLine( errorMessage );
                 }
             }
         }

@@ -16,7 +16,10 @@ namespace Mojo
             {
                 try
                 {
-                    Release.Assert( File.Exists( effectFile ) );
+                    if ( !File.Exists( effectFile ) )
+                    {
+                        throw new Exception( "Effect file " + effectFile + " not found." );
+                    }
 
                     using ( var shaderBytecode = ShaderBytecode.CompileFromFile( effectFile,
                                                                                  "fx_5_0",
@@ -30,7 +33,7 @@ namespace Mojo
                 catch ( Exception e )
                 {
                     compilationSucceeded = false;
-                    Release.Assert( false, e.Message );
+                    throw new Exception( "Could not compile effect file " + effectFile + ":\n" + e.Message );
                 }
             }
 

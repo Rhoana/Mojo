@@ -130,7 +130,7 @@ namespace Mojo
 
         public virtual void OnMouseDoubleClick( System.Windows.Forms.MouseEventArgs mouseEventArgs, int width, int height )
         {
-            if ( mTileManager.SegmentationLoaded && mouseEventArgs.Button == System.Windows.Forms.MouseButtons.Left )
+            if ( mTileManager.SegmentationLoaded && !mTileManager.SegmentationChangeInProgress && mouseEventArgs.Button == System.Windows.Forms.MouseButtons.Left )
             {
                 //Get the id of the segment being clicked
 

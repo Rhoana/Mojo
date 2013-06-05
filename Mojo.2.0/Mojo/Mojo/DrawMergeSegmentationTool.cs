@@ -140,7 +140,7 @@ namespace Mojo
         {
             base.OnMouseDown( mouseEventArgs, width, height );
 
-            if ( mTileManager.SegmentationLoaded )
+            if ( mTileManager.SegmentationLoaded && !mTileManager.SegmentationChangeInProgress )
             {
                 //
                 // Draw here
@@ -196,16 +196,24 @@ namespace Mojo
             }
             else if ( mCurrentlyDrawing && ( mouseEventArgs.Button == MouseButtons.Left || mouseEventArgs.Button == MouseButtons.Right ) )
             {
+                mCurrentlyDrawing = false;
+
                 switch ( mTileManager.CurrentMergeMode )
                 {
                     case MergeMode.Fill2D:
+                        mTileManager.SegmentationChangeProgress = 10;
                         mTileManager.SelectedSegmentId = mTileManager.CommitDrawMergeCurrentSlice();
+                        mTileManager.SegmentationChangeProgress = 100;
                         break;
                     case MergeMode.Fill3D:
+                        mTileManager.SegmentationChangeProgress = 10;
                         mTileManager.SelectedSegmentId = mTileManager.CommitDrawMergeCurrentConnectedComponent();
+                        mTileManager.SegmentationChangeProgress = 100;
                         break;
                     default:
+                        mTileManager.SegmentationChangeProgress = 10;
                         mTileManager.SelectedSegmentId = mTileManager.CommitDrawMerge();
+                        mTileManager.SegmentationChangeProgress = 100;
                         break;
                 }
                 mTileManager.ChangesMade = true;
@@ -216,7 +224,7 @@ namespace Mojo
         public override void OnMouseMove( MouseEventArgs mouseEventArgs, int width, int height )
         {
             base.OnMouseMove( mouseEventArgs, width, height );
-            if ( !mCurrentlyPanning && !mCurrentlyHandlingMouseOver && mTileManager.TiledDatasetLoaded && mTileManager.SegmentationLoaded )
+            if ( !mCurrentlyPanning && !mCurrentlyHandlingMouseOver && mTileManager.TiledDatasetLoaded && mTileManager.SegmentationLoaded && !mTileManager.SegmentationChangeInProgress )
             {
                 mCurrentlyHandlingMouseOver = true;
 

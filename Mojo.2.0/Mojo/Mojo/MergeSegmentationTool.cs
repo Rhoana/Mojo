@@ -39,11 +39,15 @@ namespace Mojo
                     break;
                 case System.Windows.Input.Key.Z:
                     if ( keyEventArgs.KeyboardDevice.Modifiers == System.Windows.Input.ModifierKeys.Control )
+                        mTileManager.SegmentationChangeProgress = 10;
                         mTileManager.Internal.UndoChange();
+                        mTileManager.SegmentationChangeProgress = 100;
                     break;
                 case System.Windows.Input.Key.Y:
                     if ( keyEventArgs.KeyboardDevice.Modifiers == System.Windows.Input.ModifierKeys.Control )
+                        mTileManager.SegmentationChangeProgress = 10;
                         mTileManager.Internal.RedoChange();
+                        mTileManager.SegmentationChangeProgress = 100;
                     break;
                 case System.Windows.Input.Key.N:
                     if ( keyEventArgs.KeyboardDevice.Modifiers == System.Windows.Input.ModifierKeys.Control )
@@ -62,7 +66,7 @@ namespace Mojo
 
         public override void OnMouseClick( System.Windows.Forms.MouseEventArgs mouseEventArgs, int width, int height )
         {
-            if ( mTileManager.SegmentationLoaded )
+            if ( mTileManager.SegmentationLoaded && !mTileManager.SegmentationChangeInProgress )
             {
                 //Get the id of the segment being clicked
 
@@ -105,14 +109,20 @@ namespace Mojo
                         switch ( mTileManager.CurrentMergeMode )
                         {
                             case MergeMode.Fill2D:
+                                mTileManager.SegmentationChangeProgress = 10;
                                 mTileManager.Internal.ReplaceSegmentationLabelCurrentSlice( clickedId, mTileManager.SelectedSegmentId, mTileManager.TiledDatasetView, p );
+                                mTileManager.SegmentationChangeProgress = 100;
                                 break;
                             case MergeMode.Fill3D:
+                                mTileManager.SegmentationChangeProgress = 10;
                                 mTileManager.Internal.ReplaceSegmentationLabelCurrentConnectedComponent( clickedId, mTileManager.SelectedSegmentId, mTileManager.TiledDatasetView, p );
+                                mTileManager.SegmentationChangeProgress = 100;
                                 break;
                             default:
+                                mTileManager.SegmentationChangeProgress = 10;
                                 mTileManager.Internal.RemapSegmentLabel( clickedId, mTileManager.SelectedSegmentId );
                                 //mTileManager.Internal.ReplaceSegmentationLabel( clickedId, mTileManager.SelectedSegmentId );
+                                mTileManager.SegmentationChangeProgress = 100;
                                 break;
                         }
                         mTileManager.ChangesMade = true;
@@ -124,7 +134,7 @@ namespace Mojo
         public override void OnMouseMove(MouseEventArgs mouseEventArgs, int width, int height)
         {
             base.OnMouseMove( mouseEventArgs, width, height );
-            if ( !mCurrentlyPanning && !mCurrentlyHandlingMouseOver && mTileManager.TiledDatasetLoaded && mTileManager.SegmentationLoaded )
+            if ( !mCurrentlyPanning && !mCurrentlyHandlingMouseOver && mTileManager.TiledDatasetLoaded && mTileManager.SegmentationLoaded && !mTileManager.SegmentationChangeInProgress )
             {
                 mCurrentlyHandlingMouseOver = true;
                 //Mouseover - update display to highlight segment under mouse

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Windows;
 using Mojo.Interop;
 using SlimDX.DXGI;
 
@@ -60,7 +61,7 @@ namespace Mojo
             {
 
                 /*
-                 * TODO: remove mToolModeChanging (Currently required because a call loop can be created).
+                 * TODO: remove mToolModeChanging (Currently required because a call loop can be created on keyboard tool change).
                  * On change from Split to Merge mode using keyboard shortcut this method is called twice and ends up back in Split mode.
                  */
 
@@ -108,70 +109,86 @@ namespace Mojo
         {
             Console.WriteLine( "\nMojo initializing...\n" );
 
-            D3D11.Initialize( out mDxgiFactory, out mD3D11Device );
-            //Cuda.Initialize( mD3D11Device );
-            //Thrust.Initialize();
+            try
+            {
 
-            TileManager = new TileManager( new Interop.TileManager( mD3D11Device, mD3D11Device.ImmediateContext, Constants.ConstParameters ) );
+                D3D11.Initialize( out mDxgiFactory, out mD3D11Device );
+                //Cuda.Initialize( mD3D11Device );
+                //Thrust.Initialize();
 
-            Tools = new ObservableDictionary<ViewerMode, ObservableDictionary<ToolMode, ITool>>
-                    {
+                TileManager = new TileManager( new Interop.TileManager( mD3D11Device, mD3D11Device.ImmediateContext, Constants.ConstParameters ) );
+
+                Tools = new ObservableDictionary<ViewerMode, ObservableDictionary<ToolMode, ITool>>
                         {
-                            ViewerMode.TileManager2D,
-                            new ObservableDictionary< ToolMode, ITool >
                             {
-                                { ToolMode.Null, new NullTool() },
-                                { ToolMode.AdjustSegmentation, new AdjustSegmentationTool( TileManager, this ) },
-                                { ToolMode.MergeSegmentation, new MergeSegmentationTool( TileManager, this ) },
-                                { ToolMode.DrawMergeSegmentation, new DrawMergeSegmentationTool( TileManager, this ) },
-                                { ToolMode.SplitSegmentation, new SplitSegmentationTool( TileManager, this ) }
-                            }
-                            }
-                    };
+                                ViewerMode.TileManager2D,
+                                new ObservableDictionary< ToolMode, ITool >
+                                {
+                                    { ToolMode.Null, new NullTool() },
+                                    { ToolMode.AdjustSegmentation, new AdjustSegmentationTool( TileManager, this ) },
+                                    { ToolMode.MergeSegmentation, new MergeSegmentationTool( TileManager, this ) },
+                                    { ToolMode.DrawMergeSegmentation, new DrawMergeSegmentationTool( TileManager, this ) },
+                                    { ToolMode.SplitSegmentation, new SplitSegmentationTool( TileManager, this ) }
+                                }
+                                }
+                        };
 
-            RenderingStrategies = new ObservableDictionary<ViewerMode, ObservableDictionary<ToolMode, IRenderingStrategy>>
-                                  {
+                RenderingStrategies = new ObservableDictionary<ViewerMode, ObservableDictionary<ToolMode, IRenderingStrategy>>
                                       {
-                                          ViewerMode.TileManager2D,
-                                          new ObservableDictionary< ToolMode, IRenderingStrategy >
                                           {
-                                              { ToolMode.Null, new NullRenderingStrategy( mD3D11Device, mD3D11Device.ImmediateContext ) },
-                                              { ToolMode.AdjustSegmentation, new AdjustSegmentationRenderingStrategy( mD3D11Device, mD3D11Device.ImmediateContext, TileManager ) },
-                                              { ToolMode.MergeSegmentation, new MergeSegmentationRenderingStrategy( mD3D11Device, mD3D11Device.ImmediateContext, TileManager ) },
-                                              { ToolMode.DrawMergeSegmentation, new DrawMergeSegmentationRenderingStrategy( mD3D11Device, mD3D11Device.ImmediateContext, TileManager ) },
-                                              { ToolMode.SplitSegmentation, new SplitSegmentationRenderingStrategy( mD3D11Device, mD3D11Device.ImmediateContext, TileManager ) }
-                                          }
-                                          }
-                                  };
+                                              ViewerMode.TileManager2D,
+                                              new ObservableDictionary< ToolMode, IRenderingStrategy >
+                                              {
+                                                  { ToolMode.Null, new NullRenderingStrategy( mD3D11Device, mD3D11Device.ImmediateContext ) },
+                                                  { ToolMode.AdjustSegmentation, new AdjustSegmentationRenderingStrategy( mD3D11Device, mD3D11Device.ImmediateContext, TileManager ) },
+                                                  { ToolMode.MergeSegmentation, new MergeSegmentationRenderingStrategy( mD3D11Device, mD3D11Device.ImmediateContext, TileManager ) },
+                                                  { ToolMode.DrawMergeSegmentation, new DrawMergeSegmentationRenderingStrategy( mD3D11Device, mD3D11Device.ImmediateContext, TileManager ) },
+                                                  { ToolMode.SplitSegmentation, new SplitSegmentationRenderingStrategy( mD3D11Device, mD3D11Device.ImmediateContext, TileManager ) }
+                                              }
+                                              }
+                                      };
 
-            Viewers = new ObservableDictionary<ViewerMode, Viewer>
-                      {
+                Viewers = new ObservableDictionary<ViewerMode, Viewer>
                           {
-                              ViewerMode.TileManager2D,
-                              new Viewer
                               {
-                                  D3D11RenderingPane = new D3D11RenderingPane( mDxgiFactory,
-                                                                               mD3D11Device,
-                                                                               mD3D11Device.ImmediateContext,
-                                                                               d3d11HwndDescriptions.Get( "TileManager2D" ) )
-                                                       {
-                                                           RenderingStrategy = RenderingStrategies.Internal[ ViewerMode.TileManager2D ].Internal[ ToolMode.Null ]
-                                                       },
-                                  UserInputHandler = Tools.Internal[ ViewerMode.TileManager2D ].Internal[ ToolMode.Null ]
-                              }
-                              }
-                      };
+                                  ViewerMode.TileManager2D,
+                                  new Viewer
+                                  {
+                                      D3D11RenderingPane = new D3D11RenderingPane( mDxgiFactory,
+                                                                                   mD3D11Device,
+                                                                                   mD3D11Device.ImmediateContext,
+                                                                                   d3d11HwndDescriptions.Get( "TileManager2D" ) )
+                                                           {
+                                                               RenderingStrategy = RenderingStrategies.Internal[ ViewerMode.TileManager2D ].Internal[ ToolMode.Null ]
+                                                           },
+                                      UserInputHandler = Tools.Internal[ ViewerMode.TileManager2D ].Internal[ ToolMode.Null ]
+                                  }
+                                  }
+                          };
+            }
+            catch ( Exception e )
+            {
+                String errorMessage = "Error opening main window:\n\n" + e.Message + "\n\nYou might want to try one of the following:\n - Install the \"DirectX End-User Runtime\" (from the Microsoft website).\n - Install the latest graphics drivers for your graphics card.\n - Reinstall the latest Mojo release.";
+                MessageBox.Show( errorMessage, "Initialization Error", MessageBoxButton.OK, MessageBoxImage.Error );
+                Console.WriteLine( errorMessage );
+                Application.Current.Shutdown( 1 );
+            }
 
         }
 
         public void Dispose()
         {
+            if ( Viewers != null )
+            {
+                Viewers.Internal.Values.ToList().ForEach( viewer => viewer.Dispose() );
+                Viewers.Internal.Clear();
+            }
 
-            Viewers.Internal.Values.ToList().ForEach( viewer => viewer.Dispose() );
-            Viewers.Internal.Clear();
-
-            RenderingStrategies.Internal.Values.ToList().ForEach( renderingStrategies => renderingStrategies.Internal.Values.ToList().ForEach( renderingStrategy => renderingStrategy.Dispose() ) );
-            RenderingStrategies.Internal.Clear();
+            if ( RenderingStrategies != null )
+            {
+                RenderingStrategies.Internal.Values.ToList().ForEach( renderingStrategies => renderingStrategies.Internal.Values.ToList().ForEach( renderingStrategy => renderingStrategy.Dispose() ) );
+                RenderingStrategies.Internal.Clear();
+            }
 
             if ( TileManager != null )
             {

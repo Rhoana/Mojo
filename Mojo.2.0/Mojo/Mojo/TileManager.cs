@@ -44,6 +44,20 @@ namespace Mojo
             }
         }
 
+        private bool mSegmentationChangeInProgress = false;
+        public bool SegmentationChangeInProgress
+        {
+            get
+            {
+                return mSegmentationChangeInProgress;
+            }
+            set
+            {
+                mSegmentationChangeInProgress = value;
+            }
+        }
+
+
         private bool mSegmentationControlsEnabled = false;
         public bool SegmentationControlsEnabled
         {
@@ -400,80 +414,241 @@ namespace Mojo
 
         public void CommmitSplitChange()
         {
-            if ( CurrentSplitMode == SplitMode.JoinPoints )
+            if ( SegmentationChangeInProgress ) return;
+            lock ( this )
             {
-                Internal.CompletePointSplit( SelectedSegmentId, new Vector3( mMouseOverX, mMouseOverY, mTiledDatasetView.CenterDataSpace.Z ) );
+                if ( SegmentationChangeInProgress ) return;
+
+                SegmentationChangeInProgress = true;
+
+                if ( CurrentSplitMode == SplitMode.JoinPoints )
+                {
+                    SegmentationChangeProgress = 10;
+                    Internal.CompletePointSplit( SelectedSegmentId, new Vector3( mMouseOverX, mMouseOverY, mTiledDatasetView.CenterDataSpace.Z ) );
+                    SegmentationChangeProgress = 100;
+                }
+                else
+                {
+                    SegmentationChangeProgress = 10;
+                    Internal.CompleteDrawSplit( SelectedSegmentId, new Vector3( mMouseOverX, mMouseOverY, mTiledDatasetView.CenterDataSpace.Z ), mJoinSplits3D, (int)mSplitStartZ );
+                    SegmentationChangeProgress = 100;
+                }
+                SplitStartZ = TiledDatasetView.CenterDataSpace.Z;
+                ChangesMade = true;
+
+                SegmentationChangeInProgress = false;
             }
-            else
-            {
-                Internal.CompleteDrawSplit( SelectedSegmentId, new Vector3( mMouseOverX, mMouseOverY, mTiledDatasetView.CenterDataSpace.Z ), mJoinSplits3D, (int) mSplitStartZ );
-            }
-            SplitStartZ = TiledDatasetView.CenterDataSpace.Z;
-            ChangesMade = true;
         }
 
         public void CancelSplitChange()
         {
-            Internal.ResetSplitState( new Vector3( mMouseOverX, mMouseOverY, mTiledDatasetView.CenterDataSpace.Z ) );
+            if ( SegmentationChangeInProgress ) return;
+            lock ( this )
+            {
+                if ( SegmentationChangeInProgress ) return;
+
+                SegmentationChangeInProgress = true;
+
+                Internal.ResetSplitState( new Vector3( mMouseOverX, mMouseOverY, mTiledDatasetView.CenterDataSpace.Z ) );
+
+                SegmentationChangeInProgress = false;
+            }
         }
 
         public void CommmitAdjustChange()
         {
-            Internal.CommitAdjustChange( SelectedSegmentId, new Vector3( mMouseOverX, mMouseOverY, mTiledDatasetView.CenterDataSpace.Z ) );
-            ChangesMade = true;
+            if ( SegmentationChangeInProgress ) return;
+            lock ( this )
+            {
+                if ( SegmentationChangeInProgress ) return;
+
+                SegmentationChangeInProgress = true;
+
+                SegmentationChangeProgress = 10;
+                Internal.CommitAdjustChange( SelectedSegmentId, new Vector3( mMouseOverX, mMouseOverY, mTiledDatasetView.CenterDataSpace.Z ) );
+                SegmentationChangeProgress = 100;
+
+                ChangesMade = true;
+
+                SegmentationChangeInProgress = false;
+            }
         }
 
         public void CancelAdjustChange()
         {
-            Internal.ResetAdjustState( new Vector3( mMouseOverX, mMouseOverY, mTiledDatasetView.CenterDataSpace.Z ) );
+            if ( SegmentationChangeInProgress ) return;
+            lock ( this )
+            {
+                if ( SegmentationChangeInProgress ) return;
+
+                SegmentationChangeInProgress = true;
+
+                Internal.ResetAdjustState( new Vector3( mMouseOverX, mMouseOverY, mTiledDatasetView.CenterDataSpace.Z ) );
+
+                SegmentationChangeInProgress = false;
+            }
         }
 
         public uint CommitDrawMerge()
         {
-            ChangesMade = true;
-            return Internal.CommitDrawMerge( new Vector3( mMouseOverX, mMouseOverY, mTiledDatasetView.CenterDataSpace.Z ) );
+            uint result = 0;
+            if ( SegmentationChangeInProgress ) return result;
+            lock ( this )
+            {
+                if ( SegmentationChangeInProgress ) return result;
+
+                SegmentationChangeInProgress = true;
+
+                SegmentationChangeProgress = 10;
+                result = Internal.CommitDrawMerge( new Vector3( mMouseOverX, mMouseOverY, mTiledDatasetView.CenterDataSpace.Z ) );
+                SegmentationChangeProgress = 100;
+
+                ChangesMade = true;
+
+                SegmentationChangeInProgress = false;
+            }
+            return result;
         }
 
         public uint CommitDrawMergeCurrentSlice()
         {
-            ChangesMade = true;
-            return Internal.CommitDrawMergeCurrentSlice( new Vector3( mMouseOverX, mMouseOverY, mTiledDatasetView.CenterDataSpace.Z ) );
+            uint result = 0;
+            if ( SegmentationChangeInProgress ) return result;
+            lock ( this )
+            {
+                if ( SegmentationChangeInProgress ) return result;
+
+                SegmentationChangeInProgress = true;
+
+                SegmentationChangeProgress = 10;
+                result = Internal.CommitDrawMergeCurrentSlice( new Vector3( mMouseOverX, mMouseOverY, mTiledDatasetView.CenterDataSpace.Z ) );
+                SegmentationChangeProgress = 100;
+
+                ChangesMade = true;
+
+                SegmentationChangeInProgress = false;
+            }
+            return result;
         }
 
         public uint CommitDrawMergeCurrentConnectedComponent()
         {
-            ChangesMade = true;
-            return Internal.CommitDrawMergeCurrentConnectedComponent( new Vector3( mMouseOverX, mMouseOverY, mTiledDatasetView.CenterDataSpace.Z ) );
+            uint result = 0;
+            if ( SegmentationChangeInProgress ) return result;
+            lock ( this )
+            {
+                if ( SegmentationChangeInProgress ) return result;
+
+                SegmentationChangeInProgress = true;
+
+                SegmentationChangeProgress = 10;
+                result = Internal.CommitDrawMergeCurrentConnectedComponent( new Vector3( mMouseOverX, mMouseOverY, mTiledDatasetView.CenterDataSpace.Z ) );
+                SegmentationChangeProgress = 100;
+
+                ChangesMade = true;
+
+                SegmentationChangeInProgress = false;
+            }
+            return result;
         }
 
         public void UndoChange()
         {
-            Internal.UndoChange();
-            ChangesMade = true;
+            if ( SegmentationChangeInProgress ) return;
+            lock ( this )
+            {
+                if ( SegmentationChangeInProgress ) return;
+
+                SegmentationChangeInProgress = true;
+
+                SegmentationChangeProgress = 10;
+                Internal.UndoChange();
+                SegmentationChangeProgress = 100;
+                ChangesMade = true;
+
+                SegmentationChangeInProgress = false;
+            }
         }
 
         public void RedoChange()
         {
-            Internal.RedoChange();
-            ChangesMade = true;
+            if ( SegmentationChangeInProgress ) return;
+            lock ( this )
+            {
+                if ( SegmentationChangeInProgress ) return;
+
+                SegmentationChangeInProgress = true;
+
+                SegmentationChangeProgress = 10;
+                Internal.RedoChange();
+                SegmentationChangeProgress = 100;
+                ChangesMade = true;
+
+                SegmentationChangeInProgress = false;
+            }
         }
 
         public void SelectNewId()
         {
-            SelectedSegmentId = Internal.GetNewId();
+            if ( SegmentationChangeInProgress ) return;
+            lock ( this )
+            {
+                if ( SegmentationChangeInProgress ) return;
+
+                SegmentationChangeInProgress = true;
+
+                SelectedSegmentId = Internal.GetNewId();
+
+                SegmentationChangeInProgress = false;
+            }
         }
 
         public void LockSegmentLabel( uint segId )
         {
-            Internal.LockSegmentLabel( segId );
-            ChangesMade = true;
+            if ( SegmentationChangeInProgress ) return;
+            lock ( this )
+            {
+                if ( SegmentationChangeInProgress ) return;
+
+                SegmentationChangeInProgress = true;
+
+                Internal.LockSegmentLabel( segId );
+                ChangesMade = true;
+
+                SegmentationChangeInProgress = false;
+            }
         }
 
         public void UnlockSegmentLabel( uint segId )
         {
-            Internal.UnlockSegmentLabel( segId );
-            ChangesMade = true;
+            if ( SegmentationChangeInProgress ) return;
+            lock ( this )
+            {
+                if ( SegmentationChangeInProgress ) return;
+
+                SegmentationChangeInProgress = true;
+
+                Internal.UnlockSegmentLabel( segId );
+                ChangesMade = true;
+
+                SegmentationChangeInProgress = false;
+            }
         }
+
+        private double mSegmentationChangeProgress = 100;
+        public double SegmentationChangeProgress
+        {
+            get
+            {
+                return mSegmentationChangeProgress;
+            }
+            set
+            {
+                mSegmentationChangeProgress = value;
+                OnPropertyChanged( "SegmentationChangeProgress" );
+            }
+        }
+
 
         public TileManager( Interop.TileManager tileManager )
         {
@@ -547,107 +722,137 @@ namespace Mojo
 
         public void LoadTiledDataset( string datasetRootDirectory )
         {
-            if ( TiledDatasetLoaded )
+            if ( SegmentationChangeInProgress ) return;
+            lock ( this )
             {
-                UnloadTiledDataset();
+                if ( SegmentationChangeInProgress ) return;
+
+                SegmentationChangeInProgress = true;
+
+                if ( TiledDatasetLoaded )
+                {
+                    UnloadTiledDataset();
+                }
+
+                if ( !Directory.Exists( datasetRootDirectory ) )
+                {
+                    throw new Exception( "Dataset directory not found." );
+                }
+
+                var sourceMapRootDirectory = Path.Combine( datasetRootDirectory, Constants.SOURCE_MAP_ROOT_DIRECTORY_NAME );
+
+                var sourceMapTiledVolumeDescriptionPath = Path.Combine( datasetRootDirectory, Constants.SOURCE_MAP_TILED_VOLUME_DESCRIPTION_NAME );
+
+                if ( !Directory.Exists( sourceMapRootDirectory ) )
+                {
+                    throw new Exception( "Image subdirectory not found." );
+                }
+
+                var sourceMapTiledVolumeDescription = GetTiledVolumeDescription( sourceMapRootDirectory, sourceMapTiledVolumeDescriptionPath );
+
+                //
+                // Read in the default idMap settings
+                // Required before LoadSegmentation so that D3D11_TEXTURE3D_DESC is set correctly in TileManager.hpp
+                //
+                var idMapRootDirectory = Path.Combine( datasetRootDirectory, Constants.ID_MAP_ROOT_DIRECTORY_NAME );
+                var idMapTiledVolumeDescriptionPath = Path.Combine( datasetRootDirectory, Constants.ID_MAP_TILED_VOLUME_DESCRIPTION_NAME );
+
+                if ( !Directory.Exists( idMapRootDirectory ) )
+                {
+                    throw new Exception( "Id subdirectory not found." );
+                }
+
+                var idMapTiledVolumeDescription = GetTiledVolumeDescription( idMapRootDirectory, idMapTiledVolumeDescriptionPath );
+
+                var tiledDatasetDescription = new TiledDatasetDescription
+                                              {
+                                                  TiledVolumeDescriptions =
+                                                      new ObservableDictionary<string, TiledVolumeDescription>
+                                                      {
+                                                          { "SourceMap", sourceMapTiledVolumeDescription },
+                                                          { "IdMap", idMapTiledVolumeDescription },
+                                                          { "OverlayMap", idMapTiledVolumeDescription }
+                                                          //,
+                                                          //{ "TempIdMap", tempIdMapTiledVolumeDescription }
+                                                      },
+                                                  Paths =
+                                                      new ObservableDictionary<string, string>
+                                                      {
+                                                          //{ "IdColorMap", idColorMapPath },
+                                                      },
+                                                  MaxLabelId = 0
+                                              };
+
+                LoadTiledDataset( tiledDatasetDescription );
+
+                NavigationControlsEnabled = true;
+
+                UpdateView();
+
+                ChangesMade = false;
+
+                SegmentationChangeInProgress = false;
             }
-
-            Release.Assert( Directory.Exists( datasetRootDirectory ) );
-
-            //Release.Assert(
-            //    datasetRootDirectory.EndsWith( Constants.DATASET_ROOT_DIRECTORY_NAME ) ||
-            //    datasetRootDirectory.EndsWith( Constants.DATASET_ROOT_DIRECTORY_NAME + "\\" ) ||
-            //    datasetRootDirectory.EndsWith( Constants.DATASET_ROOT_DIRECTORY_NAME + "/" ) );
-
-            var sourceMapRootDirectory = Path.Combine( datasetRootDirectory, Constants.SOURCE_MAP_ROOT_DIRECTORY_NAME );
-
-            var sourceMapTiledVolumeDescriptionPath = Path.Combine( datasetRootDirectory, Constants.SOURCE_MAP_TILED_VOLUME_DESCRIPTION_NAME );
-
-            Release.Assert( Directory.Exists( sourceMapRootDirectory ) );
-
-            var sourceMapTiledVolumeDescription = GetTiledVolumeDescription( sourceMapRootDirectory, sourceMapTiledVolumeDescriptionPath );
-
-            //
-            // Read in the default idMap settings
-            // Required before LoadSegmentation so that D3D11_TEXTURE3D_DESC is set correctly in TileManager.hpp
-            //
-            var idMapRootDirectory = Path.Combine( datasetRootDirectory, Constants.ID_MAP_ROOT_DIRECTORY_NAME );
-            var idMapTiledVolumeDescriptionPath = Path.Combine( datasetRootDirectory, Constants.ID_MAP_TILED_VOLUME_DESCRIPTION_NAME );
-
-            Release.Assert( Directory.Exists( idMapRootDirectory ) );
-
-            var idMapTiledVolumeDescription = GetTiledVolumeDescription( idMapRootDirectory, idMapTiledVolumeDescriptionPath );
-
-            var tiledDatasetDescription = new TiledDatasetDescription
-                                          {
-                                              TiledVolumeDescriptions =
-                                                  new ObservableDictionary<string, TiledVolumeDescription>
-                                                  {
-                                                      { "SourceMap", sourceMapTiledVolumeDescription },
-                                                      { "IdMap", idMapTiledVolumeDescription },
-                                                      { "OverlayMap", idMapTiledVolumeDescription }
-                                                      //,
-                                                      //{ "TempIdMap", tempIdMapTiledVolumeDescription }
-                                                  },
-                                              Paths =
-                                                  new ObservableDictionary<string, string>
-                                                  {
-                                                      //{ "IdColorMap", idColorMapPath },
-                                                  },
-                                              MaxLabelId = 0
-                                          };
-
-            LoadTiledDataset( tiledDatasetDescription );
-
-            NavigationControlsEnabled = true;
-
-            UpdateView();
-
-            ChangesMade = false;
         }
 
         public void LoadSegmentation( string segmentationRootDirectory )
         {
-            if ( SegmentationLoaded )
+            if ( SegmentationChangeInProgress ) return;
+            lock ( this )
             {
-                UnloadSegmentation();
+                if ( SegmentationChangeInProgress ) return;
+
+                SegmentationChangeInProgress = true;
+
+                if ( SegmentationLoaded )
+                {
+                    UnloadSegmentation();
+                }
+
+                if ( !Directory.Exists( segmentationRootDirectory ) )
+                {
+                    throw new Exception( "Dataset directory not found." );
+                }
+
+                var idMapRootDirectory = Path.Combine( segmentationRootDirectory, Constants.ID_MAP_ROOT_DIRECTORY_NAME );
+
+                if ( !Directory.Exists( idMapRootDirectory ) )
+                {
+                    throw new Exception( "Id subdirectory not found." );
+                }
+
+                var tempIdMapRootDirectory = Path.Combine( segmentationRootDirectory, Constants.TEMP_ID_MAP_ROOT_DIRECTORY_NAME );
+                var autosaveIdMapRootDirectory = Path.Combine( segmentationRootDirectory, Constants.AUTOSAVE_ID_MAP_ROOT_DIRECTORY_NAME );
+
+                var idMapTiledVolumeDescriptionPath = Path.Combine( segmentationRootDirectory, Constants.ID_MAP_TILED_VOLUME_DESCRIPTION_NAME );
+
+                var idMapTiledVolumeDescription = GetTiledVolumeDescription( idMapRootDirectory, idMapTiledVolumeDescriptionPath );
+                var tempIdMapTiledVolumeDescription = GetTiledVolumeDescription( tempIdMapRootDirectory, idMapTiledVolumeDescriptionPath );
+                var autosaveIdMapTiledVolumeDescription = GetTiledVolumeDescription( autosaveIdMapRootDirectory, idMapTiledVolumeDescriptionPath );
+
+                TiledDatasetDescription.TiledVolumeDescriptions.Set( "IdMap", idMapTiledVolumeDescription );
+                TiledDatasetDescription.TiledVolumeDescriptions.Set( "TempIdMap", tempIdMapTiledVolumeDescription );
+                TiledDatasetDescription.TiledVolumeDescriptions.Set( "AutosaveIdMap", autosaveIdMapTiledVolumeDescription );
+
+                var colorMapPath = Path.Combine( segmentationRootDirectory, Constants.COLOR_MAP_PATH );
+                TiledDatasetDescription.Paths.Set( "ColorMap", colorMapPath );
+
+                var idTileIndexPath = Path.Combine( segmentationRootDirectory, Constants.SEGMENT_INFO_PATH );
+                TiledDatasetDescription.Paths.Set( "SegmentInfo", idTileIndexPath );
+
+                var logPath = Path.Combine( segmentationRootDirectory, Constants.LOG_PATH );
+                TiledDatasetDescription.Paths.Set( "Log", logPath );
+
+                LoadSegmentation( TiledDatasetDescription );
+
+                SegmentationControlsEnabled = true;
+
+                UpdateView();
+
+                ChangesMade = false;
+
+                SegmentationChangeInProgress = false;
             }
-
-            Release.Assert( Directory.Exists( segmentationRootDirectory ) );
-
-            var idMapRootDirectory = Path.Combine( segmentationRootDirectory, Constants.ID_MAP_ROOT_DIRECTORY_NAME );
-
-            Release.Assert( Directory.Exists( idMapRootDirectory ) );
-
-            var tempIdMapRootDirectory = Path.Combine( segmentationRootDirectory, Constants.TEMP_ID_MAP_ROOT_DIRECTORY_NAME );
-            var autosaveIdMapRootDirectory = Path.Combine( segmentationRootDirectory, Constants.AUTOSAVE_ID_MAP_ROOT_DIRECTORY_NAME );
-
-            var idMapTiledVolumeDescriptionPath = Path.Combine( segmentationRootDirectory, Constants.ID_MAP_TILED_VOLUME_DESCRIPTION_NAME );
-
-            var idMapTiledVolumeDescription = GetTiledVolumeDescription( idMapRootDirectory, idMapTiledVolumeDescriptionPath );
-            var tempIdMapTiledVolumeDescription = GetTiledVolumeDescription( tempIdMapRootDirectory, idMapTiledVolumeDescriptionPath );
-            var autosaveIdMapTiledVolumeDescription = GetTiledVolumeDescription( autosaveIdMapRootDirectory, idMapTiledVolumeDescriptionPath );
-
-            TiledDatasetDescription.TiledVolumeDescriptions.Set( "IdMap", idMapTiledVolumeDescription );
-            TiledDatasetDescription.TiledVolumeDescriptions.Set( "TempIdMap", tempIdMapTiledVolumeDescription );
-            TiledDatasetDescription.TiledVolumeDescriptions.Set( "AutosaveIdMap", autosaveIdMapTiledVolumeDescription );
-
-            var colorMapPath = Path.Combine( segmentationRootDirectory, Constants.COLOR_MAP_PATH );
-            TiledDatasetDescription.Paths.Set( "ColorMap", colorMapPath );
-
-            var idTileIndexPath = Path.Combine( segmentationRootDirectory, Constants.SEGMENT_INFO_PATH );
-            TiledDatasetDescription.Paths.Set( "SegmentInfo", idTileIndexPath );
-
-            var logPath = Path.Combine( segmentationRootDirectory, Constants.LOG_PATH );
-            TiledDatasetDescription.Paths.Set( "Log", logPath );
-
-            LoadSegmentation( TiledDatasetDescription );
-
-            SegmentationControlsEnabled = true;
-
-            UpdateView();
-
-            ChangesMade = false;
         }
 
         private static TiledVolumeDescription GetTiledVolumeDescription( string mapRootDirectory, string tiledVolumeDescriptionPath )
@@ -669,9 +874,7 @@ namespace Mojo
             }
             catch ( Exception e )
             {
-                Console.WriteLine( e.Message );
-                Release.Assert( false );
-                tiledVolumeDescriptionXml = new tiledVolumeDescription();
+                throw new Exception( "Error reading XML from " + tiledVolumeDescriptionPath + ":\n" + e.Message );
             }
 
             var tiledVolumeDescription = new TiledVolumeDescription
@@ -752,37 +955,62 @@ namespace Mojo
 
         public void SaveSegmentation()
         {
-            if ( Internal != null && SegmentationLoaded )
+            lock ( this )
             {
-                Internal.SaveSegmentation();
+                if ( Internal != null && SegmentationLoaded )
+                {
+                    SegmentationChangeProgress = 10;
+                    Internal.SaveSegmentation();
+                    SegmentationChangeProgress = 100;
+                }
+                ChangesMade = false;
             }
-            ChangesMade = false;
         }
 
         public void SaveSegmentationAs( string savePath )
         {
-            if ( Internal != null && SegmentationLoaded )
+            lock ( this )
             {
-                Internal.SaveSegmentationAs( savePath );
+                if ( Internal != null && SegmentationLoaded )
+                {
+                    SegmentationChangeProgress = 10;
+                    Internal.SaveSegmentationAs( savePath );
+                    SegmentationChangeProgress = 100;
+                }
+                ChangesMade = false;
             }
-            ChangesMade = false;
         }
 
         public void AutoSaveSegmentation()
         {
-            if ( Internal != null && SegmentationLoaded )
+            lock ( this )
             {
-                Internal.AutosaveSegmentation();
+                if ( Internal != null && SegmentationLoaded )
+                {
+                    SegmentationChangeProgress = 10;
+                    Internal.AutosaveSegmentation();
+                    SegmentationChangeProgress = 100;
+                }
             }
         }
 
         public void DiscardChanges()
         {
-            if ( Internal != null && SegmentationLoaded )
+            if ( SegmentationChangeInProgress ) return;
+            lock ( this )
             {
-                Internal.DeleteTempFiles();
-                //UnloadSegmentation();
-                //LoadSegmentation( TiledDatasetDescription );
+                if ( SegmentationChangeInProgress ) return;
+
+                SegmentationChangeInProgress = true;
+
+                if ( Internal != null && SegmentationLoaded )
+                {
+                    Internal.DeleteTempFiles();
+                    //UnloadSegmentation();
+                    //LoadSegmentation( TiledDatasetDescription );
+                }
+
+                SegmentationChangeInProgress = false;
             }
         }
 

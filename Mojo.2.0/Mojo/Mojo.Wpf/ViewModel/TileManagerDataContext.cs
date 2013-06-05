@@ -1,8 +1,11 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Windows;
 using System.Windows.Media;
+using System.Windows.Threading;
 using System.Collections.Generic;
 using Mojo.Interop;
+
 
 namespace Mojo.Wpf.ViewModel
 {
@@ -18,6 +21,7 @@ namespace Mojo.Wpf.ViewModel
 
             mTileManager.PropertyChanged += PropertyChangedHandler;
             mTileManager.Internal.PropertyChanged += PropertyChangedHandler;
+            mProgressHideTimer.Tick += HideProgress;
         }
 
         public void Dispose()
@@ -57,7 +61,10 @@ namespace Mojo.Wpf.ViewModel
                     JumpToSelectedSegmentInfoPage();
                     break;
                 case "MouseOverSegmentId":
-                    UpdateMouseOverSegmentBrush();
+                    UpdateMouseOverSegmentInfo();
+                    break;
+                case "SegmentationChangeProgress":
+                    UpdateProgress();
                     break;
             }
 
@@ -90,6 +97,20 @@ namespace Mojo.Wpf.ViewModel
             {
                 mSelectedSegmentName = value;
                 OnPropertyChanged( "SelectedSegmentName" );
+            }
+        }
+
+        private String mSelectedSegmentNameAndId = "";
+        public String SelectedSegmentNameAndId
+        {
+            get
+            {
+                return mSelectedSegmentNameAndId;
+            }
+            set
+            {
+                mSelectedSegmentNameAndId = value;
+                OnPropertyChanged( "SelectedSegmentNameAndId" );
             }
         }
 
@@ -132,13 +153,12 @@ namespace Mojo.Wpf.ViewModel
             }
             else
             {
-                SlimDX.Vector3 segmentColor = mTileManager.Internal.GetSegmentationLabelColor( mTileManager.SelectedSegmentId );
-                SelectedSegmentBrush = new SolidColorBrush( Color.FromRgb( (byte)( segmentColor.X ), (byte)( segmentColor.Y ), (byte)( segmentColor.Z ) ) );
-
                 var segInfo = mTileManager.Internal.GetSegmentInfo( mTileManager.SelectedSegmentId );
                 SelectedSegmentConfidence = segInfo.Confidence;
                 SelectedSegmentName = segInfo.Name;
                 SelectedSegmentSize = segInfo.Size;
+                SelectedSegmentBrush = new SolidColorBrush( (Color)ColorConverter.ConvertFromString(segInfo.Color) );
+                SelectedSegmentNameAndId = segInfo.Name + " [" + mTileManager.SelectedSegmentId + "]";
             }
         }
 
@@ -152,20 +172,36 @@ namespace Mojo.Wpf.ViewModel
             set
             {
                 mMouseOverSegmentBrush = value;
-                OnPropertyChanged("MouseOverSegmentBrush");
+                OnPropertyChanged( "MouseOverSegmentBrush" );
             }
         }
 
-        public void UpdateMouseOverSegmentBrush( )
+        private String mMouseOverSegmentNameAndId = "";
+        public String MouseOverSegmentNameAndId
+        {
+            get
+            {
+                return mMouseOverSegmentNameAndId;
+            }
+            set
+            {
+                mMouseOverSegmentNameAndId = value;
+                OnPropertyChanged( "MouseOverSegmentNameAndId" );
+            }
+        }
+
+        public void UpdateMouseOverSegmentInfo()
         {
             if ( mTileManager.MouseOverSegmentId == 0 )
             {
                 MouseOverSegmentBrush = new SolidColorBrush();
+                MouseOverSegmentNameAndId = "";
             }
             else
             {
-                SlimDX.Vector3 segmentColor = mTileManager.Internal.GetSegmentationLabelColor( mTileManager.MouseOverSegmentId );
-                MouseOverSegmentBrush = new SolidColorBrush( Color.FromRgb( (byte)( segmentColor.X ), (byte)( segmentColor.Y ), (byte)( segmentColor.Z ) ) );
+                var segInfo = mTileManager.Internal.GetSegmentInfo( mTileManager.MouseOverSegmentId );
+                MouseOverSegmentBrush = new SolidColorBrush( (Color)ColorConverter.ConvertFromString( segInfo.Color ) );
+                MouseOverSegmentNameAndId = segInfo.Name + " [" + mTileManager.MouseOverSegmentId + "]";
             }
 
         }
@@ -377,6 +413,70 @@ namespace Mojo.Wpf.ViewModel
                 mSegmentInfoCurrentPageIndex = 0;
             }
             UpdateSegmentInfoList();
+        }
+
+        //
+        // Progress Bar Display Logic
+        //
+
+        private readonly DispatcherTimer mProgressHideTimer = new DispatcherTimer();
+
+        public void HideProgress( object sender, EventArgs eventArgs )
+        {
+            mProgressHideTimer.Stop();
+            ProgressVisibility = Visibility.Hidden;
+        }
+
+        private double mProgress = 100;
+        public double Progress
+        {
+            get
+            {
+                return mProgress;
+            }
+            set
+            {
+                mProgress = value;
+                OnPropertyChanged( "Progress" );
+
+                if ( ProgressVisibility == Visibility.Hidden )
+                {
+                    ProgressVisibility = Visibility.Visible;
+                }
+
+                //
+                // TODO: This is very un-wpf like - should use BackgroundWorkers instead and disable the UI while operations are in progress
+                //
+                Dispatcher.CurrentDispatcher.Invoke( (EmptyDelegate) delegate { }, DispatcherPriority.ContextIdle, null );
+
+                if ( value >= 100 )
+                {
+                    mProgressHideTimer.Stop();
+                    mProgressHideTimer.Interval = TimeSpan.FromSeconds( 0.1 );
+                    mProgressHideTimer.Start();
+                }
+            }
+        }
+
+        private delegate void EmptyDelegate();
+
+        private Visibility mProgressVisibility = Visibility.Hidden;
+        public Visibility ProgressVisibility
+        {
+            get
+            {
+                return mProgressVisibility;
+            }
+            set
+            {
+                mProgressVisibility = value;
+                OnPropertyChanged( "ProgressVisibility" );
+            }
+        }
+
+        public void UpdateProgress()
+        {
+            Progress = mTileManager.SegmentationChangeProgress;
         }
 
     }
