@@ -85,6 +85,7 @@ public:
 	virtual std::list< unsigned int >                             RedoChange()                                                                                                           = 0;
     virtual void                                                  TempSaveAndClearFileSystemTileCache()                                                                                  = 0;
     virtual void                                                  ClearFileSystemTileCache()                                                                                             = 0;
+    virtual float                                                 GetCurrentOperationProgress()                                                                                          = 0;
 																																						                               
     virtual marray::Marray< unsigned char >*                      GetIdColorMap()                                                                                                        = 0;
     virtual marray::Marray< unsigned int >*                       GetLabelIdMap()                                                                                                        = 0;

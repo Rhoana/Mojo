@@ -257,6 +257,8 @@
       <ObjectFileName>$(IntDir)</ObjectFileName>
       <AdditionalUsingDirectories>..\Sdk\SlimDX\SlimDX SDK (October 2010)\Bin\net20\x86\;..\Sdk\ObservableDictionary\v1.0\bin\Release\</AdditionalUsingDirectories>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <MultiProcessorCompilation>
+      </MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

@@ -107,6 +107,7 @@ public:
 	void                                                    RedoChange();
     void                                                    TempSaveAndClearFileSystemTileCache();
     void                                                    ClearFileSystemTileCache();
+	float                                                   GetCurrentOperationProgress();
 
 private:
     void LoadTileCache();

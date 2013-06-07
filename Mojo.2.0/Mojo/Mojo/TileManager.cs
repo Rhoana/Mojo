@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.ComponentModel;
 using Mojo.Interop;
 using SlimDX;
 using SlimDX.DXGI;
@@ -54,6 +55,19 @@ namespace Mojo
             set
             {
                 mSegmentationChangeInProgress = value;
+            }
+        }
+
+        private bool mBackgroundSegmentationChangeInProgress = false;
+        public bool BackgroundSegmentationChangeInProgress
+        {
+            get
+            {
+                return mBackgroundSegmentationChangeInProgress;
+            }
+            set
+            {
+                mBackgroundSegmentationChangeInProgress = value;
             }
         }
 
@@ -412,6 +426,263 @@ namespace Mojo
             }
         }
 
+        private Vector3 GetPointDataSpace( Vector2 relativeScreenOffset )
+        {
+            var topLeftDataSpaceX = mTiledDatasetView.CenterDataSpace.X - ( mTiledDatasetView.ExtentDataSpace.X / 2f );
+            var topLeftDataSpaceY = mTiledDatasetView.CenterDataSpace.Y - ( mTiledDatasetView.ExtentDataSpace.Y / 2f );
+
+            var offsetDataSpaceX = ( relativeScreenOffset.X ) * mTiledDatasetView.ExtentDataSpace.X;
+            var offsetDataSpaceY = ( relativeScreenOffset.Y ) * mTiledDatasetView.ExtentDataSpace.Y;
+
+            return new Vector3( topLeftDataSpaceX + offsetDataSpaceX, topLeftDataSpaceY + offsetDataSpaceY, mTiledDatasetView.CenterDataSpace.Z );
+        }
+
+        public uint GetSegmentationLabelId( Vector2 p )
+        {
+            if ( SegmentationChangeInProgress ) return 0;
+            lock ( this )
+            {
+                if ( SegmentationChangeInProgress ) return 0;
+                return Internal.GetSegmentationLabelId( mTiledDatasetView, GetPointDataSpace( p ) );
+            }
+        }
+
+        public void MouseOver( Vector2 p )
+        {
+            if ( SegmentationChangeInProgress ) return;
+            lock ( this )
+            {
+                if ( SegmentationChangeInProgress ) return;
+
+                Vector3 pointDataSpace = GetPointDataSpace( p );
+                MouseOverSegmentId = Internal.GetSegmentationLabelId( mTiledDatasetView, pointDataSpace );
+                MouseOverX = pointDataSpace.X;
+                MouseOverY = pointDataSpace.Y;
+            }
+        }
+
+        public void PrepForAdjust( Vector2 p )
+        {
+            if ( SegmentationChangeInProgress ) return;
+            lock ( this )
+            {
+                if ( SegmentationChangeInProgress ) return;
+                Internal.PrepForAdjust( mSelectedSegmentId, GetPointDataSpace( p ) );
+            }
+        }
+
+        public void PrepForDrawMerge( Vector2 p )
+        {
+            if ( SegmentationChangeInProgress ) return;
+            lock ( this )
+            {
+                if ( SegmentationChangeInProgress ) return;
+                Internal.PrepForDrawMerge( GetPointDataSpace( p ) );
+            }
+        }
+
+        public void ResetDrawMergeState( Vector2 p )
+        {
+            if ( SegmentationChangeInProgress ) return;
+            lock ( this )
+            {
+                if ( SegmentationChangeInProgress ) return;
+                Internal.ResetDrawMergeState( GetPointDataSpace( p ) );
+            }
+        }
+
+        public void PrepForSplit( Vector2 p )
+        {
+            if ( SegmentationChangeInProgress ) return;
+            lock ( this )
+            {
+                if ( SegmentationChangeInProgress ) return;
+                Internal.PrepForSplit( mSelectedSegmentId, GetPointDataSpace( p ) );
+            }
+        }
+
+        public void AddSplitSource( Vector2 p )
+        {
+            if ( SegmentationChangeInProgress ) return;
+            lock ( this )
+            {
+                if ( SegmentationChangeInProgress ) return;
+                Internal.AddSplitSource( mTiledDatasetView, GetPointDataSpace( p ) );
+            }
+        }
+
+        public void DrawRegionA( Vector2 p )
+        {
+            if ( SegmentationChangeInProgress ) return;
+            lock ( this )
+            {
+                if ( SegmentationChangeInProgress ) return;
+                Internal.DrawRegionA( mTiledDatasetView, GetPointDataSpace( p ), mBrushSize );
+            }
+        }
+
+        public void DrawRegionA( Vector2 p, float brushSize )
+        {
+            if ( SegmentationChangeInProgress ) return;
+            lock ( this )
+            {
+                if ( SegmentationChangeInProgress ) return;
+                Internal.DrawRegionA( mTiledDatasetView, GetPointDataSpace( p ), brushSize );
+            }
+        }
+
+        public void DrawRegionB( Vector2 p )
+        {
+            if ( SegmentationChangeInProgress ) return;
+            lock ( this )
+            {
+                if ( SegmentationChangeInProgress ) return;
+                Internal.DrawRegionB( mTiledDatasetView, GetPointDataSpace( p ), mBrushSize );
+            }
+        }
+
+        public void DrawRegionB( Vector2 p, float brushSize)
+        {
+            if ( SegmentationChangeInProgress ) return;
+            lock ( this )
+            {
+                if ( SegmentationChangeInProgress ) return;
+                Internal.DrawRegionB( mTiledDatasetView, GetPointDataSpace( p ), brushSize );
+            }
+        }
+
+        public void DrawSplit( Vector2 p )
+        {
+            if ( SegmentationChangeInProgress ) return;
+            lock ( this )
+            {
+                if ( SegmentationChangeInProgress ) return;
+                Internal.DrawSplit( mTiledDatasetView, GetPointDataSpace( p ), mBrushSize );
+            }
+        }
+
+        public void DrawErase( Vector2 p )
+        {
+            if ( SegmentationChangeInProgress ) return;
+            lock ( this )
+            {
+                if ( SegmentationChangeInProgress ) return;
+                Internal.DrawErase( mTiledDatasetView, GetPointDataSpace( p ), mBrushSize );
+            }
+        }
+
+        public void FindBoundaryWithinRegion2D( Vector2 p )
+        {
+            if ( SegmentationChangeInProgress ) return;
+            lock ( this )
+            {
+                if ( SegmentationChangeInProgress ) return;
+                Internal.FindBoundaryWithinRegion2D( mSelectedSegmentId, GetPointDataSpace( p ) );
+            }
+        }
+
+        public void FindBoundaryBetweenRegions2D( Vector2 p )
+        {
+            if ( SegmentationChangeInProgress ) return;
+            lock ( this )
+            {
+                if ( SegmentationChangeInProgress ) return;
+                Internal.FindBoundaryBetweenRegions2D( mSelectedSegmentId, GetPointDataSpace( p ) );
+            }
+        }
+
+        public void FindBoundaryJoinPoints2D( Vector2 p )
+        {
+            if ( SegmentationChangeInProgress ) return;
+            lock ( this )
+            {
+                if ( SegmentationChangeInProgress ) return;
+                Internal.FindBoundaryJoinPoints2D( mSelectedSegmentId, GetPointDataSpace( p ) );
+            }
+        }
+
+        public void PredictSplit( Vector2 p )
+        {
+            if ( SegmentationChangeInProgress ) return;
+            lock ( this )
+            {
+                if ( SegmentationChangeInProgress ) return;
+                Internal.PredictSplit( mSelectedSegmentId, GetPointDataSpace( p ), mBrushSize );
+            }
+        }
+
+        private void DoWorkAndUpdateProgressBlocking( DoWorkEventHandler workDelegate )
+        {
+            SegmentationChangeProgress = 10;
+            BackgroundSegmentationChangeInProgress = true;
+
+            //
+            // BackgroundWorker to do the change
+            //
+            BackgroundWorker worker = new BackgroundWorker();
+            worker.DoWork += workDelegate;
+            worker.RunWorkerAsync();
+
+            //
+            // Monitor progress here (blocking)
+            //
+            System.Threading.Thread.Sleep( TimeSpan.FromSeconds( 0.2 ) );
+            while ( worker.IsBusy )
+            {
+                SegmentationChangeProgress = Internal.GetCurrentOperationProgress() * 80 + 10;
+                System.Threading.Thread.Sleep( TimeSpan.FromSeconds( 0.2 ) );
+            }
+
+            BackgroundSegmentationChangeInProgress = false;
+            SegmentationChangeProgress = 100;
+
+            UpdateView();
+        }
+
+        //private void DoWorkAndUpdateProgressAsync( DoWorkEventHandler workDelegate )
+        //{
+        //    SegmentationChangeProgress = 10;
+
+        //    //
+        //    // BackgroundWorker to do the change
+        //    //
+        //    BackgroundWorker worker = new BackgroundWorker();
+        //    worker.DoWork += workDelegate;
+        //    worker.RunWorkerAsync();
+
+        //    //
+        //    // BackgroundWorker to monitor the progress
+        //    // TODO: Requires interface to be disabled so that no tile loads occur.
+        //    //
+        //    BackgroundWorker progressWorker = new BackgroundWorker();
+        //    progressWorker.WorkerReportsProgress = true;
+
+        //    progressWorker.DoWork += delegate( object s, DoWorkEventArgs args )
+        //    {
+        //        System.Threading.Thread.Sleep( TimeSpan.FromSeconds( 0.2 ) );
+        //        while ( worker.IsBusy )
+        //        {
+        //            float progress = Internal.GetCurrentOperationProgress();
+        //            progressWorker.ReportProgress( (int)( progress * 80 + 10 ) );
+        //            System.Threading.Thread.Sleep( TimeSpan.FromSeconds( 0.2 ) );
+        //        }
+        //        progressWorker.ReportProgress( 100 );
+        //    };
+
+        //    progressWorker.ProgressChanged += delegate( object s, ProgressChangedEventArgs args )
+        //    {
+        //        SegmentationChangeProgress = (float)args.ProgressPercentage;
+        //        if ( args.ProgressPercentage == 100 )
+        //        {
+        //            SegmentationChangeInProgress = false;
+        //            UpdateView();
+        //        }
+        //    };
+
+        //    progressWorker.RunWorkerAsync(); 
+
+        //}
+
         public void CommmitSplitChange()
         {
             if ( SegmentationChangeInProgress ) return;
@@ -423,16 +694,21 @@ namespace Mojo
 
                 if ( CurrentSplitMode == SplitMode.JoinPoints )
                 {
-                    SegmentationChangeProgress = 10;
-                    Internal.CompletePointSplit( SelectedSegmentId, new Vector3( mMouseOverX, mMouseOverY, mTiledDatasetView.CenterDataSpace.Z ) );
-                    SegmentationChangeProgress = 100;
+                    DoWorkAndUpdateProgressBlocking(
+                        delegate( object s, DoWorkEventArgs args )
+                        {
+                            Internal.CompletePointSplit( mSelectedSegmentId, new Vector3( mMouseOverX, mMouseOverY, mTiledDatasetView.CenterDataSpace.Z ) );
+                        });
                 }
                 else
                 {
-                    SegmentationChangeProgress = 10;
-                    Internal.CompleteDrawSplit( SelectedSegmentId, new Vector3( mMouseOverX, mMouseOverY, mTiledDatasetView.CenterDataSpace.Z ), mJoinSplits3D, (int)mSplitStartZ );
-                    SegmentationChangeProgress = 100;
+                    DoWorkAndUpdateProgressBlocking(
+                        delegate( object s, DoWorkEventArgs args )
+                        {
+                            Internal.CompleteDrawSplit( mSelectedSegmentId, new Vector3( mMouseOverX, mMouseOverY, mTiledDatasetView.CenterDataSpace.Z ), mJoinSplits3D, (int)mSplitStartZ );
+                        } );
                 }
+
                 SplitStartZ = TiledDatasetView.CenterDataSpace.Z;
                 ChangesMade = true;
 
@@ -446,12 +722,7 @@ namespace Mojo
             lock ( this )
             {
                 if ( SegmentationChangeInProgress ) return;
-
-                SegmentationChangeInProgress = true;
-
                 Internal.ResetSplitState( new Vector3( mMouseOverX, mMouseOverY, mTiledDatasetView.CenterDataSpace.Z ) );
-
-                SegmentationChangeInProgress = false;
             }
         }
 
@@ -464,9 +735,11 @@ namespace Mojo
 
                 SegmentationChangeInProgress = true;
 
-                SegmentationChangeProgress = 10;
-                Internal.CommitAdjustChange( SelectedSegmentId, new Vector3( mMouseOverX, mMouseOverY, mTiledDatasetView.CenterDataSpace.Z ) );
-                SegmentationChangeProgress = 100;
+                DoWorkAndUpdateProgressBlocking(
+                    delegate( object s, DoWorkEventArgs args )
+                    {
+                        Internal.CommitAdjustChange( SelectedSegmentId, new Vector3( mMouseOverX, mMouseOverY, mTiledDatasetView.CenterDataSpace.Z ) );
+                    } );
 
                 ChangesMade = true;
 
@@ -480,76 +753,135 @@ namespace Mojo
             lock ( this )
             {
                 if ( SegmentationChangeInProgress ) return;
-
-                SegmentationChangeInProgress = true;
-
                 Internal.ResetAdjustState( new Vector3( mMouseOverX, mMouseOverY, mTiledDatasetView.CenterDataSpace.Z ) );
-
-                SegmentationChangeInProgress = false;
             }
         }
 
-        public uint CommitDrawMerge()
+        public void CommitDrawMerge()
         {
-            uint result = 0;
-            if ( SegmentationChangeInProgress ) return result;
+            if ( SegmentationChangeInProgress ) return;
             lock ( this )
             {
-                if ( SegmentationChangeInProgress ) return result;
+                if ( SegmentationChangeInProgress ) return;
 
                 SegmentationChangeInProgress = true;
 
-                SegmentationChangeProgress = 10;
-                result = Internal.CommitDrawMerge( new Vector3( mMouseOverX, mMouseOverY, mTiledDatasetView.CenterDataSpace.Z ) );
-                SegmentationChangeProgress = 100;
+                DoWorkAndUpdateProgressBlocking(
+                    delegate( object s, DoWorkEventArgs args )
+                    {
+                        mSelectedSegmentId = Internal.CommitDrawMerge( new Vector3( mMouseOverX, mMouseOverY, mTiledDatasetView.CenterDataSpace.Z ) );
+                    } );
 
                 ChangesMade = true;
 
                 SegmentationChangeInProgress = false;
             }
-            return result;
         }
 
-        public uint CommitDrawMergeCurrentSlice()
+        public void CommitDrawMergeCurrentSlice()
         {
-            uint result = 0;
-            if ( SegmentationChangeInProgress ) return result;
+            if ( SegmentationChangeInProgress ) return;
             lock ( this )
             {
-                if ( SegmentationChangeInProgress ) return result;
+                if ( SegmentationChangeInProgress ) return;
 
                 SegmentationChangeInProgress = true;
 
-                SegmentationChangeProgress = 10;
-                result = Internal.CommitDrawMergeCurrentSlice( new Vector3( mMouseOverX, mMouseOverY, mTiledDatasetView.CenterDataSpace.Z ) );
-                SegmentationChangeProgress = 100;
+                DoWorkAndUpdateProgressBlocking(
+                    delegate( object s, DoWorkEventArgs args )
+                    {
+                        mSelectedSegmentId = Internal.CommitDrawMergeCurrentSlice( new Vector3( mMouseOverX, mMouseOverY, mTiledDatasetView.CenterDataSpace.Z ) );
+                    } );
 
                 ChangesMade = true;
 
                 SegmentationChangeInProgress = false;
             }
-            return result;
         }
 
-        public uint CommitDrawMergeCurrentConnectedComponent()
+        public void CommitDrawMergeCurrentConnectedComponent()
         {
-            uint result = 0;
-            if ( SegmentationChangeInProgress ) return result;
+            if ( SegmentationChangeInProgress ) return;
             lock ( this )
             {
-                if ( SegmentationChangeInProgress ) return result;
+                if ( SegmentationChangeInProgress ) return;
 
                 SegmentationChangeInProgress = true;
 
-                SegmentationChangeProgress = 10;
-                result = Internal.CommitDrawMergeCurrentConnectedComponent( new Vector3( mMouseOverX, mMouseOverY, mTiledDatasetView.CenterDataSpace.Z ) );
-                SegmentationChangeProgress = 100;
+                DoWorkAndUpdateProgressBlocking(
+                    delegate( object s, DoWorkEventArgs args )
+                    {
+                        mSelectedSegmentId = Internal.CommitDrawMergeCurrentConnectedComponent( new Vector3( mMouseOverX, mMouseOverY, mTiledDatasetView.CenterDataSpace.Z ) );
+                    } );
 
                 ChangesMade = true;
 
                 SegmentationChangeInProgress = false;
             }
-            return result;
+            return;
+        }
+
+        public void RemapSegmentLabel( uint clickedId )
+        {
+            if ( SegmentationChangeInProgress ) return;
+            lock ( this )
+            {
+                if ( SegmentationChangeInProgress ) return;
+
+                SegmentationChangeInProgress = true;
+
+                DoWorkAndUpdateProgressBlocking(
+                    delegate( object s, DoWorkEventArgs args )
+                    {
+                        Internal.RemapSegmentLabel( clickedId, mSelectedSegmentId );
+                    } );
+
+                ChangesMade = true;
+
+                SegmentationChangeInProgress = false;
+            }
+        }
+
+        public void ReplaceSegmentationLabelCurrentSlice( uint clickedId, Vector2 p )
+        {
+            if ( SegmentationChangeInProgress ) return;
+            lock ( this )
+            {
+                if ( SegmentationChangeInProgress ) return;
+
+                SegmentationChangeInProgress = true;
+
+                DoWorkAndUpdateProgressBlocking(
+                    delegate( object s, DoWorkEventArgs args )
+                    {
+                        Internal.ReplaceSegmentationLabelCurrentSlice( clickedId, mSelectedSegmentId, mTiledDatasetView, GetPointDataSpace( p ) );
+                    } );
+
+                ChangesMade = true;
+
+                SegmentationChangeInProgress = false;
+            }
+        }
+
+        public void ReplaceSegmentationLabelCurrentConnectedComponent( uint clickedId, Vector2 p )
+        {
+            if ( SegmentationChangeInProgress ) return;
+            lock ( this )
+            {
+                if ( SegmentationChangeInProgress ) return;
+
+                SegmentationChangeInProgress = true;
+
+                DoWorkAndUpdateProgressBlocking(
+                    delegate( object s, DoWorkEventArgs args )
+                    {
+                        Internal.ReplaceSegmentationLabelCurrentConnectedComponent( clickedId, mSelectedSegmentId, mTiledDatasetView, GetPointDataSpace( p ) );
+                    } );
+
+                ChangesMade = true;
+
+                SegmentationChangeInProgress = false;
+            }
         }
 
         public void UndoChange()
@@ -561,9 +893,12 @@ namespace Mojo
 
                 SegmentationChangeInProgress = true;
 
-                SegmentationChangeProgress = 10;
-                Internal.UndoChange();
-                SegmentationChangeProgress = 100;
+                DoWorkAndUpdateProgressBlocking(
+                    delegate( object s, DoWorkEventArgs args )
+                    {
+                        Internal.UndoChange();
+                    } );
+
                 ChangesMade = true;
 
                 SegmentationChangeInProgress = false;
@@ -579,9 +914,12 @@ namespace Mojo
 
                 SegmentationChangeInProgress = true;
 
-                SegmentationChangeProgress = 10;
-                Internal.RedoChange();
-                SegmentationChangeProgress = 100;
+                DoWorkAndUpdateProgressBlocking(
+                    delegate( object s, DoWorkEventArgs args )
+                    {
+                        Internal.RedoChange();
+                    } );
+
                 ChangesMade = true;
 
                 SegmentationChangeInProgress = false;
@@ -594,12 +932,7 @@ namespace Mojo
             lock ( this )
             {
                 if ( SegmentationChangeInProgress ) return;
-
-                SegmentationChangeInProgress = true;
-
                 SelectedSegmentId = Internal.GetNewId();
-
-                SegmentationChangeInProgress = false;
             }
         }
 
@@ -613,6 +946,7 @@ namespace Mojo
                 SegmentationChangeInProgress = true;
 
                 Internal.LockSegmentLabel( segId );
+
                 ChangesMade = true;
 
                 SegmentationChangeInProgress = false;
@@ -629,14 +963,15 @@ namespace Mojo
                 SegmentationChangeInProgress = true;
 
                 Internal.UnlockSegmentLabel( segId );
+
                 ChangesMade = true;
 
                 SegmentationChangeInProgress = false;
             }
         }
 
-        private double mSegmentationChangeProgress = 100;
-        public double SegmentationChangeProgress
+        private float mSegmentationChangeProgress = 100;
+        public float SegmentationChangeProgress
         {
             get
             {

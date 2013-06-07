@@ -252,12 +252,12 @@
                     <Label Focusable="False" MinHeight="20" MinWidth="50" Margin="0,0,10,0" Content="{Binding Path=TileManagerDataContext.CurrentZLocationString}" />
                     <Label Focusable="False" MinHeight="20" Content="Selection:" />
                     <Rectangle Height="20" Stroke="Gray" Width="50" Fill="{Binding Path=TileManagerDataContext.SelectedSegmentBrush}" />
-                    <Label Focusable="False" MinHeight="20" MinWidth="150" Margin="0,0,10,0" Content="{Binding Path=TileManagerDataContext.SelectedSegmentNameAndId}" />
+                    <Label Focusable="False" MinHeight="20" MinWidth="200" Margin="0,0,10,0" Content="{Binding Path=TileManagerDataContext.SelectedSegmentNameAndId}" />
                     <Label Focusable="False" MinHeight="20" Content="Target:" />
                     <Rectangle Height="20" Stroke="Gray" Width="50" Fill="{Binding Path=TileManagerDataContext.MouseOverSegmentBrush}" />
-                    <Label Focusable="False" MinHeight="20" MinWidth="150" Margin="0,0,10,0" Content="{Binding Path=TileManagerDataContext.MouseOverSegmentNameAndId}" />
+                    <Label Focusable="False" MinHeight="20" MinWidth="250" Margin="0,0,10,0" Content="{Binding Path=TileManagerDataContext.MouseOverSegmentNameAndId}" />
                 </StackPanel>
-                <ProgressBar DockPanel.Dock="Right" Width="200" Margin="3,3,3,3" HorizontalAlignment="Right" Value="{Binding Path=TileManagerDataContext.Progress}" Visibility="{Binding Path=TileManagerDataContext.ProgressVisibility}">
+                <ProgressBar DockPanel.Dock="Right" Width="250" Margin="3,3,3,3" HorizontalAlignment="Right" Value="{Binding Path=TileManagerDataContext.Progress}" Visibility="{Binding Path=TileManagerDataContext.ProgressVisibility}">
                 </ProgressBar>
             </DockPanel>
         </Border>

@@ -21,7 +21,7 @@ namespace Mojo.Wpf.ViewModel
 
             mTileManager.PropertyChanged += PropertyChangedHandler;
             mTileManager.Internal.PropertyChanged += PropertyChangedHandler;
-            mProgressHideTimer.Tick += HideProgress;
+            mProgressTimer.Tick += CheckProgress;
         }
 
         public void Dispose()
@@ -158,7 +158,7 @@ namespace Mojo.Wpf.ViewModel
                 SelectedSegmentName = segInfo.Name;
                 SelectedSegmentSize = segInfo.Size;
                 SelectedSegmentBrush = new SolidColorBrush( (Color)ColorConverter.ConvertFromString(segInfo.Color) );
-                SelectedSegmentNameAndId = segInfo.Name + " [" + mTileManager.SelectedSegmentId + "]";
+                SelectedSegmentNameAndId = segInfo.Name + " [size=" + segInfo.Size / 1000 + "k]"; //, id=" + mTileManager.SelectedSegmentId + "]";
             }
         }
 
@@ -201,7 +201,7 @@ namespace Mojo.Wpf.ViewModel
             {
                 var segInfo = mTileManager.Internal.GetSegmentInfo( mTileManager.MouseOverSegmentId );
                 MouseOverSegmentBrush = new SolidColorBrush( (Color)ColorConverter.ConvertFromString( segInfo.Color ) );
-                MouseOverSegmentNameAndId = segInfo.Name + " [" + mTileManager.MouseOverSegmentId + "]";
+                MouseOverSegmentNameAndId = segInfo.Name + " [size=" + segInfo.Size / 1000 + "k]"; //, id=" + mTileManager.MouseOverSegmentId + "]";
             }
 
         }
@@ -419,16 +419,28 @@ namespace Mojo.Wpf.ViewModel
         // Progress Bar Display Logic
         //
 
-        private readonly DispatcherTimer mProgressHideTimer = new DispatcherTimer();
+        private readonly DispatcherTimer mProgressTimer = new DispatcherTimer();
 
-        public void HideProgress( object sender, EventArgs eventArgs )
+        public void CheckProgress( object sender, EventArgs eventArgs )
         {
-            mProgressHideTimer.Stop();
+            if ( mProgress >= 100 )
+            {
+                HideProgress();
+            }
+            else
+            {
+                Progress = mTileManager.SegmentationChangeProgress;
+            }
+        }
+
+        public void HideProgress()
+        {
+            mProgressTimer.Stop();
             ProgressVisibility = Visibility.Hidden;
         }
 
-        private double mProgress = 100;
-        public double Progress
+        private float mProgress = 100;
+        public float Progress
         {
             get
             {
@@ -447,18 +459,18 @@ namespace Mojo.Wpf.ViewModel
                 //
                 // TODO: This is very un-wpf like - should use BackgroundWorkers instead and disable the UI while operations are in progress
                 //
-                Dispatcher.CurrentDispatcher.Invoke( (EmptyDelegate) delegate { }, DispatcherPriority.ContextIdle, null );
+                Dispatcher.CurrentDispatcher.Invoke( (NoArgDelegate)delegate { }, DispatcherPriority.ContextIdle, null );
 
-                if ( value >= 100 )
+                mProgressTimer.Stop();
+                if ( mProgress >= 100 )
                 {
-                    mProgressHideTimer.Stop();
-                    mProgressHideTimer.Interval = TimeSpan.FromSeconds( 0.1 );
-                    mProgressHideTimer.Start();
+                    mProgressTimer.Interval = TimeSpan.FromSeconds( 0.1 );
+                    mProgressTimer.Start();
                 }
             }
         }
 
-        private delegate void EmptyDelegate();
+        private delegate void NoArgDelegate();
 
         private Visibility mProgressVisibility = Visibility.Hidden;
         public Visibility ProgressVisibility

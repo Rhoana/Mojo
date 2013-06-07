@@ -115,6 +115,7 @@ public:
 	void                                                  RedoChange();
     void                                                  TempSaveAndClearFileSystemTileCache();
     void                                                  ClearFileSystemTileCache();
+	float                                                 GetCurrentOperationProgress();
 
     MojoInt3                                              GetZoomLevel( const TiledDatasetView& tiledDatasetView );
 
@@ -168,6 +169,7 @@ private:
     bool                                                  mIsSegmentationLoaded;
 
 	int                                                   mDeviceTileCacheSize;
+
 
 };
 

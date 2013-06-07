@@ -39,15 +39,11 @@ namespace Mojo
                     break;
                 case System.Windows.Input.Key.Z:
                     if ( keyEventArgs.KeyboardDevice.Modifiers == System.Windows.Input.ModifierKeys.Control )
-                        mTileManager.SegmentationChangeProgress = 10;
-                        mTileManager.Internal.UndoChange();
-                        mTileManager.SegmentationChangeProgress = 100;
+                        mTileManager.UndoChange();
                     break;
                 case System.Windows.Input.Key.Y:
                     if ( keyEventArgs.KeyboardDevice.Modifiers == System.Windows.Input.ModifierKeys.Control )
-                        mTileManager.SegmentationChangeProgress = 10;
-                        mTileManager.Internal.RedoChange();
-                        mTileManager.SegmentationChangeProgress = 100;
+                        mTileManager.RedoChange();
                     break;
                 case System.Windows.Input.Key.N:
                     if ( keyEventArgs.KeyboardDevice.Modifiers == System.Windows.Input.ModifierKeys.Control )
@@ -70,22 +66,9 @@ namespace Mojo
             {
                 //Get the id of the segment being clicked
 
-                var centerDataSpace = mTileManager.TiledDatasetView.CenterDataSpace;
-                var extentDataSpace = mTileManager.TiledDatasetView.ExtentDataSpace;
+                var p = new Vector2( (float)mouseEventArgs.X / width, (float)mouseEventArgs.Y / height );
 
-                var topLeftDataSpaceX = centerDataSpace.X - ( extentDataSpace.X / 2f );
-                var topLeftDataSpaceY = centerDataSpace.Y - ( extentDataSpace.Y / 2f );
-
-                var offsetDataSpaceX = ( (float) mouseEventArgs.X / width ) * extentDataSpace.X;
-                var offsetDataSpaceY = ( (float) mouseEventArgs.Y / height ) * extentDataSpace.Y;
-
-                var x = topLeftDataSpaceX + offsetDataSpaceX;
-                var y = topLeftDataSpaceY + offsetDataSpaceY;
-                var z = centerDataSpace.Z;
-
-                var p = new Vector3( x, y, z );
-
-                var clickedId = mTileManager.Internal.GetSegmentationLabelId( mTileManager.TiledDatasetView, p );
+                var clickedId = mTileManager.GetSegmentationLabelId( p );
 
                 if ( mouseEventArgs.Button == MouseButtons.Left )
                 {
@@ -109,23 +92,15 @@ namespace Mojo
                         switch ( mTileManager.CurrentMergeMode )
                         {
                             case MergeMode.Fill2D:
-                                mTileManager.SegmentationChangeProgress = 10;
-                                mTileManager.Internal.ReplaceSegmentationLabelCurrentSlice( clickedId, mTileManager.SelectedSegmentId, mTileManager.TiledDatasetView, p );
-                                mTileManager.SegmentationChangeProgress = 100;
+                                mTileManager.ReplaceSegmentationLabelCurrentSlice( clickedId, p );
                                 break;
                             case MergeMode.Fill3D:
-                                mTileManager.SegmentationChangeProgress = 10;
-                                mTileManager.Internal.ReplaceSegmentationLabelCurrentConnectedComponent( clickedId, mTileManager.SelectedSegmentId, mTileManager.TiledDatasetView, p );
-                                mTileManager.SegmentationChangeProgress = 100;
+                                mTileManager.ReplaceSegmentationLabelCurrentConnectedComponent( clickedId, p );
                                 break;
                             default:
-                                mTileManager.SegmentationChangeProgress = 10;
-                                mTileManager.Internal.RemapSegmentLabel( clickedId, mTileManager.SelectedSegmentId );
-                                //mTileManager.Internal.ReplaceSegmentationLabel( clickedId, mTileManager.SelectedSegmentId );
-                                mTileManager.SegmentationChangeProgress = 100;
+                                mTileManager.RemapSegmentLabel( clickedId );
                                 break;
                         }
-                        mTileManager.ChangesMade = true;
                     }
                 }
             }
@@ -140,22 +115,9 @@ namespace Mojo
                 //Mouseover - update display to highlight segment under mouse
                 //Get the id of the segment being clicked
 
-                var centerDataSpace = mTileManager.TiledDatasetView.CenterDataSpace;
-                var extentDataSpace = mTileManager.TiledDatasetView.ExtentDataSpace;
+                var p = new Vector2( (float)mouseEventArgs.X / width, (float)mouseEventArgs.Y / height );
 
-                var topLeftDataSpaceX = centerDataSpace.X - ( extentDataSpace.X / 2f );
-                var topLeftDataSpaceY = centerDataSpace.Y - ( extentDataSpace.Y / 2f );
-
-                var offsetDataSpaceX = ( (float)mouseEventArgs.X / width ) * extentDataSpace.X;
-                var offsetDataSpaceY = ( (float)mouseEventArgs.Y / height ) * extentDataSpace.Y;
-
-                var x = topLeftDataSpaceX + offsetDataSpaceX;
-                var y = topLeftDataSpaceY + offsetDataSpaceY;
-                var z = centerDataSpace.Z;
-
-                var p = new Vector3( x, y, z );
-
-                mTileManager.MouseOverSegmentId = mTileManager.Internal.GetSegmentationLabelId( mTileManager.TiledDatasetView, p );
+                mTileManager.MouseOverSegmentId = mTileManager.GetSegmentationLabelId( p );
 
                 mCurrentlyHandlingMouseOver = false;
             }

@@ -439,6 +439,11 @@ unsigned int TileManager::GetNewId()
     return mTileManager->GetNewId();
 }
 
+float TileManager::GetCurrentOperationProgress()
+{
+	return mTileManager->GetCurrentOperationProgress();
+}
+
 void TileManager::UndoChange()
 {
     mTileManager->UndoChange();

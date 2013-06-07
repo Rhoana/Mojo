@@ -37,6 +37,8 @@ FileSystemTileServer::FileSystemTileServer( Core::PrimitiveMap constParameters )
 
     mPrevSplitId = 0;
     mPrevSplitZ = -2;
+
+	mCurrentOperationProgress = 0;
 }
 
 FileSystemTileServer::~FileSystemTileServer()
@@ -549,8 +551,12 @@ void FileSystemTileServer::ReplaceSegmentationLabel( unsigned int oldId, unsigne
 			mNextUndoItem->idTileMapAddNewId.erase( *eraseIterator );
 		}
 
+		int maxProgress = (int)tilesContainingOldId.size();
+		int currentProgress = 0;
+
         for( FileSystemTileSet::iterator tileIndexi = tilesContainingOldId.begin(); tileIndexi != tilesContainingOldId.end(); ++tileIndexi )
         {
+
             MojoInt4 tileIndex = *tileIndexi;
 			if ( tileIndex.w == 0 )
 			{
@@ -608,6 +614,10 @@ void FileSystemTileServer::ReplaceSegmentationLabel( unsigned int oldId, unsigne
 				//
 				UnloadTile( tileIndex );
 			}
+
+			++currentProgress;
+			mCurrentOperationProgress = (float)currentProgress / (float)maxProgress;
+
         }
 
         //
@@ -636,6 +646,8 @@ void FileSystemTileServer::ReplaceSegmentationLabel( unsigned int oldId, unsigne
         Core::Printf( "\nFinished replacing segmentation label ", oldId, " with segmentation label ", newId, ".\n" );
 
 		mLogger.Log( Core::ToString( "ReplaceSegmentationLabel: oldId=", oldId, ", newId=", newId ) );
+
+		mCurrentOperationProgress = 1;
 
     }
 }
@@ -698,6 +710,23 @@ void FileSystemTileServer::ReplaceSegmentationLabelCurrentSlice( unsigned int ol
         MojoInt3 currentIdNumVoxels;
         MojoInt4 thisVoxel;
 
+		int maxProgress = 0;
+		int currentProgress = 0;
+		int ignoreProgressTiles = 0;
+
+		//
+		// Determine the (approximate) max amount of work to be done
+		//
+		for( FileSystemTileSet::iterator tileIndexi = tilesContainingOldId.begin(); tileIndexi != tilesContainingOldId.end(); ++tileIndexi )
+        {
+			if ( tileIndexi->z == pVoxelSpace.z )
+			{
+				++maxProgress;
+			}
+		}
+
+		ignoreProgressTiles = (int)tilesContainingOldId.size() - maxProgress;
+
         tileQueue.push( MojoInt4(pVoxelSpace.x, pVoxelSpace.y, pVoxelSpace.z, 0) );
 
         //while ( currentW < numTiles.w )
@@ -719,6 +748,9 @@ void FileSystemTileServer::ReplaceSegmentationLabelCurrentSlice( unsigned int ol
 					//
                     thisVoxel = sliceQueue.begin()->second;
                     sliceQueue.erase( sliceQueue.begin() );
+
+					currentProgress = maxProgress - ( (int)tilesContainingOldId.size() - ignoreProgressTiles );
+					mCurrentOperationProgress = (float)currentProgress / (float)maxProgress;
                 }
 
                 //
@@ -931,6 +963,8 @@ void FileSystemTileServer::ReplaceSegmentationLabelCurrentSlice( unsigned int ol
 
 		mLogger.Log( Core::ToString( "ReplaceSegmentationLabelCurrentSlice: oldId=", oldId, ", newId=", newId, ", x=", pVoxelSpace.x, ", y=", pVoxelSpace.y, ", z=", pVoxelSpace.z ) );
 
+		mCurrentOperationProgress = 1;
+
     }
 }
 
@@ -976,6 +1010,14 @@ void FileSystemTileServer::ReplaceSegmentationLabelCurrentConnectedComponent( un
         MojoInt3 currentIdNumVoxels;
         MojoInt4 thisVoxel;
 
+		int maxProgress = 0;
+		int currentProgress = 0;
+
+		//
+		// Determine the (approximate) max amount of work to be done
+		//
+		maxProgress = (int)tilesContainingOldId.size();
+
         tileQueue.push( MojoInt4(pVoxelSpace.x, pVoxelSpace.y, pVoxelSpace.z, 0) );
 
         //while ( currentW < numTiles.w )
@@ -997,6 +1039,9 @@ void FileSystemTileServer::ReplaceSegmentationLabelCurrentConnectedComponent( un
 					//
                     thisVoxel = sliceQueue.begin()->second;
                     sliceQueue.erase( sliceQueue.begin() );
+
+					currentProgress = maxProgress - (int)tilesContainingOldId.size();
+					mCurrentOperationProgress = (float)currentProgress / (float)maxProgress;
                 }
 
                 //
@@ -1223,6 +1268,8 @@ void FileSystemTileServer::ReplaceSegmentationLabelCurrentConnectedComponent( un
         Core::Printf( "\nFinished replacing segmentation label ", oldId, " conencted to voxel (x", pVoxelSpace.x, ", y", pVoxelSpace.y, " z", pVoxelSpace.z, ") with segmentation label ", newId, " in 3D from zslice ", pVoxelSpace.z, ".\n" );
 
 		mLogger.Log( Core::ToString( "ReplaceSegmentationLabelCurrentConnectedComponent: oldId=", oldId, ", newId=", newId, ", x=", pVoxelSpace.x, ", y=", pVoxelSpace.y, ", z=", pVoxelSpace.z ) );
+
+		mCurrentOperationProgress = 1;
 
     }
 }
@@ -2312,7 +2359,28 @@ unsigned int FileSystemTileServer::CompletePointSplit( unsigned int segId, MojoF
 		bool invert = false;
         bool foundMouseOverPixel = false;
 
-        tileQueue.push( MojoInt4(pVoxelSpace.x, pVoxelSpace.y, pVoxelSpace.z, 0) );
+        FileSystemTileSet tilesContainingOldId = mSegmentInfoManager.GetTiles( segId );
+
+		int maxProgress = 0;
+		int currentProgress = 0;
+
+		//
+		// Determine the (approximate) max amount of work to be done
+		//
+		for( FileSystemTileSet::iterator tileIndexi = tilesContainingOldId.begin(); tileIndexi != tilesContainingOldId.end(); ++tileIndexi )
+        {
+			if ( tileIndexi->z == pVoxelSpace.z )
+			{
+				++maxProgress;
+			}
+		}
+
+		//
+		// Compensate for possible inversion and search / fill time
+		//
+		maxProgress *= 2;
+		
+		tileQueue.push( MojoInt4(pVoxelSpace.x, pVoxelSpace.y, pVoxelSpace.z, 0) );
 
         Core::Printf( "Filling at w=0." );
 
@@ -2333,6 +2401,12 @@ unsigned int FileSystemTileServer::CompletePointSplit( unsigned int segId, MojoF
 				//
                 thisVoxel = sliceQueue.begin()->second;
                 sliceQueue.erase( sliceQueue.begin() );
+
+				if ( currentProgress < maxProgress )
+				{
+					++currentProgress;
+					mCurrentOperationProgress = (float)currentProgress / (float)maxProgress;
+				}
             }
 
             if ( thisVoxel.x == pMouseOverVoxelSpace.x && thisVoxel.y == pMouseOverVoxelSpace.y && thisVoxel.z == pMouseOverVoxelSpace.z )
@@ -2584,7 +2658,7 @@ unsigned int FileSystemTileServer::CompletePointSplit( unsigned int segId, MojoF
 
         newId = mSegmentInfoManager.AddNewId();
         mTiledDatasetDescription.maxLabelId = newId;
-        FileSystemTileSet tilesContainingOldId = mSegmentInfoManager.GetTiles( segId );
+
         FileSystemTileSet tilesContainingNewId;
 
 		mNextUndoItem->newId = newId;
@@ -2610,6 +2684,12 @@ unsigned int FileSystemTileServer::CompletePointSplit( unsigned int segId, MojoF
 			{
 				thisVoxel = tileQueue.front();
 				tileQueue.pop();
+
+				if ( currentProgress < maxProgress )
+				{
+					++currentProgress;
+					mCurrentOperationProgress = (float)currentProgress / (float)maxProgress;
+				}
 
 				//
 				// Find the tile for this pixel
@@ -2756,6 +2836,8 @@ unsigned int FileSystemTileServer::CompletePointSplit( unsigned int segId, MojoF
 
 		mLogger.Log( Core::ToString( "CompletePointSplit: segId=", segId, ", newId=", newId, ", z=", pVoxelSpace.z, ", npixels=", voxelChangeCount ) );
 
+		mCurrentOperationProgress = 1;
+
     }
 
 	//
@@ -2889,7 +2971,28 @@ unsigned int FileSystemTileServer::CompleteDrawSplit( unsigned int segId, MojoFl
 			    bool invert = false;
                 bool foundMouseOverPixel = false;
 
-			    tileQueue.push( MojoInt4( pVoxelSpace.x, pVoxelSpace.y, pVoxelSpace.z, 0 ) );
+                FileSystemTileSet tilesContainingOldId = mSegmentInfoManager.GetTiles( segId );
+
+				int maxProgress = 0;
+				int currentProgress = 0;
+
+				//
+				// Determine the (approximate) max amount of work to be done
+				//
+				for( FileSystemTileSet::iterator tileIndexi = tilesContainingOldId.begin(); tileIndexi != tilesContainingOldId.end(); ++tileIndexi )
+				{
+					if ( tileIndexi->z == pVoxelSpace.z )
+					{
+						++maxProgress;
+					}
+				}
+
+				//
+				// Compensate for possible inversion and search / fill time
+				//
+				maxProgress *= 2;
+
+				tileQueue.push( MojoInt4( pVoxelSpace.x, pVoxelSpace.y, pVoxelSpace.z, 0 ) );
 
 			    Core::Printf( "Filling at w=0." );
 
@@ -2910,6 +3013,12 @@ unsigned int FileSystemTileServer::CompleteDrawSplit( unsigned int segId, MojoFl
 					    //
 					    thisVoxel = sliceQueue.begin()->second;
 					    sliceQueue.erase( sliceQueue.begin() );
+
+						if ( currentProgress < maxProgress )
+						{
+							++currentProgress;
+							mCurrentOperationProgress = (float)currentProgress / (float)maxProgress;
+						}
 				    }
 
                     if ( thisVoxel.x == pMouseOverVoxelSpace.x && thisVoxel.y == pMouseOverVoxelSpace.y && thisVoxel.z == pMouseOverVoxelSpace.z )
@@ -3196,8 +3305,8 @@ unsigned int FileSystemTileServer::CompleteDrawSplit( unsigned int segId, MojoFl
                     newId = mSegmentInfoManager.AddNewId();
                 }
                 mTiledDatasetDescription.maxLabelId = newId;
-                FileSystemTileSet tilesContainingOldId = mSegmentInfoManager.GetTiles( segId );
-			    FileSystemTileSet tilesContainingNewId = mSegmentInfoManager.GetTiles( newId );
+
+			    FileSystemTileSet tilesContainingNewId;
 
 			    mNextUndoItem->newId = newId;
 
@@ -3222,6 +3331,12 @@ unsigned int FileSystemTileServer::CompleteDrawSplit( unsigned int segId, MojoFl
 				    {
 					    thisVoxel = tileQueue.front();
 					    tileQueue.pop();
+
+						if ( currentProgress < maxProgress )
+						{
+							++currentProgress;
+							mCurrentOperationProgress = (float)currentProgress / (float)maxProgress;
+						}
 
 					    //
 					    // Find the tile for this pixel
@@ -3383,6 +3498,8 @@ unsigned int FileSystemTileServer::CompleteDrawSplit( unsigned int segId, MojoFl
 					Core::Printf( "\nFinished Splitting segmentation label ", segId, " from voxel (x", pVoxelSpace.x, ", y", pVoxelSpace.y, " z", pVoxelSpace.z, ") to new segmentation label ", newId, "...\n" );
 
 					mLogger.Log( Core::ToString( "CompleteDrawSplit: segId=", segId, ", newId=", newId, ", z=", pVoxelSpace.z, ", npixels=", voxelChangeCount ) );
+
+					mCurrentOperationProgress = 1;
 
 				}
 
@@ -4519,6 +4636,11 @@ unsigned int FileSystemTileServer:: GetNewId()
 	return mSegmentInfoManager.AddNewId();
 }
 
+float FileSystemTileServer::GetCurrentOperationProgress()
+{
+	return mCurrentOperationProgress;
+}
+
 //
 // Undo / Redo Methods
 //
@@ -4601,7 +4723,7 @@ std::list< unsigned int > FileSystemTileServer::UndoChange()
 						//
 						for ( TileChangeIdMap::iterator changeBitsIt = tileChangeIt->second.begin(); changeBitsIt != tileChangeIt->second.end(); ++changeBitsIt )
 						{
-							for ( int i = 0; i < changeBitsIt->second.size(); ++i )
+							for ( unsigned int i = 0; i < changeBitsIt->second.size(); ++i )
 							{
 								if ( changeBitsIt->second[ i ] )
 								{
@@ -4745,7 +4867,7 @@ std::list< unsigned int > FileSystemTileServer::RedoChange()
 						//
 						for ( TileChangeIdMap::iterator changeBitsIt = tileChangeIt->second.begin(); changeBitsIt != tileChangeIt->second.end(); ++changeBitsIt )
 						{
-							for ( int i = 0; i < changeBitsIt->second.size(); ++i )
+							for ( unsigned int i = 0; i < changeBitsIt->second.size(); ++i )
 							{
 								if ( changeBitsIt->second[ i ] )
 								{
@@ -5320,7 +5442,6 @@ FileSystemSegmentInfoManager* FileSystemTileServer::GetSegmentInfoManager()
 {
 	return &mSegmentInfoManager;
 }
-
 
 //
 // Internal template functions moved here to resolve x64 linking errors

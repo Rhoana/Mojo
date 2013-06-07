@@ -97,6 +97,7 @@ public:
     virtual void                                                  TempSaveFileSystemTileCacheChanges();
     virtual void                                                  TempSaveAndClearFileSystemTileCache();
     virtual void                                                  ClearFileSystemTileCache();
+	virtual float                                                 GetCurrentOperationProgress();
 
     virtual marray::Marray< unsigned char >*                      GetIdColorMap();
     virtual marray::Marray< unsigned int >*                       GetLabelIdMap();
@@ -207,6 +208,8 @@ private:
 	std::deque< FileSystemUndoRedoItem >                          mRedoDeque;
 
     FileSystemUndoRedoItem*                                       mNextUndoItem;
+
+	float                                                         mCurrentOperationProgress;
 
 };
 

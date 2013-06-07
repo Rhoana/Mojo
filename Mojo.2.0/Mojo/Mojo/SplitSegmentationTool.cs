@@ -22,9 +22,8 @@ namespace Mojo
         {
             if ( mTileManager.SelectedSegmentId != 0 )
             {
-                var centerDataSpace = mTileManager.TiledDatasetView.CenterDataSpace;
-                var p = new Vector3( centerDataSpace.X, centerDataSpace.Y, centerDataSpace.Z );
-                mTileManager.Internal.PrepForSplit( mTileManager.SelectedSegmentId, p );
+                var p = new Vector2( 0.5f, 0.5f );
+                mTileManager.PrepForSplit( p );
             }
         }
 
@@ -33,9 +32,8 @@ namespace Mojo
             if ( mTileManager.SelectedSegmentId != segmentId )
             {
                 mTileManager.SelectedSegmentId = segmentId;
-                var centerDataSpace = mTileManager.TiledDatasetView.CenterDataSpace;
-                var p = new Vector3( centerDataSpace.X, centerDataSpace.Y, centerDataSpace.Z );
-                mTileManager.Internal.PrepForSplit( mTileManager.SelectedSegmentId, p );
+                var p = new Vector2( 0.5f, 0.5f );
+                mTileManager.PrepForSplit( p );
             }
         }
 
@@ -46,12 +44,11 @@ namespace Mojo
             //
             if ( mTileManager.SelectedSegmentId != 0 && !mCurrentlyMovingZ )
             {
-                var centerDataSpace = mTileManager.TiledDatasetView.CenterDataSpace;
-                var p = new Vector3( centerDataSpace.X, centerDataSpace.Y, centerDataSpace.Z );
-                mTileManager.Internal.PrepForSplit( mTileManager.SelectedSegmentId, p );
+                var p = new Vector2( 0.5f, 0.5f );
+                mTileManager.PrepForSplit( p );
                 if ( mTileManager.JoinSplits3D )
                 {
-                    mTileManager.Internal.PredictSplit( mTileManager.SelectedSegmentId, p, mTileManager.BrushSize );
+                    mTileManager.PredictSplit( p );
                 }
             }
         }
@@ -59,8 +56,7 @@ namespace Mojo
         public override void OnKeyDown( System.Windows.Input.KeyEventArgs keyEventArgs, int width, int height )
         {
 
-            var centerDataSpace = mTileManager.TiledDatasetView.CenterDataSpace;
-            var p = new Vector3( centerDataSpace.X, centerDataSpace.Y, centerDataSpace.Z );
+            var p = new Vector2( 0.5f, 0.5f );
 
             switch ( keyEventArgs.Key )
             {
@@ -86,21 +82,21 @@ namespace Mojo
                     if ( keyEventArgs.KeyboardDevice.Modifiers == System.Windows.Input.ModifierKeys.Control )
                     {
                         mTileManager.UndoChange();
-                        mTileManager.Internal.PrepForSplit( mTileManager.SelectedSegmentId, p );
+                        mTileManager.PrepForSplit( p );
                     }
                     break;
                 case System.Windows.Input.Key.Y:
                     if ( keyEventArgs.KeyboardDevice.Modifiers == System.Windows.Input.ModifierKeys.Control )
                     {
                         mTileManager.RedoChange();
-                        mTileManager.Internal.PrepForSplit( mTileManager.SelectedSegmentId, p );
+                        mTileManager.PrepForSplit( p );
                     }
                     break;
                 case System.Windows.Input.Key.N:
                     if ( keyEventArgs.KeyboardDevice.Modifiers == System.Windows.Input.ModifierKeys.Control )
                     {
                         mTileManager.SelectNewId();
-                        mTileManager.Internal.PrepForSplit( mTileManager.SelectedSegmentId, p );
+                        mTileManager.PrepForSplit( p );
                     }
                     break;
                 case System.Windows.Input.Key.Tab:
@@ -155,22 +151,9 @@ namespace Mojo
 
                     //Get the id of the segment being clicked
 
-                    var centerDataSpace = mTileManager.TiledDatasetView.CenterDataSpace;
-                    var extentDataSpace = mTileManager.TiledDatasetView.ExtentDataSpace;
+                    var p = new Vector2( (float)mouseEventArgs.X / width, (float)mouseEventArgs.Y / height );
 
-                    var topLeftDataSpaceX = centerDataSpace.X - ( extentDataSpace.X / 2f );
-                    var topLeftDataSpaceY = centerDataSpace.Y - ( extentDataSpace.Y / 2f );
-
-                    var offsetDataSpaceX = ( (float)mouseEventArgs.X / width ) * extentDataSpace.X;
-                    var offsetDataSpaceY = ( (float)mouseEventArgs.Y / height ) * extentDataSpace.Y;
-
-                    var x = topLeftDataSpaceX + offsetDataSpaceX;
-                    var y = topLeftDataSpaceY + offsetDataSpaceY;
-                    var z = centerDataSpace.Z;
-
-                    var p = new Vector3( x, y, z );
-
-                    var clickedId = mTileManager.Internal.GetSegmentationLabelId( mTileManager.TiledDatasetView, p );
+                    var clickedId = mTileManager.GetSegmentationLabelId( p );
 
                     if ( clickedId == mTileManager.SelectedSegmentId && mTileManager.CurrentSplitMode != SplitMode.JoinPoints )
                     {
@@ -180,12 +163,12 @@ namespace Mojo
                         {
                             if ( mouseEventArgs.Button == MouseButtons.Left )
                             {
-                                mTileManager.Internal.DrawSplit( mTileManager.TiledDatasetView, p, mTileManager.BrushSize );
+                                mTileManager.DrawSplit( p );
                                 mEngine.QuickRender();
                             }
                             else if ( mouseEventArgs.Button == MouseButtons.Right )
                             {
-                                mTileManager.Internal.DrawErase( mTileManager.TiledDatasetView, p, mTileManager.BrushSize );
+                                mTileManager.DrawErase( p );
                                 mEngine.QuickRender();
                             }
                         }
@@ -193,12 +176,12 @@ namespace Mojo
                         {
                             if ( mouseEventArgs.Button == MouseButtons.Left )
                             {
-                                mTileManager.Internal.DrawRegionA( mTileManager.TiledDatasetView, p, mTileManager.BrushSize );
+                                mTileManager.DrawRegionA( p );
                                 mEngine.QuickRender();
                             }
                             else if ( mouseEventArgs.Button == MouseButtons.Right )
                             {
-                                mTileManager.Internal.DrawRegionB( mTileManager.TiledDatasetView, p, mTileManager.BrushSize );
+                                mTileManager.DrawRegionB( p );
                                 mEngine.QuickRender();
                             }
                         }
@@ -215,27 +198,15 @@ namespace Mojo
             {
                 mCurrentlyDrawing = false;
 
-                var centerDataSpace = mTileManager.TiledDatasetView.CenterDataSpace;
-                var extentDataSpace = mTileManager.TiledDatasetView.ExtentDataSpace;
-
-                var topLeftDataSpaceX = centerDataSpace.X - ( extentDataSpace.X / 2f );
-                var topLeftDataSpaceY = centerDataSpace.Y - ( extentDataSpace.Y / 2f );
-
-                var offsetDataSpaceX = ( (float)mouseEventArgs.X / width ) * extentDataSpace.X;
-                var offsetDataSpaceY = ( (float)mouseEventArgs.Y / height ) * extentDataSpace.Y;
-                var x = topLeftDataSpaceX + offsetDataSpaceX;
-                var y = topLeftDataSpaceY + offsetDataSpaceY;
-                var z = centerDataSpace.Z;
-
-                var p = new Vector3( x, y, z );
+                var p = new Vector2( (float)mouseEventArgs.X / width, (float)mouseEventArgs.Y / height );
 
                 if ( mTileManager.CurrentSplitMode == SplitMode.DrawSplit )
                 {
-                    mTileManager.Internal.FindBoundaryWithinRegion2D( mTileManager.SelectedSegmentId, p );
+                    mTileManager.FindBoundaryWithinRegion2D( p );
                 }
                 if ( mTileManager.CurrentSplitMode == SplitMode.DrawRegions )
                 {
-                    mTileManager.Internal.FindBoundaryBetweenRegions2D( mTileManager.SelectedSegmentId, p );
+                    mTileManager.FindBoundaryBetweenRegions2D( p );
                 }
             }
             mCurrentlyDrawing = false;
@@ -247,22 +218,9 @@ namespace Mojo
             {
                 //Get the id of the segment being clicked
 
-                var centerDataSpace = mTileManager.TiledDatasetView.CenterDataSpace;
-                var extentDataSpace = mTileManager.TiledDatasetView.ExtentDataSpace;
+                var p = new Vector2( (float)mouseEventArgs.X / width, (float)mouseEventArgs.Y / height );
 
-                var topLeftDataSpaceX = centerDataSpace.X - ( extentDataSpace.X / 2f );
-                var topLeftDataSpaceY = centerDataSpace.Y - ( extentDataSpace.Y / 2f );
-
-                var offsetDataSpaceX = ( (float) mouseEventArgs.X / width ) * extentDataSpace.X;
-                var offsetDataSpaceY = ( (float) mouseEventArgs.Y / height ) * extentDataSpace.Y;
-
-                var x = topLeftDataSpaceX + offsetDataSpaceX;
-                var y = topLeftDataSpaceY + offsetDataSpaceY;
-                var z = centerDataSpace.Z;
-
-                var p = new Vector3( x, y, z );
-
-                var clickedId = mTileManager.Internal.GetSegmentationLabelId( mTileManager.TiledDatasetView, p );
+                var clickedId = mTileManager.GetSegmentationLabelId( p );
 
                 if ( mouseEventArgs.Button == MouseButtons.Left )
                 {
@@ -272,8 +230,8 @@ namespace Mojo
                         if ( clickedId != mTileManager.SelectedSegmentId )
                         {
                             //Select this segment
-                            mTileManager.Internal.PrepForSplit( clickedId, p );
                             mTileManager.SelectedSegmentId = clickedId;
+                            mTileManager.PrepForSplit( p );
                         }
                     }
                 }
@@ -281,9 +239,9 @@ namespace Mojo
                 {
                     if ( clickedId > 0 && clickedId == mTileManager.SelectedSegmentId && mTileManager.CurrentSplitMode == SplitMode.JoinPoints )
                     {
-                        mTileManager.Internal.AddSplitSource( mTileManager.TiledDatasetView, p );
-                        mTileManager.Internal.DrawRegionB( mTileManager.TiledDatasetView, p, 4 );
-                        mTileManager.Internal.FindBoundaryJoinPoints2D( clickedId, p );
+                        mTileManager.AddSplitSource( p );
+                        mTileManager.DrawRegionB( p, 4 );
+                        mTileManager.FindBoundaryJoinPoints2D( p );
                     }
                     else if ( clickedId > 0 && mTileManager.SelectedSegmentId > 0 && clickedId != mTileManager.SelectedSegmentId )
                     {
@@ -293,24 +251,16 @@ namespace Mojo
                         switch ( mTileManager.CurrentMergeMode )
                         {
                             case MergeMode.Fill2D:
-                                mTileManager.SegmentationChangeProgress = 10;
-                                mTileManager.Internal.ReplaceSegmentationLabelCurrentSlice( clickedId, mTileManager.SelectedSegmentId, mTileManager.TiledDatasetView, p );
-                                mTileManager.SegmentationChangeProgress = 100;
+                                mTileManager.ReplaceSegmentationLabelCurrentSlice( clickedId, p );
                                 break;
                             case MergeMode.Fill3D:
-                                mTileManager.SegmentationChangeProgress = 10;
-                                mTileManager.Internal.ReplaceSegmentationLabelCurrentConnectedComponent( clickedId, mTileManager.SelectedSegmentId, mTileManager.TiledDatasetView, p );
-                                mTileManager.SegmentationChangeProgress = 100;
+                                mTileManager.ReplaceSegmentationLabelCurrentConnectedComponent( clickedId, p );
                                 break;
                             default:
-                                mTileManager.SegmentationChangeProgress = 10;
-                                mTileManager.Internal.RemapSegmentLabel( clickedId, mTileManager.SelectedSegmentId );
-                                //mTileManager.Internal.ReplaceSegmentationLabel( clickedId, mTileManager.SelectedSegmentId );
-                                mTileManager.SegmentationChangeProgress = 100;
+                                mTileManager.RemapSegmentLabel( clickedId );
                                 break;
                         }
-                        mTileManager.ChangesMade = true;
-                        mTileManager.Internal.PrepForSplit( mTileManager.SelectedSegmentId, p );
+                        mTileManager.PrepForSplit( p );
                     }
                 }
             }
@@ -326,41 +276,24 @@ namespace Mojo
                 //Mouseover - update display to highlight segment or area under mouse
                 //Get the id of the segment under the mouse
 
-                var centerDataSpace = mTileManager.TiledDatasetView.CenterDataSpace;
-                var extentDataSpace = mTileManager.TiledDatasetView.ExtentDataSpace;
+                var p = new Vector2( (float)mouseEventArgs.X / width, (float)mouseEventArgs.Y / height );
 
-                var topLeftDataSpaceX = centerDataSpace.X - ( extentDataSpace.X / 2f );
-                var topLeftDataSpaceY = centerDataSpace.Y - ( extentDataSpace.Y / 2f );
-
-                var offsetDataSpaceX = ( (float)mouseEventArgs.X / width ) * extentDataSpace.X;
-                var offsetDataSpaceY = ( (float)mouseEventArgs.Y / height ) * extentDataSpace.Y;
-
-                var x = topLeftDataSpaceX + offsetDataSpaceX;
-                var y = topLeftDataSpaceY + offsetDataSpaceY;
-                var z = centerDataSpace.Z;
-
-                var p = new Vector3( x, y, z );
-
-                mTileManager.MouseOverSegmentId = mTileManager.Internal.GetSegmentationLabelId( mTileManager.TiledDatasetView, p );
+                mTileManager.MouseOver( p );
 
                 if ( mTileManager.MouseOverSegmentId > 0 && mTileManager.MouseOverSegmentId == mTileManager.SelectedSegmentId )
                 {
-                    //Make a hover circle
-                    mTileManager.MouseOverX = x;
-                    mTileManager.MouseOverY = y;
-
                     if ( mCurrentlyDrawing )
                     {
                         if ( mTileManager.CurrentSplitMode == SplitMode.DrawSplit )
                         {
                             if ( mouseEventArgs.Button == MouseButtons.Left )
                             {
-                                mTileManager.Internal.DrawSplit( mTileManager.TiledDatasetView, p, mTileManager.BrushSize );
+                                mTileManager.DrawSplit( p );
                                 mEngine.QuickRender();
                             }
                             else if ( mouseEventArgs.Button == MouseButtons.Right )
                             {
-                                mTileManager.Internal.DrawErase( mTileManager.TiledDatasetView, p, mTileManager.BrushSize );
+                                mTileManager.DrawErase( p );
                                 mEngine.QuickRender();
                             }
                         }
@@ -368,21 +301,16 @@ namespace Mojo
                         {
                             if ( mouseEventArgs.Button == MouseButtons.Left )
                             {
-                                mTileManager.Internal.DrawRegionA( mTileManager.TiledDatasetView, p, mTileManager.BrushSize );
+                                mTileManager.DrawRegionA( p );
                                 mEngine.QuickRender();
                             }
                             else if ( mouseEventArgs.Button == MouseButtons.Right )
                             {
-                                mTileManager.Internal.DrawRegionB( mTileManager.TiledDatasetView, p, mTileManager.BrushSize );
+                                mTileManager.DrawRegionB( p );
                                 mEngine.QuickRender();
                             }
                         }
                     }
-                }
-                else
-                {
-                    mTileManager.MouseOverX = 0;
-                    mTileManager.MouseOverY = 0;
                 }
 
                 mCurrentlyHandlingMouseOver = false;

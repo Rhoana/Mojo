@@ -867,6 +867,11 @@ unsigned int TileManager::GetNewId()
 	return mTileServer->GetNewId();
 }
 
+float TileManager::GetCurrentOperationProgress()
+{
+	return mTileServer->GetCurrentOperationProgress();
+}
+
 void TileManager::UndoChange()
 {
 	std::list< unsigned int > remappedIds = mTileServer->UndoChange();

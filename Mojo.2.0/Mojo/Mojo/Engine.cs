@@ -445,7 +445,7 @@ namespace Mojo
             {
                 mSkipUpdate = false;
             }
-            else
+            else if ( !TileManager.SegmentationChangeInProgress )
             {
                 TileManager.Update();
                 Viewers.Internal.ToList().ForEach( viewer => viewer.Value.D3D11RenderingPane.Render() );

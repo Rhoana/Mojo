@@ -318,7 +318,6 @@ marray::Marray< unsigned char >* FileSystemSegmentInfoManager::GetIdConfidenceMa
 
 FileSystemTileSet FileSystemSegmentInfoManager::GetTiles( unsigned int segid )
 {
-
     if ( mCacheIdTileMap.GetHashMap().find( segid ) != mCacheIdTileMap.GetHashMap().end() )
     {
         return mCacheIdTileMap.Get( segid );
