@@ -91,7 +91,16 @@ namespace Mojo.Wpf.View
             }
         }
 
-        protected override void OnKeyDown(KeyEventArgs e)
+        public void OnManipulationDelta( System.Windows.Input.ManipulationDeltaEventArgs e, int width, int height )
+        {
+            if ( Viewer != null )
+            {
+                Viewer.UserInputHandler.OnManipulationDelta( e, width, height );
+                AquireKeyboardFocusAndLogicalFocus();
+            }
+        }
+
+        protected override void OnKeyDown( KeyEventArgs e )
         {
             if (Viewer != null)
             {

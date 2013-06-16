@@ -243,6 +243,11 @@ namespace Mojo
 
         }
 
+        public virtual void OnManipulationDelta( System.Windows.Input.ManipulationDeltaEventArgs manipulationEventArgs, int width, int height )
+        {
+            Console.WriteLine( "Got manipulation delta." );
+        }
+
         public virtual void SetSize( int oldWidth, int oldHeight, int newWidth, int newHeight )
         {
             var extentDataSpace = mTileManager.TiledDatasetView.ExtentDataSpace;

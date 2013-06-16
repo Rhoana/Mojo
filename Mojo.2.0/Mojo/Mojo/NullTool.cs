@@ -46,6 +46,10 @@ namespace Mojo
         {
         }
 
+        public void OnManipulationDelta( System.Windows.Input.ManipulationDeltaEventArgs manipulationEventArgs, int width, int height )
+        {
+        }
+
         public void SetSize( int oldWidth, int oldHeight, int newWidth, int newHeight )
         {
         }

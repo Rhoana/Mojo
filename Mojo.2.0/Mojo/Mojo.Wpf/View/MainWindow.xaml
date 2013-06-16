@@ -268,7 +268,7 @@
                 <ColumnDefinition Width="370" />
             </Grid.ColumnDefinitions>
 
-            <Mojo.Wpf.View:ViewerContext Grid.Column="0" x:Name="TileManager2DViewerContext" Viewer="{Binding Path=Engine.Viewers.Internal[TileManager2D]}" />
+            <Mojo.Wpf.View:ViewerContext Grid.Column="0" x:Name="TileManager2DViewerContext" Viewer="{Binding Path=Engine.Viewers.Internal[TileManager2D]}" IsManipulationEnabled="True" />
 
             <GridSplitter Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Stretch" Width="5" ShowsPreview="False" />
 

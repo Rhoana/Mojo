@@ -14,6 +14,8 @@ namespace Mojo
         void OnMouseMove( System.Windows.Forms.MouseEventArgs mouseEventArgs, int width, int height );
         void OnMouseWheel( System.Windows.Forms.MouseEventArgs mouseEventArgs, int width, int height );
 
+        void OnManipulationDelta( ManipulationDeltaEventArgs manipulationEventArgs, int width, int height );
+
         void SetSize( int oldWidth, int oldHeight, int newWidth, int newHeight );
     }
 }
