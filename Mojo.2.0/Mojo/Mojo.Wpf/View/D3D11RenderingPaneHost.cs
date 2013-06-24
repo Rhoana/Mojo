@@ -64,14 +64,6 @@ namespace Mojo.Wpf.View
             }
         }
 
-        protected void OnManipulationDelta( System.Windows.Input.ManipulationDeltaEventArgs e ) 
-        {
-            if ( ViewerContext != null )
-            {
-                ViewerContext.OnManipulationDelta( e, Width, Height );
-            }
-        }
-
         public System.Drawing.SizeF GetAutoScaleFactor()
         {
             return AutoScaleFactor;
