@@ -31,7 +31,7 @@ DirectX 11
 
 Build Instructions:
 
-The Mojo2.0\Sdk is not included in the repository - ask Seymour for a zip (download link pending).
+The libraries in Mojo2.0\Mojo\Sdk is not included in the repository - ask Seymour for a zip (download link pending).
 
 
 Installation instructions:

@@ -197,7 +197,7 @@
   <PropertyGroup>
     <PostBuildEvent>copy ..\..\..\..\Sdk\OpenCV\OpenCV2.4\build\$(PlatformName)\vc10\bin\opencv_core240.dll .
 copy ..\..\..\..\Sdk\OpenCV\OpenCV2.4\build\$(PlatformName)\vc10\bin\opencv_highgui240.dll .
-copy ..\..\..\..\Sdk\OpenCV\OpenCV2.4\build\common\tbb\$(PlatformName)\vc10\tbb.dll .
+copy ..\..\..\..\Sdk\OpenCV\OpenCV2.4\build\$(PlatformName)\vc10\bin\tbb.dll .
 mkdir Shaders
 copy ..\..\..\Shaders\*.fx Shaders\</PostBuildEvent>
   </PropertyGroup>

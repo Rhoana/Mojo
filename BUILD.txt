@@ -1,0 +1,1 @@
+The libraries in Mojo2.0\Mojo\Sdk is not included in the repository - ask Seymour for a zip (download link pending).
