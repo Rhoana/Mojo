@@ -463,6 +463,10 @@ namespace Mojo
             return new Vector3( topLeftDataSpaceX + offsetDataSpaceX, topLeftDataSpaceY + offsetDataSpaceY, mTiledDatasetView.CenterDataSpace.Z );
         }
 
+        //
+        // CODE QUALITY ISSUE:
+        // All these if SegmentationChangeInProgress things are more cleanly implemented with Monitor.TryLock(...)
+        //
         public uint GetSegmentationLabelId( Vector2 p )
         {
             if ( SegmentationChangeInProgress ) return 0;
