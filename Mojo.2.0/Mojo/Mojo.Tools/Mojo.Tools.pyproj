@@ -30,7 +30,7 @@
     <Compile Include="CreateTiledSegmentationDataset.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="CreateSubvolumeDatasets.py">
+    <Compile Include="CreateChunkedTiledDatasets.py">
       <SubType>Code</SubType>
     </Compile>
   </ItemGroup>
