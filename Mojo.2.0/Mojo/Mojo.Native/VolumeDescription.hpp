@@ -1,12 +1,11 @@
 #pragma once
 
-#include "MojoVectors.hpp"
-//#include <cuda_runtime.h>
+#include "Types.hpp"
 #include <DXGIFormat.h>
 
 namespace Mojo
 {
-namespace Core
+namespace Native
 {
 
 class VolumeDescription
@@ -16,7 +15,7 @@ public:
 
     void*       data;
 
-    MojoInt3    numVoxels;
+    Int3        numVoxels;
 
     DXGI_FORMAT dxgiFormat;
     int         numBytesPerVoxel;

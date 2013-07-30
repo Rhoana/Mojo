@@ -22,7 +22,6 @@ public:
 
     Native::TiledVolumeDescription ToNative();
 
-    property String^ ImageDataDirectory;
     property String^ FileExtension;
 
     property int     NumTilesX;

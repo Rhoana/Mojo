@@ -1,8 +1,8 @@
 #pragma once
 
-#include "Mojo.Core/Stl.hpp"
-#include "Mojo.Core/HashMap.hpp"
-#include "Mojo.Core/Comparator.hpp"
+#include "Stl.hpp"
+#include "HashMap.hpp"
+#include "Types.hpp"
 
 #include "SegmentInfo.hpp"
 
@@ -26,9 +26,9 @@ namespace Mojo
 namespace Native
 {
 
-typedef std::set< Mojo::Core::MojoInt4, Mojo::Core::Int4Comparator, boost::fast_pool_allocator< Mojo::Core::MojoInt4 > >   FileSystemTileSet;
-typedef Core::HashMap< unsigned int, FileSystemTileSet >                                   FileSystemIdTileMap;
-typedef stdext::hash_map< unsigned int, FileSystemTileSet >                                FileSystemIdTileMapDirect;
+typedef std::set< Int4, Int4Comparator, boost::fast_pool_allocator< Int4 > > FileSystemTileSet;
+typedef HashMap< unsigned int, FileSystemTileSet >                           FileSystemIdTileMap;
+typedef stdext::hash_map< unsigned int, FileSystemTileSet >                  FileSystemIdTileMapDirect;
 
 //
 // Tags for accesing indicies
@@ -51,10 +51,10 @@ typedef boost::multi_index_container<
         ordered_unique< tag<id>, member< SegmentInfo, unsigned int, &SegmentInfo::id > >,
         // index by name
         ordered_non_unique< tag<name>, member< SegmentInfo, std::string, &SegmentInfo::name > >,
-	    // index by size
-	    ordered_non_unique< tag<size>, member< SegmentInfo, long, &SegmentInfo::size > >,
-	    // index by confidence
-	    ordered_non_unique< tag<confidence>, member< SegmentInfo, int, &SegmentInfo::confidence > >
+        // index by size
+        ordered_non_unique< tag<size>, member< SegmentInfo, long, &SegmentInfo::size > >,
+        // index by confidence
+        ordered_non_unique< tag<confidence>, member< SegmentInfo, int, &SegmentInfo::confidence > >
   >,
   boost::fast_pool_allocator< SegmentInfo >
 > SegmentMultiIndex;
@@ -68,26 +68,28 @@ class FileSystemSegmentInfoManager
 {
 
 public:
-	FileSystemSegmentInfoManager();
-	FileSystemSegmentInfoManager( std::string idInfoFilePath, std::string idTileIndexDBFilePath );
+    FileSystemSegmentInfoManager();
+    FileSystemSegmentInfoManager( std::string idInfoFilePath, std::string idTileIndexDBFilePath );
 
-	void                                              Save();
+    void                                              Save();
+    void                                              SaveAs( std::string colorMapFilePath, std::string idTileIndexDBFilePath );
+
     void                                              OpenDB();
-	void                                              CloseDB();
+    void                                              CloseDB();
 
     marray::Marray< unsigned char >*                  GetIdColorMap();
     marray::Marray< unsigned int >*                   GetLabelIdMap();
     marray::Marray< unsigned char >*                  GetIdConfidenceMap();
-	FileSystemTileSet                                 GetTiles( unsigned int segid );
-	unsigned int                                      GetTileCount ( unsigned int segid );
+    FileSystemTileSet                                 GetTiles( unsigned int segid );
+    unsigned int                                      GetTileCount ( unsigned int segid );
     long                                              GetVoxelCount ( unsigned int segid );
-	int                                               GetConfidence ( unsigned int segid );
+    int                                               GetConfidence ( unsigned int segid );
                                                
-	unsigned int                                      GetMaxId();
-	unsigned int                                      AddNewId();
+    unsigned int                                      GetMaxId();
+    unsigned int                                      AddNewId();
                                                
-	void                                              SetTiles( unsigned int segid, FileSystemTileSet tiles );
-	void                                              SetVoxelCount ( unsigned int segid, long voxelCount );
+    void                                              SetTiles( unsigned int segid, FileSystemTileSet tiles );
+    void                                              SetVoxelCount ( unsigned int segid, long voxelCount );
 
     void                                              SortSegmentInfoById( bool reverse );
     void                                              SortSegmentInfoByName( bool reverse );
@@ -95,7 +97,7 @@ public:
     void                                              SortSegmentInfoByConfidence( bool reverse );
 
     void                                              RemapSegmentLabel( unsigned int fromSegId, unsigned int toSegId );
-	unsigned int                                      GetIdForLabel( unsigned int label );
+    unsigned int                                      GetIdForLabel( unsigned int label );
 
     void                                              LockSegmentLabel( unsigned int segId );
     void                                              UnlockSegmentLabel( unsigned int segId );
@@ -107,26 +109,29 @@ public:
                                                
 private:                                       
 
-	FileSystemTileSet                                 LoadTileSet( unsigned int segid );
+    FileSystemTileSet                                 LoadTileSet( unsigned int segid );
 
-	std::string                                       mColorMapPath;
-	hid_t                                             mColorMapHdf5FileHandle;
+    void                                              SaveHelper( std::string colorMapFilePath );
+
+    std::string                                       mColorMapPath;
+    hid_t                                             mColorMapHdf5FileHandle;
 
     std::string                                       mIdTileIndexDBPath;
-    sqlite3                                           *mIdTileIndexDB;
+
+    sqlite3*                                          mIdTileIndexDB;
     bool                                              mIsDBOpen;
 
     int                                               mCurrentSortIndex;
 
-	unsigned int                                      mIdMax;
+    unsigned int                                      mIdMax;
     marray::Marray< unsigned char >                   mIdColorMap;
-	marray::Marray< unsigned int >                    mLabelIdMap;
+    marray::Marray< unsigned int >                    mLabelIdMap;
     marray::Marray< unsigned char >                   mIdConfidenceMap;
-	SegmentMultiIndex                                 mSegmentMultiIndex;
-	FileSystemIdTileMap                               mCacheIdTileMap;
+    SegmentMultiIndex                                 mSegmentMultiIndex;
+    FileSystemIdTileMap                               mCacheIdTileMap;
 
-	unsigned int                                      mPreviousLabelQuery;
-	unsigned int                                      mPreviousIdResult;
+    unsigned int                                      mPreviousLabelQuery;
+    unsigned int                                      mPreviousIdResult;
 
 
 };

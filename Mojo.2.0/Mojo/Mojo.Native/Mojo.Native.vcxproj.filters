@@ -12,8 +12,12 @@
     <ClCompile Include="FileSystemSplitState.cpp" />
     <ClCompile Include="FileSystemSegmentInfoManager.cpp" />
     <ClCompile Include="SegmentInfo.cpp" />
-    <ClCompile Include="..\Sdk\SQLite\sqlite-amalgamation-3071502\sqlite3.c" />
     <ClCompile Include="FileSystemLogger.cpp" />
+    <ClCompile Include="Index.cpp" />
+    <ClCompile Include="PrimitiveMap.cpp" />
+    <ClCompile Include="Printf.cpp" />
+    <ClCompile Include="ToString.cpp" />
+    <ClCompile Include="VolumeDescription.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="TileCacheEntry.hpp" />
@@ -25,12 +29,26 @@
     <ClInclude Include="TiledDatasetView.hpp" />
     <ClInclude Include="FileSystemTileCacheEntry.hpp" />
     <ClInclude Include="FileSystemUndoRedoItem.hpp" />
-    <ClInclude Include="Constants.hpp" />
     <ClInclude Include="SimpleSplitTools.hpp" />
     <ClInclude Include="FileSystemSplitState.hpp" />
     <ClInclude Include="FileSystemSegmentInfoManager.hpp" />
     <ClInclude Include="SegmentInfo.hpp" />
-    <ClInclude Include="..\Sdk\SQLite\sqlite-amalgamation-3071502\sqlite3.h" />
     <ClInclude Include="FileSystemLogger.hpp" />
+    <ClInclude Include="D3D11.hpp" />
+    <ClInclude Include="D3D11Texture.hpp" />
+    <ClInclude Include="ForEach.hpp" />
+    <ClInclude Include="HashMap.hpp" />
+    <ClInclude Include="ID3D11Texture.hpp" />
+    <ClInclude Include="Index.hpp" />
+    <ClInclude Include="OpenCV.hpp" />
+    <ClInclude Include="PrimitiveMap.hpp" />
+    <ClInclude Include="Printf.hpp" />
+    <ClInclude Include="Stl.hpp" />
+    <ClInclude Include="ToString.hpp" />
+    <ClInclude Include="Types.hpp" />
+    <ClInclude Include="VolumeDescription.hpp" />
+    <ClInclude Include="Assert.hpp" />
+    <ClInclude Include="Boost.hpp" />
+    <ClInclude Include="FileSystemTileServerConstants.hpp" />
   </ItemGroup>
 </Project>

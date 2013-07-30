@@ -109,7 +109,7 @@ namespace Mojo
         public override void OnMouseMove(MouseEventArgs mouseEventArgs, int width, int height)
         {
             base.OnMouseMove( mouseEventArgs, width, height );
-            if ( !mCurrentlyPanning && !mCurrentlyHandlingMouseOver && mTileManager.TiledDatasetLoaded && mTileManager.SegmentationLoaded && !mTileManager.SegmentationChangeInProgress )
+            if ( !mCurrentlyPanning && !mCurrentlyHandlingMouseOver && mTileManager.SourceImagesLoaded && mTileManager.SegmentationLoaded && !mTileManager.SegmentationChangeInProgress )
             {
                 mCurrentlyHandlingMouseOver = true;
                 //Mouseover - update display to highlight segment under mouse

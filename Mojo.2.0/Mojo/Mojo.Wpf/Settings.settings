@@ -2,7 +2,7 @@
 <SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="Mojo.Wpf" GeneratedClassName="Settings">
   <Profiles />
   <Settings>
-    <Setting Name="LoadDatasetPath" Type="System.String" Scope="User">
+    <Setting Name="LoadSourceImagesPath" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
     <Setting Name="LoadSegmentationPath" Type="System.String" Scope="User">
@@ -13,6 +13,18 @@
     </Setting>
     <Setting Name="SegmentListItemsPerPage" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">1000</Value>
+    </Setting>
+    <Setting Name="AutoSaveSegmentationPath" Type="System.String" Scope="User">
+      <Value Profile="(Default)">MOJO_AUTOSAVE</Value>
+    </Setting>
+    <Setting Name="AutoSaveSegmentationFrequencySeconds" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">600</Value>
+    </Setting>
+    <Setting Name="AutoSaveSegmentation" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="SaveSegmentationAsPath" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
     </Setting>
   </Settings>
 </SettingsFile>

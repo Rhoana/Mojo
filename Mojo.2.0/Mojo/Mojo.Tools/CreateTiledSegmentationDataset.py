@@ -29,11 +29,11 @@ compress_ids                  = True
 #ncolors                       = 10000
 #input_file_format             = 'tif'
 
-original_input_ids_path       = 'H:\\dev\\datasets\\conn\\main_dataset\\cube2\\diced_xy=512_z=32_xyOv=128_zOv=12_dwnSmp=1\\res_from_Nov29_PF\\FS=1\\stitched\\labels_grow'
-output_path                   = 'D:\\dev\\datasets\\Cube2\\mojo'
-nimages_to_process            = 1124
-ncolors                       = 10000
-input_file_format             = 'png'
+#original_input_ids_path       = 'H:\\dev\\datasets\\conn\\main_dataset\\cube2\\diced_xy=512_z=32_xyOv=128_zOv=12_dwnSmp=1\\res_from_Nov29_PF\\FS=1\\stitched\\labels_grow'
+#output_path                   = 'D:\\dev\\datasets\\Cube2\\mojo'
+#nimages_to_process            = 1124
+#ncolors                       = 10000
+#input_file_format             = 'png'
 
 #original_input_ids_path       = 'C:\\dev\\datasets\\conn\\main_dataset\\5K_cube\\diced_xy=512_z=32_xyOv=128_zOv=12_dwnSmp=1\\res_from_0ct15_PF\\FS=1\\stitched\\labels_grow'
 #output_path                   = 'C:\\dev\\datasets\\Cube1x10\\mojo'
@@ -53,12 +53,19 @@ input_file_format             = 'png'
 #ncolors                       = 1000
 #input_file_format             = 'png'
 
-output_ids_path                = output_path + '\\ids'
-output_tile_ids_path           = output_ids_path + '\\tiles'
+original_input_ids_path        = 'C:\\Users\\mike\\Data\\Local\\2013_mojo\\isbi_submission\\labels'
+output_path                    = 'C:\\Users\\mike\\Data\\Local\\2013_mojo\\isbi_submission_mojo\\isbi_submission_mojoseg'
+output_top_level_mojo_file     = 'C:\\Users\\mike\\Data\\Local\\2013_mojo\\isbi_submission_mojo\\isbi_submission.mojoseg'
+nimages_to_process             = 100
+ncolors                        = 1000
+input_file_format              = 'png'
+transpose_label_images         = False
+subtract_one_from_label_images = False
 
-output_tile_volume_file       = output_ids_path + '\\tiledVolumeDescription.xml'
-output_color_map_file         = output_ids_path + '\\colorMap.hdf5'
-output_segment_info_db_file   = output_ids_path + '\\segmentInfo.db'
+output_tile_ids_path          = output_path + '\\ids\\tiles'
+output_tile_volume_file       = output_path + '\\ids\\tiledVolumeDescription.xml'
+output_color_map_file         = output_path + '\\ids\\colorMap.hdf5'
+output_segment_info_db_file   = output_path + '\\ids\\segmentInfo.db'
 
 #color_map_variable_name       = 'cmap'
 ids_upscale_factor            = 1
@@ -99,9 +106,13 @@ def load_id_image ( file_path ):
 
     if len( ids.shape ) == 3:
         ids = ids[ :, :, 0 ] + ids[ :, :, 1 ] * 2**8 + ids[ :, :, 2 ] * 2**16
-    else:
-        # Read from pipeline format
-        ids = ids.transpose() - 1
+
+    # Read from pipeline format
+    if transpose_label_images:
+        ids = ids.transpose()
+
+    if subtract_one_from_label_images:
+        ids = ids - 1
 
     return ids
 
@@ -129,6 +140,18 @@ if len(files) > 0:
         import random
         from nltk.corpus import wordnet
         
+        try:
+            [list(wordnet.all_synsets(pos=POS)) for POS in [wordnet.NOUN, wordnet.VERB, wordnet.ADJ, wordnet.ADV]]
+        except LookupError as e:
+            print "LookupError in nltk:"
+            print
+            print e
+            print
+            print "Trying to download missing data..."
+            nltk.download()
+            print "Download successful."
+            print
+
         # Seed based on input path so that names will be the same for multiple volumes
         random.seed( sbdm_string_hash( original_input_ids_path ) )
 
@@ -246,7 +269,9 @@ if len(files) > 0:
         #    grow_count = grow_count + 1
         #    print "Grow count {0}: {1} boundary pixels remaining.".format(grow_count, len(boundary_indices[0]))
 
-        current_image_counts = np.bincount( original_ids.ravel() )
+        assert original_ids.ravel().max() < np.iinfo(np.int32).max
+        current_image_counts = np.bincount( original_ids.ravel().astype(np.int32) )
+
         current_image_counts_ids = np.nonzero( current_image_counts )[0]
         current_max = np.max( current_image_counts_ids )
         
@@ -340,7 +365,7 @@ if len(files) > 0:
 
     ## Write all segment info to a single file
 
-    print 'Writing colorMap file (hdf5)'
+    print 'Writing colorMap file (hdf5).'
 
     hdf5             = h5py.File( output_color_map_file, 'w' )
 
@@ -348,7 +373,7 @@ if len(files) > 0:
 
     hdf5.close()
 
-    print 'Writing segmentInfo file (sqlite)'
+    print 'Writing segmentInfo file (sqlite).'
 
         
     if os.path.exists(output_segment_info_db_file):
@@ -400,9 +425,9 @@ if len(files) > 0:
 
     con.close()
 
-    #Output TiledVolumeDescription xml file
+    # Output TiledVolumeDescription xml file
 
-    print 'Writing TiledVolumeDescription file'
+    print 'Writing TiledVolumeDescription file.'
 
     tiledVolumeDescription = lxml.etree.Element( "tiledVolumeDescription",
         fileExtension = "hdf5",
@@ -422,3 +447,10 @@ if len(files) > 0:
         
     with open( output_tile_volume_file, 'w' ) as file:
         file.write( lxml.etree.tostring( tiledVolumeDescription, pretty_print = True ) )
+
+    # Output top-level mojo file associated with this set of images
+
+    print 'Writing top-level Mojo file.'
+
+    with open( output_top_level_mojo_file, 'w' ) as file:
+        file.write( "MOJOSEG" )

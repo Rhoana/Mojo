@@ -1,12 +1,8 @@
 #pragma once
 
-#define WIN32_LEAN_AND_MEAN
-
 #include "Stl.hpp"
 
-#ifndef __CUDACC__
-    #include <d3d11.h>
-#endif
+#include <d3d11.h>
 
 #include <DXGIFormat.h>
 
@@ -67,4 +63,3 @@
 
 
 #define MOJO_D3D_SAFE( functionCall ) MOJO_D3D_SAFE_DEBUG( functionCall )
-//#define MOJO_D3D_SAFE( functionCall ) Mojo::Core::Printf( #functionCall ); MOJO_D3D_SAFE_DEBUG( functionCall )

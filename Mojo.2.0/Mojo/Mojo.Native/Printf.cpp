@@ -2,16 +2,13 @@
 
 #include "Stl.hpp"
 
-#include <stdio.h>
-
-#define NOMINMAX
 #include <Windows.h>
 
 #include "ToString.hpp"
 
 namespace Mojo
 {
-namespace Core
+namespace Native
 {
 
 void PrintfHelper( std::string string )

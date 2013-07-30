@@ -3,18 +3,17 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{b0725c50-90e7-4634-846f-5c793765168a}</ProjectGuid>
+    <ProjectGuid>{d5d015d3-98f6-4c60-ac4b-15c562cd2cec}</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>ImageTileCalculator.py</StartupFile>
+    <StartupFile>
+    </StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
-    <Name>MojoImportTools</Name>
-    <RootNamespace>MojoImportTools</RootNamespace>
+    <Name>Mojo.Tools</Name>
+    <RootNamespace>Mojo.Tools</RootNamespace>
     <IsWindowsApplication>False</IsWindowsApplication>
-    <InterpreterId>9a7a9026-48c1-4688-9d5d-e5699d47d074</InterpreterId>
-    <InterpreterVersion>2.7</InterpreterVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DebugSymbols>true</DebugSymbols>
@@ -25,10 +24,15 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="ImageTileCalculator.py" />
-    <Compile Include="SubvolumeCalculator.py" />
-    <Compile Include="MojoImportTools.py" />
-    <Compile Include="SegmentationTileCalculator.py" />
+    <Compile Include="CreateTiledImageDataset.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="CreateTiledSegmentationDataset.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="CreateSubvolumeDatasets.py">
+      <SubType>Code</SubType>
+    </Compile>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.Common.targets" />
 </Project>

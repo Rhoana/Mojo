@@ -1,6 +1,6 @@
 #include "ObservableDictionary.hpp"
 
-#include "Mojo.Core/Assert.hpp"
+#include "Mojo.Native/Assert.hpp"
 
 namespace Mojo
 {

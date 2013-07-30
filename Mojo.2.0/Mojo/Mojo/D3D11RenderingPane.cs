@@ -69,23 +69,23 @@ namespace Mojo
 
         public void Render()
         {
-            if ( !PauseRendering )
+            lock ( this )
             {
-                mD3D11DeviceContext.OutputMerger.SetTargets( mD3D11DepthStencilView, mD3D11RenderTargetView );
-                mD3D11DeviceContext.Rasterizer.SetViewports( Viewport );
+                mD3D11DeviceContext.OutputMerger.SetTargets(mD3D11DepthStencilView, mD3D11RenderTargetView);
+                mD3D11DeviceContext.Rasterizer.SetViewports(Viewport);
 
-                if ( RenderingStrategy != null )
+                if (RenderingStrategy != null)
                 {
-                    RenderingStrategy.Render( mD3D11DeviceContext, Viewport, mD3D11RenderTargetView, mD3D11DepthStencilView );
+                    RenderingStrategy.Render(mD3D11DeviceContext, Viewport, mD3D11RenderTargetView, mD3D11DepthStencilView);
                 }
 
-                mSwapChain.Present( 0, PresentFlags.None );
+                mSwapChain.Present(0, PresentFlags.None);
             }
         }
 
         public void SetSize( Size size )
         {
-            lock ( mSwapChain )
+            lock ( this )
             {
                 DestroyD3D11Resources();
 
@@ -102,7 +102,6 @@ namespace Mojo
 
                 CreateD3D11Resources( (int)size.Width, (int)size.Height );
             }
-
         }
 
         private void CreateD3D11Resources( int width, int height )

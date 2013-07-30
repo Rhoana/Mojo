@@ -2,11 +2,11 @@
 
 #include <msclr/marshal_cppstd.h>
 
-#include "Mojo.Core/Assert.hpp"
-//#include "Mojo.Core/Cuda.hpp"
-#include "Mojo.Core/ForEach.hpp"
-#include "Mojo.Core/ID3D11CudaTexture.hpp"
-#include "Mojo.Core/Stl.hpp"
+#include "Mojo.Native/Stl.hpp"
+#include "Mojo.Native/Types.hpp"
+#include "Mojo.Native/Assert.hpp"
+#include "Mojo.Native/ForEach.hpp"
+#include "Mojo.Native/ID3D11Texture.hpp"
 
 #include "Mojo.Native/FileSystemTileServer.hpp"
 
@@ -30,6 +30,9 @@ TileManager::TileManager( SlimDX::Direct3D11::Device^ d3d11Device, SlimDX::Direc
 
 TileManager::~TileManager()
 {
+    UnloadSegmentation();
+    UnloadSourceImages();
+
     if ( mTileCache != nullptr )
     {
         delete mTileCache;
@@ -54,43 +57,26 @@ Native::TileManager* TileManager::GetTileManager()
     return mTileManager;
 }
 
-void TileManager::LoadTiledDataset( TiledDatasetDescription^ tiledDatasetDescription )
+void TileManager::LoadSourceImages( TiledDatasetDescription^ tiledDatasetDescription )
 {
-    mTileManager->LoadTiledDataset( tiledDatasetDescription->ToNative() );
+    mTileManager->LoadSourceImages( tiledDatasetDescription->ToNative() );
 
     UnloadTileCache();
     LoadTileCache();
-
-    //UnloadIdColorMap();
-    //LoadIdColorMap();
-
-    //UnloadLabelIdMap();
-    //LoadLabelIdMap();
-
-	//UnloadIdConfidenceMap();
-	//LoadIdConfidenceMap();
 }
 
-void TileManager::UnloadTiledDataset()
+void TileManager::UnloadSourceImages()
 {
-    mTileManager->UnloadTiledDataset();
+    UnloadSegmentation();
+
+    mTileManager->UnloadSourceImages();
 
     UnloadTileCache();
-    LoadTileCache();
-
-    UnloadIdColorMap();
-    //LoadIdColorMap();
-
-    UnloadLabelIdMap();
-    //LoadLabelIdMap();
-
-	UnloadIdConfidenceMap();
-	//LoadIdConfidenceMap();
 }
 
-bool TileManager::IsTiledDatasetLoaded()
+bool TileManager::AreSourceImagesLoaded()
 {
-    return mTileManager->IsTiledDatasetLoaded();
+    return mTileManager->AreSourceImagesLoaded();
 }
 
 void TileManager::LoadSegmentation( TiledDatasetDescription^ tiledDatasetDescription )
@@ -103,24 +89,17 @@ void TileManager::LoadSegmentation( TiledDatasetDescription^ tiledDatasetDescrip
     UnloadLabelIdMap();
     LoadLabelIdMap();
 
-	UnloadIdConfidenceMap();
-	LoadIdConfidenceMap();
+    UnloadIdConfidenceMap();
+    LoadIdConfidenceMap();
 }
 
 void TileManager::UnloadSegmentation()
 {
     mTileManager->UnloadSegmentation();
 
-    mTileServer->UnloadSegmentation();
-
     UnloadIdColorMap();
-    //LoadIdColorMap();
-
     UnloadLabelIdMap();
-    //LoadLabelIdMap();
-
-	UnloadIdConfidenceMap();
-	//LoadIdConfidenceMap();
+    UnloadIdConfidenceMap();
 }
 
 bool TileManager::IsSegmentationLoaded()
@@ -167,49 +146,49 @@ Collections::Generic::IList< TileCacheEntry^ >^ TileManager::GetTileCache()
 
 void TileManager::SortSegmentInfoById( bool reverse )
 {
-	mTileManager->SortSegmentInfoById( reverse );
+    mTileManager->SortSegmentInfoById( reverse );
 }
 
 void TileManager::SortSegmentInfoByName( bool reverse )
 {
-	mTileManager->SortSegmentInfoByName( reverse );
+    mTileManager->SortSegmentInfoByName( reverse );
 }
 
 void TileManager::SortSegmentInfoBySize( bool reverse )
 {
-	mTileManager->SortSegmentInfoBySize( reverse );
+    mTileManager->SortSegmentInfoBySize( reverse );
 }
 
 void TileManager::SortSegmentInfoByConfidence( bool reverse )
 {
-	mTileManager->SortSegmentInfoByConfidence( reverse );
+    mTileManager->SortSegmentInfoByConfidence( reverse );
 }
 
 void TileManager::RemapSegmentLabel( unsigned int fromSegId, unsigned int toSegId )
 {
 
-	mTileManager->RemapSegmentLabel( fromSegId, toSegId );
+    mTileManager->RemapSegmentLabel( fromSegId, toSegId );
 
 }
 
 void TileManager::LockSegmentLabel( unsigned int segId )
 {
-	mTileManager->LockSegmentLabel( segId );
+    mTileManager->LockSegmentLabel( segId );
 }
 
 void TileManager::UnlockSegmentLabel( unsigned int segId )
 {
-	mTileManager->UnlockSegmentLabel( segId );
+    mTileManager->UnlockSegmentLabel( segId );
 }
 
 unsigned int TileManager::GetSegmentInfoCount()
 {
-	return mTileManager->GetSegmentInfoCount();
+    return mTileManager->GetSegmentInfoCount();
 }
 
 unsigned int TileManager::GetSegmentInfoCurrentListLocation( unsigned int segId )
 {
-	return mTileManager->GetSegmentInfoCurrentListLocation( segId );
+    return mTileManager->GetSegmentInfoCurrentListLocation( segId );
 }
 
 Collections::Generic::IList< SegmentInfo^ >^ TileManager::GetSegmentInfoRange( int begin, int end )
@@ -218,18 +197,18 @@ Collections::Generic::IList< SegmentInfo^ >^ TileManager::GetSegmentInfoRange( i
 
     Collections::Generic::List< SegmentInfo^ >^ interopSegmentInfoPage = gcnew Collections::Generic::List< SegmentInfo^ >();
 
-	for ( std::list< Native::SegmentInfo >::iterator segIt = segmentInfoPage.begin(); segIt != segmentInfoPage.end(); ++segIt )
-	{
+    for ( std::list< Native::SegmentInfo >::iterator segIt = segmentInfoPage.begin(); segIt != segmentInfoPage.end(); ++segIt )
+    {
         interopSegmentInfoPage->Add( gcnew SegmentInfo( *segIt, mTileManager->GetSegmentationLabelColorString( segIt->id ) ) );
-	}
+    }
 
     return interopSegmentInfoPage;
 }
 
 SegmentInfo^ TileManager::GetSegmentInfo( unsigned int segId )
 {
-	Native::SegmentInfo segInfo = mTileManager->GetSegmentInfo( segId );
-	return gcnew SegmentInfo( segInfo, mTileManager->GetSegmentationLabelColorString( segInfo.id ) );
+    Native::SegmentInfo segInfo = mTileManager->GetSegmentInfo( segId );
+    return gcnew SegmentInfo( segInfo, mTileManager->GetSegmentationLabelColorString( segInfo.id ) );
 }
 
 SlimDX::Direct3D11::ShaderResourceView^ TileManager::GetIdColorMap()
@@ -249,13 +228,13 @@ SlimDX::Direct3D11::ShaderResourceView^ TileManager::GetIdConfidenceMap()
 
 unsigned int TileManager::GetSegmentationLabelId( TiledDatasetView^ tiledDatasetView, Vector3^ pDataSpace )
 {
-    MojoFloat3 pDataSpaceFloat3 = MojoFloat3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
+    Native::Float3 pDataSpaceFloat3 = Native::Float3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
     return mTileManager->GetSegmentationLabelId( tiledDatasetView->ToNative(), pDataSpaceFloat3 );
 }
 
 Vector3 TileManager::GetSegmentationLabelColor( unsigned int segId )
 {
-    MojoInt3 labelColor = mTileManager->GetSegmentationLabelColor( segId );
+    Native::Int3 labelColor = mTileManager->GetSegmentationLabelColor( segId );
     return Vector3( (float)labelColor.x, (float)labelColor.y, (float)labelColor.z );
 }
 
@@ -266,13 +245,13 @@ String^ TileManager::GetSegmentationLabelColorString( unsigned int segId )
 
 Vector3 TileManager::GetSegmentCentralTileLocation( unsigned int segId )
 {
-    Core::MojoInt3 location = mTileManager->GetSegmentCentralTileLocation( segId );
+    Native::Int3 location = mTileManager->GetSegmentCentralTileLocation( segId );
     return Vector3( (float)location.x, (float)location.y, (float)location.z );
 }
 
 Vector4 TileManager::GetSegmentZTileBounds( unsigned int segId, int zIndex )
 {
-    Core::MojoInt4 location = mTileManager->GetSegmentZTileBounds( segId, zIndex );
+    Native::Int4 location = mTileManager->GetSegmentZTileBounds( segId, zIndex );
     return Vector4( (float)location.x, (float)location.y, (float)location.z, (float)location.w );
 }
 
@@ -283,47 +262,47 @@ void TileManager::ReplaceSegmentationLabel( unsigned int oldId, unsigned int new
 
 void TileManager::ReplaceSegmentationLabelCurrentSlice( unsigned int oldId, unsigned int newId, TiledDatasetView^ tiledDatasetView, Vector3^ pDataSpace )
 {
-    MojoFloat3 pDataSpaceFloat3 = MojoFloat3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
+    Native::Float3 pDataSpaceFloat3 = Native::Float3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
     mTileManager->ReplaceSegmentationLabelCurrentSlice( oldId, newId, pDataSpaceFloat3  );
 }
 
 void TileManager::ReplaceSegmentationLabelCurrentConnectedComponent( unsigned int oldId, unsigned int newId, TiledDatasetView^ tiledDatasetView, Vector3^ pDataSpace )
 {
-    MojoFloat3 pDataSpaceFloat3 = MojoFloat3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
+    Native::Float3 pDataSpaceFloat3 = Native::Float3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
     mTileManager->ReplaceSegmentationLabelCurrentConnectedComponent( oldId, newId, pDataSpaceFloat3  );
 }
 
 void TileManager::DrawSplit( TiledDatasetView^ tiledDatasetView, Vector3^ pDataSpace, float radius )
 {
-    MojoFloat3 pDataSpaceFloat3 = MojoFloat3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
-	MojoInt3 zoomLevel = mTileManager->GetZoomLevel( tiledDatasetView->ToNative() );
+    Native::Float3 pDataSpaceFloat3 = Native::Float3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
+    Native::Int3 zoomLevel = mTileManager->GetZoomLevel( tiledDatasetView->ToNative() );
     mTileManager->DrawSplit( pDataSpaceFloat3, radius * (float) pow( 2.0, std::min( zoomLevel.x, zoomLevel.y ) ) );
 }
 
 void TileManager::DrawErase( TiledDatasetView^ tiledDatasetView, Vector3^ pDataSpace, float radius )
 {
-    MojoFloat3 pDataSpaceFloat3 = MojoFloat3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
-	MojoInt3 zoomLevel = mTileManager->GetZoomLevel( tiledDatasetView->ToNative() );
+    Native::Float3 pDataSpaceFloat3 = Native::Float3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
+    Native::Int3 zoomLevel = mTileManager->GetZoomLevel( tiledDatasetView->ToNative() );
     mTileManager->DrawErase( pDataSpaceFloat3, radius * (float) pow( 2.0, std::min( zoomLevel.x, zoomLevel.y ) ) );
 }
 
 void TileManager::DrawRegionA( TiledDatasetView^ tiledDatasetView, Vector3^ pDataSpace, float radius )
 {
-    MojoFloat3 pDataSpaceFloat3 = MojoFloat3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
-	MojoInt3 zoomLevel = mTileManager->GetZoomLevel( tiledDatasetView->ToNative() );
+    Native::Float3 pDataSpaceFloat3 = Native::Float3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
+    Native::Int3 zoomLevel = mTileManager->GetZoomLevel( tiledDatasetView->ToNative() );
     mTileManager->DrawRegionA( pDataSpaceFloat3, radius * (float) pow( 2.0, std::min( zoomLevel.x, zoomLevel.y ) ) );
 }
 
 void TileManager::DrawRegionB( TiledDatasetView^ tiledDatasetView, Vector3^ pDataSpace, float radius )
 {
-    MojoFloat3 pDataSpaceFloat3 = MojoFloat3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
-	MojoInt3 zoomLevel = mTileManager->GetZoomLevel( tiledDatasetView->ToNative() );
+    Native::Float3 pDataSpaceFloat3 = Native::Float3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
+    Native::Int3 zoomLevel = mTileManager->GetZoomLevel( tiledDatasetView->ToNative() );
     mTileManager->DrawRegionB( pDataSpaceFloat3, radius * (float) pow( 2.0, std::min( zoomLevel.x, zoomLevel.y ) ) );
 }
 
 void TileManager::AddSplitSource( TiledDatasetView^ tiledDatasetView, Vector3^ pDataSpace )
 {
-    MojoFloat3 pDataSpaceFloat3 = MojoFloat3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
+    Native::Float3 pDataSpaceFloat3 = Native::Float3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
     mTileManager->AddSplitSource( pDataSpaceFloat3 );
 }
 
@@ -334,103 +313,103 @@ void TileManager::RemoveSplitSource()
 
 void TileManager::ResetSplitState( Vector3^ pDataSpace )
 {
-    MojoFloat3 pDataSpaceFloat3 = MojoFloat3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
+    Native::Float3 pDataSpaceFloat3 = Native::Float3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
     mTileManager->ResetSplitState( pDataSpaceFloat3 );
 }
 
 void TileManager::PrepForSplit( unsigned int segId, Vector3^ pDataSpace )
 {
-    MojoFloat3 pDataSpaceFloat3 = MojoFloat3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
+    Native::Float3 pDataSpaceFloat3 = Native::Float3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
     mTileManager->PrepForSplit( segId, pDataSpaceFloat3 );
 }
 
 void TileManager::FindBoundaryJoinPoints2D( unsigned int segId, Vector3^ pDataSpace  )
 {
-    MojoFloat3 pDataSpaceFloat3 = MojoFloat3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
+    Native::Float3 pDataSpaceFloat3 = Native::Float3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
     mTileManager->FindBoundaryJoinPoints2D( segId, pDataSpaceFloat3 );
 }
 
 void TileManager::FindBoundaryWithinRegion2D( unsigned int segId, Vector3^ pDataSpace  )
 {
-    MojoFloat3 pDataSpaceFloat3 = MojoFloat3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
+    Native::Float3 pDataSpaceFloat3 = Native::Float3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
     mTileManager->FindBoundaryWithinRegion2D( segId, pDataSpaceFloat3 );
 }
 
 void TileManager::FindBoundaryBetweenRegions2D( unsigned int segId, Vector3^ pDataSpace  )
 {
-    MojoFloat3 pDataSpaceFloat3 = MojoFloat3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
+    Native::Float3 pDataSpaceFloat3 = Native::Float3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
     mTileManager->FindBoundaryBetweenRegions2D( segId, pDataSpaceFloat3 );
 }
 
 int TileManager::CompletePointSplit( unsigned int segId, Vector3^ pDataSpace )
 {
-    MojoFloat3 pDataSpaceFloat3 = MojoFloat3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
+    Native::Float3 pDataSpaceFloat3 = Native::Float3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
     return mTileManager->CompletePointSplit( segId, pDataSpaceFloat3 );
 }
 
 int TileManager::CompleteDrawSplit( unsigned int segId, Vector3^ pDataSpace, bool join3D, int splitStartZ )
 {
-    MojoFloat3 pDataSpaceFloat3 = MojoFloat3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
+    Native::Float3 pDataSpaceFloat3 = Native::Float3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
     return mTileManager->CompleteDrawSplit( segId, pDataSpaceFloat3, join3D, splitStartZ );
 }
 
 void TileManager::RecordSplitState( unsigned int segId, Vector3^ pDataSpace )
 {
-    MojoFloat3 pDataSpaceFloat3 = MojoFloat3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
+    Native::Float3 pDataSpaceFloat3 = Native::Float3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
     mTileManager->RecordSplitState( segId, pDataSpaceFloat3 );
 }
 
 void TileManager::PredictSplit( unsigned int segId, Vector3^ pDataSpace, float radius )
 {
-    MojoFloat3 pDataSpaceFloat3 = MojoFloat3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
+    Native::Float3 pDataSpaceFloat3 = Native::Float3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
     mTileManager->PredictSplit( segId, pDataSpaceFloat3, radius );
 }
 
 void TileManager::ResetAdjustState( Vector3^ pDataSpace )
 {
-    MojoFloat3 pDataSpaceFloat3 = MojoFloat3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
+    Native::Float3 pDataSpaceFloat3 = Native::Float3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
     mTileManager->ResetAdjustState( pDataSpaceFloat3 );
 }
 
 void TileManager::PrepForAdjust( unsigned int segId, Vector3^ pDataSpace )
 {
-    MojoFloat3 pDataSpaceFloat3 = MojoFloat3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
+    Native::Float3 pDataSpaceFloat3 = Native::Float3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
     mTileManager->PrepForAdjust( segId, pDataSpaceFloat3 );
 }
 
 void TileManager::CommitAdjustChange( unsigned int segId, Vector3^ pDataSpace )
 {
-    MojoFloat3 pDataSpaceFloat3 = MojoFloat3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
+    Native::Float3 pDataSpaceFloat3 = Native::Float3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
     mTileManager->CommitAdjustChange( segId, pDataSpaceFloat3 );
 }
 
 void TileManager::ResetDrawMergeState( Vector3^ pDataSpace )
 {
-    MojoFloat3 pDataSpaceFloat3 = MojoFloat3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
+    Native::Float3 pDataSpaceFloat3 = Native::Float3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
     mTileManager->ResetDrawMergeState( pDataSpaceFloat3 );
 }
 
 void TileManager::PrepForDrawMerge( Vector3^ pDataSpace )
 {
-    MojoFloat3 pDataSpaceFloat3 = MojoFloat3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
+    Native::Float3 pDataSpaceFloat3 = Native::Float3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
     mTileManager->PrepForDrawMerge( pDataSpaceFloat3 );
 }
 
 unsigned int TileManager::CommitDrawMerge( Vector3^ pDataSpace )
 {
-    MojoFloat3 pDataSpaceFloat3 = MojoFloat3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
+    Native::Float3 pDataSpaceFloat3 = Native::Float3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
     return mTileManager->CommitDrawMerge( pDataSpaceFloat3 );
 }
 
 unsigned int TileManager::CommitDrawMergeCurrentSlice( Vector3^ pDataSpace )
 {
-    MojoFloat3 pDataSpaceFloat3 = MojoFloat3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
+    Native::Float3 pDataSpaceFloat3 = Native::Float3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
     return mTileManager->CommitDrawMergeCurrentSlice( pDataSpaceFloat3 );
 }
 
 unsigned int TileManager::CommitDrawMergeCurrentConnectedComponent( Vector3^ pDataSpace )
 {
-    MojoFloat3 pDataSpaceFloat3 = MojoFloat3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
+    Native::Float3 pDataSpaceFloat3 = Native::Float3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
     return mTileManager->CommitDrawMergeCurrentConnectedComponent( pDataSpaceFloat3 );
 }
 
@@ -441,7 +420,7 @@ unsigned int TileManager::GetNewId()
 
 float TileManager::GetCurrentOperationProgress()
 {
-	return mTileManager->GetCurrentOperationProgress();
+    return mTileManager->GetCurrentOperationProgress();
 }
 
 void TileManager::UndoChange()
@@ -456,12 +435,12 @@ void TileManager::RedoChange()
 
 void TileManager::TempSaveAndClearFileSystemTileCache()
 {
-	mTileManager->TempSaveAndClearFileSystemTileCache();
+    mTileManager->TempSaveAndClearFileSystemTileCache();
 }
 
 void TileManager::ClearFileSystemTileCache()
 {
-	mTileManager->ClearFileSystemTileCache();
+    mTileManager->ClearFileSystemTileCache();
 }
 
 void TileManager::LoadTileCache()
@@ -470,12 +449,10 @@ void TileManager::LoadTileCache()
     {
         TileCacheEntry^ tileCacheEntry = gcnew TileCacheEntry();
 
-        MOJO_FOR_EACH_KEY_VALUE( std::string key, Core::ID3D11CudaTexture* value, nativeTileCacheEntry.d3d11CudaTextures.GetHashMap() )
+        MOJO_FOR_EACH_KEY_VALUE( std::string key, Native::ID3D11Texture* value, nativeTileCacheEntry.d3d11Textures.GetHashMap() )
         {
-            tileCacheEntry->D3D11CudaTextures->Set( msclr::interop::marshal_as< String^ >( key ), ShaderResourceView::FromPointer( IntPtr( value->GetD3D11ShaderResourceView() ) ) );
+            tileCacheEntry->D3D11Textures->Set( msclr::interop::marshal_as< String^ >( key ), ShaderResourceView::FromPointer( IntPtr( value->GetD3D11ShaderResourceView() ) ) );
         }
-
-        tileCacheEntry->KeepState = (Mojo::Interop::TileCacheEntryKeepState)nativeTileCacheEntry.keepState;
 
         mTileCache->Add( tileCacheEntry );
     }
@@ -485,12 +462,12 @@ void TileManager::UnloadTileCache()
 {
     for each ( TileCacheEntry^ tileCacheEntry in mTileCache )
     {
-        for each ( Collections::Generic::KeyValuePair< String^, ShaderResourceView^ > keyValuePair in tileCacheEntry->D3D11CudaTextures )
+        for each ( Collections::Generic::KeyValuePair< String^, ShaderResourceView^ > keyValuePair in tileCacheEntry->D3D11Textures )
         {
             delete keyValuePair.Value;
         }
 
-        tileCacheEntry->D3D11CudaTextures->Internal->Clear();
+        tileCacheEntry->D3D11Textures->Internal->Clear();
     }
 
     mTileCache->Clear();
@@ -498,18 +475,17 @@ void TileManager::UnloadTileCache()
 
 void TileManager::UpdateTileCacheState()
 {
-	std::vector< Native::TileCacheEntry >& tileCache = mTileManager->GetTileCache();
+    std::vector< Native::TileCacheEntry >& tileCache = mTileManager->GetTileCache();
 
     if ( mTileCache->Count == tileCache.size() )
     {
-		for ( unsigned int i = 0; i < tileCache.size(); i++ )
-		{
-            mTileCache[ i ]->KeepState       = (Mojo::Interop::TileCacheEntryKeepState)tileCache[ i ].keepState;
+        for ( unsigned int i = 0; i < tileCache.size(); i++ )
+        {
             mTileCache[ i ]->IndexTileSpace  = Vector4( (float)tileCache[ i ].indexTileSpace.x,  (float)tileCache[ i ].indexTileSpace.y,  (float)tileCache[ i ].indexTileSpace.z, (float)tileCache[ i ].indexTileSpace.w );
             mTileCache[ i ]->CenterDataSpace = Vector3( (float)tileCache[ i ].centerDataSpace.x, (float)tileCache[ i ].centerDataSpace.y, (float)tileCache[ i ].centerDataSpace.z );
             mTileCache[ i ]->ExtentDataSpace = Vector3( (float)tileCache[ i ].extentDataSpace.x, (float)tileCache[ i ].extentDataSpace.y, (float)tileCache[ i ].extentDataSpace.z );
             mTileCache[ i ]->Active          = tileCache[ i ].active;
-		}
+        }
     }
 }
 

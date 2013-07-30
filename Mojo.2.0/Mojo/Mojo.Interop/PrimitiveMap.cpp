@@ -2,8 +2,8 @@
 
 #include <msclr/marshal_cppstd.h>
 
-#include "Mojo.Core/ForEach.hpp"
-#include "Mojo.Core/ID3D11CudaTexture.hpp"
+#include "Mojo.Native/ForEach.hpp"
+#include "Mojo.Native/ID3D11Texture.hpp"
 
 #using <SlimDX.dll>
 
@@ -72,9 +72,9 @@ void PrimitiveMap::Add( PrimitiveType type, String^ key, bool value )
     SetBool( key, value );
 }
 
-Core::PrimitiveMap PrimitiveMap::ToCore()
+Native::PrimitiveMap PrimitiveMap::ToCore()
 {
-    Core::PrimitiveMap primitiveDictionary;
+    Native::PrimitiveMap primitiveDictionary;
 
     //for each ( Collections::Generic::KeyValuePair< String^, Vector4 > keyValuePair in mFloat4 )
     //{

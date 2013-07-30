@@ -1,5 +1,10 @@
 #pragma once
 
+//
+// CODE QUALITY ISSUE:
+// These should be moved into Constants.cs so we can change them without needing to recompile the code.
+// Justification: some of these needed at compile time. -MR
+//
 #if _WIN64 
 const int MAX_UNDO_OPERATIONS = 20;
 const int FILE_SYSTEM_TILE_CACHE_SIZE = 1024;

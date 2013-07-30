@@ -2,12 +2,12 @@
 
 namespace Mojo
 {
-namespace Core
+namespace Native
 {
 
 VolumeDescription::VolumeDescription() :
     data            ( 0 ),
-    numVoxels       ( MojoInt3( -1, -1, -1 ) ),
+    numVoxels       ( Int3( -1, -1, -1 ) ),
     dxgiFormat      ( DXGI_FORMAT_UNKNOWN ),
     numBytesPerVoxel( -1 ),
     isSigned        ( false )

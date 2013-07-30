@@ -1,7 +1,5 @@
 #pragma once
 
-//#include "vld.h"
-
 #include "Mojo.Native/ITileServer.hpp"
 #include "Mojo.Native/TileManager.hpp"
 
@@ -30,12 +28,12 @@ public:
 
     Native::TileManager*                                    GetTileManager();
 
-    void                                                    LoadTiledDataset( TiledDatasetDescription^ tiledDatasetDescription );
-    void                                                    UnloadTiledDataset();
+    void                                                    LoadSourceImages( TiledDatasetDescription^ tiledDatasetDescription );
+    void                                                    UnloadSourceImages();
 
-    bool                                                    IsTiledDatasetLoaded();
+    bool                                                    AreSourceImagesLoaded();
 
-	void                                                    LoadSegmentation( TiledDatasetDescription^ tiledDatasetDescription );
+    void                                                    LoadSegmentation( TiledDatasetDescription^ tiledDatasetDescription );
     void                                                    UnloadSegmentation();
 
     bool                                                    IsSegmentationLoaded();
@@ -57,11 +55,11 @@ public:
     void                                                    SortSegmentInfoByName( bool reverse );
     void                                                    SortSegmentInfoBySize( bool reverse );
     void                                                    SortSegmentInfoByConfidence( bool reverse );
-	void                                                    RemapSegmentLabel( unsigned int fromSegId, unsigned int toSegId );
-	void                                                    LockSegmentLabel( unsigned int segId );
-	void                                                    UnlockSegmentLabel( unsigned int segId );
-	unsigned int                                            GetSegmentInfoCount();
-	unsigned int                                            GetSegmentInfoCurrentListLocation( unsigned int segId );
+    void                                                    RemapSegmentLabel( unsigned int fromSegId, unsigned int toSegId );
+    void                                                    LockSegmentLabel( unsigned int segId );
+    void                                                    UnlockSegmentLabel( unsigned int segId );
+    unsigned int                                            GetSegmentInfoCount();
+    unsigned int                                            GetSegmentInfoCurrentListLocation( unsigned int segId );
     Collections::Generic::IList< SegmentInfo^ >^            GetSegmentInfoRange( int begin, int end );
     SegmentInfo^                                            GetSegmentInfo( unsigned int segId );
 
@@ -84,9 +82,9 @@ public:
     void                                                    RemoveSplitSource();
     void                                                    ResetSplitState( Vector3^ pDataSpace );
     void                                                    PrepForSplit( unsigned int segId, Vector3^ pDataSpace );
-	void                                                    FindBoundaryJoinPoints2D( unsigned int segId, Vector3^ pDataSpace );
-	void                                                    FindBoundaryWithinRegion2D( unsigned int segId, Vector3^ pDataSpace );
-	void                                                    FindBoundaryBetweenRegions2D( unsigned int segId, Vector3^ pDataSpace );
+    void                                                    FindBoundaryJoinPoints2D( unsigned int segId, Vector3^ pDataSpace );
+    void                                                    FindBoundaryWithinRegion2D( unsigned int segId, Vector3^ pDataSpace );
+    void                                                    FindBoundaryBetweenRegions2D( unsigned int segId, Vector3^ pDataSpace );
     int                                                     CompletePointSplit( unsigned int segId, Vector3^ pDataSpace );
     int                                                     CompleteDrawSplit( unsigned int segId, Vector3^ pDataSpace, bool join3D, int splitStartZ );
     void                                                    RecordSplitState( unsigned int segId, Vector3^ pDataSpace );
@@ -102,12 +100,12 @@ public:
     unsigned int                                            CommitDrawMergeCurrentSlice( Vector3^ pDataSpace );
     unsigned int                                            CommitDrawMergeCurrentConnectedComponent( Vector3^ pDataSpace );
 
-	unsigned int                                            GetNewId();
-	void                                                    UndoChange();
-	void                                                    RedoChange();
+    unsigned int                                            GetNewId();
+    void                                                    UndoChange();
+    void                                                    RedoChange();
     void                                                    TempSaveAndClearFileSystemTileCache();
     void                                                    ClearFileSystemTileCache();
-	float                                                   GetCurrentOperationProgress();
+    float                                                   GetCurrentOperationProgress();
 
 private:
     void LoadTileCache();

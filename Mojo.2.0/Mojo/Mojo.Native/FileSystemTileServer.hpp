@@ -1,17 +1,12 @@
 #pragma once
 
-//#include "vld.h"
+#include "Stl.hpp"
 
-#include "Mojo.Core/Stl.hpp"
-#include <queue>
-
-//#include "Mojo.Core/Cuda.hpp"
-
-#include "Mojo.Core/Boost.hpp"
-#include "Mojo.Core/PrimitiveMap.hpp"
-#include "Mojo.Core/VolumeDescription.hpp"
-#include "Mojo.Core/Index.hpp"
-#include "Mojo.Core/ForEach.hpp"
+#include "Boost.hpp"
+#include "PrimitiveMap.hpp"
+#include "VolumeDescription.hpp"
+#include "Index.hpp"
+#include "ForEach.hpp"
 
 #include "ITileServer.hpp"
 #include "TiledDatasetDescription.hpp"
@@ -19,7 +14,7 @@
 #include "FileSystemUndoRedoItem.hpp"
 #include "FileSystemSplitState.hpp"
 #include "FileSystemLogger.hpp"
-#include "Constants.hpp"
+#include "FileSystemTileServerConstants.hpp"
 
 namespace Mojo
 {
@@ -29,13 +24,13 @@ namespace Native
 class FileSystemTileServer : public ITileServer
 {
 public:
-    FileSystemTileServer( Core::PrimitiveMap constParameters );
+    FileSystemTileServer( PrimitiveMap constParameters );
     virtual ~FileSystemTileServer();
 
-    virtual void                                                  LoadTiledDataset( TiledDatasetDescription& tiledDatasetDescription );
-    virtual void                                                  UnloadTiledDataset();
+    virtual void                                                  LoadSourceImages( TiledDatasetDescription& tiledDatasetDescription );
+    virtual void                                                  UnloadSourceImages();
 
-    virtual bool                                                  IsTiledDatasetLoaded();
+    virtual bool                                                  AreSourceImagesLoaded();
 
     virtual void                                                  LoadSegmentation( TiledDatasetDescription& tiledDatasetDescription );
     virtual void                                                  UnloadSegmentation();
@@ -48,56 +43,56 @@ public:
     virtual void                                                  DeleteTempFiles();
 
     virtual int                                                   GetTileCountForId( unsigned int segId );
-    virtual MojoInt3                                              GetSegmentCentralTileLocation( unsigned int segId );
-    virtual MojoInt4                                              GetSegmentZTileBounds( unsigned int segId, int zIndex );
+    virtual Int3                                                  GetSegmentCentralTileLocation( unsigned int segId );
+    virtual Int4                                                  GetSegmentZTileBounds( unsigned int segId, int zIndex );
 
-    virtual Core::HashMap< std::string, Core::VolumeDescription > LoadTile( MojoInt4 tileIndex );
-    virtual void                                                  UnloadTile( MojoInt4 tileIndex );
+    virtual HashMap< std::string, VolumeDescription >             LoadTile( Int4 tileIndex );
+    virtual void                                                  UnloadTile( Int4 tileIndex );
 
     virtual void                                                  RemapSegmentLabels( std::set< unsigned int > fromSegId, unsigned int toSegId );
     virtual void                                                  ReplaceSegmentationLabel( unsigned int oldId, unsigned int newId );
-    virtual void                                                  ReplaceSegmentationLabelCurrentSlice( unsigned int oldId, unsigned int newId, MojoFloat3 pointTileSpace );
-    virtual void                                                  ReplaceSegmentationLabelCurrentConnectedComponent( unsigned int oldId, unsigned int newId, MojoFloat3 pointTileSpace );
+    virtual void                                                  ReplaceSegmentationLabelCurrentSlice( unsigned int oldId, unsigned int newId, Float3 pointTileSpace );
+    virtual void                                                  ReplaceSegmentationLabelCurrentConnectedComponent( unsigned int oldId, unsigned int newId, Float3 pointTileSpace );
 
-    virtual void                                                  DrawSplit( MojoFloat3 pointTileSpace, float radius );
-    virtual void                                                  DrawErase( MojoFloat3 pointTileSpace, float radius );
-    virtual void                                                  DrawRegionB( MojoFloat3 pointTileSpace, float radius );
-    virtual void                                                  DrawRegionA( MojoFloat3 pointTileSpace, float radius );
-    virtual void                                                  DrawRegionValue( MojoFloat3 pointTileSpace, float radius, int value );
+    virtual void                                                  DrawSplit( Float3 pointTileSpace, float radius );
+    virtual void                                                  DrawErase( Float3 pointTileSpace, float radius );
+    virtual void                                                  DrawRegionB( Float3 pointTileSpace, float radius );
+    virtual void                                                  DrawRegionA( Float3 pointTileSpace, float radius );
+    virtual void                                                  DrawRegionValue( Float3 pointTileSpace, float radius, int value );
 
-    virtual void                                                  AddSplitSource( MojoFloat3 pointTileSpace );
+    virtual void                                                  AddSplitSource( Float3 pointTileSpace );
     virtual void                                                  RemoveSplitSource();
     virtual void                                                  LoadSplitDistances( unsigned int segId );
     virtual void                                                  ResetSplitState();
-    virtual void                                                  PrepForSplit( unsigned int segId, MojoFloat3 pointTileSpace );
-	virtual void                                                  FindBoundaryJoinPoints2D( unsigned int segId );
-	virtual void                                                  FindBoundaryWithinRegion2D( unsigned int segId );
-	virtual void                                                  FindBoundaryBetweenRegions2D( unsigned int segId );
-    virtual unsigned int                                          CompletePointSplit( unsigned int segId, MojoFloat3 pointTileSpace );
-    virtual unsigned int                                          CompleteDrawSplit( unsigned int segId, MojoFloat3 pointTileSpace, bool join3D, int splitStartZ );
+    virtual void                                                  PrepForSplit( unsigned int segId, Float3 pointTileSpace );
+    virtual void                                                  FindBoundaryJoinPoints2D( unsigned int segId );
+    virtual void                                                  FindBoundaryWithinRegion2D( unsigned int segId );
+    virtual void                                                  FindBoundaryBetweenRegions2D( unsigned int segId );
+    virtual unsigned int                                          CompletePointSplit( unsigned int segId, Float3 pointTileSpace );
+    virtual unsigned int                                          CompleteDrawSplit( unsigned int segId, Float3 pointTileSpace, bool join3D, int splitStartZ );
 
-    virtual void                                                  RecordSplitState( unsigned int segId, MojoFloat3 pointTileSpace );
-    virtual void                                                  PredictSplit( unsigned int segId, MojoFloat3 pointTileSpace, float radius );
+    virtual void                                                  RecordSplitState( unsigned int segId, Float3 pointTileSpace );
+    virtual void                                                  PredictSplit( unsigned int segId, Float3 pointTileSpace, float radius );
 
     virtual void                                                  ResetAdjustState();
-    virtual void                                                  PrepForAdjust( unsigned int segId, MojoFloat3 pointTileSpace );
-    virtual void                                                  CommitAdjustChange( unsigned int segId, MojoFloat3 pointTileSpace );
+    virtual void                                                  PrepForAdjust( unsigned int segId, Float3 pointTileSpace );
+    virtual void                                                  CommitAdjustChange( unsigned int segId, Float3 pointTileSpace );
 
     virtual void                                                  ResetDrawMergeState();
-    virtual void                                                  PrepForDrawMerge( MojoFloat3 pointTileSpace );
-	virtual std::set< unsigned int >                              GetDrawMergeIds( MojoFloat3 pointTileSpace );
-	virtual std::map< unsigned int, MojoFloat3 >                  GetDrawMergeIdsAndPoints( MojoFloat3 pointTileSpace );
-	virtual unsigned int                                          CommitDrawMerge( std::set< unsigned int > mergeIds, MojoFloat3 pointTileSpace );
-	virtual unsigned int                                          CommitDrawMergeCurrentSlice( MojoFloat3 pointTileSpace );
-	virtual unsigned int                                          CommitDrawMergeCurrentConnectedComponent( MojoFloat3 pointTileSpace );
+    virtual void                                                  PrepForDrawMerge( Float3 pointTileSpace );
+    virtual std::set< unsigned int >                              GetDrawMergeIds( Float3 pointTileSpace );
+    virtual std::map< unsigned int, Float3 >                      GetDrawMergeIdsAndPoints( Float3 pointTileSpace );
+    virtual unsigned int                                          CommitDrawMerge( std::set< unsigned int > mergeIds, Float3 pointTileSpace );
+    virtual unsigned int                                          CommitDrawMergeCurrentSlice( Float3 pointTileSpace );
+    virtual unsigned int                                          CommitDrawMergeCurrentConnectedComponent( Float3 pointTileSpace );
 
-	virtual unsigned int                                          GetNewId();
-	virtual std::list< unsigned int >                             UndoChange();
-	virtual std::list< unsigned int >                             RedoChange();
+    virtual unsigned int                                          GetNewId();
+    virtual std::list< unsigned int >                             UndoChange();
+    virtual std::list< unsigned int >                             RedoChange();
     virtual void                                                  TempSaveFileSystemTileCacheChanges();
     virtual void                                                  TempSaveAndClearFileSystemTileCache();
     virtual void                                                  ClearFileSystemTileCache();
-	virtual float                                                 GetCurrentOperationProgress();
+    virtual float                                                 GetCurrentOperationProgress();
 
     virtual marray::Marray< unsigned char >*                      GetIdColorMap();
     virtual marray::Marray< unsigned int >*                       GetLabelIdMap();
@@ -109,82 +104,85 @@ public:
     virtual void                                                  SortSegmentInfoByConfidence( bool reverse );
     virtual void                                                  LockSegmentLabel( unsigned int segId );
     virtual void                                                  UnlockSegmentLabel( unsigned int segId );
-	virtual unsigned int                                          GetSegmentInfoCount();
-	virtual unsigned int                                          GetSegmentInfoCurrentListLocation( unsigned int segId );
+    virtual unsigned int                                          GetSegmentInfoCount();
+    virtual unsigned int                                          GetSegmentInfoCurrentListLocation( unsigned int segId );
     virtual std::list< SegmentInfo >                              GetSegmentInfoRange( int begin, int end );
     SegmentInfo                                                   GetSegmentInfo( unsigned int segId );
 
     virtual FileSystemSegmentInfoManager*                         GetSegmentInfoManager();
 
 private:
-    void                                                          LoadTiledDatasetInternal( TiledDatasetDescription& tiledDatasetDescription );
-    void                                                          UnloadTiledDatasetInternal();
+    VolumeDescription                                             LoadTileLayerFromImage( Int4 tileIndex, std::string tileBasePath, std::string tiledVolumeDescriptionName );
+    VolumeDescription                                             LoadTileLayerFromHdf5( Int4 tileIndex, std::string tileBasePath, std::string tiledVolumeDescriptionName, std::string hdf5InternalDatasetName );
 
-	void                                                          LoadSegmentationInternal( TiledDatasetDescription& tiledDatasetDescription );
-    void                                                          UnloadSegmentationInternal();
+    bool                                                          TryLoadTileLayerFromImage( Int4 tileIndex, std::string tileBasePath, std::string tiledVolumeDescriptionName, VolumeDescription& volumeDescription );
+    bool                                                          TryLoadTileLayerFromHdf5( Int4 tileIndex, std::string tileBasePath, std::string tiledVolumeDescriptionName, std::string hdf5InternalDatasetName, VolumeDescription& volumeDescription );
 
-    Core::VolumeDescription                                       LoadTileImage( MojoInt4 tileIndex, std::string imageName );
-    Core::VolumeDescription                                       LoadTileHdf5( MojoInt4 tileIndex, std::string hdf5Name, std::string hdf5InternalDatasetName );
+    void                                                          UnloadTileLayer( VolumeDescription& volumeDescription );                                                                  
 
-    bool                                                          TryLoadTileImage( MojoInt4 tileIndex, std::string imageName, Core::VolumeDescription& volumeDescription );
-    bool                                                          TryLoadTileHdf5( MojoInt4 tileIndex, std::string hdf5Name, std::string hdf5InternalDatasetName, Core::VolumeDescription& volumeDescription );
+    void                                                          SaveTile( Int4 tileIndex );
 
-    void                                                          SaveTile( MojoInt4 tileIndex, Core::HashMap< std::string, Core::VolumeDescription >& volumeDescriptions );
+    void                                                          SaveTileLayerToImage( Int4 tileIndex, std::string tileBasePath, std::string tiledVolumeDescriptionName, const VolumeDescription& volumeDescription );
+    void                                                          SaveTileLayerToHdf5( Int4 tileIndex, std::string tileBasePath, std::string tiledVolumeDescriptionName, std::string hdf5InternalDatasetName, const VolumeDescription& volumeDescription );
 
-    void                                                          SaveTileImage( MojoInt4 tileIndex, std::string imageName, const Core::VolumeDescription& volumeDescription );
-    void                                                          SaveTileHdf5( MojoInt4 tileIndex, std::string hdf5Name, std::string hdf5InternalDatasetName, const Core::VolumeDescription& volumeDescription );
+    std::string                                                   CreateTileString( Int4 tileIndex );
+    Int4                                                          CreateTileIndex( std::string tileString );
 
-    void                                                          UnloadTileImage( Core::VolumeDescription& volumeDescription );                                                                  
-    void                                                          UnloadTileHdf5( Core::VolumeDescription& volumeDescription );
-
-    std::string                                                   CreateTileString( MojoInt4 tileIndex );
-	MojoInt4                                                      CreateTileIndex( std::string tileString );
     void                                                          ReduceCacheSize();
     void                                                          ReduceCacheSizeIfNecessary();
 
-    bool                                                          TileContainsId ( MojoInt3 numVoxelsPerTile, MojoInt3 currentIdNumVoxels, unsigned int* currentIdVolume, unsigned int segId );
+    bool                                                          TileContainsId ( Int3 numVoxelsPerTile, Int3 currentIdNumVoxels, unsigned int* currentIdVolume, unsigned int segId );
 
     //
     // tile loading and saving internals
     //
-    bool                                                          TryLoadTileImageInternalUChar1( MojoInt4 tileIndex, std::string imageName, Core::VolumeDescription& volumeDescription );
-    bool                                                          TryLoadTileImageInternalUChar4( MojoInt4 tileIndex, std::string imageName, Core::VolumeDescription& volumeDescription );
+    bool                                                          TryLoadTileLayerFromImageInternalUChar1( Int4 tileIndex, std::string tileBasePath, std::string tiledVolumeDescriptionName, VolumeDescription& volumeDescription );
+    bool                                                          TryLoadTileLayerFromImageInternalUChar4( Int4 tileIndex, std::string tileBasePath, std::string tiledVolumeDescriptionName, VolumeDescription& volumeDescription );
 
-    bool                                                          TryLoadTileHdf5Internal( MojoInt4 tileIndex, std::string hdf5Name, std::string hdf5InternalDatasetName, Core::VolumeDescription& volumeDescription );
+    bool                                                          TryLoadTileLayerFromHdf5Internal( Int4 tileIndex, std::string tileBasePath, std::string tiledVolumeDescriptionName, std::string hdf5InternalDatasetName, VolumeDescription& volumeDescription );
 
-    void                                                          SaveTileImageInternalUChar1( MojoInt4 tileIndex, std::string imageName, const Core::VolumeDescription& volumeDescription );
-    void                                                          SaveTileImageInternalUChar4( MojoInt4 tileIndex, std::string imageName, const Core::VolumeDescription& volumeDescription );
+    void                                                          SaveTileLayerToImageInternalUChar1( Int4 tileIndex, std::string tileBasePath, std::string tiledVolumeDescriptionName, const VolumeDescription& volumeDescription );
+    void                                                          SaveTileLayerToImageInternalUChar4( Int4 tileIndex, std::string tileBasePath, std::string tiledVolumeDescriptionName, const VolumeDescription& volumeDescription );
 
-    void                                                          SaveTileHdf5Internal( MojoInt4 tileIndex, std::string hdf5Name, std::string hdf5InternalDatasetName, const Core::VolumeDescription& volumeDescription );
+    void                                                          SaveTileLayerToHdf5Internal( Int4 tileIndex, std::string tileBasePath, std::string tiledVolumeDescriptionName, std::string hdf5InternalDatasetName, const VolumeDescription& volumeDescription );
 
-    void                                                          UnloadTileImageInternal( Core::VolumeDescription& volumeDescription );
-    void                                                          UnloadTileHdf5Internal( Core::VolumeDescription& volumeDescription );
+    void                                                          UnloadTileLayerInternal( VolumeDescription& volumeDescription );
 
-	void                                                          UpdateOverlayTiles();
-	void                                                          UpdateOverlayTilesBoundingBox( MojoInt2 upperLeft, MojoInt2 lowerRight );
-	void                                                          ResetOverlayTiles();
-	void                                                          PrepForNextUndoRedoChange();
+    void                                                          UpdateOverlayTiles();
+    void                                                          UpdateOverlayTilesBoundingBox( Int2 upperLeft, Int2 lowerRight );
+    void                                                          ResetOverlayTiles();
+    void                                                          PrepForNextUndoRedoChange();
 
-	void														  StrideUpIdTileChange( MojoInt4 numTiles, MojoInt3 numVoxelsPerTile, MojoInt4 tileIndex, unsigned int* data );
+    void                                                          StrideUpIdTileChange( Int4 numTiles, Int3 numVoxelsPerTile, Int4 tileIndex, unsigned int* data );
 
-    Core::PrimitiveMap                                            mConstParameters;
-    TiledDatasetDescription                                       mTiledDatasetDescription;
-    bool                                                          mIsTiledDatasetLoaded;
+    PrimitiveMap                                                  mConstParameters;
+
+    TiledDatasetDescription                                       mSourceImagesTiledDatasetDescription;
+    TiledDatasetDescription                                       mSegmentationTiledDatasetDescription;
+
+    bool                                                          mAreSourceImagesLoaded;
     bool                                                          mIsSegmentationLoaded;
 
-    Core::HashMap < std::string, FileSystemTileCacheEntry >       mFileSystemTileCache;
+    //
+    // CODE QUALITY ISSUE:
+    // Why is this a hashmap? It seems like this is actually implementing a straightforward page table (like the one in TileManager.cpp).
+    // Instead of indexing with the string "X001Y002Z0003W004" or whatever, why don't you just index into an Marray with the index a(1, 2, 3, 4). Then
+    // the device and host caching functionality could be refactored into a templetized Cache class that would facilitate code reuse. Moreover,
+    // Moreover, since memory fragmentation is an issue, it would be better to have a fixed-size page table and cache allocated at startup.
+    //
+    HashMap < std::string, FileSystemTileCacheEntry >             mFileSystemTileCache;
 
     //
     // simple split variables
     //
-    std::vector< MojoInt3 >                                       mSplitSourcePoints;
+    std::vector< Int3 >                                           mSplitSourcePoints;
     int                                                           mSplitNPerimiters;
-    MojoInt3                                                      mSplitWindowStart;
-    MojoInt3                                                      mSplitWindowNTiles;
+    Int3                                                          mSplitWindowStart;
+    Int3                                                          mSplitWindowNTiles;
     int                                                           mSplitWindowWidth;
     int                                                           mSplitWindowHeight;
     int                                                           mSplitWindowNPix;
-	int                                                           mSplitLabelCount;
+    int                                                           mSplitLabelCount;
     int*                                                          mSplitStepDist;
     int*                                                          mSplitResultDist;
     int*                                                          mSplitPrev;
@@ -196,20 +194,20 @@ private:
     FileSystemLogger                                              mLogger;
     FileSystemSegmentInfoManager                                  mSegmentInfoManager;
 
-    MojoFloat2                                                    mCentroid;
+    Float2                                                        mCentroid;
     unsigned int                                                  mPrevSplitId;
     int                                                           mPrevSplitZ;
-    std::vector< MojoFloat2 >                                     mPrevSplitLine;
-    std::vector< std::pair< MojoFloat2, int >>                    mPrevSplitCentroids;
+    std::vector< Float2 >                                         mPrevSplitLine;
+    std::vector< std::pair< Float2, int >>                        mPrevSplitCentroids;
 
     std::map< int, FileSystemSplitState >                         mSplitStates;
 
     std::deque< FileSystemUndoRedoItem >                          mUndoDeque;
-	std::deque< FileSystemUndoRedoItem >                          mRedoDeque;
+    std::deque< FileSystemUndoRedoItem >                          mRedoDeque;
 
     FileSystemUndoRedoItem*                                       mNextUndoItem;
 
-	float                                                         mCurrentOperationProgress;
+    float                                                         mCurrentOperationProgress;
 
 };
 

@@ -20,6 +20,12 @@ namespace Mojo
         SplitSegmentation,
     }
 
+    //
+    // CODE QUALITY ISSUE:
+    // These enums should all be tools. e.g., there should be a MergeSegmentationFill2DTool and a MergeSegmentationFill3DTool, etc.
+    // This avoids ugly and hard-to-maintain if statements all over the code. Use the C# type system to take care of all these ugly
+    // and hard-to-maintain if statements for you. -MR 
+    //
     public enum MergeMode
     {
         Fill2D,
@@ -59,12 +65,21 @@ namespace Mojo
             get { return mCurrentToolMode; }
             set
             {
+                //
+                // CODE QUALITY ISSUE:
+                // Please replace all /* */ comments with // comments for consistency and because /* */ comments don't allow nesting. -MR
+                //
 
                 /*
                  * TODO: remove mToolModeChanging (Currently required because a call loop can be created on keyboard tool change).
                  * On change from Split to Merge mode using keyboard shortcut this method is called twice and ends up back in Split mode.
                  */
 
+                //
+                // CODE QUALITY ISSUE:
+                // The tool class heirarchy is designed to avoid these kinds of if statements. There shouldn't be if statements like this
+                // in Engine.cs. Please move this logic into a Tool class. -MR
+                //
                 if ( value == ToolMode.MergeSegmentation && CurrentMergeControlMode == MergeControlMode.Draw )
                 {
                     value = ToolMode.DrawMergeSegmentation;
@@ -77,8 +92,7 @@ namespace Mojo
 
                     Tools.Internal.ToList().ForEach( viewerModeToolsMap => viewerModeToolsMap.Value.Internal[mCurrentToolMode].Select() );
 
-                    Viewers.Internal.ToList()
-                           .ForEach( viewer => viewer.Value.D3D11RenderingPane.RenderingStrategy = RenderingStrategies.Internal[viewer.Key].Internal[mCurrentToolMode] );
+                    Viewers.Internal.ToList().ForEach( viewer => viewer.Value.D3D11RenderingPane.RenderingStrategy = RenderingStrategies.Internal[viewer.Key].Internal[mCurrentToolMode] );
                     Viewers.Internal.ToList().ForEach( viewer => viewer.Value.UserInputHandler = Tools.Internal[viewer.Key].Internal[mCurrentToolMode] );
 
                     OnPropertyChanged( "CurrentToolMode" );
@@ -111,10 +125,7 @@ namespace Mojo
 
             try
             {
-
                 D3D11.Initialize( out mDxgiFactory, out mD3D11Device );
-                //Cuda.Initialize( mD3D11Device );
-                //Thrust.Initialize();
 
                 TileManager = new TileManager( new Interop.TileManager( mD3D11Device, mD3D11Device.ImmediateContext, Constants.ConstParameters ) );
 
@@ -173,11 +184,13 @@ namespace Mojo
                 Console.WriteLine( errorMessage );
                 Application.Current.Shutdown( 1 );
             }
-
         }
 
         public void Dispose()
         {
+            TileManager.UnloadSegmentation();
+            TileManager.UnloadSourceImages();
+
             if ( Viewers != null )
             {
                 Viewers.Internal.Values.ToList().ForEach( viewer => viewer.Dispose() );
@@ -196,18 +209,24 @@ namespace Mojo
                 TileManager = null;
             }
 
-            //Thrust.Terminate();
-            //Cuda.Terminate();
             D3D11.Terminate( ref mDxgiFactory, ref mD3D11Device );
 
             Console.WriteLine( "\nMojo terminating...\n" );
         }
 
+        //
+        // CODE QUALITY ISSUE:
+        // This design is incorrect. Please move all of the logic below into various tool classes. -MR
+        //
         public void NextImage()
         {
             var centerDataSpace = TileManager.TiledDatasetView.CenterDataSpace;
-            if ( centerDataSpace.Z < TileManager.TiledDatasetDescription.TiledVolumeDescriptions.Get( "SourceMap" ).NumVoxelsZ - 1 )
+            if ( centerDataSpace.Z < TileManager.SourceImagesTiledDatasetDescription.TiledVolumeDescriptions.Get( "SourceMap" ).NumVoxelsZ - 1 )
             {
+                //
+                // CODE QUALITY ISSUE:
+                // Notice that these ugly and hard-to-maintain if statements would go away if this logic was implemented in the various tool classes. -MR
+                //
                 if ( CurrentToolMode == ToolMode.SplitSegmentation && TileManager.JoinSplits3D )
                 {
                     //
@@ -275,19 +294,21 @@ namespace Mojo
             CurrentToolMoveZ();
             TileManager.UpdateXYZ();
             Update();
-
         }
 
+        //
+        // CODE QUALITY ISSUE:
+        // This function name makes it sound like it won't have side-effects and will return a bool. Consider KeepTiledDatasetViewInBounds(). -MR
+        //
         public void CheckBounds()
         {
             var centerDataSpace = TileManager.TiledDatasetView.CenterDataSpace;
 
-            var tiledVolumeDescription = TileManager.TiledDatasetDescription.TiledVolumeDescriptions.Get( "SourceMap" );
+            var tiledVolumeDescription = TileManager.SourceImagesTiledDatasetDescription.TiledVolumeDescriptions.Get( "SourceMap" );
 
             if ( centerDataSpace.X < 0 )
             {
                 centerDataSpace.X = 0;
-
             }
             else if ( centerDataSpace.X > tiledVolumeDescription.NumTilesX * Constants.ConstParameters.GetInt( "TILE_SIZE_X" ) - 1 )
             {
@@ -316,6 +337,10 @@ namespace Mojo
 
         }
 
+        //
+        // CODE QUALITY ISSUE:
+        // Notice that you wouldn't need this function if all of this UI logic was in various tool classes; you could just call MoveZ directly. -MR
+        //
         public void CurrentToolMoveZ()
         {
             Tools.Get( ViewerMode.TileManager2D ).Get( CurrentToolMode ).MoveZ();
@@ -348,7 +373,7 @@ namespace Mojo
         public void ZoomOut()
         {
             var extentDataSpace = TileManager.TiledDatasetView.ExtentDataSpace;
-            var tiledVolumeDescription = TileManager.TiledDatasetDescription.TiledVolumeDescriptions.Get( "SourceMap" );
+            var tiledVolumeDescription = TileManager.SourceImagesTiledDatasetDescription.TiledVolumeDescriptions.Get( "SourceMap" );
 
             if ( extentDataSpace.X < tiledVolumeDescription.NumTilesX * 10 && extentDataSpace.Y < tiledVolumeDescription.NumTilesY * 10 )
             {
@@ -448,6 +473,7 @@ namespace Mojo
             else if ( !TileManager.SegmentationChangeInProgress )
             {
                 TileManager.Update();
+
                 Viewers.Internal.ToList().ForEach( viewer => viewer.Value.D3D11RenderingPane.Render() );
             }
         }
@@ -456,6 +482,7 @@ namespace Mojo
         {
             mSkipUpdate = true;
             TileManager.UpdateOneTile();
+
             Viewers.Internal.ToList().ForEach( viewer => viewer.Value.D3D11RenderingPane.Render() );
         }
 

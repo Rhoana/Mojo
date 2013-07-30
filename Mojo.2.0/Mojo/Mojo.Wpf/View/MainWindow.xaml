@@ -8,7 +8,7 @@
         Width                    = "1200"
         Height                   = "700"
         WindowStartupLocation    = "CenterScreen"
-        Title                    = "Mojo v2.0">
+        Title                    = "{Binding Path=MainWindowTitle}" >
 
     <Window.Resources>
         
@@ -63,7 +63,7 @@
 
         <Menu DockPanel.Dock="Top" Focusable="False" Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}" BorderBrush="Gray" BorderThickness="1">
             <MenuItem Header="File" Focusable="False">
-                <MenuItem Name="LoadDatasetMenuItem" Header="Load Images…" Command="{Binding Path=LoadDatasetCommand}" Focusable="False">
+                <MenuItem Name="LoadSourceImagesMenuItem" Header="Load Images…" Command="{Binding Path=LoadSourceImagesCommand}" Focusable="False">
                     <MenuItem.Icon>
                         <Image Width="16" Height="16" Source="{StaticResource DatasetLoad}"/>
                     </MenuItem.Icon>
@@ -79,7 +79,7 @@
                         <Image Width="16" Height="16" Source="{StaticResource SegmentationSave}"/>
                     </MenuItem.Icon>
                 </MenuItem>
-                <MenuItem Name="SaveSegmentationAsMenuItem" Header="Save Segmentation As…" Focusable="False" Command="{Binding Path=SaveSegmentationAsCommand}" IsEnabled="False">
+                <MenuItem Name="SaveSegmentationAsMenuItem" Header="Save Segmentation As…" Focusable="False" Command="{Binding Path=SaveSegmentationAsCommand}" IsEnabled="{Binding Path=Engine.TileManager.SegmentationControlsEnabled}">
                     <MenuItem.Icon>
                         <Image Width="16" Height="16" Source="{StaticResource SegmentationSaveAs}"/>
                     </MenuItem.Icon>
@@ -265,7 +265,7 @@
         <Grid VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="370" />
+                <ColumnDefinition Width="380" />
             </Grid.ColumnDefinitions>
 
             <Mojo.Wpf.View:ViewerContext Grid.Column="0" x:Name="TileManager2DViewerContext" Viewer="{Binding Path=Engine.Viewers.Internal[TileManager2D]}" IsManipulationEnabled="True" />

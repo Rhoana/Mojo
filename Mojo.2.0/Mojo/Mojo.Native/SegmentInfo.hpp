@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Mojo.Core/D3D11.hpp"
-#include "Mojo.Core/Stl.hpp"
+#include "D3D11.hpp"
+#include "Stl.hpp"
 
 namespace Mojo
 {
