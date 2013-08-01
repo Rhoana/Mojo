@@ -131,7 +131,7 @@
       <MinimalRebuild>false</MinimalRebuild>
       <ExceptionHandling>Async</ExceptionHandling>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
-      <AdditionalIncludeDirectories>..\;..\Sdk\SQLite\sqlite-amalgamation-3071502\;..\Sdk\Marray\v1.0\marray\include\;..\Sdk\Hdf5\1.8.8\include\;..\Sdk\OpenCV\OpenCV2.4\build\include\;..\Sdk\Boost\boost_1_44\;..\Sdk\DirectX\Microsoft DirectX SDK (June 2010)\Include\</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\;..\Sdk\SQLite\sqlite-amalgamation-3071700\;..\Sdk\Marray\v1.0\marray\include\;..\Sdk\Hdf5\1.8.8\include\;..\Sdk\OpenCV\OpenCV2.4\build\include\;..\Sdk\Boost\boost_1_44\;..\Sdk\DirectX\Microsoft DirectX SDK (June 2010)\Include\</AdditionalIncludeDirectories>
       <ObjectFileName>$(IntDir)</ObjectFileName>
       <AdditionalUsingDirectories>..\Sdk\SlimDX\SlimDX SDK (October 2010)\Bin\net40\x86\;..\Sdk\ObservableDictionary\v1.0\bin\Release\</AdditionalUsingDirectories>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -139,7 +139,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>..\Sdk\Hdf5\1.8.8\lib\;..\Sdk\OpenCV\OpenCV2.4\build\x86\vc10\lib\;..\Sdk\Boost\boost_1_44\lib\;..\Sdk\SQLite\sqlite-amalgamation-3071502\lib\x86\Debug\</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\Sdk\Hdf5\1.8.8\lib\;..\Sdk\OpenCV\OpenCV2.4\build\x86\vc10\lib\;..\Sdk\Boost\boost_1_44\lib\;..\Sdk\SQLite\sqlite-amalgamation-3071700\lib\x86\DebugLib\</AdditionalLibraryDirectories>
       <AdditionalDependencies>hdf5.lib;libszip.lib;libzlib.lib;sqlite3.lib;opencv_highgui240d.lib;opencv_imgproc240d.lib;opencv_core240d.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>msvcrt.lib</IgnoreSpecificDefaultLibraries>
     </Link>
@@ -170,7 +170,7 @@
       <MinimalRebuild>false</MinimalRebuild>
       <ExceptionHandling>Async</ExceptionHandling>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
-      <AdditionalIncludeDirectories>..\;..\Sdk\SQLite\sqlite-amalgamation-3071502\;..\Sdk\Marray\v1.0\marray\include\;..\Sdk\Hdf5\1.8.8\include\;..\Sdk\OpenCV\OpenCV2.4\build\include\;..\Sdk\Boost\boost_1_44\;..\Sdk\DirectX\Microsoft DirectX SDK (June 2010)\Include\</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\;..\Sdk\SQLite\sqlite-amalgamation-3071700\;..\Sdk\Marray\v1.0\marray\include\;..\Sdk\Hdf5\1.8.8\include\;..\Sdk\OpenCV\OpenCV2.4\build\include\;..\Sdk\Boost\boost_1_44\;..\Sdk\DirectX\Microsoft DirectX SDK (June 2010)\Include\</AdditionalIncludeDirectories>
       <ObjectFileName>$(IntDir)</ObjectFileName>
       <AdditionalUsingDirectories>..\Sdk\SlimDX\SlimDX SDK (October 2010)\Bin\net40\x64\;..\Sdk\ObservableDictionary\v1.0\bin\Release\</AdditionalUsingDirectories>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -178,10 +178,10 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>..\Sdk\Hdf5\1.8.8\lib64\;..\Sdk\OpenCV\OpenCV2.4\build\x64\vc10\lib\;..\Sdk\Boost\boost_1_44\lib64\;..\Sdk\SQLite\sqlite-amalgamation-3071502\lib\amd64\Release\</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\Sdk\Hdf5\1.8.8\lib64\;..\Sdk\OpenCV\OpenCV2.4\build\x64\vc10\lib\;..\Sdk\Boost\boost_1_44\lib64\;..\Sdk\SQLite\sqlite-amalgamation-3071700\lib\amd64\DebugLib\</AdditionalLibraryDirectories>
       <AdditionalDependencies>hdf5.lib;libszip.lib;libzlib.lib;sqlite3.lib;opencv_highgui240d.lib;opencv_imgproc240d.lib;opencv_core240d.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>msvcrt.lib</IgnoreSpecificDefaultLibraries>
-      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
+      <LinkTimeCodeGeneration>Default</LinkTimeCodeGeneration>
     </Link>
     <Lib>
       <OutputFile>$(ProjectDir)bin\$(PlatformShortName)\$(Configuration)\$(TargetName)$(TargetExt)</OutputFile>
@@ -210,7 +210,7 @@
       <MinimalRebuild>false</MinimalRebuild>
       <ExceptionHandling>Async</ExceptionHandling>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
-      <AdditionalIncludeDirectories>..\;..\Sdk\SQLite\sqlite-amalgamation-3071502\;..\Sdk\Marray\v1.0\marray\include\;..\Sdk\Hdf5\1.8.8\include\;..\Sdk\OpenCV\OpenCV2.4\build\include\;..\Sdk\Boost\boost_1_44\;..\Sdk\DirectX\Microsoft DirectX SDK (June 2010)\Include\</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\;..\Sdk\SQLite\sqlite-amalgamation-3071700\;..\Sdk\Marray\v1.0\marray\include\;..\Sdk\Hdf5\1.8.8\include\;..\Sdk\OpenCV\OpenCV2.4\build\include\;..\Sdk\Boost\boost_1_44\;..\Sdk\DirectX\Microsoft DirectX SDK (June 2010)\Include\</AdditionalIncludeDirectories>
       <ObjectFileName>$(IntDir)</ObjectFileName>
       <AdditionalUsingDirectories>..\Sdk\SlimDX\SlimDX SDK (October 2010)\Bin\net40\x86\;..\Sdk\ObservableDictionary\v1.0\bin\Release\</AdditionalUsingDirectories>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
@@ -220,7 +220,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>..\Sdk\Hdf5\1.8.8\lib\;..\Sdk\OpenCV\OpenCV2.4\build\x86\vc10\lib\;..\Sdk\Boost\boost_1_44\lib\;..\Sdk\SQLite\sqlite-amalgamation-3071502\lib\x86\Release\</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\Sdk\Hdf5\1.8.8\lib\;..\Sdk\OpenCV\OpenCV2.4\build\x86\vc10\lib\;..\Sdk\Boost\boost_1_44\lib\;..\Sdk\SQLite\sqlite-amalgamation-3071700\lib\x86\ReleaseLib\</AdditionalLibraryDirectories>
       <AdditionalDependencies>hdf5.lib;libszip.lib;libzlib.lib;sqlite3.lib;opencv_highgui240.lib;opencv_imgproc240.lib;opencv_core240.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AssemblyDebug>true</AssemblyDebug>
     </Link>
@@ -251,7 +251,7 @@
       <MinimalRebuild>false</MinimalRebuild>
       <ExceptionHandling>Async</ExceptionHandling>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
-      <AdditionalIncludeDirectories>..\;..\Sdk\SQLite\sqlite-amalgamation-3071502\;..\Sdk\OpenCV\OpenCV2.4\build\include\;..\Sdk\Marray\v1.0\marray\include\;..\Sdk\Hdf5\1.8.8\include\;..\Sdk\Boost\boost_1_44\;..\Sdk\DirectX\Microsoft DirectX SDK (June 2010)\Include\</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\;..\Sdk\SQLite\sqlite-amalgamation-3071700\;..\Sdk\OpenCV\OpenCV2.4\build\include\;..\Sdk\Marray\v1.0\marray\include\;..\Sdk\Hdf5\1.8.8\include\;..\Sdk\Boost\boost_1_44\;..\Sdk\DirectX\Microsoft DirectX SDK (June 2010)\Include\</AdditionalIncludeDirectories>
       <ObjectFileName>$(IntDir)</ObjectFileName>
       <AdditionalUsingDirectories>..\Sdk\SlimDX\SlimDX SDK (October 2010)\Bin\net40\x64\;..\Sdk\ObservableDictionary\v1.0\bin\Release\</AdditionalUsingDirectories>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
@@ -263,7 +263,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>..\Sdk\Hdf5\1.8.8\lib64\;..\Sdk\OpenCV\OpenCV2.4\build\x64\vc10\lib\;..\Sdk\Boost\boost_1_44\lib64\;..\Sdk\SQLite\sqlite-amalgamation-3071502\lib\amd64\Release\</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\Sdk\Hdf5\1.8.8\lib64\;..\Sdk\OpenCV\OpenCV2.4\build\x64\vc10\lib\;..\Sdk\Boost\boost_1_44\lib64\;..\Sdk\SQLite\sqlite-amalgamation-3071700\lib\amd64\ReleaseLib\</AdditionalLibraryDirectories>
       <AdditionalDependencies>hdf5.lib;libszip.lib;libzlib.lib;sqlite3.lib;opencv_highgui240.lib;opencv_imgproc240.lib;opencv_core240.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AssemblyDebug>true</AssemblyDebug>
     </Link>

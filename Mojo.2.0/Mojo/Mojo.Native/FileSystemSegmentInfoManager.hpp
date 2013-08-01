@@ -14,7 +14,7 @@
 #include <boost/multi_index/random_access_index.hpp>
 #include <boost/multi_index/identity.hpp>
 #include <boost/multi_index/member.hpp>
-#include "sqlite3.h"
+#include <sqlite3.h>
 
 #undef min
 
