@@ -13,8 +13,18 @@ import h5py
 import lxml
 import lxml.etree
 import glob
-import sqlite3
 import colorsys
+
+#
+# Instead of importing sqlite3 from the standard library, we import from
+# the pysqlite2 package. This is because the version of sqlite3 in the standard
+# library is inconsistent across platforms and Python distributions. For example,
+# on the 32-bit Windows Enthought Python Distribution, the standard library sqlite3
+# is too old to read the db files that are read and written to by Mojo. On the other
+# hand, the standard library sqlite3 on On Mac OSX is new enough to load Mojo db
+# files. By using pysqlite2, we achieve more consistency across Python distributions. - MR
+#
+from pysqlite2 import dbapi2 as sqlite3
 
 tile_num_pixels_y             = 512
 tile_num_pixels_x             = 512
@@ -133,7 +143,7 @@ print "Found {0} input images in {1}".format( len(files), input_search_string )
 
 if len(files) > 0:
 
-    #Only load names if there is something to name
+    # Only load names if there is something to name
     if generate_memorable_names:
         print 'Loading words for memorable name generation.'
         import nltk
@@ -232,9 +242,9 @@ if len(files) > 0:
 
         original_ids = load_id_image( original_input_ids_name )
 
-        ## Grow regions until there are no boundaries
+        # Grow regions until there are no boundaries
 
-        ## Method 4 - watershed
+        # Method 4 - watershed
         original_ids = mahotas.cwatershed(np.zeros(original_ids.shape, dtype=np.uint32), original_ids, return_lines=False)
 
         if compress_ids:
@@ -245,13 +255,13 @@ if len(files) > 0:
         #grow_count = 0
         #while len(boundary_indices[0]) > 0:
 
-        #    ## Method 1 - dilate (slow)
+        #    # Method 1 - dilate (slow)
         #    #original_ids[boundary_indices] = mahotas.dilate(original_ids)[boundary_indices] - 1
 
-        #    ## Method 2 - conditional dilate (doesn't work)
+        #    # Method 2 - conditional dilate (doesn't work)
         #    #original_ids[boundary_indices] = mahotas.cdilate(original_ids, boundaries==0)[boundary_indices] - 1
 
-        #    ## Method 3 - direct shift
+        #    # Method 3 - direct shift
         #    shift_left = np.roll(original_ids, -1, 0);
         #    shift_left[-1,:] = 0
         #    shift_right = np.roll(original_ids, 1, 0);
@@ -360,10 +370,10 @@ if len(files) > 0:
             break
 
 
-    ## Sort the tile list so that the same id appears together
+    # Sort the tile list so that the same id appears together
     id_tile_list = np.array( sorted( id_tile_list ), np.uint32 )
 
-    ## Write all segment info to a single file
+    # Write all segment info to a single file
 
     print 'Writing colorMap file (hdf5).'
 

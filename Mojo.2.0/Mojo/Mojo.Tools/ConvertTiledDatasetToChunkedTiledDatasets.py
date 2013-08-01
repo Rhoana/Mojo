@@ -14,11 +14,21 @@ import h5py
 import lxml
 import lxml.etree
 import glob
-import sqlite3
 import colorsys
 
-## Open existing volume and create a series of subvolumes
-## (with the same ids / names etc)
+#
+# Instead of importing sqlite3 from the standard library, we import from
+# the pysqlite2 package. This is because the version of sqlite3 in the standard
+# library is inconsistent across platforms and Python distributions. For example,
+# on the 32-bit Windows Enthought Python Distribution, the standard library sqlite3
+# is too old to read the db files that are read and written to by Mojo. On the other
+# hand, the standard library sqlite3 on On Mac OSX is new enough to load Mojo db
+# files. By using pysqlite2, we achieve more consistency across Python distributions. - MR
+#
+from pysqlite2 import dbapi2 as sqlite3
+
+# Open existing volume and create a series of subvolumes
+# (with the same ids / names etc)
 
 #input_mojo_path               = 'D:\\dev\\datasets\\NewPipelineResults2\\mojo'
 #output_subvolume_path         = 'D:\\dev\\datasets\\NewPipelineResults2_Subvolumes'
@@ -120,7 +130,7 @@ tile_num_pixels_x = int ( idTiledVolumeDescription.xpath('@numVoxelsPerTileX')[0
 tile_num_pixels_y = int ( idTiledVolumeDescription.xpath('@numVoxelsPerTileY')[0] )
 
 
-## Calculate subvolume sizes
+# Calculate subvolume sizes
 if original_image_num_tiles_z < min_slices_per_subvolume:
     min_slices_per_subvolume = original_image_num_tiles_z
 
@@ -129,7 +139,7 @@ subvolume_size = int(math.floor(original_image_num_tiles_z / n_subvolumes))
 subvolume_start_indices = range(0, n_subvolumes * subvolume_size, subvolume_size)
 
 
-## Loop for each subvolume
+# Loop for each subvolume
 for subvolume_i in range(len(subvolume_start_indices)):
 
     subvolume_first_z = subvolume_start_indices[subvolume_i]
@@ -227,10 +237,10 @@ for subvolume_i in range(len(subvolume_start_indices)):
             tile_index_w               = tile_index_w               + 1
 
 
-    ## Sort the tile list so that the same id appears together
+    # Sort the tile list so that the same id appears together
     id_tile_list = np.array( sorted( id_tile_list ), np.uint32 )
 
-    ## Save subvolume xml and database files. Also save top-level Mojo files.
+    # Save subvolume xml and database files. Also save top-level Mojo files.
     print 'Copying colorMap file (hdf5).'
     shutil.copyfile(input_color_map_file, output_color_map_file)
 
@@ -267,7 +277,7 @@ for subvolume_i in range(len(subvolume_start_indices)):
     for segment_index in xrange( 1, id_max ):
         if len( segment_sizes ) > segment_index and segment_sizes[ segment_index ] > 0:
 
-            ## Add the segment info entry
+            # Add the segment info entry
             if segment_index == 0:
                 segment_name = '__boundary__'
             elif segment_names[segment_index] != None:
@@ -277,7 +287,7 @@ for subvolume_i in range(len(subvolume_start_indices)):
                 segment_name = "segment{0}".format( segment_index )
             cur.execute('INSERT INTO segmentInfo VALUES({0}, "{1}", {2}, {3});'.format( segment_index, segment_name, segment_sizes[ segment_index ], segment_confidence[ segment_index ] ))
 
-            ## Add the segment remap entry
+            # Add the segment remap entry
             if len( segment_remap ) > segment_index and segment_remap[ segment_index ] != segment_index:
                 cur.execute('INSERT INTO relabelMap VALUES({0}, {1});'.format( segment_index, segment_remap[ segment_index ]))
 
@@ -285,7 +295,7 @@ for subvolume_i in range(len(subvolume_start_indices)):
 
     con.close()
 
-    #Output TiledVolumeDescription xml files
+    # Output TiledVolumeDescription xml files
     print 'Writing TiledVolumeDescription files.'
 
     output_imageTiledVolumeDescription = lxml.etree.Element( "tiledVolumeDescription",
@@ -326,7 +336,7 @@ for subvolume_i in range(len(subvolume_start_indices)):
     with open( output_tile_ids_volume_file, 'w' ) as file:
         file.write( lxml.etree.tostring( output_idTiledVolumeDescription, pretty_print = True ) )
 
-    #Output TiledVolumeDescription xml files
+    # Output top-level Mojo files
     print 'Writing top-level Mojo files.'
 
     with open( output_image_top_level_mojo_file, 'w' ) as file:

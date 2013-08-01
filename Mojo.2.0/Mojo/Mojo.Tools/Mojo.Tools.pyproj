@@ -5,8 +5,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{d5d015d3-98f6-4c60-ac4b-15c562cd2cec}</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>
-    </StartupFile>
+    <StartupFile>ConvertTiledSegmentationDatasetToSegmentationDataset.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -24,13 +23,17 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="CreateTiledImageDataset.py">
+    <Compile Include="ConvertImageDatasetToTiledImageDataset.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="CreateTiledSegmentationDataset.py">
+    <Compile Include="ConvertTiledSegmentationDatasetToSegmentationDataset.py" />
+    <Compile Include="ConvertSegmentationDatasetToTiledSegmentationDataset.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="CreateChunkedTiledDatasets.py">
+    <Compile Include="ConvertTiledDatasetToChunkedTiledDatasets.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="MojoUtil.py">
       <SubType>Code</SubType>
     </Compile>
   </ItemGroup>
