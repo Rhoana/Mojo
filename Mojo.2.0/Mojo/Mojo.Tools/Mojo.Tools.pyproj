@@ -5,7 +5,8 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{d5d015d3-98f6-4c60-ac4b-15c562cd2cec}</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>ConvertTiledSegmentationDatasetToSegmentationDataset.py</StartupFile>
+    <StartupFile>
+    </StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
