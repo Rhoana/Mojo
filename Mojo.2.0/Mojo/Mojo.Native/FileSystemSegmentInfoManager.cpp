@@ -60,8 +60,8 @@ void FileSystemSegmentInfoManager::OpenDB()
 			std::ostringstream converter;
 
 			converter << "PRAGMA main.cache_size=10000;\n";
-			converter << "PRAGMA main.locking_mode=EXCLUSIVE;\n";
-			converter << "PRAGMA main.synchronous=OFF;\n";
+			//converter << "PRAGMA main.locking_mode=EXCLUSIVE;\n";
+			//converter << "PRAGMA main.synchronous=OFF;\n";
 			converter << "PRAGMA main.journal_mode=WAL;\n";
 			converter << "PRAGMA count_changes=OFF;\n";
 			converter << "PRAGMA main.temp_store=MEMORY;\n";
@@ -155,7 +155,7 @@ void FileSystemSegmentInfoManager::OpenDB()
 			// Load the label id map
 			//
             converter.str("");
-            converter << "SELECT fromId, toId FROM relabelMap WHERE fromId != toId ORDER BY fromId;";
+            converter << "SELECT fromId, toId FROM relabelMap WHERE fromId != toId and fromId != 0 and toId != 0 ORDER BY fromId;";
             query = converter.str();
 
             sqlReturn = sqlite3_prepare_v2(mIdTileIndexDB, query.c_str(), (int)query.size(), &statement, NULL); 
@@ -291,6 +291,8 @@ void FileSystemSegmentInfoManager::Save()
     {
         mCacheIdTileMap.GetHashMap().clear();
     }
+
+	CloseDB();
 
     Core::Printf( "Replacing idInfo file." );
 
@@ -593,6 +595,35 @@ SegmentInfo FileSystemSegmentInfoManager::GetSegmentInfo( unsigned int segId )
 	}
 
 }
+
+std::set< unsigned int > FileSystemSegmentInfoManager::GetRemappedChildren( unsigned int segId )
+{
+	std::set< unsigned int > remappedChildren;
+
+	if ( segId <= mIdMax )
+	{
+		remappedChildren.insert( segId );
+		bool newIds = true;
+
+		while ( newIds )
+		{
+			newIds = false;
+			for ( unsigned int checkId = 0; checkId <= mIdMax; ++checkId )
+			{
+				if ( remappedChildren.find( checkId ) == remappedChildren.end() && remappedChildren.find( mLabelIdMap( checkId ) ) != remappedChildren.end() )
+				{
+					remappedChildren.insert( checkId );
+					newIds = true;
+				}
+			}
+		}
+
+		remappedChildren.erase( segId );
+	}
+
+	return remappedChildren;
+}
+
 
 
 }

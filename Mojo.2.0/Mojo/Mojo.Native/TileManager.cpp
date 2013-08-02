@@ -604,6 +604,11 @@ SegmentInfo TileManager::GetSegmentInfo( unsigned int segId )
 	return mTileServer->GetSegmentInfo( segId );
 }
 
+std::set< unsigned int > TileManager::GetRemappedChildren( unsigned int segid )
+{
+	return mTileServer->GetRemappedChildren( segid );
+}
+
 MojoInt3 TileManager::GetSegmentationLabelColor( unsigned int segId )
 {
 	if ( mIdColorMap->size() > 0 )

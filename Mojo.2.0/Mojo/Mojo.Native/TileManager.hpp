@@ -71,6 +71,7 @@ public:
 	unsigned int                                          GetSegmentInfoCurrentListLocation( unsigned int segId );
     std::list< SegmentInfo >                              GetSegmentInfoRange( int begin, int end );
     SegmentInfo                                           GetSegmentInfo( unsigned int segId );
+	std::set< unsigned int >                              GetRemappedChildren( unsigned int segid );
 
     unsigned int                                          GetSegmentationLabelId( const TiledDatasetView& tiledDatasetView, MojoFloat3 pDataSpace );
     MojoInt3                                              GetSegmentationLabelColor( unsigned int segId );

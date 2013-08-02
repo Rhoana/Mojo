@@ -5098,6 +5098,8 @@ Core::VolumeDescription FileSystemTileServer::LoadTileImage( MojoInt4 tileIndex,
 {
     Core::VolumeDescription volumeDescription;
 
+	//Core::Printf( "Loading Image:", tileIndex.x, ",", tileIndex.y, ",", tileIndex.z, ",", tileIndex.w, "." );
+
     bool success = TryLoadTileImage( tileIndex, imageName, volumeDescription );
 
     RELEASE_ASSERT( success );
@@ -5141,6 +5143,8 @@ void FileSystemTileServer::UnloadTileImageInternal( Core::VolumeDescription& vol
 Core::VolumeDescription FileSystemTileServer::LoadTileHdf5( MojoInt4 tileIndex, std::string hdf5Name, std::string hdf5InternalDatasetName )
 {
     Core::VolumeDescription volumeDescription;
+
+	//Core::Printf( "Loading Seg  :", tileIndex.x, ",", tileIndex.y, ",", tileIndex.z, ",", tileIndex.w, "." );
 
     bool success = TryLoadTileHdf5( tileIndex, hdf5Name, hdf5InternalDatasetName, volumeDescription );
 
@@ -5436,6 +5440,11 @@ std::list< SegmentInfo > FileSystemTileServer::GetSegmentInfoRange( int begin, i
 SegmentInfo FileSystemTileServer::GetSegmentInfo( unsigned int segId )
 {
 	return mSegmentInfoManager.GetSegmentInfo( segId );
+}
+
+std::set< unsigned int > FileSystemTileServer::GetRemappedChildren( unsigned int segId )
+{
+	return mSegmentInfoManager.GetRemappedChildren( segId );
 }
 
 FileSystemSegmentInfoManager* FileSystemTileServer::GetSegmentInfoManager()

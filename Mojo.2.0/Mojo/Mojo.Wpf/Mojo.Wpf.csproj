@@ -282,6 +282,7 @@ copy ..\..\..\Shaders\*.fx Shaders\</PostBuildEvent>
     <Resource Include="Icons\SegmentationBorderLinesCrop.png" />
   </ItemGroup>
   <ItemGroup>
+    <Resource Include="Icons\Open3DViewer.png" />
     <Content Include="Shaders\AdjustRenderer2D.fx" />
     <Content Include="Shaders\DebugRenderer.fx" />
     <Content Include="Shaders\DrawMergeRenderer2D.fx" />

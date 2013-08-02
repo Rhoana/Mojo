@@ -14,6 +14,8 @@
         
         <BitmapImage x:Key="DatasetLoad"             UriSource="../Icons/DatasetLoad.png"             />
 
+        <BitmapImage x:Key="Open3DViewer"            UriSource="../Icons/Open3DViewer.png"            />
+        
         <BitmapImage x:Key="SegmentationLabelAdd"    UriSource="../Icons/SegmentationLabelAdd.png"    />
         <BitmapImage x:Key="SegmentationLabelRemove" UriSource="../Icons/SegmentationLabelRemove.png" />
 
@@ -146,6 +148,11 @@
                 </MenuItem>
                 <MenuItem Name="DecreaseSegmentationVisibility" Header="Decrease Segmentation Visibility" InputGestureText="D" Focusable="False" Command="{Binding Path=DecreaseSegmentationVisibilityCommand}" IsEnabled="{Binding Path=Engine.TileManager.SegmentationControlsEnabled}">
                 </MenuItem>
+                <MenuItem Name="Open3DViewerMenuItem" Header="3D View" InputGestureText="V" Focusable="False" Command="{Binding Path=Open3DViewerCommand}" IsEnabled="{Binding Path=Engine.TileManager.SegmentationControlsEnabled}" >
+                    <MenuItem.Icon>
+                        <Image Width="16" Height="16" Source="{StaticResource Open3DViewer}"/>
+                    </MenuItem.Icon>
+                </MenuItem>
             </MenuItem>
         </Menu>
 
@@ -170,6 +177,13 @@
                             <Label Content="Split Tool"/>
                         </StackPanel>
                     </RadioButton>
+                    <Border Width="1" BorderBrush="Gray" BorderThickness="1,0,0,0" Margin="5,5,5,5" />
+                    <Button Margin="5,5,5,5" VerticalAlignment="Center" Command="{Binding Path=Open3DViewerCommand}" IsEnabled="{Binding Path=Engine.TileManager.SegmentationControlsEnabled}">
+                        <DockPanel>
+                            <Image DockPanel.Dock="Left" Width="32" Height="32" Source="{StaticResource Open3DViewer}" />
+                            <Label DockPanel.Dock="Right">3D View</Label>
+                        </DockPanel>
+                    </Button>
                     <Border Width="1" BorderBrush="Gray" BorderThickness="1,0,0,0" Margin="5,5,5,5" />
                     <CheckBox Margin="5,5,5,5" VerticalAlignment="Center" IsChecked="{Binding Path=Engine.TileManager.JoinSplits3D}" IsEnabled="{Binding Path=Engine.TileManager.SegmentationControlsEnabled}">
                         <DockPanel>

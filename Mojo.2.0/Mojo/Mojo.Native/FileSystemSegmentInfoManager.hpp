@@ -104,7 +104,8 @@ public:
     unsigned int                                      GetSegmentInfoCurrentListLocation( unsigned int segId );
     std::list< SegmentInfo >                          GetSegmentInfoRange( unsigned int startIndex, unsigned int endIndex );
     SegmentInfo                                       GetSegmentInfo( unsigned int segId );
-                                               
+	std::set< unsigned int >                          GetRemappedChildren( unsigned int segId );
+
 private:                                       
 
 	FileSystemTileSet                                 LoadTileSet( unsigned int segid );

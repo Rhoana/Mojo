@@ -50,28 +50,32 @@ namespace Mojo
                     mEngine.CurrentToolMode = ToolMode.SplitSegmentation;
                     break;
 
+                case Key.V:
+                    mEngine.Open3DViewer();
+                    break;
+
                 case Key.Left:
                     centerDataSpace.X -= Constants.ARROW_KEY_STEP / dataSpaceUnitWidthNumPixels;
                     mTileManager.TiledDatasetView.CenterDataSpace = centerDataSpace;
-                    mTileManager.UpdateXYZ();
+                    mEngine.UpdateXYZ();
                     keyEventArgs.Handled = true;
                     break;
                 case Key.Right:
                     centerDataSpace.X += Constants.ARROW_KEY_STEP / dataSpaceUnitWidthNumPixels;
                     mTileManager.TiledDatasetView.CenterDataSpace = centerDataSpace;
-                    mTileManager.UpdateXYZ();
+                    mEngine.UpdateXYZ();
                     keyEventArgs.Handled = true;
                     break;
                 case Key.Up:
                     centerDataSpace.Y -= Constants.ARROW_KEY_STEP / dataSpaceUnitWidthNumPixels;
                     mTileManager.TiledDatasetView.CenterDataSpace = centerDataSpace;
-                    mTileManager.UpdateXYZ();
+                    mEngine.UpdateXYZ();
                     keyEventArgs.Handled = true;
                     break;
                 case Key.Down:
                     centerDataSpace.Y += Constants.ARROW_KEY_STEP / dataSpaceUnitWidthNumPixels;
                     mTileManager.TiledDatasetView.CenterDataSpace = centerDataSpace;
-                    mTileManager.UpdateXYZ();
+                    mEngine.UpdateXYZ();
                     keyEventArgs.Handled = true;
                     break;
 
@@ -113,7 +117,7 @@ namespace Mojo
             {
                 case System.Windows.Forms.MouseButtons.Middle:
                     mCurrentlyPanning = false;
-                    mTileManager.UpdateXYZ();
+                    mEngine.UpdateXYZ();
                     break;
                 case System.Windows.Forms.MouseButtons.XButton1:
                     mEngine.PreviousImage();
@@ -239,7 +243,7 @@ namespace Mojo
 
             mEngine.QuickRender();
 
-            mTileManager.UpdateXYZ();
+            mEngine.UpdateXYZ();
 
         }
 

@@ -426,7 +426,7 @@ namespace Mojo
             }
         }
 
-        private Vector3 GetPointDataSpace( Vector2 relativeScreenOffset )
+        public Vector3 GetPointDataSpace( Vector2 relativeScreenOffset )
         {
             var topLeftDataSpaceX = mTiledDatasetView.CenterDataSpace.X - ( mTiledDatasetView.ExtentDataSpace.X / 2f );
             var topLeftDataSpaceY = mTiledDatasetView.CenterDataSpace.Y - ( mTiledDatasetView.ExtentDataSpace.Y / 2f );
@@ -445,6 +445,11 @@ namespace Mojo
                 if ( SegmentationChangeInProgress ) return 0;
                 return Internal.GetSegmentationLabelId( mTiledDatasetView, GetPointDataSpace( p ) );
             }
+        }
+
+        public IList<uint> GetRemappedChildren( uint segId )
+        {
+            return Internal.GetRemappedChildren( segId );
         }
 
         public void MouseOver( Vector2 p )

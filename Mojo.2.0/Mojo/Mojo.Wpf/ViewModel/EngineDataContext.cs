@@ -47,6 +47,7 @@ namespace Mojo.Wpf.ViewModel
         public RelayCommand ToggleShowBoundaryLinesCommand { get; private set; }
         public RelayCommand IncreaseSegmentationVisibilityCommand { get; private set; }
         public RelayCommand DecreaseSegmentationVisibilityCommand { get; private set; }
+        public RelayCommand Open3DViewerCommand { get; private set; }
 
         //
         // Segment list commands
@@ -113,12 +114,13 @@ namespace Mojo.Wpf.ViewModel
             PreviousImageCommand = new RelayCommand( param => Engine.PreviousImage(), param => Engine.TileManager.TiledDatasetLoaded );
             ZoomInCommand = new RelayCommand( param => Engine.ZoomIn(), param => Engine.TileManager.TiledDatasetLoaded );
             ZoomOutCommand = new RelayCommand( param => Engine.ZoomOut(), param => Engine.TileManager.TiledDatasetLoaded );
-            UpdateLocationFromTextCommand = new RelayCommand( param => Engine.UpdateLocationFromText(param), param => Engine.TileManager.TiledDatasetLoaded );
+            UpdateLocationFromTextCommand = new RelayCommand( param => Engine.UpdateLocationFromText( param ), param => Engine.TileManager.TiledDatasetLoaded );
             ToggleShowSegmentationCommand = new RelayCommand( param => Engine.TileManager.ToggleShowSegmentation(), param => Engine.TileManager.SegmentationLoaded );
             ToggleShowBoundaryLinesCommand = new RelayCommand( param => Engine.TileManager.ToggleShowBoundaryLines(), param => Engine.TileManager.SegmentationLoaded );
             ToggleJoinSplits3DCommand = new RelayCommand( param => Engine.TileManager.ToggleJoinSplits3D(), param => Engine.TileManager.SegmentationLoaded );
             IncreaseSegmentationVisibilityCommand = new RelayCommand( param => Engine.TileManager.IncreaseSegmentationVisibility(), param => Engine.TileManager.SegmentationLoaded );
             DecreaseSegmentationVisibilityCommand = new RelayCommand( param => Engine.TileManager.DecreaseSegmentationVisibility(), param => Engine.TileManager.SegmentationLoaded );
+            Open3DViewerCommand = new RelayCommand( param => Engine.Open3DViewer(), param => Engine.TileManager.SegmentationLoaded );
 
             //
             // Segment list commands

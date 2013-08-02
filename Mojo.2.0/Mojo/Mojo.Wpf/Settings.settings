@@ -14,5 +14,8 @@
     <Setting Name="SegmentListItemsPerPage" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">1000</Value>
     </Setting>
+    <Setting Name="ExternalViewerPath" Type="System.String" Scope="User">
+      <Value Profile="(Default)">C:\Program Files\Mojo3DRelease\dist\viewer_3d.exe</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

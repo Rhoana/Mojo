@@ -182,6 +182,7 @@ namespace Mojo
                     // Select this segment
                     //
                     mTileManager.SelectedSegmentId = clickedId;
+                    mEngine.UpdateExternalViewerLocation( mTileManager.GetPointDataSpace( p ) );
                     mTileManager.PrepForAdjust( p );
                 }
             }

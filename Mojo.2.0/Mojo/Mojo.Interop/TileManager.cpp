@@ -232,6 +232,20 @@ SegmentInfo^ TileManager::GetSegmentInfo( unsigned int segId )
 	return gcnew SegmentInfo( segInfo, mTileManager->GetSegmentationLabelColorString( segInfo.id ) );
 }
 
+Collections::Generic::IList< unsigned int >^ TileManager::GetRemappedChildren( unsigned int segId )
+{
+	std::set< unsigned int > remappedChildren = mTileManager->GetRemappedChildren( segId );
+
+	Collections::Generic::List< unsigned int >^ interopRemappedChildren = gcnew Collections::Generic::List< unsigned int >();
+
+	for ( std::set< unsigned int >::iterator childIt = remappedChildren.begin(); childIt != remappedChildren.end(); ++childIt )
+	{
+		interopRemappedChildren->Add( *childIt );
+	}
+
+	return interopRemappedChildren;
+}
+
 SlimDX::Direct3D11::ShaderResourceView^ TileManager::GetIdColorMap()
 {
     return mIdColorMap;

@@ -64,6 +64,7 @@ public:
 	unsigned int                                            GetSegmentInfoCurrentListLocation( unsigned int segId );
     Collections::Generic::IList< SegmentInfo^ >^            GetSegmentInfoRange( int begin, int end );
     SegmentInfo^                                            GetSegmentInfo( unsigned int segId );
+    Collections::Generic::IList< unsigned int >^            GetRemappedChildren( unsigned int segId );
 
     unsigned int                                            GetSegmentationLabelId( TiledDatasetView^ tiledDatasetView, Vector3^ pDataSpace );
     String^                                                 GetSegmentationLabelColorString( unsigned int segId );

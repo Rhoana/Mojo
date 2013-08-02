@@ -101,6 +101,7 @@ public:
 	virtual unsigned int                                          GetSegmentInfoCurrentListLocation( unsigned int segId )                                                                = 0;
     virtual std::list< SegmentInfo >                              GetSegmentInfoRange( int begin, int end ) 	                                                                         = 0;
     virtual SegmentInfo                                           GetSegmentInfo( unsigned int segId )      	                                                                         = 0;
+	virtual std::set< unsigned int >                              GetRemappedChildren( unsigned int segid )                                                                              = 0;
 
     virtual FileSystemSegmentInfoManager*                         GetSegmentInfoManager()                                                                                                = 0;
 

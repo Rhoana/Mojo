@@ -113,6 +113,7 @@ public:
 	virtual unsigned int                                          GetSegmentInfoCurrentListLocation( unsigned int segId );
     virtual std::list< SegmentInfo >                              GetSegmentInfoRange( int begin, int end );
     SegmentInfo                                                   GetSegmentInfo( unsigned int segId );
+    virtual std::set< unsigned int >                              GetRemappedChildren( unsigned int segId );
 
     virtual FileSystemSegmentInfoManager*                         GetSegmentInfoManager();
 

@@ -6,11 +6,13 @@ namespace Mojo
     public class MergeSegmentationTool : ToolBase
     {
         private readonly TileManager mTileManager;
+        private readonly Engine mEngine;
 
         public MergeSegmentationTool( TileManager tileManager, Engine engine )
             : base( tileManager, engine )
         {
             mTileManager = tileManager;
+            mEngine = engine;
         }
 
         public override void SelectSegment( uint segmentId )
@@ -79,6 +81,7 @@ namespace Mojo
                         {
                             //Select this segment
                             mTileManager.SelectedSegmentId = clickedId;
+                            mEngine.UpdateExternalViewerLocation( mTileManager.GetPointDataSpace( p ) );
                         }
                     }
                 }
