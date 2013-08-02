@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi" xmlns:netfx="http://schemas.microsoft.com/wix/NetFxExtension">
+  <Product Name="Mojo" Id="*" Language="1033" Version="!(bind.fileVersion.MojoEXE)" Manufacturer="Harvard SEAS" UpgradeCode="2A6FBBC1-AB6F-4C8C-B709-EE870A1CA4BA">
+    <Package Id="*" Keywords="Installer" Description="Harvard SEAS Mojo 2.0 Installer (64 bit)" Manufacturer="Harvard SEAS" InstallerVersion="300" Compressed="yes" InstallScope="perMachine" />
+
+    <MediaTemplate EmbedCab="yes" />
+
+    <MajorUpgrade AllowSameVersionUpgrades="yes" DowngradeErrorMessage="A newer version of [ProductName] is already installed. Setup will now exit." />
+
+    <!--Property Id="PREVIOUSVERSIONSINSTALLED" Secure="yes" />
+    <Upgrade Id="{6E9D7B6B-9764-44C7-8477-C7F8EBBF57B5}">
+      <UpgradeVersion
+         Minimum="1.0.0.0" Maximum="99.0.0.0"
+         Property="PREVIOUSVERSIONSINSTALLED"
+         IncludeMinimum="yes" IncludeMaximum="no" />
+    </Upgrade-->
+
+    <Directory Id="TARGETDIR" Name="SourceDir">
+      <Directory Id="ProgramFiles64Folder">
+        <Directory Id="INSTALLFOLDER" Name="Mojo">
+          <Directory Id="ShadersFolder" Name="Shaders" />
+          <Directory Id="DirectXFolder" Name="DirectX" />
+        </Directory>
+      </Directory>
+      <Directory Id="ProgramMenuFolder" Name="Programs">
+        <Directory Id="ProgramMenuSubFolder" Name="Mojo 2.0" />
+      </Directory>
+      <Directory Id="DesktopFolder" Name="Desktop" />
+    </Directory>
+
+    <DirectoryRef Id="INSTALLFOLDER">
+
+      <Component Id="MainExecutable" Guid="723EE864-91A1-4F9E-BD91-754B1BE39461">
+        <File Id="MojoEXE" Name="Mojo.Wpf.exe" Source="..\Mojo\Mojo.Wpf\bin\x64\Release\Mojo.Wpf.exe" KeyPath="yes" />
+      </Component>
+
+      <Component Id="MojoConfig" Guid="C91F22B1-6C11-4784-AE7C-1A0CD4E2438B">
+        <File Id="MojoConfig" Name="Mojo.Wpf.exe.config" Source="..\Mojo\Mojo.Wpf\bin\x64\Release\Mojo.Wpf.exe.config" />
+      </Component>
+
+      <Component Id="MojoDLL" Guid="05DBD086-0C83-48D7-B7E8-391E97C5CCFE">
+        <File Id="MojoDLL" Name="Mojo.dll" Source="..\Mojo\Mojo.Wpf\bin\x64\Release\Mojo.dll" />
+      </Component>
+
+      <Component Id="MojoInteropDLL" Guid="301C8144-0714-43C5-A745-035D90E44963">
+        <File Id="MojoInteropDLL" Name="Mojo.Interop.dll" Source="..\Mojo\Mojo.Wpf\bin\x64\Release\Mojo.Interop.dll" />
+      </Component>
+
+      <Component Id="ObservableDictionaryDLL" Guid="4077F21B-75E7-4279-9BA3-CA0E12B16A27">
+        <File Id="ObservableDictionaryDLL" Name="ObservableDictionary.dll" Source="..\Mojo\Mojo.Wpf\bin\x64\Release\ObservableDictionary.dll" />
+      </Component>
+
+      <Component Id="OokiDialogs" Guid="FC73C862-0230-4640-9D1E-6DF1CB6A21D1">
+        <File Id="OokiDialogs" Name="Ookii.Dialogs.Wpf.dll" Source="..\Mojo\Mojo.Wpf\bin\x64\Release\Ookii.Dialogs.Wpf.dll" />
+      </Component>
+
+      <Component Id="SlimDX" Guid="B71E18D9-7539-49F8-8E7F-7838E5D34E7E">
+        <File Id="SlimDX" Name="SlimDX.dll" Source="..\Mojo\Mojo.Wpf\bin\x64\Release\SlimDX.dll" />
+      </Component>
+
+      <Component Id="OpenCvCoreDLL" Guid="7F56A245-A6BB-474B-9CB8-5E5B3ED65F70">
+        <File Id="OpenCvCoreDLL" Name="opencv_core240.dll" Source="..\Mojo\Mojo.Wpf\bin\x64\Release\opencv_core240.dll" />
+      </Component>
+
+      <Component Id="OpenCvHighGuiDLL" Guid="115D3D56-A959-4996-A1FF-B449AFA8BC32">
+        <File Id="OpenCvHighGuiDLL" Name="opencv_highgui240.dll" Source="..\Mojo\Mojo.Wpf\bin\x64\Release\opencv_highgui240.dll" />
+      </Component>
+
+      <Component Id="tbbDLL" Guid="2B4F940F-BCC5-4B7A-8DA5-F788CB582569">
+        <File Id="tbbDLL" Name="tbb.dll" Source="..\Mojo\Mojo.Wpf\bin\x64\Release\tbb.dll" />
+      </Component>
+
+    </DirectoryRef>
+
+    <DirectoryRef Id="ShadersFolder">
+
+      <Component Id="Shaders" Guid="EA867978-B481-4824-817B-AAEB1B439894">
+        <File Id="AdjustRenderer2DFX" Name="AdjustRenderer2D.fx" Source="..\Mojo\Mojo.Wpf\bin\x64\Release\Shaders\AdjustRenderer2D.fx" />
+        <File Id="DebugRendererFX" Name="DebugRenderer.fx" Source="..\Mojo\Mojo.Wpf\bin\x64\Release\Shaders\DebugRenderer.fx" />
+        <File Id="DrawMergeRenderer2DFX" Name="DrawMergeRenderer2D.fx" Source="..\Mojo\Mojo.Wpf\bin\x64\Release\Shaders\DrawMergeRenderer2D.fx" />
+        <File Id="MergeRenderer2DFX" Name="MergeRenderer2D.fx" Source="..\Mojo\Mojo.Wpf\bin\x64\Release\Shaders\MergeRenderer2D.fx" />
+        <File Id="SplitRenderer2DFX" Name="SplitRenderer2D.fx" Source="..\Mojo\Mojo.Wpf\bin\x64\Release\Shaders\SplitRenderer2D.fx" />
+      </Component>
+
+    </DirectoryRef>
+
+    <DirectoryRef Id="ProgramMenuSubFolder">
+      <Component Id="StartMenuShortcut" Guid="3B9F97CF-263A-4E86-8EE7-8B33BB4DECDD">
+        <Shortcut Id="ApplicationStartMenuShortcut"
+                  Name="Mojo 2.0 (64 bit)"
+                  Description="Mojo: Connectome Annotation Tool."
+                  Target="[INSTALLFOLDER]Mojo.Wpf.exe"
+                  WorkingDirectory="INSTALLFOLDER"
+                  Icon="Mojo.ico"
+                  />
+        <RemoveFolder Id="ProgramMenuSubFolder" On="uninstall"/>
+        <RegistryValue Root="HKCU" Key="Software\HarvardSEAS\MojoConnectomeAnnotation" Name="installed" Type="integer" Value="1" KeyPath="yes"/>
+      </Component>
+    </DirectoryRef>
+
+    <DirectoryRef Id="DesktopFolder">
+      <Component Id="DesktopShortcut" Guid="D4FB0B9A-FD78-4DB0-9BB2-FB7ADBF5FC9F">
+        <Shortcut Id="ApplicationDesktopShortcut"
+                  Name="Mojo 2.0"
+                  Description="Mojo: Connectome Annotation Tool."
+                  Target="[INSTALLFOLDER]Mojo.Wpf.exe"
+                  WorkingDirectory="INSTALLFOLDER"
+                  Icon="Mojo.ico"
+                  />
+        <RegistryValue Root="HKCU" Key="Software\HarvardSEAS\MojoConnectomeAnnotation" Name="installed" Type="integer" Value="1" KeyPath="yes"/>
+      </Component>
+    </DirectoryRef>
+
+    <DirectoryRef Id="TARGETDIR">
+      <Merge Id="VCRedist" SourceFile="Microsoft_VC100_CRT_x64.msm" DiskId="1" Language="0"/>
+    </DirectoryRef>
+
+    <DirectoryRef Id="DirectXFolder">
+      <Component Id="DirectXRedist" Guid="176E0848-C46D-4D39-BDB7-59527D0169AB">
+        <File Id="DXSETUPEXE" Source="directx\dxsetup.exe" KeyPath="yes" Checksum="yes"/>
+        <File Id="dxupdate.cab" Source="directx\dxupdate.cab"/>
+        <File Id="dxdllreg_x86.cab" Source="directx\dxdllreg_x86.cab"/>
+        <File Id="dsetup32.dll" Source="directx\dsetup32.dll"/>
+        <File Id="dsetup.dll" Source="directx\dsetup.dll"/>
+        <File Id="Jun2010_D3DCompiler_43_x86.cab" Source="directx\Jun2010_D3DCompiler_43_x86.cab"/>
+        <File Id="Jun2010_D3DCompiler_43_x64.cab" Source="directx\Jun2010_D3DCompiler_43_x64.cab"/>
+      </Component>
+    </DirectoryRef>
+
+    <Feature Id="MainApplication" Title="Mojo" Level="1">
+      <ComponentRef Id="MainExecutable" />
+      <ComponentRef Id="MojoConfig" />
+      <ComponentRef Id="MojoDLL" />
+      <ComponentRef Id="MojoInteropDLL" />
+      <ComponentRef Id="ObservableDictionaryDLL" />
+      <ComponentRef Id="OokiDialogs" />
+      <ComponentRef Id="SlimDX" />
+      <ComponentRef Id="OpenCvCoreDLL" />
+      <ComponentRef Id="OpenCvHighGuiDLL" />
+      <ComponentRef Id="tbbDLL" />
+      <ComponentRef Id="Shaders" />
+      <ComponentRef Id="StartMenuShortcut" />
+      <ComponentRef Id="DesktopShortcut" />
+    </Feature>
+
+    <Feature Id="VCRedist" Title="Visual C++ 10.0 Runtime (x64)" AllowAdvertise="no" Display="hidden" Level="1">
+      <MergeRef Id="VCRedist"/>
+    </Feature>
+
+    <Feature Id="DirectXRedist"
+        Title="DirectX Runtime"
+        AllowAdvertise="no"
+        Display="hidden" Level="1">
+      <ComponentRef Id="DirectXRedist"/>
+    </Feature>
+
+    <CustomAction Id="InstallDirectX"
+        FileKey="DXSETUPEXE"
+        ExeCommand="/silent"
+        Execute="deferred"
+        Impersonate="no"
+        Return="check"/>
+
+    <InstallExecuteSequence>
+      <!--RemoveExistingProducts Before="InstallInitialize" /-->
+      <Custom Action="InstallDirectX" Before="InstallFinalize">
+        <![CDATA[NOT REMOVE]]>
+      </Custom>
+    </InstallExecuteSequence>
+
+    <PropertyRef Id="NETFRAMEWORK40CLIENT"/>
+
+    <Condition Message="This application requires .NET Framework 4.0 Client Profile. Please install the .NET Framework 4 Client Profile then run this installer again.">
+      <![CDATA[Installed OR NETFRAMEWORK40CLIENT]]>
+    </Condition>
+
+    <Icon Id="Mojo.ico" SourceFile="..\Mojo\Mojo.Wpf\Icons\Mojo.ico" />
+    <Property Id="ARPPRODUCTICON" Value="Mojo.ico" />
+
+    <Property Id="WIXUI_EXITDIALOGOPTIONALCHECKBOXTEXT" Value="Launch Mojo 2.0" />
+    <Property Id="WixShellExecTarget" Value="[#MojoEXE]" />
+    <CustomAction Id="LaunchApplication" BinaryKey="WixCA" DllEntry="WixShellExec" Impersonate="yes" />
+
+    <WixVariable Id="WixUILicenseRtf" Value="license.rtf" />
+
+    <UI>
+      <UIRef Id="WixUI_Minimal" />
+      <Publish Dialog="ExitDialog"
+          Control="Finish"
+          Event="DoAction"
+          Value="LaunchApplication">WIXUI_EXITDIALOGOPTIONALCHECKBOX = 1</Publish>
+    </UI>
+
+  </Product>
+
+</Wix>
