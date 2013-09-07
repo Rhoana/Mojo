@@ -35,7 +35,6 @@ tile_num_voxels_x                           = 512
 input_top_level_mojo_image_directory        = 'C:\\Users\\mike\\Data\\Local\\2013_mojo\\isbi_submission_mojo\\isbi_submission_mojoimg'
 input_top_level_mojo_segmentation_directory = 'C:\\Users\\mike\\Data\\Local\\2013_mojo\\isbi_submission_edited_mojo\\isbi_submission_edited_mojoseg'
 input_resolution_as_w_index                 = 0
-input_tile_image_path                       = input_top_level_mojo_image_directory        + '\\images\\tiles\\w=%08d' % input_resolution_as_w_index
 input_tile_id_path                          = input_top_level_mojo_segmentation_directory + '\\ids\\tiles\\w=%08d'    % input_resolution_as_w_index
 input_tile_id_volume_file                   = input_top_level_mojo_segmentation_directory + '\\ids\\tiledVolumeDescription.xml'
 input_color_map_file                        = input_top_level_mojo_segmentation_directory + '\\ids\\colorMap.hdf5'

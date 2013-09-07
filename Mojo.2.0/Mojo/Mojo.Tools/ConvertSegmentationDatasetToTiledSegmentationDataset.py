@@ -63,14 +63,25 @@ compress_ids                  = True
 #ncolors                       = 1000
 #input_file_format             = 'png'
 
-original_input_ids_path        = 'C:\\Users\\mike\\Data\\Local\\2013_mojo\\isbi_submission\\labels'
-output_path                    = 'C:\\Users\\mike\\Data\\Local\\2013_mojo\\isbi_submission_mojo\\isbi_submission_mojoseg'
-output_top_level_mojo_file     = 'C:\\Users\\mike\\Data\\Local\\2013_mojo\\isbi_submission_mojo\\isbi_submission.mojoseg'
-nimages_to_process             = 100
+#original_input_ids_path        = 'C:\\Users\\mike\\Data\\Local\\2013_mojo\\isbi_submission\\labels'
+#output_path                    = 'C:\\Users\\mike\\Data\\Local\\2013_mojo\\isbi_submission_mojo\\isbi_submission_mojoseg'
+#output_top_level_mojo_file     = 'C:\\Users\\mike\\Data\\Local\\2013_mojo\\isbi_submission_mojo\\isbi_submission.mojoseg'
+#nimages_to_process             = 100
+#ncolors                        = 1000
+#input_file_format              = 'png'
+#transpose_label_images         = False
+#subtract_one_from_label_images = False
+
+original_input_ids_path        = 'C:\\Users\\mike\\Data\\Local\\2013_mojo\\isbi_train64_scf095_segs60_FS3_join500\\isbi_train64_scf095_segs60_FS3_join500\\labels'
+output_path                    = 'C:\\Users\\mike\\Data\\Local\\2013_mojo\\SegmentationExperiment\\Mojo20\\isbi_train_input_images_mojoseg'
+output_top_level_mojo_file     = 'C:\\Users\\mike\\Data\\Local\\2013_mojo\\SegmentationExperiment\\Mojo20\\isbi_train_input_images.mojoseg'
+nimages_to_process             = 10
 ncolors                        = 1000
 input_file_format              = 'png'
 transpose_label_images         = False
 subtract_one_from_label_images = False
+
+
 
 output_tile_ids_path          = output_path + '\\ids\\tiles'
 output_tile_volume_file       = output_path + '\\ids\\tiledVolumeDescription.xml'
