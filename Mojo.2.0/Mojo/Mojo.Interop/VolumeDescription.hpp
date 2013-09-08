@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Mojo.Core/VolumeDescription.hpp"
+#include "Mojo.Native/VolumeDescription.hpp"
 
 #using <SlimDX.dll>
 
@@ -18,9 +18,9 @@ public ref class VolumeDescription
 {
 public:
     VolumeDescription();
-    VolumeDescription( const Core::VolumeDescription& volumeDescription );
+    VolumeDescription( const Native::VolumeDescription& volumeDescription );
 
-    Core::VolumeDescription ToCore();
+    Native::VolumeDescription ToCore();
 
     property DataStream^ DataStream;
     property IntPtr      Data;

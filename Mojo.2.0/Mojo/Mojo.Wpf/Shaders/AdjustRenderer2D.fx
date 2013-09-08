@@ -74,134 +74,134 @@ float4 PS( PS_IN input ) : SV_Target
     float4 sourceColor    = float4( rawSourceColor.xxx, 1.0f );
 
     int4   index3D        = int4( (int)( input.texCoord.x * 512 ), (int)( input.texCoord.y * 512 ), (int)( input.texCoord.z * 1 ), 0 );
-	uint   previd          = gIdTexture3D.Load( index3D );
+    uint   previd          = gIdTexture3D.Load( index3D );
     uint   id              = gLabelIdMapBuffer.Load( previd );
 
-	while ( id != previd )
-	{
-		previd = id;
-		id = gLabelIdMapBuffer.Load( previd );
-	}
+    while ( id != previd )
+    {
+        previd = id;
+        id = gLabelIdMapBuffer.Load( previd );
+    }
 
-	uint   overlay        = gOverlayTexture3D.Load( index3D );
+    uint   overlay        = gOverlayTexture3D.Load( index3D );
     float4 idColor        = gIdColorMapBuffer.Load( id % gIdColorMapBuffer.Length );
     float1 idConfidence   = gIdConfidenceMapBuffer.Load( id );
 
-	if ( idConfidence.x > 0.0f && index3D.x % 16 < 12 && index3D.y % 16 < 12 )
-		idColor = float4( 0.0f, 0.0f, 0.3f, 0.0f );
+    if ( idConfidence.x > 0.0f && index3D.x % 16 < 12 && index3D.y % 16 < 12 )
+        idColor = float4( 0.0f, 0.0f, 0.3f, 0.0f );
 
-	float4 returnColor    = ( ( 1.0f - gSegmentationRatio ) * sourceColor ) + ( gSegmentationRatio * idColor );
+    float4 returnColor    = ( ( 1.0f - gSegmentationRatio ) * sourceColor ) + ( gSegmentationRatio * idColor );
 
     float xDist           = ( (float) index3D.x ) - gMouseOverX * 512.0f + 0.5f;
-	float yDist           = ( (float) index3D.y ) - gMouseOverY * 512.0f + 0.5f;
-	float mouseDistance   = sqrt( xDist * xDist + yDist * yDist );
+    float yDist           = ( (float) index3D.y ) - gMouseOverY * 512.0f + 0.5f;
+    float mouseDistance   = sqrt( xDist * xDist + yDist * yDist );
 
     bool border           = false;
     bool selectBorder     = false;
 
-	if ( gBoundaryLinesVisible )
-	{
-		//Check for borders
-		if ( index3D.x > 0 )
-		{
-			int4   index3DLeft      = int4( index3D.x - 1, index3D.y, index3D.z, 0 );
-			uint   previdLeft       = gIdTexture3D.Load( index3DLeft );
-			uint   idLeft           = gLabelIdMapBuffer.Load( previdLeft );
-			while ( idLeft != previdLeft )
-			{
-				previdLeft = idLeft;
-				idLeft = gLabelIdMapBuffer.Load( previdLeft );
-			}
-			if ( idLeft != id )
-			{
-				//idColor = float4( 0.0f, 0.0f, 0.0f, 0.0f );
-				border = true;
-				if ( id == gSelectedSegmentId || idLeft == gSelectedSegmentId )
-				{
-					selectBorder = true;
-				}
-			}
-		}
+    if ( gBoundaryLinesVisible )
+    {
+        //Check for borders
+        if ( index3D.x > 0 )
+        {
+            int4   index3DLeft      = int4( index3D.x - 1, index3D.y, index3D.z, 0 );
+            uint   previdLeft       = gIdTexture3D.Load( index3DLeft );
+            uint   idLeft           = gLabelIdMapBuffer.Load( previdLeft );
+            while ( idLeft != previdLeft )
+            {
+                previdLeft = idLeft;
+                idLeft = gLabelIdMapBuffer.Load( previdLeft );
+            }
+            if ( idLeft != id )
+            {
+                //idColor = float4( 0.0f, 0.0f, 0.0f, 0.0f );
+                border = true;
+                if ( id == gSelectedSegmentId || idLeft == gSelectedSegmentId )
+                {
+                    selectBorder = true;
+                }
+            }
+        }
 
-		if ( index3D.y > 0 )
-		{
-			int4   index3DUp      = int4( index3D.x, index3D.y - 1, index3D.z, 0 );
-			uint   previdUp       = gIdTexture3D.Load( index3DUp );
-			uint   idUp           = gLabelIdMapBuffer.Load( previdUp );
-			while ( idUp != previdUp )
-			{
-				previdUp = idUp;
-				idUp = gLabelIdMapBuffer.Load( previdUp );
-			}
-			if ( idUp != id )
-			{
-				//idColor = float4( 0.0f, 0.0f, 0.0f, 0.0f );
-				border = true;
-				if ( id == gSelectedSegmentId || idUp == gSelectedSegmentId )
-				{
-					selectBorder = true;
-				}
-			}
-		}
+        if ( index3D.y > 0 )
+        {
+            int4   index3DUp      = int4( index3D.x, index3D.y - 1, index3D.z, 0 );
+            uint   previdUp       = gIdTexture3D.Load( index3DUp );
+            uint   idUp           = gLabelIdMapBuffer.Load( previdUp );
+            while ( idUp != previdUp )
+            {
+                previdUp = idUp;
+                idUp = gLabelIdMapBuffer.Load( previdUp );
+            }
+            if ( idUp != id )
+            {
+                //idColor = float4( 0.0f, 0.0f, 0.0f, 0.0f );
+                border = true;
+                if ( id == gSelectedSegmentId || idUp == gSelectedSegmentId )
+                {
+                    selectBorder = true;
+                }
+            }
+        }
 
-		if ( index3D.y > 0 && index3D.x > 0 )
-		{
-			int4   index3DLeftUp  = int4( index3D.x - 1, index3D.y - 1, index3D.z, 0 );
-			uint   previdLeftUp       = gIdTexture3D.Load( index3DLeftUp );
-			uint   idLeftUp           = gLabelIdMapBuffer.Load( previdLeftUp );
-			while ( idLeftUp != previdLeftUp )
-			{
-				previdLeftUp = idLeftUp;
-				idLeftUp = gLabelIdMapBuffer.Load( previdLeftUp );
-			}
-			if ( idLeftUp != id )
-			{
-				//idColor = float4( 0.0f, 0.0f, 0.0f, 0.0f );
-				border = true;
-				if ( id == gSelectedSegmentId || idLeftUp == gSelectedSegmentId )
-				{
-					selectBorder = true;
-				}
-			}
-		}
-	}
+        if ( index3D.y > 0 && index3D.x > 0 )
+        {
+            int4   index3DLeftUp  = int4( index3D.x - 1, index3D.y - 1, index3D.z, 0 );
+            uint   previdLeftUp       = gIdTexture3D.Load( index3DLeftUp );
+            uint   idLeftUp           = gLabelIdMapBuffer.Load( previdLeftUp );
+            while ( idLeftUp != previdLeftUp )
+            {
+                previdLeftUp = idLeftUp;
+                idLeftUp = gLabelIdMapBuffer.Load( previdLeftUp );
+            }
+            if ( idLeftUp != id )
+            {
+                //idColor = float4( 0.0f, 0.0f, 0.0f, 0.0f );
+                border = true;
+                if ( id == gSelectedSegmentId || idLeftUp == gSelectedSegmentId )
+                {
+                    selectBorder = true;
+                }
+            }
+        }
+    }
 
     if ( border && gSegmentationRatio > 0.0f )
     {
         if ( selectBorder && mouseDistance < gMouseHighlightSize )
-		    returnColor = float4( 0.4f, 0.4f, 0.8f, 0.0f );
+            returnColor = float4( 0.4f, 0.4f, 0.8f, 0.0f );
         else if ( selectBorder )
-		    returnColor = float4( 1.0f, 1.0f, 1.0f, 0.0f );
+            returnColor = float4( 1.0f, 1.0f, 1.0f, 0.0f );
         else
-		    returnColor = float4( 0.0f, 0.0f, 0.0f, 0.0f );
+            returnColor = float4( 0.0f, 0.0f, 0.0f, 0.0f );
     }
-	else if ( gBrushVisible && id != 0 && id != gSelectedSegmentId && ( mouseDistance < gMouseHighlightSize ) )
-	{
-		returnColor = sourceColor + float4( -0.2f, -0.2f, 0.2f, 0.0f);
-	}
-	else if ( id != 0 && gSegmentationRatio > 0.0f )
-	{
+    else if ( gBrushVisible && id != 0 && id != gSelectedSegmentId && ( mouseDistance < gMouseHighlightSize ) )
+    {
+        returnColor = sourceColor + float4( -0.2f, -0.2f, 0.2f, 0.0f);
+    }
+    else if ( id != 0 && gSegmentationRatio > 0.0f )
+    {
         if ( border )
         {
             returnColor = float4( 0.0f, 0.0f, 0.0f, 0.0f );
         }
-		else if ( gSelectedSegmentId != 0 && id != gSelectedSegmentId )
-		{
-			returnColor = sourceColor;
-		}
+        else if ( gSelectedSegmentId != 0 && id != gSelectedSegmentId )
+        {
+            returnColor = sourceColor;
+        }
         else if ( gSelectedSegmentId == 0 && id == gMouseOverSegmentId )
-		{
-			returnColor *= 1.2;
-		}
+        {
+            returnColor *= 1.2;
+        }
     }
-	if ( gSegmentationRatio > 0.0f )
-	{
-		if ( overlay == REGION_A && id != gSelectedSegmentId )
-		{
-			//Split bonus region ( drawn line )
-		    returnColor = sourceColor + float4( -0.5f, -0.5f, 0.0f, 0.0f);
-		}
-	}
+    if ( gSegmentationRatio > 0.0f )
+    {
+        if ( overlay == REGION_A && id != gSelectedSegmentId )
+        {
+            //Split bonus region ( drawn line )
+            returnColor = sourceColor + float4( -0.5f, -0.5f, 0.0f, 0.0f);
+        }
+    }
 
     return returnColor;
 }

@@ -1,7 +1,7 @@
 #include "FileSystemSegmentInfoManager.hpp"
-#include "Constants.hpp"
+#include "FileSystemTileServerConstants.hpp"
 
-#include "Mojo.Core/Boost.hpp"
+#include "Boost.hpp"
 
 namespace Mojo
 {
@@ -29,7 +29,7 @@ void FileSystemSegmentInfoManager::CloseDB()
     if ( mIsDBOpen )
     {
         sqlite3_close( mIdTileIndexDB );
-        Core::Printf( "Closed SQLite database ", mIdTileIndexDBPath, "." );
+        Printf( "Closed SQLite database ", mIdTileIndexDBPath, "." );
         mIsDBOpen = false;
     }
 }
@@ -44,42 +44,42 @@ void FileSystemSegmentInfoManager::OpenDB()
         int sqlReturn = sqlite3_open( mIdTileIndexDBPath.c_str(), &mIdTileIndexDB );
         if ( sqlReturn )
         {
-            Core::Printf( "Error opening SQLite database: ", std::string( sqlite3_errmsg( mIdTileIndexDB ) ) );
+            Printf( "Error opening SQLite database: ", std::string( sqlite3_errmsg( mIdTileIndexDB ) ) );
             sqlite3_close( mIdTileIndexDB );
         }
         else
         {
 
-			Core::Printf( "Opened SQLite database ", mIdTileIndexDBPath, "." );
+            Printf( "Opened SQLite database ", mIdTileIndexDBPath, "." );
             mIsDBOpen = true;
 
-			//
-			// SQLite PRAGMAS for faster operation
-			//
-			std::string query;
-			std::ostringstream converter;
+            //
+            // SQLite PRAGMAS for faster operation
+            //
+            std::string query;
+            std::ostringstream converter;
 
-			converter << "PRAGMA main.cache_size=10000;\n";
-			converter << "PRAGMA main.locking_mode=EXCLUSIVE;\n";
-			converter << "PRAGMA main.synchronous=OFF;\n";
-			converter << "PRAGMA main.journal_mode=WAL;\n";
-			converter << "PRAGMA count_changes=OFF;\n";
-			converter << "PRAGMA main.temp_store=MEMORY;\n";
+            converter << "PRAGMA main.cache_size=10000;\n";
+            converter << "PRAGMA main.locking_mode=EXCLUSIVE;\n";
+            converter << "PRAGMA main.synchronous=OFF;\n";
+            converter << "PRAGMA main.journal_mode=WAL;\n";
+            converter << "PRAGMA count_changes=OFF;\n";
+            converter << "PRAGMA main.temp_store=MEMORY;\n";
 
-			int sqlReturn;
-			char *sqlError = NULL;
+            int sqlReturn;
+            char *sqlError = NULL;
 
-			query = converter.str();
-			sqlReturn = sqlite3_exec( mIdTileIndexDB, query.c_str(), NULL, NULL, &sqlError); 
+            query = converter.str();
+            sqlReturn = sqlite3_exec( mIdTileIndexDB, query.c_str(), NULL, NULL, &sqlError); 
 
-			if ( sqlReturn != SQLITE_OK )
-			{
-				Core::Printf( "ERROR: Unable to execute PRAGMA statements in database (", sqlReturn, "): ", std::string( sqlError ) );
-			}
+            if ( sqlReturn != SQLITE_OK )
+            {
+                Printf( "ERROR: Unable to execute PRAGMA statements in database (", sqlReturn, "): ", std::string( sqlError ) );
+            }
 
-			//
-			// Get mIdMax
-			//
+            //
+            // Get mIdMax
+            //
             sqlite3_stmt* statement = NULL;
             converter.str("");
             converter << "SELECT MAX(id) FROM segmentInfo;";
@@ -89,7 +89,7 @@ void FileSystemSegmentInfoManager::OpenDB()
 
             if ( sqlReturn )
             {
-                Core::Printf( "Error preparing SQLite3 query (", sqlReturn, "): ", sqlite3_errmsg( mIdTileIndexDB ) );
+                Printf( "Error preparing SQLite3 query (", sqlReturn, "): ", sqlite3_errmsg( mIdTileIndexDB ) );
             }
             else
             {
@@ -97,7 +97,7 @@ void FileSystemSegmentInfoManager::OpenDB()
                 {
                     mIdMax = sqlite3_column_int(statement, 0);
                 }
-                Core::Printf( "Found max id of ", mIdMax, "." );
+                Printf( "Found max id of ", mIdMax, "." );
             }
 
             sqlite3_finalize(statement);
@@ -105,20 +105,20 @@ void FileSystemSegmentInfoManager::OpenDB()
             //
             // Round label id / confidence map size up to the nearest (+1) EXTRA_SEGMENTS_PER_SESSION
             //
-			size_t shape[] = { ( mIdMax / EXTRA_SEGMENTS_PER_SESSION + 2 ) * EXTRA_SEGMENTS_PER_SESSION };
+            size_t shape[] = { ( mIdMax / EXTRA_SEGMENTS_PER_SESSION + 2 ) * EXTRA_SEGMENTS_PER_SESSION };
             unsigned char defaultConfidence = 0;
-			mIdConfidenceMap = marray::Marray< unsigned char >( shape, shape + 1, defaultConfidence );
+            mIdConfidenceMap = marray::Marray< unsigned char >( shape, shape + 1, defaultConfidence );
 
-			mLabelIdMap = marray::Marray< unsigned char >( shape, shape + 1 );
+            mLabelIdMap = marray::Marray< unsigned char >( shape, shape + 1 );
 
-			for ( unsigned int i = 0; i < shape[0]; ++i )
-			{
-				mLabelIdMap( i ) = i;
-			}
+            for ( unsigned int i = 0; i < shape[0]; ++i )
+            {
+                mLabelIdMap( i ) = i;
+            }
 
-			//
-			// Load the Segment Info 
-			//
+            //
+            // Load the Segment Info 
+            //
             converter.str("");
             converter << "SELECT id, name, size, confidence FROM segmentInfo ORDER BY id;";
             query = converter.str();
@@ -127,7 +127,7 @@ void FileSystemSegmentInfoManager::OpenDB()
 
             if ( sqlReturn )
             {
-                Core::Printf( "Error preparing SQLite3 query (", sqlReturn, "): ", sqlite3_errmsg( mIdTileIndexDB ) );
+                Printf( "Error preparing SQLite3 query (", sqlReturn, "): ", sqlite3_errmsg( mIdTileIndexDB ) );
             }
             else
             {
@@ -138,22 +138,22 @@ void FileSystemSegmentInfoManager::OpenDB()
                         std::string( reinterpret_cast<const char*>( sqlite3_column_text(statement, 1) ) ),
                         sqlite3_column_int(statement, 2),
                         sqlite3_column_int(statement, 3) ) );
-					mIdConfidenceMap( sqlite3_column_int(statement, 0) ) = sqlite3_column_int(statement, 3);
+                    mIdConfidenceMap( sqlite3_column_int(statement, 0) ) = sqlite3_column_int(statement, 3);
 
-					/*if ( ( sqlite3_column_int(statement, 0) ) < 500 )
-					{
-						Core::Printf( "Segment debug: ", sqlite3_column_int(statement, 0), "=", std::string( reinterpret_cast<const char*>( sqlite3_column_text(statement, 1) ) ), "." );
-					}*/
+                    /*if ( ( sqlite3_column_int(statement, 0) ) < 500 )
+                    {
+                        Printf( "Segment debug: ", sqlite3_column_int(statement, 0), "=", std::string( reinterpret_cast<const char*>( sqlite3_column_text(statement, 1) ) ), "." );
+                    }*/
 
                 }
-                Core::Printf( "Read ", (int)mSegmentMultiIndex.size(), " segment info entries from db." );
+                Printf( "Read ", (int)mSegmentMultiIndex.size(), " segment info entries from db." );
             }
 
             sqlite3_finalize(statement);
 
-			//
-			// Load the label id map
-			//
+            //
+            // Load the label id map
+            //
             converter.str("");
             converter << "SELECT fromId, toId FROM relabelMap WHERE fromId != toId ORDER BY fromId;";
             query = converter.str();
@@ -162,17 +162,17 @@ void FileSystemSegmentInfoManager::OpenDB()
 
             if ( sqlReturn )
             {
-                Core::Printf( "Error preparing SQLite3 query (", sqlReturn, "): ", sqlite3_errmsg( mIdTileIndexDB ) );
+                Printf( "Didn't find any label remap entries in the db, which is expected when proofreading a dataset for the first time." );
             }
             else
             {
-				unsigned int relabelCount = 0;
+                unsigned int relabelCount = 0;
                 while ( sqlite3_step( statement ) == SQLITE_ROW )
                 {
-					mLabelIdMap( sqlite3_column_int(statement, 0) ) = sqlite3_column_int(statement, 1);
-					++relabelCount;
+                    mLabelIdMap( sqlite3_column_int(statement, 0) ) = sqlite3_column_int(statement, 1);
+                    ++relabelCount;
                 }
-                Core::Printf( "Read ", relabelCount, " label remap entries from db." );
+                Printf( "Read ", relabelCount, " label remap entries from db." );
             }
 
             sqlite3_finalize(statement);
@@ -191,8 +191,37 @@ static int callback(void *unused, int argc, char **argv, char **colName)
 
 void FileSystemSegmentInfoManager::Save()
 {
+    SaveHelper( mColorMapPath );
+}
 
-    std::string newPath = mColorMapPath + ".temp";
+void FileSystemSegmentInfoManager::SaveAs( std::string colorMapFilePath, std::string idTileIndexDBFilePath )
+{
+    SaveHelper( colorMapFilePath );
+
+    boost::filesystem::path oldIdTileIndexDBPath = boost::filesystem::path( mIdTileIndexDBPath );
+    boost::filesystem::path newIdTileIndexDBPath = boost::filesystem::path( idTileIndexDBFilePath );
+
+    if ( boost::filesystem::exists( newIdTileIndexDBPath ) )
+    {
+        boost::filesystem::remove( newIdTileIndexDBPath );
+    }
+    else
+    {
+        boost::filesystem::create_directories( newIdTileIndexDBPath.parent_path() );
+    }
+
+    boost::filesystem::copy_file( oldIdTileIndexDBPath, newIdTileIndexDBPath );
+}
+
+void FileSystemSegmentInfoManager::SaveHelper( std::string colorMapFilePath )
+{
+    //
+    // Save  colorMap.hdf5
+    //
+
+    Printf( "Saving colorMap.hdf5" );
+
+    std::string newPath = colorMapFilePath + ".temp";
 
     boost::filesystem::path tempidInfoPath = boost::filesystem::path( newPath );
     if ( !boost::filesystem::exists( tempidInfoPath ) )
@@ -200,15 +229,21 @@ void FileSystemSegmentInfoManager::Save()
         boost::filesystem::create_directories( tempidInfoPath.parent_path() );
     }
 
-    Core::Printf("Saving idInfo (temp).");
-
     hid_t newIdMapsFile = marray::hdf5::createFile( newPath );
     marray::hdf5::save( newIdMapsFile, "idColorMap", mIdColorMap );
     marray::hdf5::closeFile( newIdMapsFile );
 
-    Core::Printf( "Saving idTileIndex." );
 
-    OpenDB();
+    boost::filesystem::path idColorMapPath = boost::filesystem::path( colorMapFilePath );
+
+    boost::filesystem::remove( idColorMapPath );
+    boost::filesystem::rename( tempidInfoPath, idColorMapPath );
+
+    //
+    // Save colorMap.db
+    //
+
+    Printf( "Saving colorMap.db" );
 
     std::string query;
     std::ostringstream converter;
@@ -216,7 +251,7 @@ void FileSystemSegmentInfoManager::Save()
     int numDeletes = 0;
     int numInserts = 0;
 
-	converter << "BEGIN TRANSACTION;\n";
+    converter << "BEGIN TRANSACTION;\n";
 
     //
     // Update tiles map
@@ -258,48 +293,47 @@ void FileSystemSegmentInfoManager::Save()
         }
     }
 
-	//
-	// Update remap info
-	//
+    //
+    // Update remap info
+    //
 
     converter << "CREATE TABLE IF NOT EXISTS relabelMap ( fromId int PRIMARY KEY, toId int);\n";
 
-	for ( unsigned int i = 0; i < mIdMax; ++i )
-	{
-		if ( mLabelIdMap( i ) != i )
-		{
-		    converter << "INSERT or REPLACE INTO relabelMap (fromId, toId) VALUES (" << i << "," << mLabelIdMap( i ) << ");\n";
-		}
-	}
+    for ( unsigned int i = 0; i < mIdMax; ++i )
+    {
+        if ( mLabelIdMap( i ) != i )
+        {
+            converter << "INSERT or REPLACE INTO relabelMap (fromId, toId) VALUES (" << i << "," << mLabelIdMap( i ) << ");\n";
+        }
+    }
 
-	converter << "END TRANSACTION;\n";
+    converter << "END TRANSACTION;\n";
 
-    Core::Printf( "Removing ", numDeletes, " and adding ", numInserts, " tile index entries." );
+    Printf( "Removing ", numDeletes, " and adding ", numInserts, " tile index entries." );
 
     int sqlReturn;
     char *sqlError = NULL;
 
     query = converter.str();
-	//Core::Printf( query );
+    //Printf( query );
     sqlReturn = sqlite3_exec( mIdTileIndexDB, query.c_str(), NULL, NULL, &sqlError); 
 
     if ( sqlReturn != SQLITE_OK )
     {
-        Core::Printf( "ERROR: Unable to update tile index database (", sqlReturn, "): ", std::string( sqlError ) );
+        Printf( "ERROR: Unable to update tile index database (", sqlReturn, "): ", std::string( sqlError ) );
     }
     else
     {
         mCacheIdTileMap.GetHashMap().clear();
     }
 
-    Core::Printf( "Replacing idInfo file." );
-
-    boost::filesystem::path idColorMapPath = boost::filesystem::path( mColorMapPath );
-
-    boost::filesystem::remove( idColorMapPath );
-    boost::filesystem::rename( tempidInfoPath, idColorMapPath );
-
+    //
+    // Call CloseDB and OpenDB so that changes to the database are flushed to disk.
+    //
+    CloseDB();
+    OpenDB();
 }
+
 
 marray::Marray< unsigned char >* FileSystemSegmentInfoManager::GetIdColorMap()
 {
@@ -351,7 +385,7 @@ FileSystemTileSet FileSystemSegmentInfoManager::LoadTileSet( unsigned int segid 
 
     if ( sqlReturn )
     {
-        Core::Printf( "Error preparing SQLite3 query (", sqlReturn, "): ", sqlite3_errmsg( mIdTileIndexDB ) );
+        Printf( "Error preparing SQLite3 query (", sqlReturn, "): ", sqlite3_errmsg( mIdTileIndexDB ) );
     }
     else
     {
@@ -362,9 +396,9 @@ FileSystemTileSet FileSystemSegmentInfoManager::LoadTileSet( unsigned int segid 
             y = sqlite3_column_int(statement, 2);
             x = sqlite3_column_int(statement, 3);
 
-            tileSet.insert( Mojo::Core::MojoInt4( x, y, z, w ) );
+            tileSet.insert( Int4( x, y, z, w ) );
         }
-        //Core::Printf( "Read ", tileSet.size(), " entries from db for segment ", segid, "." );
+        //Printf( "Read ", tileSet.size(), " entries from db for segment ", segid, "." );
     }
 
     sqlite3_finalize(statement); 
@@ -409,12 +443,12 @@ unsigned int FileSystemSegmentInfoManager::AddNewId()
     //
     if ( mIdMax > mLabelIdMap.shape( 0 ) )
     {
-    	size_t shape[] = { ( mIdMax / EXTRA_SEGMENTS_PER_SESSION + 2 ) * EXTRA_SEGMENTS_PER_SESSION };
+        size_t shape[] = { ( mIdMax / EXTRA_SEGMENTS_PER_SESSION + 2 ) * EXTRA_SEGMENTS_PER_SESSION };
         mLabelIdMap.resize( shape, shape + 1 );
-		for ( unsigned int i = mIdMax; i < shape[0]; ++i )
-		{
-			mLabelIdMap( i ) = i;
-		}
+        for ( unsigned int i = mIdMax; i < shape[0]; ++i )
+        {
+            mLabelIdMap( i ) = i;
+        }
     }
 
     //
@@ -422,7 +456,7 @@ unsigned int FileSystemSegmentInfoManager::AddNewId()
     //
     if ( mIdMax > mIdConfidenceMap.shape( 0 ) )
     {
-    	size_t shape[] = { ( mIdMax / EXTRA_SEGMENTS_PER_SESSION + 2 ) * EXTRA_SEGMENTS_PER_SESSION };
+        size_t shape[] = { ( mIdMax / EXTRA_SEGMENTS_PER_SESSION + 2 ) * EXTRA_SEGMENTS_PER_SESSION };
         unsigned char defaultConfidence = 0;
         mIdConfidenceMap.resize( shape, shape + 1, defaultConfidence );
     }
@@ -440,24 +474,24 @@ void FileSystemSegmentInfoManager::SetVoxelCount ( unsigned int segid, long voxe
     SegmentMultiIndexById& idIndex = mSegmentMultiIndex.get<id>();
     SegmentMultiIndexById::iterator segIt = idIndex.find( segid );
 
-	if ( segIt == idIndex.end() )
-	{
-		Core::Printf( "WARNING: Could not update voxel count for id  ", segid, " to size ", voxelCount, " - id not found in multi index." );
-	}
-	else
-	{	
-		SegmentInfo segInfo = *segIt;
+    if ( segIt == idIndex.end() )
+    {
+        Printf( "WARNING: Could not update voxel count for id  ", segid, " to size ", voxelCount, " - id not found in multi index." );
+    }
+    else
+    {    
+        SegmentInfo segInfo = *segIt;
 
-		segInfo.size = voxelCount;
-		segInfo.changed = true;
+        segInfo.size = voxelCount;
+        segInfo.changed = true;
     
-		bool success = idIndex.replace( segIt, segInfo );
+        bool success = idIndex.replace( segIt, segInfo );
 
-		if ( !success )
-		{
-			Core::Printf( "WARNING: Could not update voxel count for id  ", segid, " to size ", voxelCount, "." );
-		}
-	}
+        if ( !success )
+        {
+            Printf( "WARNING: Could not update voxel count for id  ", segid, " to size ", voxelCount, "." );
+        }
+    }
 
 }
 
@@ -501,25 +535,25 @@ void FileSystemSegmentInfoManager::RemapSegmentLabel( unsigned int fromSegId, un
 {
     if ( fromSegId <= mIdMax && toSegId <= mIdMax )
     {
-		mLabelIdMap( fromSegId ) = toSegId;
+        mLabelIdMap( fromSegId ) = toSegId;
     }
 }
 
 unsigned int FileSystemSegmentInfoManager::GetIdForLabel( unsigned int label )
 {
-	if ( label == mPreviousLabelQuery && mPreviousIdResult != 0 )
-		return mPreviousIdResult;
+    if ( label == mPreviousLabelQuery && mPreviousIdResult != 0 )
+        return mPreviousIdResult;
 
-	mPreviousLabelQuery = label;
-	mPreviousIdResult = mLabelIdMap( label );
+    mPreviousLabelQuery = label;
+    mPreviousIdResult = mLabelIdMap( label );
 
-	while ( mPreviousIdResult != label )
-	{
-		label = mPreviousIdResult;
-		mPreviousIdResult = mLabelIdMap( label );
-	}
+    while ( mPreviousIdResult != label )
+    {
+        label = mPreviousIdResult;
+        mPreviousIdResult = mLabelIdMap( label );
+    }
     
-	return mPreviousIdResult;
+    return mPreviousIdResult;
 
 }
 
@@ -528,11 +562,11 @@ void FileSystemSegmentInfoManager::LockSegmentLabel( unsigned int segId )
     if ( segId <= mIdMax )
     {
         mIdConfidenceMap( segId ) = 100;
-	    SegmentMultiIndexById::iterator segmentInfoIt = mSegmentMultiIndex.get<id>().find( segId );
+        SegmentMultiIndexById::iterator segmentInfoIt = mSegmentMultiIndex.get<id>().find( segId );
         SegmentInfo changeSeg = *segmentInfoIt;
-	    changeSeg.confidence = 100;
+        changeSeg.confidence = 100;
         changeSeg.changed = true;
-	    mSegmentMultiIndex.get<id>().replace( segmentInfoIt, changeSeg );
+        mSegmentMultiIndex.get<id>().replace( segmentInfoIt, changeSeg );
     }
 }
 
@@ -541,17 +575,17 @@ void FileSystemSegmentInfoManager::UnlockSegmentLabel( unsigned int segId )
     if ( segId <= mIdMax )
     {
         mIdConfidenceMap( segId ) = 0;
-	    SegmentMultiIndexById::iterator segmentInfoIt = mSegmentMultiIndex.get<id>().find( segId );
+        SegmentMultiIndexById::iterator segmentInfoIt = mSegmentMultiIndex.get<id>().find( segId );
         SegmentInfo changeSeg = *segmentInfoIt;
-	    changeSeg.confidence = 0;
+        changeSeg.confidence = 0;
         changeSeg.changed = true;
-	    mSegmentMultiIndex.get<id>().replace( segmentInfoIt, changeSeg );
+        mSegmentMultiIndex.get<id>().replace( segmentInfoIt, changeSeg );
     }
 }
 
 unsigned int FileSystemSegmentInfoManager::GetSegmentInfoCount()
 {
-	return (unsigned int)mSegmentMultiIndex.size();
+    return (unsigned int)mSegmentMultiIndex.size();
 }
 
 unsigned int FileSystemSegmentInfoManager::GetSegmentInfoCurrentListLocation( unsigned int segId )
@@ -579,18 +613,18 @@ std::list< SegmentInfo > FileSystemSegmentInfoManager::GetSegmentInfoRange( unsi
 SegmentInfo FileSystemSegmentInfoManager::GetSegmentInfo( unsigned int segId )
 {
 
-	SegmentMultiIndexById& idIndex = mSegmentMultiIndex.get<id>();
+    SegmentMultiIndexById& idIndex = mSegmentMultiIndex.get<id>();
     SegmentMultiIndexById::iterator segIt = idIndex.find( segId );
 
-	if ( segIt == idIndex.end() )
-	{
-		Core::Printf( "WARNING: Could not find segment for id  ", segId, " - id not found in multi index." );
-		return SegmentInfo( 0, "", 0, 0, false );
-	}
-	else
-	{
-		return *segIt;
-	}
+    if ( segIt == idIndex.end() )
+    {
+        Printf( "WARNING: Could not find segment for id  ", segId, " - id not found in multi index." );
+        return SegmentInfo( 0, "", 0, 0, false );
+    }
+    else
+    {
+        return *segIt;
+    }
 
 }
 

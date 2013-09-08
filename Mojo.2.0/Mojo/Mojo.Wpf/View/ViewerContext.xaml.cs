@@ -93,33 +93,30 @@ namespace Mojo.Wpf.View
 
         public void OnManipulationStarting( object sender, System.Windows.Input.ManipulationStartingEventArgs e )
         {
-            Console.WriteLine( "ViewerContext got manipulation started event." );
         }
 
         public void OnManipulationDelta( object sender, System.Windows.Input.ManipulationDeltaEventArgs e )
         {
-            Console.WriteLine( "ViewerContext got manipulation delta event." );
         }
 
         public void OnManipulationInertiaStarting( object sender, System.Windows.Input.ManipulationInertiaStartingEventArgs e )
         {
-            Console.WriteLine( "ViewerContext got manipulation inertia started event." );
         }
 
         protected override void OnKeyDown( KeyEventArgs e )
         {
-            if (Viewer != null)
+            if ( Viewer != null )
             {
-                Viewer.UserInputHandler.OnKeyDown(e, D3D11RenderingPaneHost.Width, D3D11RenderingPaneHost.Height);
+                Viewer.UserInputHandler.OnKeyDown( e, D3D11RenderingPaneHost.Width, D3D11RenderingPaneHost.Height );
                 AquireKeyboardFocusAndLogicalFocus();
             }
         }
 
         protected override void OnKeyUp(KeyEventArgs e)
         {
-            if (Viewer != null)
+            if ( Viewer != null )
             {
-                Viewer.UserInputHandler.OnKeyUp(e, D3D11RenderingPaneHost.Width, D3D11RenderingPaneHost.Height);
+                Viewer.UserInputHandler.OnKeyUp( e, D3D11RenderingPaneHost.Width, D3D11RenderingPaneHost.Height );
                 AquireKeyboardFocusAndLogicalFocus();
             }
         }

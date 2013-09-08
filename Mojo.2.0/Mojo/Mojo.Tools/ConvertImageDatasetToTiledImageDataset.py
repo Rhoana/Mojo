@@ -13,47 +13,68 @@ tile_num_pixels_y = 512
 tile_num_pixels_x = 512
 
 #original_input_images_path = 'H:\\dev\\datasets\\conn\\main_dataset\\cube2\\input_images'
-#output_tile_image_path     = 'D:\\dev\\datasets\\NewPipelineResults2x20\\mojo\\images\\tiles'
-#output_tile_volume_file    = 'D:\\dev\\datasets\\NewPipelineResults2x20\\mojo\\images\\tiledVolumeDescription.xml'
+#output_tile_image_path     = 'D:\\dev\\datasets\\NewPipelineResults2x20\\NewPipelineResults2x20_mojoimg\\images\\tiles'
+#output_tile_volume_file    = 'D:\\dev\\datasets\\NewPipelineResults2x20\\NewPipelineResults2x20_mojoimg\\images\\tiledVolumeDescription.xml'
+#output_top_level_mojo_file = 'D:\\dev\\datasets\\NewPipelineResults2x20\\NewPipelineResults2x20.mojoimg'
 #input_image_extension      = '.tif'
 #output_image_extension     = '.tif'
 #image_resize_filter        = PIL.Image.ANTIALIAS
 #nimages_to_process         = 20
 
-original_input_images_path = 'H:\\dev\\datasets\\conn\\main_dataset\\cube2\\input_images'
-output_tile_image_path     = 'D:\\dev\\datasets\\Cube2\\mojo\\images\\tiles'
-output_tile_volume_file    = 'D:\\dev\\datasets\\Cube2\\mojo\\images\\tiledVolumeDescription.xml'
-input_image_extension      = '.tif'
-output_image_extension     = '.tif'
-image_resize_filter        = PIL.Image.ANTIALIAS
-#nimages_to_process            = 100
-nimages_to_process            = 1124
+#original_input_images_path = 'H:\\dev\\datasets\\conn\\main_dataset\\cube2\\input_images'
+#output_tile_image_path     = 'D:\\dev\\datasets\\Cube2\\Cube2_mojoimg\\images\\tiles'
+#output_tile_volume_file    = 'D:\\dev\\datasets\\Cube2\\Cube2_mojoimg\\images\\tiledVolumeDescription.xml'
+#output_top_level_mojo_file = 'D:\\dev\\datasets\\Cube2\\Cube2.mojoimg'
+#input_image_extension      = '.tif'
+#output_image_extension     = '.tif'
+#image_resize_filter        = PIL.Image.ANTIALIAS
+##nimages_to_process            = 100
+#nimages_to_process            = 1124
 
 #original_input_images_path = 'C:\\dev\\datasets\\conn\\main_dataset\\ac3train\\input_images'
-#output_tile_image_path     = 'C:\\dev\\datasets\\ac3x75_compress\\mojo\\images\\tiles'
-#output_tile_volume_file    = 'C:\\dev\\datasets\\ac3x75_compress\\mojo\\images\\tiledVolumeDescription.xml'
+#output_tile_image_path     = 'C:\\dev\\datasets\\ac3x75_compress\\ac3x75_compress_mojoimg\\images\\tiles'
+#output_tile_volume_file    = 'C:\\dev\\datasets\\ac3x75_compress\\ac3x75_compress_mojoimg\\images\\tiledVolumeDescription.xml'
+#output_top_level_mojo_file = 'D:\\dev\\datasets\\ac3x75_compress\\ac3x75_compress.mojoimg'
 #input_image_extension      = '.tif'
 #output_image_extension     = '.tif'
 #image_resize_filter        = PIL.Image.ANTIALIAS
 #nimages_to_process         = 75
 
 #original_input_images_path = 'C:\\dev\\datasets\\challengeCubeV2x20\\images'
-#output_tile_image_path     = 'C:\\dev\\datasets\\Cube1x10\\mojo\\images\\tiles'
-#output_tile_volume_file    = 'C:\\dev\\datasets\\Cube1x10\\mojo\\images\\tiledVolumeDescription.xml'
+#output_tile_image_path     = 'C:\\dev\\datasets\\Cube1x10\\Cube1x10_mojoimg\\images\\tiles'
+#output_tile_volume_file    = 'C:\\dev\\datasets\\Cube1x10\\Cube1x10_mojoimg\\images\\tiledVolumeDescription.xml'
+#output_top_level_mojo_file = 'D:\\dev\\datasets\\Cube1x10\\Cube1x10.mojoimg'
 #input_image_extension      = '.png'
 #output_image_extension     = '.tif'
 #image_resize_filter        = PIL.Image.ANTIALIAS
 #nimages_to_process         = 10
 
 #original_input_images_path = 'C:\\dev\\datasets\\conn\\main_dataset\\ac3train\\input_images'
-#output_tile_image_path     = 'C:\\dev\\datasets\\ac3x20\\mojo\\images\\tiles'
-#output_tile_volume_file    = 'C:\\dev\\datasets\\ac3x20\\mojo\\images\\tiledVolumeDescription.xml'
+#output_tile_image_path     = 'C:\\dev\\datasets\\ac3x20\\ac3x20_mojoimg\\images\\tiles'
+#output_tile_volume_file    = 'C:\\dev\\datasets\\ac3x20\\ac3x20_mojoimg\\images\\tiledVolumeDescription.xml'
+#output_top_level_mojo_file = 'D:\\dev\\datasets\\ac3x20\\ac3x20.mojoimg'
 #input_image_extension      = '.tif'
 #output_image_extension     = '.tif'
 #image_resize_filter        = PIL.Image.ANTIALIAS
 #nimages_to_process         = 20
 
+#original_input_images_path = 'C:\\Users\\mike\\Data\\Local\\2013_mojo\\isbi_submission\\input_images'
+#output_tile_image_path     = 'C:\\Users\\mike\\Data\\Local\\2013_mojo\\isbi_submission_mojo\\isbi_submission_mojoimg\\images\\tiles'
+#output_tile_volume_file    = 'C:\\Users\\mike\\Data\\Local\\2013_mojo\\isbi_submission_mojo\\isbi_submission_mojoimg\\images\\tiledVolumeDescription.xml'
+#output_top_level_mojo_file = 'C:\\Users\\mike\\Data\\Local\\2013_mojo\\isbi_submission_mojo\\isbi_submission.mojoimg'
+#input_image_extension      = '.tif'
+#output_image_extension     = '.tif'
+#image_resize_filter        = PIL.Image.ANTIALIAS
+#nimages_to_process         = 100
 
+original_input_images_path = 'C:\\Users\\mike\\Data\\Local\\2013_mojo\\isbi_train_input_images\\input_images'
+output_tile_image_path     = 'C:\\Users\\mike\\Data\\Local\\2013_mojo\\SegmentationExperiment\\Mojo20\\isbi_train_input_images_mojoimg\\images\\tiles'
+output_tile_volume_file    = 'C:\\Users\\mike\\Data\\Local\\2013_mojo\\SegmentationExperiment\\Mojo20\\isbi_train_input_images_mojoimg\\images\\tiledVolumeDescription.xml'
+output_top_level_mojo_file = 'C:\\Users\\mike\\Data\\Local\\2013_mojo\\SegmentationExperiment\\Mojo20\\isbi_train_input_images.mojoimg'
+input_image_extension      = '.tif'
+output_image_extension     = '.tif'
+image_resize_filter        = PIL.Image.ANTIALIAS
+nimages_to_process         = 10
 
 def mkdir_safe( dir_to_make ):
 
@@ -90,17 +111,11 @@ for file in files:
 
     while current_image_num_pixels_y > tile_num_pixels_y / 2 or current_image_num_pixels_x > tile_num_pixels_x / 2:
     
-        #current_pyramid_image_path = output_pyramid_image_path  + '\\' + 'w=' + '%08d' % ( tile_index_w )
-        #current_pyramid_image_name = current_pyramid_image_path + '\\' + 'z=' + '%08d' % ( tile_index_z ) + output_image_extension
         current_tile_image_path    = output_tile_image_path     + '\\' + 'w=' + '%08d' % ( tile_index_w ) + '\\' + 'z=' + '%08d' % ( tile_index_z )
 
         mkdir_safe( current_tile_image_path )
-        #mkdir_safe( current_pyramid_image_path )
 
         current_image = original_image.resize( ( current_image_num_pixels_x, current_image_num_pixels_y ), image_resize_filter )            
-        #current_image.save( current_pyramid_image_name )
-        #print current_pyramid_image_name
-        #print
         
         num_tiles_y = int( math.ceil( float( current_image_num_pixels_y ) / tile_num_pixels_y ) )
         num_tiles_x = int( math.ceil( float( current_image_num_pixels_x ) / tile_num_pixels_x ) )
@@ -129,7 +144,7 @@ for file in files:
     if tile_index_z >= nimages_to_process:
         break
 
-#Output TiledVolumeDescription xml file
+# Output TiledVolumeDescription xml file
 tiledVolumeDescription = lxml.etree.Element( "tiledVolumeDescription",
     fileExtension = output_image_extension[1:],
     numTilesX = str( int( math.ceil( original_image_num_pixels_x / tile_num_pixels_x ) ) ),
@@ -149,4 +164,6 @@ tiledVolumeDescription = lxml.etree.Element( "tiledVolumeDescription",
 with open( output_tile_volume_file, 'w' ) as file:
     file.write( lxml.etree.tostring( tiledVolumeDescription, pretty_print = True ) )
 
-
+# Output top-level mojo file associated with this set of images
+with open( output_top_level_mojo_file, 'w' ) as file:
+    file.write( "MOJOIMG" )

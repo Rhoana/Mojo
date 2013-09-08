@@ -1,12 +1,11 @@
 #pragma once
 
 #include "Stl.hpp"
-
 #include "ToString.hpp"
 
 namespace Mojo
 {
-namespace Core
+namespace Native
 {
 template < typename T00 >
 void Printf( T00 t00 );

@@ -1,12 +1,9 @@
 #pragma once
 
-#include <time.h>
-
-#include "Mojo.Core/HashMap.hpp"
-#include "Mojo.Core/VolumeDescription.hpp"
-#include "Mojo.Core/MojoVectors.hpp"
-
-using namespace Mojo::Core;
+#include "Stl.hpp"
+#include "HashMap.hpp"
+#include "VolumeDescription.hpp"
+#include "Types.hpp"
 
 namespace Mojo
 {
@@ -17,11 +14,11 @@ struct FileSystemTileCacheEntry
 {
     FileSystemTileCacheEntry();
 
-    MojoInt4                                                 tileIndex;
-    int                                                      inUse;
-    clock_t                                                  timeStamp;
-    bool                                                     needsSaving;
-    Core::HashMap< std::string, Core::VolumeDescription >    volumeDescriptions;
+    Int4                                      tileIndex;
+    int                                       inUse;
+    clock_t                                   timeStamp;
+    bool                                      needsSaving;
+    HashMap< std::string, VolumeDescription > volumeDescriptions;
 };
 
 }

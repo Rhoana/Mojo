@@ -1,9 +1,8 @@
 #pragma once
 
-#include "Mojo.Core/Stl.hpp"
-//#include "Mojo.Core/Cuda.hpp"
-#include "Mojo.Core/HashMap.hpp"
-#include "Mojo.Core/Comparator.hpp"
+#include "Stl.hpp"
+#include "HashMap.hpp"
+#include "Types.hpp"
 
 #include "TiledVolumeDescription.hpp"
 
@@ -15,9 +14,9 @@ namespace Native
 class TiledDatasetDescription
 {
 public:
-    Core::HashMap< std::string, TiledVolumeDescription >                            tiledVolumeDescriptions;
-    Core::HashMap< std::string, std::string >                                       paths;
-	unsigned int                                                                    maxLabelId;
+    HashMap< std::string, TiledVolumeDescription > tiledVolumeDescriptions;
+    HashMap< std::string, std::string >            paths;
+    unsigned int                                   maxLabelId;
 };
 
 }

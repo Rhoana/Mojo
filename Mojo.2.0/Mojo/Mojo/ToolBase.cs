@@ -174,7 +174,7 @@ namespace Mojo
 
             var centerDataSpace = mTileManager.TiledDatasetView.CenterDataSpace;
             var extentDataSpace = mTileManager.TiledDatasetView.ExtentDataSpace;
-            var tiledVolumeDescription = mTileManager.TiledDatasetDescription.TiledVolumeDescriptions.Get( "SourceMap" );
+            var tiledVolumeDescription = mTileManager.SourceImagesTiledDatasetDescription.TiledVolumeDescriptions.Get( "SourceMap" );
 
             var dataSpaceUnitWidthNumPixels = width / extentDataSpace.X;
 
@@ -245,6 +245,10 @@ namespace Mojo
 
         public virtual void OnManipulationDelta( System.Windows.Input.ManipulationDeltaEventArgs manipulationEventArgs, int width, int height )
         {
+            //
+            // CODE QUALITY ISSUE:
+            // Is this console output useful for a user? If not, consider removing. -MR
+            //
             Console.WriteLine( "Got manipulation delta." );
         }
 

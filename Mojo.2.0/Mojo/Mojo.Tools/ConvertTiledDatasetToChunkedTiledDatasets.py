@@ -14,37 +14,50 @@ import h5py
 import lxml
 import lxml.etree
 import glob
-import sqlite3
 import colorsys
 
-## Open existing volume and create a series of subvolumes
-## (with the same ids / names etc)
+#
+# Instead of importing sqlite3 from the standard library, we import from
+# the pysqlite2 package. This is because the version of sqlite3 in the standard
+# library is inconsistent across platforms and Python distributions. For example,
+# on the 32-bit Windows Enthought Python Distribution, the standard library sqlite3
+# is too old to read the db files that are read and written to by Mojo. On the other
+# hand, the standard library sqlite3 on On Mac OSX is new enough to load Mojo db
+# files. By using pysqlite2, we achieve more consistency across Python distributions. - MR
+#
+from pysqlite2 import dbapi2 as sqlite3
+
+# Open existing volume and create a series of subvolumes
+# (with the same ids / names etc)
 
 #input_mojo_path               = 'D:\\dev\\datasets\\NewPipelineResults2\\mojo'
 #output_subvolume_path         = 'D:\\dev\\datasets\\NewPipelineResults2_Subvolumes'
 #min_slices_per_subvolume      = 100
 #overlap_slices                = 1
 
-input_mojo_path               = 'D:\\dev\\datasets\\Cube2\\mojo'
-output_subvolume_path         = 'D:\\dev\\datasets\\Cube2_Subvolumes'
-min_slices_per_subvolume      = 100
-overlap_slices                = 1
+#input_mojo_path               = 'D:\\dev\\datasets\\Cube2\\mojo'
+#output_subvolume_path         = 'D:\\dev\\datasets\\Cube2_Subvolumes'
+#min_slices_per_subvolume      = 100
+#overlap_slices                = 1
 
 #input_mojo_path               = 'C:\\dev\\datasets\\ac3x75_compress\\mojo'
 #output_subvolume_path         = 'C:\\dev\\datasets\\ac3x75_compress_subvolumes'
 #min_slices_per_subvolume      = 25
 #overlap_slices                = 1
 
+input_mojo_image_path         = 'C:\\Users\\mike\\Data\\Local\\2013_mojo\\isbi_submission_mojo\\isbi_submission_mojoimg'
+input_mojo_segmentation_path  = 'C:\\Users\\mike\\Data\\Local\\2013_mojo\\isbi_submission_mojo\\isbi_submission_mojoseg'
+output_subvolume_path         = 'C:\\Users\\mike\\Data\\Local\\2013_mojo\\isbi_submission_mojo_subvolumes'
+min_slices_per_subvolume      = 10
+overlap_slices                = 1
 
+input_tile_images_path        = input_mojo_image_path        + '\\images\\tiles'
+input_tile_images_volume_file = input_mojo_image_path        + '\\images\\tiledVolumeDescription.xml'
 
-input_tile_images_path        = input_mojo_path + '\\images\\tiles'
-input_tile_images_volume_file = input_mojo_path + '\\images\\tiledVolumeDescription.xml'
-
-input_ids_path                = input_mojo_path + '\\ids'
-input_tile_ids_path           = input_ids_path + '\\tiles'
-input_tile_ids_volume_file    = input_ids_path + '\\tiledVolumeDescription.xml'
-input_color_map_file          = input_ids_path + '\\colorMap.hdf5'
-input_segment_info_db_file    = input_ids_path + '\\segmentInfo.db'
+input_tile_ids_path           = input_mojo_segmentation_path + '\\ids\\tiles'
+input_tile_ids_volume_file    = input_mojo_segmentation_path + '\\ids\\tiledVolumeDescription.xml'
+input_color_map_file          = input_mojo_segmentation_path + '\\ids\\colorMap.hdf5'
+input_segment_info_db_file    = input_mojo_segmentation_path + '\\ids\\segmentInfo.db'
 
 
 
@@ -58,8 +71,7 @@ def mkdir_safe( dir_to_make ):
 
 
 
-## Open input volume xml 
-
+# Open input volume xml 
 print 'Reading TiledVolumeDescription files'
 
 with open( input_tile_images_volume_file, 'r' ) as file:
@@ -70,8 +82,7 @@ with open( input_tile_ids_volume_file, 'r' ) as file:
 
 
 
-## Open input volume database
-
+# Open input volume database
 print 'Reading segmentInfo file (sqlite) {0}.'.format(input_segment_info_db_file)
 
 in_con = sqlite3.connect(input_segment_info_db_file)
@@ -119,7 +130,7 @@ tile_num_pixels_x = int ( idTiledVolumeDescription.xpath('@numVoxelsPerTileX')[0
 tile_num_pixels_y = int ( idTiledVolumeDescription.xpath('@numVoxelsPerTileY')[0] )
 
 
-## Calculate subvolume sizes
+# Calculate subvolume sizes
 if original_image_num_tiles_z < min_slices_per_subvolume:
     min_slices_per_subvolume = original_image_num_tiles_z
 
@@ -128,8 +139,8 @@ subvolume_size = int(math.floor(original_image_num_tiles_z / n_subvolumes))
 subvolume_start_indices = range(0, n_subvolumes * subvolume_size, subvolume_size)
 
 
-## Loop for each subvolume
-for subvolume_i in [len(subvolume_start_indices) - 1]: #range(len(subvolume_start_indices)):
+# Loop for each subvolume
+for subvolume_i in range(len(subvolume_start_indices)):
 
     subvolume_first_z = subvolume_start_indices[subvolume_i]
     if subvolume_i == len(subvolume_start_indices) - 1:
@@ -137,17 +148,19 @@ for subvolume_i in [len(subvolume_start_indices) - 1]: #range(len(subvolume_star
     else:
         subvolume_last_z = subvolume_start_indices[subvolume_i + 1] - 1 + overlap_slices
 
-    output_path                    = output_subvolume_path + '\\z={0:04d}-{1:04d}\\mojo'.format(subvolume_first_z, subvolume_last_z)
+    output_image_path                       = output_subvolume_path + '\\z={0:04d}-{1:04d}_mojoimg'.format(subvolume_first_z, subvolume_last_z)
+    output_image_top_level_mojo_file        = output_subvolume_path + '\\z={0:04d}-{1:04d}.mojoimg'.format(subvolume_first_z, subvolume_last_z)
 
-    output_tile_images_path        = output_path + '\\images\\tiles'
-    output_tile_images_volume_file = output_path + '\\images\\tiledVolumeDescription.xml'
+    output_segmentation_path                = output_subvolume_path + '\\z={0:04d}-{1:04d}_mojoseg'.format(subvolume_first_z, subvolume_last_z)
+    output_segmentation_top_level_mojo_file = output_subvolume_path + '\\z={0:04d}-{1:04d}.mojoseg'.format(subvolume_first_z, subvolume_last_z)
 
-    output_ids_path                = output_path + '\\ids'
-    output_tile_ids_path           = output_ids_path + '\\tiles'
+    output_tile_images_path                 = output_image_path + '\\images\\tiles'
+    output_tile_images_volume_file          = output_image_path + '\\images\\tiledVolumeDescription.xml'
 
-    output_tile_ids_volume_file    = output_ids_path + '\\tiledVolumeDescription.xml'
-    output_color_map_file          = output_ids_path + '\\colorMap.hdf5'
-    output_segment_info_db_file    = output_ids_path + '\\segmentInfo.db'
+    output_tile_ids_path                    = output_segmentation_path + '\\ids\\tiles'
+    output_tile_ids_volume_file             = output_segmentation_path + '\\ids\\tiledVolumeDescription.xml'
+    output_color_map_file                   = output_segmentation_path + '\\ids\\colorMap.hdf5'
+    output_segment_info_db_file             = output_segmentation_path + '\\ids\\segmentInfo.db'
 
     segment_sizes = np.zeros(id_max + 1, dtype=np.int64)
     id_tile_list         = [];
@@ -156,7 +169,6 @@ for subvolume_i in [len(subvolume_start_indices) - 1]: #range(len(subvolume_star
         from_tile_index_z = subvolume_first_z + tile_index_z
 
         ## Copy tile images (measure segment sizes for w=0)
-
         current_image_num_pixels_y = original_image_num_pixels_y
         current_image_num_pixels_x = original_image_num_pixels_x
         current_tile_data_space_y  = tile_num_pixels_y
@@ -198,7 +210,9 @@ for subvolume_i in [len(subvolume_start_indices) - 1]: #range(len(subvolume_star
 
                     if tile_index_w == 0:
 
-                        current_image_counts = np.bincount( tile_ids.ravel() )
+                        assert tile_ids.ravel().max() < np.iinfo(np.int32).max
+
+                        current_image_counts = np.bincount( tile_ids.ravel().astype(np.int32) )
                         current_image_counts_ids = np.nonzero( current_image_counts )[0]
                         current_max = np.max( current_image_counts_ids )
         
@@ -223,16 +237,14 @@ for subvolume_i in [len(subvolume_start_indices) - 1]: #range(len(subvolume_star
             tile_index_w               = tile_index_w               + 1
 
 
-    ## Sort the tile list so that the same id appears together
+    # Sort the tile list so that the same id appears together
     id_tile_list = np.array( sorted( id_tile_list ), np.uint32 )
 
-    ## Save subvolume xml and database files
-
-    print 'Copying colorMap file (hdf5)'
+    # Save subvolume xml and database files. Also save top-level Mojo files.
+    print 'Copying colorMap file (hdf5).'
     shutil.copyfile(input_color_map_file, output_color_map_file)
 
-    print 'Writing segmentInfo file (sqlite)'
-        
+    print 'Writing segmentInfo file (sqlite).'
     if os.path.exists(output_segment_info_db_file):
         os.remove(output_segment_info_db_file)
         print "Deleted existing database file."
@@ -265,7 +277,7 @@ for subvolume_i in [len(subvolume_start_indices) - 1]: #range(len(subvolume_star
     for segment_index in xrange( 1, id_max ):
         if len( segment_sizes ) > segment_index and segment_sizes[ segment_index ] > 0:
 
-            ## Add the segment info entry
+            # Add the segment info entry
             if segment_index == 0:
                 segment_name = '__boundary__'
             elif segment_names[segment_index] != None:
@@ -275,7 +287,7 @@ for subvolume_i in [len(subvolume_start_indices) - 1]: #range(len(subvolume_star
                 segment_name = "segment{0}".format( segment_index )
             cur.execute('INSERT INTO segmentInfo VALUES({0}, "{1}", {2}, {3});'.format( segment_index, segment_name, segment_sizes[ segment_index ], segment_confidence[ segment_index ] ))
 
-            ## Add the segment remap entry
+            # Add the segment remap entry
             if len( segment_remap ) > segment_index and segment_remap[ segment_index ] != segment_index:
                 cur.execute('INSERT INTO relabelMap VALUES({0}, {1});'.format( segment_index, segment_remap[ segment_index ]))
 
@@ -283,9 +295,8 @@ for subvolume_i in [len(subvolume_start_indices) - 1]: #range(len(subvolume_star
 
     con.close()
 
-    #Output TiledVolumeDescription xml files
-
-    print 'Writing TiledVolumeDescription files'
+    # Output TiledVolumeDescription xml files
+    print 'Writing TiledVolumeDescription files.'
 
     output_imageTiledVolumeDescription = lxml.etree.Element( "tiledVolumeDescription",
         fileExtension = imageTiledVolumeDescription.xpath('@fileExtension')[0],
@@ -324,6 +335,15 @@ for subvolume_i in [len(subvolume_start_indices) - 1]: #range(len(subvolume_star
         
     with open( output_tile_ids_volume_file, 'w' ) as file:
         file.write( lxml.etree.tostring( output_idTiledVolumeDescription, pretty_print = True ) )
+
+    # Output top-level Mojo files
+    print 'Writing top-level Mojo files.'
+
+    with open( output_image_top_level_mojo_file, 'w' ) as file:
+        file.write( "MOJOIMG" )
+
+    with open( output_segmentation_top_level_mojo_file, 'w' ) as file:
+        file.write( "MOJOSEG" )
 
     print
     print "Subvolume {0} of {1} created.".format( subvolume_i + 1, len(subvolume_start_indices))

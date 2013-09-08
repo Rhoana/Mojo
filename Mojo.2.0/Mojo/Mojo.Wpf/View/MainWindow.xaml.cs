@@ -1,14 +1,7 @@
 ﻿using System;
-using System.Windows.Controls.Primitives;
-using System.Windows.Forms.Integration;
+using System.Windows;
 using System.Windows.Input;
 using System.Windows.Controls;
-
-using System.Collections;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Windows;
-using System.Windows.Data;
 
 namespace Mojo.Wpf.View
 {
@@ -17,11 +10,32 @@ namespace Mojo.Wpf.View
 
         public MainWindow()
         {
+            Loaded += LoadedHandler;
+            SizeChanged += SizeChangedHandler;
+            Unloaded += UnloadedHandler;
+
             InitializeComponent();
         }
 
         public void Dispose()
         {
+        }
+
+        private void LoadedHandler(object sender, RoutedEventArgs e)
+        {
+            ( (ViewModel.EngineDataContext)DataContext ).MainWindowWidth = ActualWidth;
+        }
+
+        private void UnloadedHandler( object sender, RoutedEventArgs e )
+        {
+            Loaded -= LoadedHandler;
+            SizeChanged -= SizeChangedHandler;
+            Unloaded -= UnloadedHandler;
+        }
+
+        private void SizeChangedHandler( object sender, SizeChangedEventArgs e )
+        {
+            ( (ViewModel.EngineDataContext)DataContext ).MainWindowWidth = ActualWidth;
         }
 
         private void SegmentList_OnSelectionChanged( object sender, SelectionChangedEventArgs e )

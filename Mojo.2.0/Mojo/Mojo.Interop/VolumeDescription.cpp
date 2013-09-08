@@ -18,7 +18,7 @@ VolumeDescription::VolumeDescription()
     IsSigned         = false;
 }
 
-VolumeDescription::VolumeDescription( const Core::VolumeDescription& volumeDescription )
+VolumeDescription::VolumeDescription( const Native::VolumeDescription& volumeDescription )
 {
     Data             = IntPtr( volumeDescription.data );
 
@@ -31,9 +31,9 @@ VolumeDescription::VolumeDescription( const Core::VolumeDescription& volumeDescr
     IsSigned         = volumeDescription.isSigned;
 }
 
-Core::VolumeDescription VolumeDescription::ToCore()
+Native::VolumeDescription VolumeDescription::ToCore()
 {
-    Core::VolumeDescription volumeDescription;
+    Native::VolumeDescription volumeDescription;
 
     volumeDescription.data             = Data.ToPointer();
 

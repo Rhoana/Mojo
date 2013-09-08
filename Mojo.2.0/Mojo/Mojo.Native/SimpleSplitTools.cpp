@@ -1,8 +1,8 @@
 #include <math.h>
 #include "SimpleSplitTools.hpp"
-#include "Mojo.Core/Stl.hpp"
-#include "Mojo.Core/Comparator.hpp"
-#include "Mojo.Core/Printf.hpp"
+#include "Stl.hpp"
+#include "Types.hpp"
+#include "Printf.hpp"
 
 namespace Mojo
 {
@@ -12,40 +12,40 @@ namespace Native
 //const int SimpleSplitTools::small_r = 4;
 //const int SimpleSplitTools::small_wh = 9;
 //const int SimpleSplitTools::small_nhood[] = { 0, 0, 0, 0, 1, 0, 0, 0, 0,
-//												0, 0, 1, 1, 1, 1, 1, 0, 0,
-//												0, 1, 1, 1, 1, 1, 1, 1, 0,
-//												0, 1, 1, 1, 1, 1, 1, 1, 0,
-//												1, 1, 1, 1, 1, 1, 1, 1, 1,
-//												0, 1, 1, 1, 1, 1, 1, 1, 0,
-//												0, 1, 1, 1, 1, 1, 1, 1, 0,
-//												0, 0, 1, 1, 1, 1, 1, 0, 0,
-//												0, 0, 0, 0, 1, 0, 0, 0, 0 };
+//                                                0, 0, 1, 1, 1, 1, 1, 0, 0,
+//                                                0, 1, 1, 1, 1, 1, 1, 1, 0,
+//                                                0, 1, 1, 1, 1, 1, 1, 1, 0,
+//                                                1, 1, 1, 1, 1, 1, 1, 1, 1,
+//                                                0, 1, 1, 1, 1, 1, 1, 1, 0,
+//                                                0, 1, 1, 1, 1, 1, 1, 1, 0,
+//                                                0, 0, 1, 1, 1, 1, 1, 0, 0,
+//                                                0, 0, 0, 0, 1, 0, 0, 0, 0 };
 
 const int SimpleSplitTools::small_r = 3;
 const int SimpleSplitTools::small_wh = 7;
 const int SimpleSplitTools::small_nhood[] = { 0, 0, 0, 1, 0, 0, 0,
-												0, 1, 1, 1, 1, 1, 0,
-												0, 1, 1, 1, 1, 1, 0,
-												1, 1, 1, 1, 1, 1, 1,
-												0, 1, 1, 1, 1, 1, 0,
-												0, 1, 1, 1, 1, 1, 0,
-												0, 0, 0, 1, 0, 0, 0 };
+                                                0, 1, 1, 1, 1, 1, 0,
+                                                0, 1, 1, 1, 1, 1, 0,
+                                                1, 1, 1, 1, 1, 1, 1,
+                                                0, 1, 1, 1, 1, 1, 0,
+                                                0, 1, 1, 1, 1, 1, 0,
+                                                0, 0, 0, 1, 0, 0, 0 };
 
 const int SimpleSplitTools::large_r = 6;
 const int SimpleSplitTools::large_wh = 13;
 const int SimpleSplitTools::large_nhood[] = { 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0,
-												0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0,
-												0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0,
-												0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,
-												0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,
-												0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,
-												1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-												0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,
-												0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,
-												0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,
-												0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0,
-												0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0,
-												0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0 };
+                                                0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0,
+                                                0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0,
+                                                0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,
+                                                0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,
+                                                0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,
+                                                1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+                                                0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,
+                                                0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,
+                                                0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,
+                                                0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0,
+                                                0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0,
+                                                0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0 };
 
 void SimpleSplitTools::ApplySmallMask ( const int fromIndex, const int width, const int height, const char targetVal, char* area )
 {
@@ -150,151 +150,151 @@ void SimpleSplitTools::ApplyCircleMask ( const int fromIndex, const int width, c
 
 void SimpleSplitTools::DijkstraSearch ( const int* searchArea, const char* searchMask, const char* searchBonus, const int fromIndex, const int width, const int height, const char targetMax, int* dist, int* prev, int* toIndex )
 {
-	for ( int i = 0; i < width * height; ++i )
-	{
-		dist[i] = std::numeric_limits<int>::max();
-		prev[i] = -1;
-	}
+    for ( int i = 0; i < width * height; ++i )
+    {
+        dist[i] = std::numeric_limits<int>::max();
+        prev[i] = -1;
+    }
 
-	dist[ fromIndex ] = 0;
+    dist[ fromIndex ] = 0;
 
-	std::set< Mojo::Core::MojoInt2, Mojo::Core::Int2Comparator > distQueue;
-	distQueue.insert( Mojo::Core::MojoInt2( fromIndex, 0 ) );
+    std::set< Int2, Int2Comparator > distQueue;
+    distQueue.insert( Int2( fromIndex, 0 ) );
 
-	bool found_target = false;
-	int currentIndex = fromIndex;
+    bool found_target = false;
+    int currentIndex = fromIndex;
 
-	//Core::Printf( distQueue.empty() );
-	//Core::Printf( distQueue.size() );
+    //Printf( distQueue.empty() );
+    //Printf( distQueue.size() );
 
-	//
-	// Dijkstra until we find a target
-	//
-	int itCount = 0;
-	while ( !distQueue.empty() )
-	{
-        std::set< Mojo::Core::MojoInt2, Mojo::Core::Int2Comparator >::iterator top = distQueue.begin();
-		currentIndex = top->x;
-		distQueue.erase( top );
+    //
+    // Dijkstra until we find a target
+    //
+    int itCount = 0;
+    while ( !distQueue.empty() )
+    {
+        std::set< Int2, Int2Comparator >::iterator top = distQueue.begin();
+        currentIndex = top->x;
+        distQueue.erase( top );
 
-		//Core::Printf( itCount, ": currentIndex=", currentIndex, "  dist=", dist[ currentIndex ], " searchArea=", searchArea[ currentIndex ], " searchMask=", searchMask[ currentIndex ] );
+        //Printf( itCount, ": currentIndex=", currentIndex, "  dist=", dist[ currentIndex ], " searchArea=", searchArea[ currentIndex ], " searchMask=", searchMask[ currentIndex ] );
 
-		if ( searchMask[ currentIndex ] && searchMask[ currentIndex ] <= targetMax )
-		{
-			found_target = true;
-			break;
-		}
+        if ( searchMask[ currentIndex ] && searchMask[ currentIndex ] <= targetMax )
+        {
+            found_target = true;
+            break;
+        }
 
-		if ( dist[ currentIndex ] == -1 )
-		{
-            Core::Printf( "ERROR: Found distance or -1 while searching for shortest path." );
-			break;
-		}
+        if ( dist[ currentIndex ] == -1 )
+        {
+            Printf( "ERROR: Found distance or -1 while searching for shortest path." );
+            break;
+        }
 
-		Mojo::Core::MojoInt2 currentPix = Mojo::Core::MojoInt2( currentIndex % width, currentIndex / width );
+        Int2 currentPix = Int2( currentIndex % width, currentIndex / width );
 
-		int nextIndex = -1;
+        int nextIndex = -1;
 
-		for ( int direction = 0; direction < 4; ++direction )
-		{
-			if ( direction == 0 && currentPix.x > 0 )
-			{
-				nextIndex = currentPix.x - 1 + currentPix.y * width;
-			}
-			else if ( direction == 1 && currentPix.x < width - 1 )
-			{
-				nextIndex = currentPix.x + 1 + currentPix.y * width;
-			}
-			else if ( direction == 2 && currentPix.y > 0 )
-			{
-				nextIndex = currentPix.x + ( currentPix.y - 1 ) * width;
-			}
-			else if ( direction == 3 && currentPix.y < height - 1 )
-			{
-				nextIndex = currentPix.x + ( currentPix.y + 1 ) * width;
-			}
-			else
-			{
-				continue;
-			}
+        for ( int direction = 0; direction < 4; ++direction )
+        {
+            if ( direction == 0 && currentPix.x > 0 )
+            {
+                nextIndex = currentPix.x - 1 + currentPix.y * width;
+            }
+            else if ( direction == 1 && currentPix.x < width - 1 )
+            {
+                nextIndex = currentPix.x + 1 + currentPix.y * width;
+            }
+            else if ( direction == 2 && currentPix.y > 0 )
+            {
+                nextIndex = currentPix.x + ( currentPix.y - 1 ) * width;
+            }
+            else if ( direction == 3 && currentPix.y < height - 1 )
+            {
+                nextIndex = currentPix.x + ( currentPix.y + 1 ) * width;
+            }
+            else
+            {
+                continue;
+            }
 
-			//
-			// Check this neighbour
-			//
-			//Core::Printf( "Checking neighbour ", nextIndex, ": dist=", dist[ nextIndex ], ".\n" );
-			int stepDist = searchArea[ nextIndex ];
+            //
+            // Check this neighbour
+            //
+            //Printf( "Checking neighbour ", nextIndex, ": dist=", dist[ nextIndex ], ".\n" );
+            int stepDist = searchArea[ nextIndex ];
 
-			if ( searchMask[ nextIndex ] == MASK_VALUE )
-			{
-				//
-				// Allow this step but make it very expensive
-				//
-				stepDist = stepDist + MASK_PENALTY_VALUE;
-				//continue;
-			}
+            if ( searchMask[ nextIndex ] == MASK_VALUE )
+            {
+                //
+                // Allow this step but make it very expensive
+                //
+                stepDist = stepDist + MASK_PENALTY_VALUE;
+                //continue;
+            }
 
-			if ( searchMask[ nextIndex ] == SOURCE_TARGET )
-			{
-				stepDist = 0;
-			}
+            if ( searchMask[ nextIndex ] == SOURCE_TARGET )
+            {
+                stepDist = 0;
+            }
 
-			//Core::Printf( "stepDist=", stepDist, ".\n" );
+            //Printf( "stepDist=", stepDist, ".\n" );
 
-			int altDist = dist[ currentIndex ] + stepDist;
-			if ( altDist < dist[ nextIndex ] )
-			{
-				if ( prev[ nextIndex ] != -1 )
-				{
-					//
-					// Remove previous node from the queue
-					//
-					distQueue.erase( distQueue.find( Mojo::Core::MojoInt2( nextIndex, dist[ nextIndex ] ) ) );
-				}
+            int altDist = dist[ currentIndex ] + stepDist;
+            if ( altDist < dist[ nextIndex ] )
+            {
+                if ( prev[ nextIndex ] != -1 )
+                {
+                    //
+                    // Remove previous node from the queue
+                    //
+                    distQueue.erase( distQueue.find( Int2( nextIndex, dist[ nextIndex ] ) ) );
+                }
 
-				//
-				// Insert new node into the queue
-				//
-				distQueue.insert( Mojo::Core::MojoInt2( nextIndex, altDist ) );
+                //
+                // Insert new node into the queue
+                //
+                distQueue.insert( Int2( nextIndex, altDist ) );
 
-				dist[ nextIndex ] = altDist;
-				prev[ nextIndex ] = currentIndex;
+                dist[ nextIndex ] = altDist;
+                prev[ nextIndex ] = currentIndex;
 
-				//Core::Printf( "Updated distance to:", altDist, ".\n" );
-			}
+                //Printf( "Updated distance to:", altDist, ".\n" );
+            }
 
-		}
+        }
 
-		//++itCount;
-		//if (1)//( itCount % 10 == 0 )
-		//{
-			//Core::Printf( "Finished Dijkstra iteration ", itCount, ": qsize=", distQueue.size(), "." );
-		//}
-	}
+        //++itCount;
+        //if (1)//( itCount % 10 == 0 )
+        //{
+            //Printf( "Finished Dijkstra iteration ", itCount, ": qsize=", distQueue.size(), "." );
+        //}
+    }
 
-	if ( found_target )
-	{
-		//
-		// Trace back from current Index
-		//
-		*toIndex = currentIndex;
+    if ( found_target )
+    {
+        //
+        // Trace back from current Index
+        //
+        *toIndex = currentIndex;
         //currentIndex = prev[ currentIndex ];
-		//Core::Printf( "Found target - tracing back." );
-		int linePix = 0;
-		int tempIndex;
-		while ( currentIndex != fromIndex )
-		{
-			//Core::Printf( currentIndex, "dif=", currentIndex - prev[ currentIndex ]);
-			tempIndex = currentIndex;
-			currentIndex = prev[ currentIndex ];
-			prev[ tempIndex ] = -PATH_RESULT;
-			++linePix;
-		}
-		Core::Printf( "Found ", linePix, " line pixels." );
-	}
-	else
-	{
-		Core::Printf( "Target not found." );
-	}
+        //Printf( "Found target - tracing back." );
+        int linePix = 0;
+        int tempIndex;
+        while ( currentIndex != fromIndex )
+        {
+            //Printf( currentIndex, "dif=", currentIndex - prev[ currentIndex ]);
+            tempIndex = currentIndex;
+            currentIndex = prev[ currentIndex ];
+            prev[ tempIndex ] = -PATH_RESULT;
+            ++linePix;
+        }
+        Printf( "Found ", linePix, " line pixels." );
+    }
+    else
+    {
+        Printf( "Target not found." );
+    }
 }
 
 }

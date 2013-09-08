@@ -1,6 +1,6 @@
 Mojo is an interactive proof reading tool for annotation of 3D EM data.
 
-    Copyright (C) 2013 Semour Knowles-Barley
+    Copyright (C) 2013 Semour Knowles-Barley, Mike Roberts
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by

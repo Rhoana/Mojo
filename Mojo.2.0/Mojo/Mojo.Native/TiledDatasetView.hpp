@@ -1,7 +1,6 @@
 #pragma once
 
-//#include "Mojo.Core/Cuda.hpp"
-#include "Mojo.Core/MojoVectors.hpp"
+#include "Types.hpp"
 
 namespace Mojo
 {
@@ -12,8 +11,8 @@ struct TiledDatasetView
 {
     TiledDatasetView();
 
-    Mojo::Core::MojoFloat3 centerDataSpace;
-    Mojo::Core::MojoFloat3 extentDataSpace;
+    Float3 centerDataSpace;
+    Float3 extentDataSpace;
     int    widthNumPixels;
 };
 

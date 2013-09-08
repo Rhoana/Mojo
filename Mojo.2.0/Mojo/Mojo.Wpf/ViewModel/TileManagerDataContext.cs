@@ -222,9 +222,9 @@ namespace Mojo.Wpf.ViewModel
 
         public void UpdateCurrentZLocationString()
         {
-            if ( mTileManager.TiledDatasetLoaded )
+            if ( mTileManager.SourceImagesLoaded )
             {
-                CurrentZLocationString = "Image " + ( mTileManager.TiledDatasetView.CenterDataSpace.Z + 1 ) + " of " + mTileManager.TiledDatasetDescription.TiledVolumeDescriptions.Get("SourceMap").NumVoxelsZ;
+                CurrentZLocationString = "Image " + ( mTileManager.TiledDatasetView.CenterDataSpace.Z + 1 ) + " of " + mTileManager.SourceImagesTiledDatasetDescription.TiledVolumeDescriptions.Get("SourceMap").NumVoxelsZ;
             }
             else
             {
@@ -248,7 +248,7 @@ namespace Mojo.Wpf.ViewModel
 
         public void UpdateCurrentXYZLocationString()
         {
-            if ( mTileManager.TiledDatasetLoaded )
+            if ( mTileManager.SourceImagesLoaded )
             {
                 CurrentXYZLocationString =
                     Math.Round( mTileManager.TiledDatasetView.CenterDataSpace.X * Constants.ConstParameters.GetInt( "TILE_PIXELS_X" ) ) + "," +

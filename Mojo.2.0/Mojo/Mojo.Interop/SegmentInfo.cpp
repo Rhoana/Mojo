@@ -17,7 +17,7 @@ SegmentInfo::SegmentInfo( Native::SegmentInfo segmentInfo, std::string colorStri
     Name               = msclr::interop::marshal_as< String^ >( segmentInfo.name );
     Size               = segmentInfo.size;
     Confidence         = segmentInfo.confidence;
-	Color              = msclr::interop::marshal_as< String^ >( colorString );
+    Color              = msclr::interop::marshal_as< String^ >( colorString );
 }
 
 Native::SegmentInfo SegmentInfo::ToNative()

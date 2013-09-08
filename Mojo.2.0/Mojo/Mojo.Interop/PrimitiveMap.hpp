@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Mojo.Core/PrimitiveMap.hpp"
+#include "Mojo.Native/PrimitiveMap.hpp"
 
 #using <SlimDX.dll> 
 
@@ -37,7 +37,7 @@ public:
     void                              Add( PrimitiveType type, String^ key, int             value );
     void                              Add( PrimitiveType type, String^ key, bool            value );
 
-    Core::PrimitiveMap ToCore();
+    Native::PrimitiveMap ToCore();
 
     SlimDX::Vector4 GetFloat4( String^ key );
     SlimDX::Vector2 GetFloat2( String^ key );

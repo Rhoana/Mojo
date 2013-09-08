@@ -6,9 +6,9 @@ namespace Native
 {
 
     FileSystemUndoRedoItem::FileSystemUndoRedoItem() :
-		newId                 ( 0 )
-		{
-		}
+        newId                 ( 0 )
+        {
+        }
 
 }
 }

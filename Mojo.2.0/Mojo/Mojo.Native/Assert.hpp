@@ -2,7 +2,6 @@
 
 #include "Stl.hpp"
 
-#define NOMINMAX
 #include <Windows.h>
 
 #include "Printf.hpp"
@@ -13,8 +12,8 @@
     {                                                                                                                                                                  \
         if ( !( expression ) )                                                                                                                                         \
         {                                                                                                                                                              \
-            std::string assertMessage = Mojo::Core::ToString( "Filename: ", __FILE__, "\n\n\n\nLine Number: ", __LINE__, "\n\n\n\nExpression: ", #expression );        \
-            Mojo::Core::Printf( "\n\n\n", assertMessage, "\n\n\n" );                                                                                                   \
+            std::string assertMessage = Mojo::Native::ToString( "Filename: ", __FILE__, "\n\n\n\nLine Number: ", __LINE__, "\n\n\n\nExpression: ", #expression );      \
+            Mojo::Native::Printf( "\n\n\n", assertMessage, "\n\n\n" );                                                                                                 \
             int  response   = MessageBoxA( 0, assertMessage.c_str(), modalDialogTitle, MB_ABORTRETRYIGNORE | MB_SETFOREGROUND | MB_SYSTEMMODAL | MB_ICONEXCLAMATION ); \
             bool debugBreak = false;                                                                                                                                   \
             switch( response )                                                                                                                                         \

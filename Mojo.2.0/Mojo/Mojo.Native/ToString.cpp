@@ -1,12 +1,11 @@
 #include "ToString.hpp"
 
 #include "Stl.hpp"
-
 #include "Boost.hpp"
 
 namespace Mojo
 {
-namespace Core
+namespace Native
 {
 
 std::string ToStringHelper( std::string x )
@@ -42,25 +41,25 @@ std::string ToStringHelper( int x )
 std::string ToStringHelper( std::set< unsigned int > x )
 {
     std::ostringstream stringStream;
-	stringStream << "[";
+    stringStream << "[";
 
-	if ( x.begin() == x.end() )
-	{
-		stringStream << " empty ";
-	}
-	else
-	{
-		stringStream << *x.begin();
-	}
+    if ( x.begin() == x.end() )
+    {
+        stringStream << " empty ";
+    }
+    else
+    {
+        stringStream << *x.begin();
+    }
 
-	for ( std::set< unsigned int >::iterator sit = ++x.begin(); sit != x.end(); ++sit )
-	{
-		stringStream << ",";
-		stringStream << *sit;
-	}
+    for ( std::set< unsigned int >::iterator sit = ++x.begin(); sit != x.end(); ++sit )
+    {
+        stringStream << ",";
+        stringStream << *sit;
+    }
 
-	stringStream << "]";
-	return stringStream.str();
+    stringStream << "]";
+    return stringStream.str();
 }
 
 std::string ToStringZeroPad( int x, int totalNumChars )

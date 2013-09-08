@@ -12,18 +12,18 @@ class FileSystemLogger
 {
 
 public:
-	FileSystemLogger();
+    FileSystemLogger();
 
     void                                              OpenLog( std::string logFilePath );
-	void                                              CloseLog();
+    void                                              CloseLog();
 
-	void                                              Log( std::string messages );
+    void                                              Log( std::string messages );
                                                
 private:                                       
 
     std::string                                       mLogFilePath;
     bool                                              mIsLogFileOpen;
-	boost::filesystem::ofstream                       mLogFileStream;
+    boost::filesystem::ofstream                       mLogFileStream;
 
 };
 

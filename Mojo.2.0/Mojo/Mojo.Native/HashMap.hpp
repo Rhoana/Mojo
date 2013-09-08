@@ -6,7 +6,7 @@
 
 namespace Mojo
 {
-namespace Core
+namespace Native
 {
 
 template< typename K, typename V >
@@ -25,7 +25,17 @@ private:
 template< typename K, typename V >
 inline V& HashMap< K, V >::Get( const K& key )
 {
+    //
+    // CODE QUALITY ISSUE:
+    // This is absolutely the wrong approach. The whole point of HashMap is
+    // to provide a layer of error checking on top of stdext::hash_map. This
+    // assert has probably caught more bugs than any other line of code in the entire
+    // Mojo codebase. Seeing this commented out is quite dissapointing. If you don't wan't
+    // this kind of error checking, don't use a HashMap. -MR
+    //
     //RELEASE_ASSERT( mHashMap.find( key ) != mHashMap.end() );
+
+    RELEASE_ASSERT( mHashMap.find( key ) != mHashMap.end() );
     return mHashMap[ key ];
 };
 

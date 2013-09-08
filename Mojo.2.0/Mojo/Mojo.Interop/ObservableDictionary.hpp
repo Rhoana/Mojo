@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Mojo.Core/Stl.hpp"
+#include "Mojo.Native/Stl.hpp"
 
 #include "NotifyPropertyChanged.hpp"
 

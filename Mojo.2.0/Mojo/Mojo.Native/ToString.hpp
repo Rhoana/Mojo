@@ -4,7 +4,7 @@
 
 namespace Mojo
 {
-namespace Core
+namespace Native
 {
 
 template < typename T00 >

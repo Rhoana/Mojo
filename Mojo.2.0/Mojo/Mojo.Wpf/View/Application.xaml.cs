@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
+using System.IO;
 using System.Windows;
 using System.Windows.Threading;
 using Mojo.Interop;
@@ -12,6 +13,7 @@ namespace Mojo.Wpf.View
         private MainWindow mMainWindow;
         private Engine mEngine;
         private DispatcherTimer mUpdateTimer;
+        private DispatcherTimer mAutoSaveSegmentationTimer;
 
         protected override void OnStartup( StartupEventArgs e )
         {
@@ -35,8 +37,19 @@ namespace Mojo.Wpf.View
             mEngine = new Engine( windowDescriptions );
 
             mUpdateTimer = new DispatcherTimer( DispatcherPriority.Input ) { Interval = TimeSpan.FromMilliseconds( Settings.Default.TargetFrameTimeMilliseconds ) };
-            mUpdateTimer.Tick += TickHandler;
+            mUpdateTimer.Tick += UpdateTimerTickHandler;
             mUpdateTimer.Start();
+
+            mAutoSaveSegmentationTimer = new DispatcherTimer( DispatcherPriority.Input ) { Interval = TimeSpan.FromSeconds( Settings.Default.AutoSaveSegmentationFrequencySeconds ) };
+            mAutoSaveSegmentationTimer.Tick += AutoSaveSegmentationTimerTickHandler;
+            mAutoSaveSegmentationTimer.Start();
+
+            if (Settings.Default.AutoSaveSegmentation)
+            {
+                Console.WriteLine(
+                    "\nConfigured for to Autosave the segmentation every " + Settings.Default.AutoSaveSegmentationFrequencySeconds +
+                    " seconds into the path " + Settings.Default.AutoSaveSegmentationPath + "...\n");
+            }
 
             var engineDataContext = new EngineDataContext( mEngine, new TileManagerDataContext( mEngine.TileManager ) );
 
@@ -50,11 +63,14 @@ namespace Mojo.Wpf.View
         protected override void OnExit( ExitEventArgs e )
         {
 
-            ((EngineDataContext) mMainWindow.DataContext).Dispose();
+            ((EngineDataContext)mMainWindow.DataContext).Dispose();
             mMainWindow.DataContext = null;
 
+            mAutoSaveSegmentationTimer.Stop();
+            mAutoSaveSegmentationTimer.Tick -= AutoSaveSegmentationTimerTickHandler;
+
             mUpdateTimer.Stop();
-            mUpdateTimer.Tick -= TickHandler;
+            mUpdateTimer.Tick -= UpdateTimerTickHandler;
 
             Settings.Default.Save();
 
@@ -74,9 +90,21 @@ namespace Mojo.Wpf.View
 
         }
 
-        private void TickHandler( object sender, EventArgs e )
+        private void UpdateTimerTickHandler(object sender, EventArgs e)
         {
             mEngine.Update();
+        }
+
+        public void AutoSaveSegmentationTimerTickHandler(object sender, EventArgs eventArgs)
+        {
+            if ( Settings.Default.AutoSaveSegmentation && mEngine.TileManager.SegmentationLoaded )
+            {
+                var dateTimeString = String.Format("{0:s}", DateTime.Now).Replace(':', '-');
+
+                Console.WriteLine("Auto-saving segmentation: " + dateTimeString );
+
+                mEngine.TileManager.SaveSegmentationAs( Path.Combine( Settings.Default.AutoSaveSegmentationPath, dateTimeString + Constants.SEGMENTATION_ROOT_DIRECTORY_NAME_SUFFIX ) );
+            }
         }
 
         public void OnMainWindowClosing( object sender, CancelEventArgs eventArgs )
@@ -98,6 +126,5 @@ namespace Mojo.Wpf.View
                 }
             }
         }
-
     }
 }

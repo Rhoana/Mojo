@@ -19,28 +19,44 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\Sdk\SQLite\sqlite-amalgamation-3071502\sqlite3.h" />
-    <ClInclude Include="Constants.hpp" />
+    <ClInclude Include="Assert.hpp" />
+    <ClInclude Include="Boost.hpp" />
+    <ClInclude Include="FileSystemTileServerConstants.hpp" />
+    <ClInclude Include="D3D11.hpp" />
+    <ClInclude Include="D3D11Texture.hpp" />
     <ClInclude Include="FileSystemLogger.hpp" />
     <ClInclude Include="FileSystemSegmentInfoManager.hpp" />
     <ClInclude Include="FileSystemSplitState.hpp" />
+    <ClInclude Include="ForEach.hpp" />
+    <ClInclude Include="HashMap.hpp" />
+    <ClInclude Include="ID3D11Texture.hpp" />
+    <ClInclude Include="Index.hpp" />
+    <ClInclude Include="OpenCV.hpp" />
+    <ClInclude Include="PrimitiveMap.hpp" />
+    <ClInclude Include="Printf.hpp" />
     <ClInclude Include="SegmentInfo.hpp" />
     <ClInclude Include="SimpleSplitTools.hpp" />
     <ClInclude Include="FileSystemTileCacheEntry.hpp" />
     <ClInclude Include="FileSystemUndoRedoItem.hpp" />
     <ClInclude Include="ITileServer.hpp" />
+    <ClInclude Include="Stl.hpp" />
     <ClInclude Include="TileCacheEntry.hpp" />
     <ClInclude Include="TiledDatasetDescription.hpp" />
     <ClInclude Include="TiledDatasetView.hpp" />
     <ClInclude Include="TiledVolumeDescription.hpp" />
     <ClInclude Include="TileManager.hpp" />
     <ClInclude Include="FileSystemTileServer.hpp" />
+    <ClInclude Include="ToString.hpp" />
+    <ClInclude Include="Types.hpp" />
+    <ClInclude Include="VolumeDescription.hpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\Sdk\SQLite\sqlite-amalgamation-3071502\sqlite3.c" />
     <ClCompile Include="FileSystemLogger.cpp" />
     <ClCompile Include="FileSystemSegmentInfoManager.cpp" />
     <ClCompile Include="FileSystemSplitState.cpp" />
+    <ClCompile Include="Index.cpp" />
+    <ClCompile Include="PrimitiveMap.cpp" />
+    <ClCompile Include="Printf.cpp" />
     <ClCompile Include="SegmentInfo.cpp" />
     <ClCompile Include="SimpleSplitTools.cpp" />
     <ClCompile Include="FileSystemTileCacheEntry.cpp" />
@@ -50,11 +66,8 @@
     <ClCompile Include="TiledVolumeDescription.cpp" />
     <ClCompile Include="TileManager.cpp" />
     <ClCompile Include="FileSystemTileServer.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Mojo.Core\Mojo.Core.vcxproj">
-      <Project>{cc8440eb-75bf-400b-b29a-df5b961efce0}</Project>
-    </ProjectReference>
+    <ClCompile Include="ToString.cpp" />
+    <ClCompile Include="VolumeDescription.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{8DD92DA7-F3EE-4334-AFA2-3CBF59D6518A}</ProjectGuid>
@@ -129,14 +142,14 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>_ITERATOR_DEBUG_LEVEL=0;WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <CompileAsManaged>false</CompileAsManaged>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <MinimalRebuild>false</MinimalRebuild>
       <ExceptionHandling>Async</ExceptionHandling>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
       <ObjectFileName>$(IntDir)</ObjectFileName>
-      <AdditionalIncludeDirectories>..\;..\Sdk\SQLite\sqlite-amalgamation-3071502\;..\Sdk\Marray\v1.0\marray\include\;..\Sdk\Hdf5\1.8.8\include\;..\Sdk\OpenCV\OpenCV2.4\build\include\;..\Sdk\Boost\boost_1_44\;..\Sdk\DirectX\Microsoft DirectX SDK (June 2010)\Include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\;..\Sdk\SQLite\sqlite-amalgamation-3071700\;..\Sdk\Marray\v1.0\marray\include\;..\Sdk\Hdf5\1.8.8\include\;..\Sdk\OpenCV\OpenCV2.4\build\include\;..\Sdk\Boost\boost_1_44\;..\Sdk\DirectX\Microsoft DirectX SDK (June 2010)\Include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
@@ -170,14 +183,14 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>_ITERATOR_DEBUG_LEVEL=0;WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <CompileAsManaged>false</CompileAsManaged>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <MinimalRebuild>false</MinimalRebuild>
       <ExceptionHandling>Async</ExceptionHandling>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
       <ObjectFileName>$(IntDir)</ObjectFileName>
-      <AdditionalIncludeDirectories>..\;..\Sdk\SQLite\sqlite-amalgamation-3071502\;..\Sdk\Marray\v1.0\marray\include\;..\Sdk\Hdf5\1.8.8\include\;..\Sdk\OpenCV\OpenCV2.4\build\include\;..\Sdk\Thrust\thrust-v1.3.0\;..\Sdk\Cutil\NVIDIA GPU Computing SDK 4.2\C\common\inc\;..\Sdk\Cuda\v4.2\include\;..\Sdk\Boost\boost_1_44\;..\Sdk\DirectX\Microsoft DirectX SDK (June 2010)\Include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\;..\Sdk\SQLite\sqlite-amalgamation-3071700\;..\Sdk\Marray\v1.0\marray\include\;..\Sdk\Hdf5\1.8.8\include\;..\Sdk\OpenCV\OpenCV2.4\build\include\;..\Sdk\Thrust\thrust-v1.3.0\;..\Sdk\Cutil\NVIDIA GPU Computing SDK 4.2\C\common\inc\;..\Sdk\Cuda\v4.2\include\;..\Sdk\Boost\boost_1_44\;..\Sdk\DirectX\Microsoft DirectX SDK (June 2010)\Include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
@@ -218,7 +231,7 @@
       <ExceptionHandling>Async</ExceptionHandling>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
       <ObjectFileName>$(IntDir)</ObjectFileName>
-      <AdditionalIncludeDirectories>..\;..\Sdk\SQLite\sqlite-amalgamation-3071502\;..\Sdk\Marray\v1.0\marray\include\;..\Sdk\Hdf5\1.8.8\include\;..\Sdk\OpenCV\OpenCV2.4\build\include\;..\Sdk\Boost\boost_1_44\;..\Sdk\DirectX\Microsoft DirectX SDK (June 2010)\Include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\;..\Sdk\SQLite\sqlite-amalgamation-3071700\;..\Sdk\Marray\v1.0\marray\include\;..\Sdk\Hdf5\1.8.8\include\;..\Sdk\OpenCV\OpenCV2.4\build\include\;..\Sdk\Boost\boost_1_44\;..\Sdk\DirectX\Microsoft DirectX SDK (June 2010)\Include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
@@ -269,7 +282,7 @@
       <ExceptionHandling>Async</ExceptionHandling>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
       <ObjectFileName>$(IntDir)</ObjectFileName>
-      <AdditionalIncludeDirectories>..\;..\Sdk\SQLite\sqlite-amalgamation-3071502\;..\Sdk\Marray\v1.0\marray\include\;..\Sdk\Hdf5\1.8.8\include\;..\Sdk\OpenCV\OpenCV2.4\build\include\;..\Sdk\Thrust\thrust-v1.3.0\;..\Sdk\Cutil\NVIDIA GPU Computing SDK 4.2\C\common\inc\;..\Sdk\Cuda\v4.2\include\;..\Sdk\Boost\boost_1_44\;..\Sdk\DirectX\Microsoft DirectX SDK (June 2010)\Include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\;..\Sdk\SQLite\sqlite-amalgamation-3071700\;..\Sdk\Marray\v1.0\marray\include\;..\Sdk\Hdf5\1.8.8\include\;..\Sdk\OpenCV\OpenCV2.4\build\include\;..\Sdk\Thrust\thrust-v1.3.0\;..\Sdk\Cutil\NVIDIA GPU Computing SDK 4.2\C\common\inc\;..\Sdk\Cuda\v4.2\include\;..\Sdk\Boost\boost_1_44\;..\Sdk\DirectX\Microsoft DirectX SDK (June 2010)\Include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
     </ClCompile>
     <Link>

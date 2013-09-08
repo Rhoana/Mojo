@@ -26,7 +26,7 @@ public:
     property String^       Name;
     property long          Size;
     property int           Confidence;
-	property String^       Color;
+    property String^       Color;
 
 };
 

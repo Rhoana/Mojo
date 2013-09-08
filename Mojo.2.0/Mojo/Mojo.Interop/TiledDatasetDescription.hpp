@@ -78,7 +78,7 @@ public:
 private:
     ObservableDictionary< String^, TiledVolumeDescription^ >^                                   mTiledVolumeDescriptions;
     ObservableDictionary< String^, String^ >^                                                   mPaths;
-	unsigned int                                                                                mMaxLabelId;
+    unsigned int                                                                                mMaxLabelId;
 };
 
 }

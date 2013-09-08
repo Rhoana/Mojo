@@ -96,13 +96,9 @@
     <Reference Include="Ookii.Dialogs.Wpf">
       <HintPath>..\Sdk\Ookii\v1.0\Ookii.Dialogs.Wpf.dll</HintPath>
     </Reference>
-    <Reference Condition="'$(Platform)'=='x86'" Include="SlimDX, Version=2.0.10.43, Culture=neutral, PublicKeyToken=b1b0c32fd1ffe4f9, processorArchitecture=x86">
+    <Reference Include="SlimDX, Version=4.0.10.43, Culture=neutral, processorArchitecture=x86">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\Sdk\SlimDX\SlimDX SDK (October 2010)\Bin\net20\x86\SlimDX.dll</HintPath>
-    </Reference>
-    <Reference Condition="'$(Platform)'=='x64'" Include="SlimDX, Version=2.0.10.43, Culture=neutral, PublicKeyToken=b1b0c32fd1ffe4f9, processorArchitecture=x64">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\Sdk\SlimDX\SlimDX SDK (October 2010)\Bin\net20\x64\SlimDX.dll</HintPath>
+      <HintPath>..\Sdk\SlimDX\SlimDX SDK (October 2010)\Bin\net40\$(Platform)\SlimDX.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
@@ -196,10 +192,19 @@
   </PropertyGroup>
   <PropertyGroup>
     <PostBuildEvent>copy ..\..\..\..\Sdk\OpenCV\OpenCV2.4\build\$(PlatformName)\vc10\bin\opencv_core240.dll .
+copy ..\..\..\..\Sdk\OpenCV\OpenCV2.4\build\$(PlatformName)\vc10\bin\opencv_core240d.dll .
 copy ..\..\..\..\Sdk\OpenCV\OpenCV2.4\build\$(PlatformName)\vc10\bin\opencv_highgui240.dll .
-copy ..\..\..\..\Sdk\OpenCV\OpenCV2.4\build\$(PlatformName)\vc10\bin\tbb.dll .
-mkdir Shaders
-copy ..\..\..\Shaders\*.fx Shaders\</PostBuildEvent>
+copy ..\..\..\..\Sdk\OpenCV\OpenCV2.4\build\$(PlatformName)\vc10\bin\opencv_highgui240d.dll .
+
+if $(PlatformName) == x86 copy ..\..\..\..\Sdk\OpenCV\OpenCV2.4\build\common\tbb\ia32\vc10\tbb.dll .
+if $(PlatformName) == x86 copy ..\..\..\..\Sdk\OpenCV\OpenCV2.4\build\common\tbb\ia32\vc10\tbb_debug.dll .
+
+if $(PlatformName) == x64 copy ..\..\..\..\Sdk\OpenCV\OpenCV2.4\build\common\tbb\intel64\vc10\tbb.dll .
+if $(PlatformName) == x64 copy ..\..\..\..\Sdk\OpenCV\OpenCV2.4\build\common\tbb\intel64\vc10\tbb_debug.dll .
+
+if not exist Shaders\nul mkdir Shaders
+copy ..\..\..\Shaders\*.fx Shaders\
+</PostBuildEvent>
   </PropertyGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.0">

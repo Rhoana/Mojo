@@ -4,7 +4,6 @@ using Mojo.Interop;
 using SlimDX;
 using SlimDX.DXGI;
 using SlimDX.Direct3D11;
-//using TinyText;
 
 namespace Mojo
 {
@@ -30,8 +29,6 @@ namespace Mojo
         private InputLayout mInputLayout;
         private Buffer mPositionVertexBuffer;
         private Buffer mTexCoordVertexBuffer;
-
-        //private Context mTinyTextContext;
 
         private DebugRenderer mDebugRenderer;
         private TileManager mTileManager;
@@ -80,10 +77,6 @@ namespace Mojo
                                                 ResourceOptionFlags.None,
                                                 0 );
 
-            //bool result;
-            //mTinyTextContext = new Context( device, deviceContext, Constants.MAX_NUM_TINY_TEXT_CHARACTERS, out result );
-            //Release.Assert( result );
-
             mStopwatch.Start();
         }
 
@@ -112,12 +105,6 @@ namespace Mojo
                 mEffect.Dispose();
                 mEffect = null;
             }
-
-            //if ( mTinyTextContext != null )
-            //{
-            //    mTinyTextContext.Dispose();
-            //    mTinyTextContext = null;
-            //}
 
             if ( mTileManager != null )
             {
@@ -153,14 +140,10 @@ namespace Mojo
                     0.1f,
                     100f ) );
 
-            var datasetExtentDataSpaceX = mTileManager.TiledDatasetDescription.TiledVolumeDescriptions.Get( "SourceMap" ).NumTilesX * Constants.ConstParameters.GetInt( "TILE_SIZE_X" );
-            var datasetExtentDataSpaceY = mTileManager.TiledDatasetDescription.TiledVolumeDescriptions.Get( "SourceMap" ).NumTilesY * Constants.ConstParameters.GetInt( "TILE_SIZE_Y" );
+            var datasetExtentDataSpaceX = mTileManager.SourceImagesTiledDatasetDescription.TiledVolumeDescriptions.Get( "SourceMap" ).NumTilesX * Constants.ConstParameters.GetInt( "TILE_SIZE_X" );
+            var datasetExtentDataSpaceY = mTileManager.SourceImagesTiledDatasetDescription.TiledVolumeDescriptions.Get( "SourceMap" ).NumTilesY * Constants.ConstParameters.GetInt( "TILE_SIZE_Y" );
 
             mTileManager.GetTileCache().ToList().ForEach( tileCacheEntry => RenderTileCacheEntry( deviceContext, camera, datasetExtentDataSpaceX, datasetExtentDataSpaceY, tileCacheEntry ) );
-
-            //mTinyTextContext.Print( viewport, "Frame Time: " + FrameTimeString, 10, 10 );
-            //mTinyTextContext.Print( viewport, "Number of Active Cache Entries: " + mTileManager.GetTileCache().Count, 10, 30 );
-            //mTinyTextContext.Render();
 
             mStopwatch.Reset();
             mStopwatch.Start();
@@ -168,7 +151,9 @@ namespace Mojo
 
         private void RenderTileCacheEntry( DeviceContext deviceContext, Camera camera, int datasetExtentDataSpaceX, int datasetExtentDataSpaceY, TileCacheEntry tileCacheEntry )
         {
-            //Check if this tile is over the edge of the image
+            //
+            // Check if this tile is over the edge of the image
+            //
             var tileMinExtentX = tileCacheEntry.CenterDataSpace.X - ( tileCacheEntry.ExtentDataSpace.X / 2f );
             var tileMinExtentY = tileCacheEntry.CenterDataSpace.Y - ( tileCacheEntry.ExtentDataSpace.Y / 2f );
             var tileMaxExtentX = tileCacheEntry.CenterDataSpace.X + ( tileCacheEntry.ExtentDataSpace.X / 2f );
@@ -242,18 +227,10 @@ namespace Mojo
                                                                                     TEXCOORD_NUM_BYTES_PER_COMPONENT,
                                                                                     0 ) );
 
-            mEffect.GetVariableByName( "gSourceTexture3D" ).AsResource().SetResource( tileCacheEntry.D3D11CudaTextures.Get( "SourceMap" ) );
+            mEffect.GetVariableByName( "gSourceTexture3D" ).AsResource().SetResource( tileCacheEntry.D3D11Textures.Get( "SourceMap" ) );
             if ( mTileManager.SegmentationLoaded )
             {
-                //if ( tileCacheEntry.D3D11CudaTextures.Internal.ContainsKey( "IdMap" ) )
-                //{
-                //    mEffect.GetVariableByName( "gIdTexture3D" ).AsResource().SetResource( tileCacheEntry.D3D11CudaTextures.Get( "IdMap" ) );
-                //}
-                //else
-                //{
-                //    System.Console.WriteLine("Warning: expected IdMap not found.");
-                //}
-                mEffect.GetVariableByName( "gIdTexture3D" ).AsResource().SetResource( tileCacheEntry.D3D11CudaTextures.Get( "IdMap" ) );
+                mEffect.GetVariableByName( "gIdTexture3D" ).AsResource().SetResource( tileCacheEntry.D3D11Textures.Get( "IdMap" ) );
                 mEffect.GetVariableByName( "gIdColorMapBuffer" ).AsResource().SetResource( mTileManager.Internal.GetIdColorMap() );
                 mEffect.GetVariableByName( "gLabelIdMapBuffer" ).AsResource().SetResource( mTileManager.Internal.GetLabelIdMap() );
                 mEffect.GetVariableByName( "gIdConfidenceMapBuffer" ).AsResource().SetResource( mTileManager.Internal.GetIdConfidenceMap() );
@@ -266,9 +243,6 @@ namespace Mojo
 
             mPass.Apply( deviceContext );
             deviceContext.Draw( QUAD_NUM_VERTICES, 0 );
-            
-            //mDebugRenderer.RenderQuadWireframeOnly( deviceContext, p1, p2, p3, p4, new Vector3( 1, 0, 0 ), camera );
-
         }
     }
 }
