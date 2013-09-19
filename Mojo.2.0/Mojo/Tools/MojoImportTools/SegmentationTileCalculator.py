@@ -256,7 +256,7 @@ if len(files) > 0:
             
         id_counts[ current_image_counts_ids ] = id_counts[ current_image_counts_ids ] + np.int64( current_image_counts [ current_image_counts_ids ] )
         
-        ( original_image_num_pixels_x, original_image_num_pixels_y ) = original_ids.shape
+        ( original_image_num_pixels_y, original_image_num_pixels_x ) = original_ids.shape
 
         current_image_num_pixels_y = original_image_num_pixels_y
         current_image_num_pixels_x = original_image_num_pixels_x

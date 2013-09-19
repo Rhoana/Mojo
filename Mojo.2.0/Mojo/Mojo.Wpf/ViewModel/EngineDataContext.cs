@@ -110,8 +110,8 @@ namespace Mojo.Wpf.ViewModel
             //
             // View menu commands
             //
-            NextImageCommand = new RelayCommand( param => Engine.NextImage(), param => Engine.TileManager.TiledDatasetLoaded );
-            PreviousImageCommand = new RelayCommand( param => Engine.PreviousImage(), param => Engine.TileManager.TiledDatasetLoaded );
+            NextImageCommand = new RelayCommand( param => Engine.NextImage( false ), param => Engine.TileManager.TiledDatasetLoaded );
+            PreviousImageCommand = new RelayCommand( param => Engine.PreviousImage( false ), param => Engine.TileManager.TiledDatasetLoaded );
             ZoomInCommand = new RelayCommand( param => Engine.ZoomIn(), param => Engine.TileManager.TiledDatasetLoaded );
             ZoomOutCommand = new RelayCommand( param => Engine.ZoomOut(), param => Engine.TileManager.TiledDatasetLoaded );
             UpdateLocationFromTextCommand = new RelayCommand( param => Engine.UpdateLocationFromText( param ), param => Engine.TileManager.TiledDatasetLoaded );

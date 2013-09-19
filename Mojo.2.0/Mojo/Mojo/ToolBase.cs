@@ -80,10 +80,10 @@ namespace Mojo
                     break;
 
                 case Key.W:
-                    mEngine.NextImage();
+                    mEngine.NextImage( keyEventArgs.IsRepeat );
                     break;
                 case Key.S:
-                    mEngine.PreviousImage();
+                    mEngine.PreviousImage( keyEventArgs.IsRepeat );
                     break;
 
                 case Key.X:
@@ -120,10 +120,10 @@ namespace Mojo
                     mEngine.UpdateXYZ();
                     break;
                 case System.Windows.Forms.MouseButtons.XButton1:
-                    mEngine.PreviousImage();
+                    mEngine.PreviousImage( false );
                     break;
                 case System.Windows.Forms.MouseButtons.XButton2:
-                    mEngine.NextImage();
+                    mEngine.NextImage( false );
                     break;
             }
         }

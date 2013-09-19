@@ -207,7 +207,7 @@ namespace Mojo
             Console.WriteLine( "\nMojo terminating...\n" );
         }
 
-        public void NextImage()
+        public void NextImage( bool isRepeat )
         {
             var centerDataSpace = TileManager.TiledDatasetView.CenterDataSpace;
             if ( centerDataSpace.Z < TileManager.TiledDatasetDescription.TiledVolumeDescriptions.Get( "SourceMap" ).NumVoxelsZ - 1 )
@@ -225,11 +225,15 @@ namespace Mojo
 
                 CurrentToolMoveZ();
                 UpdateZ();
-                UpdateOneTile();
+
+                if ( isRepeat )
+                    UpdateOneTile();
+                else
+                    Update();
             }
         }
 
-        public void PreviousImage()
+        public void PreviousImage( bool isRepeat )
         {
             var centerDataSpace = TileManager.TiledDatasetView.CenterDataSpace;
             if ( centerDataSpace.Z > 0 )
@@ -247,7 +251,11 @@ namespace Mojo
 
                 CurrentToolMoveZ();
                 UpdateZ();
-                UpdateOneTile();
+
+                if ( isRepeat )
+                    UpdateOneTile();
+                else
+                    Update();
             }
         }
 
