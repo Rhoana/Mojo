@@ -12,13 +12,13 @@ import numpy as np
 tile_num_pixels_y = 512
 tile_num_pixels_x = 512
 
-original_input_images_path = 'D:\\dev\\datasets\\NerveCord\\trakem2aligned_crop\\'
-output_tile_image_path     = 'D:\\dev\\datasets\\NerveCord\\mojo1\\images\\tiles'
-output_tile_volume_file    = 'D:\\dev\\datasets\\NerveCord\\mojo1\\images\\tiledVolumeDescription.xml'
-input_image_extension      = '.tif'
+original_input_images_path = 'D:\\dev\\datasets\\RDExtendLeft\\tatoo_images'
+output_tile_image_path     = 'D:\\dev\\datasets\\RDExtendLeft\\mojo_tatoo\\images\\tiles'
+output_tile_volume_file    = 'D:\\dev\\datasets\\RDExtendLeft\\mojo_tatoo\\images\\tiledVolumeDescription.xml'
+input_image_extension      = '.png'
 output_image_extension     = '.tif'
 image_resize_filter        = PIL.Image.ANTIALIAS
-nimages_to_process            = 10
+nimages_to_process            = 300
 
 # original_input_images_path = 'D:\\dev\\datasets\\LGN1\\imageTifs'
 # output_tile_image_path     = 'D:\\dev\\datasets\\LGN1\\output_rf=combined_lessmito_pairwise=multijoin\\mojo\\images\\tiles'
