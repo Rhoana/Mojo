@@ -41,6 +41,7 @@ namespace Mojo
         DrawRegions
     }
 
+
     public class Engine : NotifyPropertyChanged, IDisposable
     {
         private Factory mDxgiFactory;
@@ -107,14 +108,52 @@ namespace Mojo
         }
 
         private String mExternalViewerPath = null;
+        private String mExternalViewerArgs = null;
+        private int mWOffset = 0;
 
-        public Engine( ObservableDictionary<string, D3D11HwndDescription> d3d11HwndDescriptions, String externalViewerPath )
+        public Engine( ObservableDictionary<string, D3D11HwndDescription> d3d11HwndDescriptions, String externalViewerPath, int wOffset )
         {
             Console.WriteLine( "\nMojo initializing...\n" );
 
             try
             {
                 mExternalViewerPath = externalViewerPath;
+                mWOffset = wOffset;
+
+                String[] pathSplit = mExternalViewerPath.Split( ' ' );
+                if (pathSplit.Length > 1)
+                {
+                    bool foundExe = false;
+                    mExternalViewerPath = "";
+                    mExternalViewerArgs = "";
+                    for ( int i = 0; i < pathSplit.Length; ++i )
+                    {
+                        if ( !foundExe )
+                        {
+                            // Append to the executable path
+                            if (mExternalViewerPath.Length > 0)
+                            {
+                                mExternalViewerPath += " ";
+                            }
+                            mExternalViewerPath += pathSplit[ i ];
+
+                            // Check if the exe path is complete
+                            if (pathSplit[i].ToLower().EndsWith(".exe"))
+                            {
+                                foundExe = true;
+                            }
+                        }
+                        else
+                        {
+                            // Append to the arguments list
+                            if ( mExternalViewerArgs.Length > 0 )
+                            {
+                                mExternalViewerArgs += " ";
+                            }
+                            mExternalViewerArgs += pathSplit[ i ];
+                        }
+                    }
+                }
 
                 D3D11.Initialize( out mDxgiFactory, out mD3D11Device );
                 //Cuda.Initialize( mD3D11Device );
@@ -227,7 +266,7 @@ namespace Mojo
                 UpdateZ();
 
                 if ( isRepeat )
-                    UpdateOneTile();
+                    UpdateFast();
                 else
                     Update();
             }
@@ -253,7 +292,7 @@ namespace Mojo
                 UpdateZ();
 
                 if ( isRepeat )
-                    UpdateOneTile();
+                    UpdateFast();
                 else
                     Update();
             }
@@ -476,10 +515,17 @@ namespace Mojo
             }
         }
 
-        public void UpdateOneTile()
+        public void UpdateFast()
         {
             mSkipUpdate = true;
-            TileManager.UpdateOneTile();
+            if ( mWOffset <= 0 )
+            {
+                TileManager.UpdateOneTile();
+            }
+            else
+            {
+                TileManager.UpdateWOffset( mWOffset );
+            }
             Viewers.Internal.ToList().ForEach( viewer => viewer.Value.D3D11RenderingPane.Render() );
         }
 
@@ -543,86 +589,102 @@ namespace Mojo
                     }
                 }
 
-                lock ( this )
-                {
-                    if ( mExternalViewerProcess == null )
-                    {
-                        try
-                        {
-                            String viewerArguments =
-                                TileManager.TiledDatasetDescription.TiledVolumeDescriptions.Get( "IdMap" ).ImageDataDirectory.Replace( "\\ids\\tiles", "" ) + " " +
-                                Math.Round( TileManager.TiledDatasetView.CenterDataSpace.X * Constants.ConstParameters.GetInt( "TILE_PIXELS_X" ) ) + " " +
-                                Math.Round( TileManager.TiledDatasetView.CenterDataSpace.Y * Constants.ConstParameters.GetInt( "TILE_PIXELS_Y" ) ) + " " +
-                                ( TileManager.TiledDatasetView.CenterDataSpace.Z * Constants.ConstParameters.GetInt( "TILE_PIXELS_Z" ) ) + " " +
-                                TileManager.TiledDatasetDescription.TiledVolumeDescriptions.Get( "IdMap" ).NumVoxelsX + " " +
-                                TileManager.TiledDatasetDescription.TiledVolumeDescriptions.Get( "IdMap" ).NumVoxelsY + " " +
-                                TileManager.SelectedSegmentId + ":";
+                StartExternalViewer( TileManager.SelectedSegmentId );
+                UpdateExternalViewerLocation();
 
-                            System.Collections.Generic.IList<uint> tileIds = TileManager.GetRemappedChildren( TileManager.SelectedSegmentId );
-
-                            viewerArguments += String.Join( ",", tileIds );
-
-                            Console.WriteLine( "Running Viewer:" );
-                            Console.WriteLine( mExternalViewerPath );
-                            Console.WriteLine( viewerArguments );
-
-                            mExternalViewerProcess = new System.Diagnostics.Process();
-                            mExternalViewerProcess.StartInfo.UseShellExecute = false;
-                            mExternalViewerProcess.StartInfo.RedirectStandardOutput = true;
-                            mExternalViewerProcess.StartInfo.RedirectStandardInput = true;
-                            mExternalViewerProcess.StartInfo.WorkingDirectory = System.IO.Path.GetDirectoryName( mExternalViewerPath );
-                            mExternalViewerProcess.StartInfo.FileName = mExternalViewerPath;
-                            mExternalViewerProcess.StartInfo.Arguments = viewerArguments;
-                            mExternalViewerProcess.Start();
-
-                            //
-                            // Start a backgroundWorker to monitor navigation events
-                            //
-
-                            DoWorkEventHandler externalViewerNavigationDelegate =
-                                delegate( object s, DoWorkEventArgs args )
-                                {
-                                    string line = mExternalViewerProcess.StandardOutput.ReadLine();
-                                    while ( line != null )
-                                    {
-                                        Console.WriteLine( "Got external viewer line:" );
-                                        Console.WriteLine( line );
-                                        if ( line.StartsWith( "location " ) )
-                                        {
-                                            line = line.Replace( "location ", "" );
-                                            Application.Current.Dispatcher.Invoke( new System.Action( () => UpdateLocationFromExternalViewer( line, TileManager.TiledDatasetDescription.TiledVolumeDescriptions.Get( "IdMap" ).NumTilesW - 1 ) ) );
-                                        }
-                                        line = mExternalViewerProcess.StandardOutput.ReadLine();
-                                    }
-                                    lock ( this )
-                                    {
-                                        mExternalViewerProcess.WaitForExit();
-                                        mExternalViewerProcess = null;
-                                    }
-                                };
-
-                            BackgroundWorker worker = new BackgroundWorker();
-                            worker.DoWork += externalViewerNavigationDelegate;
-                            worker.RunWorkerAsync();
-                        }
-                        catch ( Exception e )
-                        {
-                            Console.WriteLine( "WARNING: Could not start external viewer." );
-                            Console.WriteLine( e.Message );
-                            Console.WriteLine( e.StackTrace );
-                        }
-                    }
-                    else
-                    {
-                        UpdateExternalViewerLocation();
-                        UpdateExternalViewerSelectedId();
-                    }
-                }
             }
 
         }
 
+        public void StartExternalViewer( uint viewId )
+        {
+            lock ( this )
+            {
+                if ( mExternalViewerProcess == null )
+                {
+                    try
+                    {
+                        String viewerArguments =
+                            TileManager.TiledDatasetDescription.TiledVolumeDescriptions.Get( "IdMap" ).ImageDataDirectory.Replace( "\\ids\\tiles", "" ) + " " +
+                            Math.Round( TileManager.TiledDatasetView.CenterDataSpace.X * Constants.ConstParameters.GetInt( "TILE_PIXELS_X" ) ) + " " +
+                            Math.Round( TileManager.TiledDatasetView.CenterDataSpace.Y * Constants.ConstParameters.GetInt( "TILE_PIXELS_Y" ) ) + " " +
+                            ( TileManager.TiledDatasetView.CenterDataSpace.Z * Constants.ConstParameters.GetInt( "TILE_PIXELS_Z" ) ) + " " +
+                            TileManager.TiledDatasetDescription.TiledVolumeDescriptions.Get( "IdMap" ).NumVoxelsX + " " +
+                            TileManager.TiledDatasetDescription.TiledVolumeDescriptions.Get( "IdMap" ).NumVoxelsY + " " +
+                            viewId + ":";
+
+                        System.Collections.Generic.IList<uint> tileIds = TileManager.GetRemappedChildren( viewId );
+
+                        viewerArguments += String.Join( ",", tileIds );
+
+                        if (mExternalViewerArgs != null)
+                        {
+                            viewerArguments = mExternalViewerArgs + " " + viewerArguments;
+                        }
+
+                        Console.WriteLine( "Running Viewer:" );
+                        Console.WriteLine( mExternalViewerPath );
+                        Console.WriteLine( viewerArguments );
+
+                        mExternalViewerProcess = new System.Diagnostics.Process();
+                        mExternalViewerProcess.StartInfo.UseShellExecute = false;
+                        mExternalViewerProcess.StartInfo.RedirectStandardOutput = true;
+                        mExternalViewerProcess.StartInfo.RedirectStandardInput = true;
+                        mExternalViewerProcess.StartInfo.WorkingDirectory = System.IO.Path.GetDirectoryName( mExternalViewerPath );
+                        mExternalViewerProcess.StartInfo.FileName = mExternalViewerPath;
+                        mExternalViewerProcess.StartInfo.Arguments = viewerArguments;
+                        mExternalViewerProcess.Start();
+
+                        //
+                        // Start a backgroundWorker to monitor navigation events
+                        //
+
+                        DoWorkEventHandler externalViewerNavigationDelegate =
+                            delegate( object s, DoWorkEventArgs args )
+                            {
+                                string line = mExternalViewerProcess.StandardOutput.ReadLine();
+                                while ( line != null )
+                                {
+                                    Console.WriteLine( "Got external viewer line:" );
+                                    Console.WriteLine( line );
+                                    if ( line.StartsWith( "location " ) )
+                                    {
+                                        line = line.Replace( "location ", "" );
+                                        Application.Current.Dispatcher.Invoke( new System.Action( () => UpdateLocationFromExternalViewer( line, TileManager.TiledDatasetDescription.TiledVolumeDescriptions.Get( "IdMap" ).NumTilesW - 1 ) ) );
+                                    }
+                                    line = mExternalViewerProcess.StandardOutput.ReadLine();
+                                }
+                                lock ( this )
+                                {
+                                    mExternalViewerProcess.WaitForExit();
+                                    mExternalViewerProcess = null;
+                                }
+                            };
+
+                        BackgroundWorker worker = new BackgroundWorker();
+                        worker.DoWork += externalViewerNavigationDelegate;
+                        worker.RunWorkerAsync();
+                    }
+                    catch ( Exception e )
+                    {
+                        Console.WriteLine( "WARNING: Could not start external viewer." );
+                        Console.WriteLine( e.Message );
+                        Console.WriteLine( e.StackTrace );
+                    }
+                }
+                else
+                {
+                    UpdateExternalViewerId( viewId );
+                }
+            }
+        }
+
         public void UpdateExternalViewerSelectedId()
+        {
+            UpdateExternalViewerId( TileManager.SelectedSegmentId );
+        }
+
+        public void UpdateExternalViewerId( uint viewId )
         {
             lock ( this )
             {
@@ -631,12 +693,12 @@ namespace Mojo
                     try
                     {
                         //
-                        // Render selected id
+                        // Render given id
                         //
                         string viewerArguments = "ids " +
-                            TileManager.SelectedSegmentId + ":";
+                            viewId + ":";
 
-                        System.Collections.Generic.IList<uint> tileIds = TileManager.GetRemappedChildren( TileManager.SelectedSegmentId );
+                        System.Collections.Generic.IList<uint> tileIds = TileManager.GetRemappedChildren( viewId );
 
                         viewerArguments += String.Join( ",", tileIds );
 

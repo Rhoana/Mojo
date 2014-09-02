@@ -141,7 +141,10 @@
     <Compile Include="ViewModel\EngineDataContext.cs" />
     <Compile Include="ViewModel\ObjectsEqualParameterConverter.cs" />
     <Compile Include="ViewModel\ObjectsEqualBrushConverter.cs" />
-    <Compile Include="ViewModel\SegmentLockConverter.cs" />
+    <Compile Include="ViewModel\SegmentLockConverter.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ViewModel\SegmentTypeConverter.cs" />
     <Compile Include="ViewModel\TileManagerDataContext.cs" />
     <Compile Include="ViewModel\RelayCommand.cs" />
     <Compile Include="View\D3D11RenderingPaneHost.cs">

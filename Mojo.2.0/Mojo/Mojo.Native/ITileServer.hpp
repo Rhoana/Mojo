@@ -95,8 +95,12 @@ public:
     virtual void                                                  SortSegmentInfoByName( bool reverse )		                                                                             = 0;
     virtual void                                                  SortSegmentInfoBySize( bool reverse )		                                                                             = 0;
     virtual void                                                  SortSegmentInfoByConfidence( bool reverse )	                                                                         = 0;
+    virtual void                                                  SortSegmentInfoByType( bool reverse )	                                                                                 = 0;
+    virtual void                                                  SortSegmentInfoBySubType( bool reverse )	                                                                             = 0;
     virtual void                                                  LockSegmentLabel( unsigned int segId )                                                                                 = 0;
     virtual void                                                  UnlockSegmentLabel( unsigned int segId )                                                                               = 0;
+    virtual void                                                  SetSegmentType( unsigned int segId, std::string newType )                                                              = 0;
+    virtual void                                                  SetSegmentSubType( unsigned int segId, std::string newSubType )                                                        = 0;
 	virtual unsigned int                                          GetSegmentInfoCount()                                                                                                  = 0;
 	virtual unsigned int                                          GetSegmentInfoCurrentListLocation( unsigned int segId )                                                                = 0;
     virtual std::list< SegmentInfo >                              GetSegmentInfoRange( int begin, int end ) 	                                                                         = 0;

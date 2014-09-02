@@ -52,7 +52,7 @@ public:
     void                                                  AutosaveSegmentation();
     void                                                  DeleteTempFiles();
 
-    void                                                  LoadTiles( const TiledDatasetView& tiledDatasetView );
+    void                                                  LoadTiles( const TiledDatasetView& tiledDatasetView, int wOffset );
     void                                                  LoadOverTile( const TiledDatasetView& tiledDatasetView );
 
     std::vector< TileCacheEntry >&                        GetTileCache();
@@ -64,9 +64,13 @@ public:
     void                                                  SortSegmentInfoByName( bool reverse );
     void                                                  SortSegmentInfoBySize( bool reverse );
     void                                                  SortSegmentInfoByConfidence( bool reverse );
+    void                                                  SortSegmentInfoByType( bool reverse );
+    void                                                  SortSegmentInfoBySubType( bool reverse );
     void                                                  RemapSegmentLabel( unsigned int fromSegId, unsigned int toSegId );
     void                                                  LockSegmentLabel( unsigned int segId );
     void                                                  UnlockSegmentLabel( unsigned int segId );
+    void                                                  SetSegmentType( unsigned int segId, std::string newType );
+    void                                                  SetSegmentSubType( unsigned int segId, std::string newSubType );
 	unsigned int                                          GetSegmentInfoCount();
 	unsigned int                                          GetSegmentInfoCurrentListLocation( unsigned int segId );
     std::list< SegmentInfo >                              GetSegmentInfoRange( int begin, int end );
@@ -129,7 +133,7 @@ private:
     void                                                  LoadSegmentationInternal( TiledDatasetDescription& tiledDatasetDescription );
     void                                                  UnloadSegmentationInternal();
 
-    std::list< MojoInt4 >                                 GetTileIndicesIntersectedByView( const TiledDatasetView& tiledDatasetView );
+    std::list< MojoInt4 >                                 GetTileIndicesIntersectedByView( const TiledDatasetView& tiledDatasetView, const int wOffset );
 	MojoInt4                                              GetTileIndexCoveringView( const TiledDatasetView& tiledDatasetView );
 
     void                                                  GetIndexTileSpace( MojoInt3 zoomLevel, MojoFloat3 pointDataSpace, MojoFloat4& pointTileSpace, MojoInt4& tileIndex );
@@ -139,6 +143,7 @@ private:
 	void                                                  UpdateLabelIdMap( unsigned int fromSegId );
     void                                                  ReloadTileCache();
     void                                                  ReloadTileCacheOverlayMapOnly( int currentZ );
+    void                                                  ReloadTileCacheOverlayAndIds( int currentZ );
 
     ID3D11Device*                                         mD3D11Device;
     ID3D11DeviceContext*                                  mD3D11DeviceContext;

@@ -45,7 +45,7 @@ public:
     void                                                    AutosaveSegmentation();
     void                                                    DeleteTempFiles();
 
-    void                                                    LoadTiles( TiledDatasetView^ tiledDatasetView );
+    void                                                    LoadTiles( TiledDatasetView^ tiledDatasetView, int wOffset );
     void                                                    LoadOverTile( TiledDatasetView^ tiledDatasetView );
 
     Collections::Generic::IList< TileCacheEntry^ >^         GetTileCache();
@@ -57,9 +57,13 @@ public:
     void                                                    SortSegmentInfoByName( bool reverse );
     void                                                    SortSegmentInfoBySize( bool reverse );
     void                                                    SortSegmentInfoByConfidence( bool reverse );
+    void                                                    SortSegmentInfoByType( bool reverse );
+    void                                                    SortSegmentInfoBySubType( bool reverse );
 	void                                                    RemapSegmentLabel( unsigned int fromSegId, unsigned int toSegId );
 	void                                                    LockSegmentLabel( unsigned int segId );
 	void                                                    UnlockSegmentLabel( unsigned int segId );
+	void                                                    SetSegmentType( unsigned int segId, String^ newType );
+	void                                                    SetSegmentSubType( unsigned int segId, String^ newSubType );
 	unsigned int                                            GetSegmentInfoCount();
 	unsigned int                                            GetSegmentInfoCurrentListLocation( unsigned int segId );
     Collections::Generic::IList< SegmentInfo^ >^            GetSegmentInfoRange( int begin, int end );

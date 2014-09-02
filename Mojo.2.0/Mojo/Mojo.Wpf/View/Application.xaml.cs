@@ -32,7 +32,7 @@ namespace Mojo.Wpf.View
                                              },
                                      };
 
-            mEngine = new Engine( windowDescriptions, Settings.Default.ExternalViewerPath );
+            mEngine = new Engine( windowDescriptions, Settings.Default.ExternalViewerPath, Settings.Default.FastZScrollWOffset );
 
             mUpdateTimer = new DispatcherTimer( DispatcherPriority.Input ) { Interval = TimeSpan.FromMilliseconds( Settings.Default.TargetFrameTimeMilliseconds ) };
             mUpdateTimer.Tick += TickHandler;

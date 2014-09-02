@@ -107,8 +107,12 @@ public:
     virtual void                                                  SortSegmentInfoByName( bool reverse );
     virtual void                                                  SortSegmentInfoBySize( bool reverse );
     virtual void                                                  SortSegmentInfoByConfidence( bool reverse );
+    virtual void                                                  SortSegmentInfoByType( bool reverse );
+    virtual void                                                  SortSegmentInfoBySubType( bool reverse );
     virtual void                                                  LockSegmentLabel( unsigned int segId );
     virtual void                                                  UnlockSegmentLabel( unsigned int segId );
+    virtual void                                                  SetSegmentType( unsigned int segId, std::string newType );
+    virtual void                                                  SetSegmentSubType( unsigned int segId, std::string newSubType );
 	virtual unsigned int                                          GetSegmentInfoCount();
 	virtual unsigned int                                          GetSegmentInfoCurrentListLocation( unsigned int segId );
     virtual std::list< SegmentInfo >                              GetSegmentInfoRange( int begin, int end );

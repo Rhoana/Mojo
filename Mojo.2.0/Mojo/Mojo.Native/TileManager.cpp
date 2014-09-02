@@ -251,7 +251,7 @@ void TileManager::LoadOverTile( const TiledDatasetView& tiledDatasetView )
 
 }
 
-void TileManager::LoadTiles( const TiledDatasetView& tiledDatasetView )
+void TileManager::LoadTiles( const TiledDatasetView& tiledDatasetView, const int wOffset )
 {
     //
     // assume that all cache entries can be discarded unless explicitly marked otherwise
@@ -262,7 +262,7 @@ void TileManager::LoadTiles( const TiledDatasetView& tiledDatasetView )
         mTileCache[ cacheIndex ].active    = false;
     }
 
-    std::list< MojoInt4 > tileIndices = GetTileIndicesIntersectedByView( tiledDatasetView );
+    std::list< MojoInt4 > tileIndices = GetTileIndicesIntersectedByView( tiledDatasetView, wOffset );
 
     //
     // explicitly mark all previously loaded cache entries that intersect the current view as cache entries to keep
@@ -484,6 +484,16 @@ void TileManager::SortSegmentInfoByConfidence( bool reverse )
 	mTileServer->SortSegmentInfoByConfidence( reverse );
 }
 
+void TileManager::SortSegmentInfoByType( bool reverse )
+{
+	mTileServer->SortSegmentInfoByType( reverse );
+}
+
+void TileManager::SortSegmentInfoBySubType( bool reverse )
+{
+	mTileServer->SortSegmentInfoBySubType( reverse );
+}
+
 void TileManager::RemapSegmentLabel( unsigned int fromSegId, unsigned int toSegId )
 {
 	Core::Printf( "From ", fromSegId, " before -> ", (*mLabelIdMap)( fromSegId ), "." );	
@@ -584,6 +594,16 @@ void TileManager::UnlockSegmentLabel( unsigned int segId )
 
 }
 
+void TileManager::SetSegmentType( unsigned int segId, std::string newType )
+{
+	mTileServer->SetSegmentType( segId, newType );
+}
+
+void TileManager::SetSegmentSubType( unsigned int segId, std::string newSubType )
+{
+	mTileServer->SetSegmentSubType( segId, newSubType );
+}
+
 unsigned int TileManager::GetSegmentInfoCount()
 {
 	return mTileServer->GetSegmentInfoCount();
@@ -658,14 +678,14 @@ void TileManager::ReplaceSegmentationLabelCurrentSlice( unsigned int oldId, unsi
 {
     mTileServer->ReplaceSegmentationLabelCurrentSlice( oldId, newId, pDataSpace );
 
-    ReloadTileCache();
+	ReloadTileCacheOverlayAndIds( (int)pDataSpace.z );
 }
 
 void TileManager::DrawSplit( MojoFloat3 pointTileSpace, float radius )
 {
     mTileServer->DrawSplit( pointTileSpace, radius );
 
-    ReloadTileCacheOverlayMapOnly( (int)pointTileSpace.z );
+    ReloadTileCacheOverlayAndIds( (int)pointTileSpace.z );
 }
 
 void TileManager::DrawErase( MojoFloat3 pointTileSpace, float radius )
@@ -740,7 +760,7 @@ int TileManager::CompletePointSplit( unsigned int segId, MojoFloat3 pointTileSpa
 
     mTileServer->PrepForSplit( segId, pointTileSpace );
 
-    ReloadTileCache();
+	ReloadTileCacheOverlayAndIds( (int)pointTileSpace.z );
 
 	return newId;
 }
@@ -751,7 +771,7 @@ int TileManager::CompleteDrawSplit( unsigned int segId, MojoFloat3 pointTileSpac
 
     mTileServer->PrepForSplit( segId, pointTileSpace );
 
-    ReloadTileCache();
+    ReloadTileCacheOverlayAndIds( (int)pointTileSpace.z );
 
 	return newId;
 }
@@ -788,7 +808,7 @@ void TileManager::CommitAdjustChange( unsigned int segId, MojoFloat3 pointTileSp
 
     mTileServer->PrepForAdjust( segId, pointTileSpace );
 
-    ReloadTileCache();
+    ReloadTileCacheOverlayAndIds( (int)pointTileSpace.z );
 }
 
 void TileManager::ResetDrawMergeState( MojoFloat3 pointTileSpace )
@@ -841,7 +861,7 @@ unsigned int TileManager::CommitDrawMergeCurrentSlice( MojoFloat3 pointTileSpace
 
 	mTileServer->PrepForDrawMerge( pointTileSpace );
 
-	ReloadTileCache();
+	ReloadTileCacheOverlayAndIds( (int)pointTileSpace.z );
 
 	return newId;
 
@@ -1062,7 +1082,7 @@ MojoInt3 TileManager::GetZoomLevel( const TiledDatasetView& tiledDatasetView )
     return MojoInt3( zoomLevelXY, zoomLevelXY, zoomLevelZ );
 }
 
-std::list< MojoInt4 > TileManager::GetTileIndicesIntersectedByView( const TiledDatasetView& tiledDatasetView )
+std::list< MojoInt4 > TileManager::GetTileIndicesIntersectedByView( const TiledDatasetView& tiledDatasetView, const int wOffset )
 {
     std::list< MojoInt4 > tilesIntersectedByCamera;
 
@@ -1073,10 +1093,19 @@ std::list< MojoInt4 > TileManager::GetTileIndicesIntersectedByView( const TiledD
     int  zoomLevelXY = std::min( zoomLevel.x, zoomLevel.y );
     int  zoomLevelZ  = zoomLevel.z;
 
+    MojoInt4 numTiles              = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "SourceMap" ).numTiles();
+
+	//
+	// offset zoom level if necessary
+	//
+	if (wOffset > 0)
+	{
+		zoomLevelXY = std::min( zoomLevelXY + wOffset, numTiles.w - 1 );
+	}
+	
     //
     // figure out how many tiles there are at the current zoom level
     //
-    MojoInt4 numTiles              = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "SourceMap" ).numTiles();
     int  numTilesForZoomLevelX = (int)ceil( numTiles.x / pow( 2.0, zoomLevelXY ) );
     int  numTilesForZoomLevelY = (int)ceil( numTiles.y / pow( 2.0, zoomLevelXY ) );
     int  numTilesForZoomLevelZ = (int)ceil( numTiles.z / pow( 2.0, zoomLevelZ ) );
@@ -1361,6 +1390,56 @@ void TileManager::ReloadTileCache()
             //
             mTileServer->UnloadTile( tileIndex );
 
+        }
+    }
+}
+
+void TileManager::ReloadTileCacheOverlayAndIds( int currentZ )
+{
+    for ( int cacheIndex = 0; cacheIndex < mDeviceTileCacheSize; cacheIndex++ )
+    {
+        if ( mTileCache[ cacheIndex ].indexTileSpace.x != TILE_CACHE_PAGE_TABLE_BAD_INDEX &&
+             mTileCache[ cacheIndex ].indexTileSpace.y != TILE_CACHE_PAGE_TABLE_BAD_INDEX &&
+             mTileCache[ cacheIndex ].indexTileSpace.z != TILE_CACHE_PAGE_TABLE_BAD_INDEX &&
+             mTileCache[ cacheIndex ].indexTileSpace.w != TILE_CACHE_PAGE_TABLE_BAD_INDEX &&
+             mTileCache[ cacheIndex ].indexTileSpace.z == currentZ )
+        {
+            //
+            // load image data into host memory
+            //
+            MojoInt4 tileIndex = MojoInt4 ( mTileCache[ cacheIndex ].indexTileSpace );
+            Core::HashMap< std::string, Core::VolumeDescription > volumeDescriptions = mTileServer->LoadTile( tileIndex );
+
+            //
+            // load the new data into into device memory for the new cache entry
+            //
+
+			if ( mIsSegmentationLoaded )
+			{
+				if ( volumeDescriptions.GetHashMap().find( "IdMap" ) != volumeDescriptions.GetHashMap().end() )
+				{
+					mTileCache[ cacheIndex ].d3d11CudaTextures.Get( "IdMap"     )->Update( volumeDescriptions.Get( "IdMap"     ) );
+
+                    //MojoInt3 volShape = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "IdMap" ).numVoxelsPerTile();
+                    //int idNumVoxelsPerTile = volShape.x * volShape.y * volShape.z;
+
+                    //Core::Thrust::MemcpyHostToDevice( mTileCache[ cacheIndex ].deviceVectors.Get< int >( "IdMap" ), volumeDescriptions.Get( "IdMap" ).data, idNumVoxelsPerTile );
+				}
+				if ( volumeDescriptions.GetHashMap().find( "OverlayMap" ) != volumeDescriptions.GetHashMap().end() )
+				{
+					mTileCache[ cacheIndex ].d3d11CudaTextures.Get( "OverlayMap" )->Update( volumeDescriptions.Get( "OverlayMap" ) );
+
+					//MojoInt3 volShape = mTiledDatasetDescription.tiledVolumeDescriptions.Get( "OverlayMap" ).numVoxelsPerTile();
+					//int idNumVoxelsPerTile = volShape.x * volShape.y * volShape.z;
+
+					//Core::Thrust::MemcpyHostToDevice( mTileCache[ cacheIndex ].deviceVectors.Get< int >( "OverlayMap" ), volumeDescriptions.Get( "OverlayMap" ).data, idNumVoxelsPerTile );
+				}
+			}
+
+            //
+            // unload image data from from host memory
+            //
+            mTileServer->UnloadTile( tileIndex );
         }
     }
 }

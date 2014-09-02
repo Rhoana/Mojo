@@ -369,7 +369,7 @@ namespace Mojo
             }
         }
 
-        private MergeMode mCurrentMergeMode = MergeMode.GlobalReplace;
+        private MergeMode mCurrentMergeMode = MergeMode.Fill2D;
         public MergeMode CurrentMergeMode
         {
             get { return mCurrentMergeMode; }
@@ -975,6 +975,40 @@ namespace Mojo
             }
         }
 
+        public void SetSegmentType( uint segId, string newType )
+        {
+            if ( SegmentationChangeInProgress || mSelectedSegmentId == 0 ) return;
+            lock ( this )
+            {
+                if ( SegmentationChangeInProgress ) return;
+
+                SegmentationChangeInProgress = true;
+
+                Internal.SetSegmentType( segId, newType );
+
+                ChangesMade = true;
+
+                SegmentationChangeInProgress = false;
+            }
+        }
+
+        public void SetSegmentSubType( uint segId, string newSubType )
+        {
+            if ( SegmentationChangeInProgress || mSelectedSegmentId == 0 ) return;
+            lock ( this )
+            {
+                if ( SegmentationChangeInProgress ) return;
+
+                SegmentationChangeInProgress = true;
+
+                Internal.SetSegmentSubType( segId, newSubType );
+
+                ChangesMade = true;
+
+                SegmentationChangeInProgress = false;
+            }
+        }
+
         private float mSegmentationChangeProgress = 100;
         public float SegmentationChangeProgress
         {
@@ -1017,7 +1051,15 @@ namespace Mojo
         {
             if ( TiledDatasetLoaded )
             {
-                Internal.LoadTiles( TiledDatasetView );
+                Internal.LoadTiles( TiledDatasetView, 0 );
+            }
+        }
+
+        public void UpdateWOffset(int wOffset)
+        {
+            if ( TiledDatasetLoaded )
+            {
+                Internal.LoadTiles( TiledDatasetView, wOffset );
             }
         }
 

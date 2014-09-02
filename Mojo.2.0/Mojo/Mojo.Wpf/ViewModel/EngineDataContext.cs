@@ -48,6 +48,7 @@ namespace Mojo.Wpf.ViewModel
         public RelayCommand IncreaseSegmentationVisibilityCommand { get; private set; }
         public RelayCommand DecreaseSegmentationVisibilityCommand { get; private set; }
         public RelayCommand Open3DViewerCommand { get; private set; }
+        public RelayCommand Multi3DViewCommand { get; private set; }
 
         //
         // Segment list commands
@@ -57,6 +58,9 @@ namespace Mojo.Wpf.ViewModel
         public RelayCommand NextSegmentPageCommand { get; private set; }
         public RelayCommand LastSegmentPageCommand { get; private set; }
         public RelayCommand LockSegmentLabelCommand { get; private set; }
+        public RelayCommand ToggleSelectedSegmentLockCommand { get; private set; }
+        public RelayCommand SetSelectedSegmentTypeCommand { get; private set; }
+        public RelayCommand SetSelectedSegmentSubTypeCommand { get; private set; }
 
 
         public class MergeModeItem
@@ -121,6 +125,7 @@ namespace Mojo.Wpf.ViewModel
             IncreaseSegmentationVisibilityCommand = new RelayCommand( param => Engine.TileManager.IncreaseSegmentationVisibility(), param => Engine.TileManager.SegmentationLoaded );
             DecreaseSegmentationVisibilityCommand = new RelayCommand( param => Engine.TileManager.DecreaseSegmentationVisibility(), param => Engine.TileManager.SegmentationLoaded );
             Open3DViewerCommand = new RelayCommand( param => Engine.Open3DViewer(), param => Engine.TileManager.SegmentationLoaded );
+            Multi3DViewCommand = new RelayCommand( param => Multi3DView(), param => Engine.TileManager.SegmentationLoaded );
 
             //
             // Segment list commands
@@ -129,6 +134,9 @@ namespace Mojo.Wpf.ViewModel
             PreviousSegmentPageCommand = new RelayCommand( param => TileManagerDataContext.MoveToPreviousSegmentInfoPage(), param => Engine.TileManager.SegmentationLoaded );
             NextSegmentPageCommand = new RelayCommand( param => TileManagerDataContext.MoveToNextSegmentInfoPage(), param => Engine.TileManager.SegmentationLoaded );
             LastSegmentPageCommand = new RelayCommand( param => TileManagerDataContext.MoveToLastSegmentInfoPage(), param => Engine.TileManager.SegmentationLoaded );
+            ToggleSelectedSegmentLockCommand = new RelayCommand( param => TileManagerDataContext.ToggleSelectedSegmentLock(), param => Engine.TileManager.SegmentationLoaded );
+            SetSelectedSegmentTypeCommand = new RelayCommand( param => TileManagerDataContext.SetSelectedSegmentTypeCommand( param ), param => Engine.TileManager.SegmentationLoaded );
+            SetSelectedSegmentSubTypeCommand = new RelayCommand( param => TileManagerDataContext.SetSelectedSegmentSubTypeCommand( param ), param => Engine.TileManager.SegmentationLoaded );
 
             TileManagerDataContext.StateChanged += StateChangedHandler;
 
@@ -180,6 +188,54 @@ namespace Mojo.Wpf.ViewModel
         private void StateChangedHandler( object sender, EventArgs e )
         {
             Refresh();
+        }
+
+        public void Multi3DView()
+        {
+            //
+            // Open a dialog to accept multiple ids
+            //
+            var textInputDialog = new Ookii.Dialogs.InputDialog
+            {
+                WindowTitle = "3D View Multiple Objects",
+                MainInstruction = "Please input ids you would like to display in the 3D viewer, seperated by commas.\nFor example: 13, 14, 16"
+            };
+
+            var result = textInputDialog.ShowDialog();
+
+            if ( result == System.Windows.Forms.DialogResult.OK )
+            {
+                bool first_round = true;
+
+                foreach ( String idString in textInputDialog.Input.Split(',') )
+                {
+                    Console.WriteLine( idString );
+                    try
+                    {
+                        uint viewId = uint.Parse( idString );
+                        Console.WriteLine( "" + viewId );
+                        if ( viewId > 0 )
+                        {
+                            if ( first_round )
+                            {
+                                Engine.StartExternalViewer( viewId );
+                                first_round = false;
+                            }
+                            else
+                            {
+                                Engine.UpdateExternalViewerId( viewId );
+                            }
+                        }
+                    }
+                    catch ( Exception e )
+                    {
+                        Console.WriteLine( e.Message );
+                    }
+                }
+
+                Engine.UpdateExternalViewerLocation();
+            }
+
         }
 
         private void LoadDataset()

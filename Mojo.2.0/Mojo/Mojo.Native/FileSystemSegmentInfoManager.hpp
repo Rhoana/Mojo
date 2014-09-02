@@ -37,6 +37,8 @@ struct id{};
 struct name{};
 struct size{};
 struct confidence{};
+struct type{};
+struct subtype{};
 
 //
 // multi_index_container to store all segment info and access quickly
@@ -54,7 +56,11 @@ typedef boost::multi_index_container<
 	    // index by size
 	    ordered_non_unique< tag<size>, member< SegmentInfo, long, &SegmentInfo::size > >,
 	    // index by confidence
-	    ordered_non_unique< tag<confidence>, member< SegmentInfo, int, &SegmentInfo::confidence > >
+	    ordered_non_unique< tag<confidence>, member< SegmentInfo, int, &SegmentInfo::confidence > >,
+	    // index by type
+	    ordered_non_unique< tag<type>, member< SegmentInfo, std::string, &SegmentInfo::type > >,
+	    // index by subtype
+	    ordered_non_unique< tag<subtype>, member< SegmentInfo, std::string, &SegmentInfo::subtype > >
   >,
   boost::fast_pool_allocator< SegmentInfo >
 > SegmentMultiIndex;
@@ -93,6 +99,8 @@ public:
     void                                              SortSegmentInfoByName( bool reverse );
     void                                              SortSegmentInfoBySize( bool reverse );
     void                                              SortSegmentInfoByConfidence( bool reverse );
+    void                                              SortSegmentInfoByType( bool reverse );
+    void                                              SortSegmentInfoBySubType( bool reverse );
 
     void                                              RemapSegmentLabel( unsigned int fromSegId, unsigned int toSegId );
 	unsigned int                                      GetIdForLabel( unsigned int label );
@@ -100,7 +108,10 @@ public:
     void                                              LockSegmentLabel( unsigned int segId );
     void                                              UnlockSegmentLabel( unsigned int segId );
 
-    unsigned int                                      GetSegmentInfoCount();
+    void                                              SetSegmentType( unsigned int segId, std::string newType );
+    void                                              SetSegmentSubType( unsigned int segId, std::string newSubType );
+
+	unsigned int                                      GetSegmentInfoCount();
     unsigned int                                      GetSegmentInfoCurrentListLocation( unsigned int segId );
     std::list< SegmentInfo >                          GetSegmentInfoRange( unsigned int startIndex, unsigned int endIndex );
     SegmentInfo                                       GetSegmentInfo( unsigned int segId );

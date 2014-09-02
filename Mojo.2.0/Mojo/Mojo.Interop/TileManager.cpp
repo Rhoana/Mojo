@@ -153,9 +153,9 @@ void TileManager::LoadOverTile( TiledDatasetView^ tiledDatasetView )
     mTileManager->LoadOverTile( tiledDatasetView->ToNative() );
 }
 
-void TileManager::LoadTiles( TiledDatasetView^ tiledDatasetView )
+void TileManager::LoadTiles( TiledDatasetView^ tiledDatasetView, int wOffset )
 {
-    mTileManager->LoadTiles( tiledDatasetView->ToNative() );
+    mTileManager->LoadTiles( tiledDatasetView->ToNative(), wOffset );
 }
 
 Collections::Generic::IList< TileCacheEntry^ >^ TileManager::GetTileCache()
@@ -185,6 +185,16 @@ void TileManager::SortSegmentInfoByConfidence( bool reverse )
 	mTileManager->SortSegmentInfoByConfidence( reverse );
 }
 
+void TileManager::SortSegmentInfoByType( bool reverse )
+{
+	mTileManager->SortSegmentInfoByType( reverse );
+}
+
+void TileManager::SortSegmentInfoBySubType( bool reverse )
+{
+	mTileManager->SortSegmentInfoBySubType( reverse );
+}
+
 void TileManager::RemapSegmentLabel( unsigned int fromSegId, unsigned int toSegId )
 {
 
@@ -200,6 +210,16 @@ void TileManager::LockSegmentLabel( unsigned int segId )
 void TileManager::UnlockSegmentLabel( unsigned int segId )
 {
 	mTileManager->UnlockSegmentLabel( segId );
+}
+
+void TileManager::SetSegmentType( unsigned int segId, String^ newType )
+{
+	mTileManager->SetSegmentType( segId, msclr::interop::marshal_as < std::string >( newType ) );
+}
+
+void TileManager::SetSegmentSubType( unsigned int segId, String^ newSubType )
+{
+	mTileManager->SetSegmentSubType( segId, msclr::interop::marshal_as < std::string >( newSubType ) );
 }
 
 unsigned int TileManager::GetSegmentInfoCount()

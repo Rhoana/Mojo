@@ -15,6 +15,28 @@ namespace Mojo.Wpf.ViewModel
 
         public event EventHandler StateChanged;
 
+        public enum SegmentType
+        {
+            // Note: Keep these names for backwards compatibility (converted to strings for database sotrage)
+            None,
+            Axon,
+            Dendrite,
+            Glia,
+            CellBody,
+            Unknown,
+            Synapse,
+            Mitochondron
+        }
+
+        public enum SegmentSubType
+        {
+            // Note: Keep these names for backwards compatibility (converted to strings for database sotrage)
+            None,
+            Excitatory,
+            Inhibitory,
+            Unknown
+        }
+
         public TileManagerDataContext( TileManager tileManager )
         {
             mTileManager = tileManager;
@@ -142,6 +164,105 @@ namespace Mojo.Wpf.ViewModel
             }
         }
 
+        private SegmentType mSelectedSegmentType = SegmentType.None;
+        public SegmentType SelectedSegmentType
+        {
+            get
+            {
+                return mSelectedSegmentType;
+            }
+            set
+            {
+                mSelectedSegmentType = value;
+                OnPropertyChanged( "SelectedSegmentType" );
+                OnPropertyChanged( "SelectedSegmentTypeString" );
+            }
+        }
+
+        public string SelectedSegmentTypeString
+        {
+            get
+            {
+                return mSelectedSegmentType.ToString();
+            }
+            set
+            {
+            }
+        }
+
+        private SegmentSubType mSelectedSegmentSubType = SegmentSubType.None;
+        public SegmentSubType SelectedSegmentSubType
+        {
+            get
+            {
+                return mSelectedSegmentSubType;
+            }
+            set
+            {
+                mSelectedSegmentSubType = value;
+                OnPropertyChanged( "SelectedSegmentSubType" );
+                OnPropertyChanged( "SelectedSegmentSubTypeString" );
+            }
+        }
+
+        public string SelectedSegmentSubTypeString
+        {
+            get
+            {
+                return mSelectedSegmentSubType.ToString();
+            }
+            set
+            {
+            }
+        }
+
+        public void ToggleSelectedSegmentLock()
+        {
+            if ( mTileManager.SelectedSegmentId != 0 )
+            {
+                if ( SelectedSegmentConfidence != 100 )
+                {
+                    mTileManager.LockSegmentLabel( mTileManager.SelectedSegmentId );
+                    SelectedSegmentConfidence = 100;
+                    UpdateSegmentInfoList( mTileManager.SelectedSegmentId );
+                }
+                else
+                {
+                    mTileManager.UnlockSegmentLabel( mTileManager.SelectedSegmentId );
+                    SelectedSegmentConfidence = 0;
+                    UpdateSegmentInfoList( mTileManager.SelectedSegmentId );
+                }
+            }
+        }
+
+        public void SetSelectedSegmentTypeCommand( object param )
+        {
+            if ( mTileManager.SelectedSegmentId != 0 )
+            {
+                SegmentType newType = (SegmentType)Enum.Parse( typeof( SegmentType ), param.ToString() );
+                if ( SelectedSegmentType != newType )
+                {
+                    SelectedSegmentType = newType;
+                    mTileManager.SetSegmentType( mTileManager.SelectedSegmentId, newType.ToString() );
+                    UpdateSegmentInfoList( mTileManager.SelectedSegmentId );
+                }
+            }
+        }
+
+        public void SetSelectedSegmentSubTypeCommand( object param )
+        {
+            if ( mTileManager.SelectedSegmentId != 0 )
+            {
+                SegmentSubType newSubType = (SegmentSubType)Enum.Parse( typeof( SegmentSubType ), param.ToString() );
+                if ( SelectedSegmentSubType != newSubType )
+                {
+                    SelectedSegmentSubType = newSubType;
+                    mTileManager.SetSegmentSubType( mTileManager.SelectedSegmentId, newSubType.ToString() );
+                    UpdateSegmentInfoList( mTileManager.SelectedSegmentId );
+                }
+            }
+        }
+
         public void UpdateSelectedSegmentInfo()
         {
             if ( mTileManager.SelectedSegmentId == 0 )
@@ -150,6 +271,8 @@ namespace Mojo.Wpf.ViewModel
                 SelectedSegmentConfidence = 0;
                 SelectedSegmentName = "";
                 SelectedSegmentSize = 0;
+                SelectedSegmentType = SegmentType.None;
+                SelectedSegmentSubType = SegmentSubType.None;
             }
             else
             {
@@ -158,7 +281,9 @@ namespace Mojo.Wpf.ViewModel
                 SelectedSegmentName = segInfo.Name;
                 SelectedSegmentSize = segInfo.Size;
                 SelectedSegmentBrush = new SolidColorBrush( (Color)ColorConverter.ConvertFromString(segInfo.Color) );
-                SelectedSegmentNameAndId = segInfo.Name + " [size=" + segInfo.Size / 1000 + "k]"; //, id=" + mTileManager.SelectedSegmentId + "]";
+                SelectedSegmentNameAndId = segInfo.Name + " [id=" + mTileManager.SelectedSegmentId + " size=" + segInfo.Size / 1000 + "k]";
+                SelectedSegmentType = (SegmentType) Enum.Parse( typeof(SegmentType), segInfo.Type );
+                SelectedSegmentSubType = (SegmentSubType) Enum.Parse( typeof( SegmentSubType ), segInfo.SubType );
             }
         }
 
@@ -201,7 +326,7 @@ namespace Mojo.Wpf.ViewModel
             {
                 var segInfo = mTileManager.Internal.GetSegmentInfo( mTileManager.MouseOverSegmentId );
                 MouseOverSegmentBrush = new SolidColorBrush( (Color)ColorConverter.ConvertFromString( segInfo.Color ) );
-                MouseOverSegmentNameAndId = segInfo.Name + " [size=" + segInfo.Size / 1000 + "k]"; //, id=" + mTileManager.MouseOverSegmentId + "]";
+                MouseOverSegmentNameAndId = segInfo.Name + " [id=" + mTileManager.MouseOverSegmentId + " size=" + segInfo.Size / 1000 + "k]";
             }
 
         }
@@ -304,23 +429,23 @@ namespace Mojo.Wpf.ViewModel
             }
         }
 
-        private SegmentInfo mSelectedSegmentInfo;
-        public SegmentInfo SelectedSegmentInfo
-        {
-            get
-            {
-                return mSelectedSegmentInfo;
-            }
-            set
-            {
-                if ( SelectedSegmentInfo.Id != value.Id )
-                {
-                    mTileManager.SelectedSegmentId = value.Id;
-                }
-                mSelectedSegmentInfo = value;
-                OnPropertyChanged( "SelectedSegmentInfo" );
-            }
-        }
+        //private SegmentInfo mSelectedSegmentInfo;
+        //public SegmentInfo SelectedSegmentInfo
+        //{
+        //    get
+        //    {
+        //        return mSelectedSegmentInfo;
+        //    }
+        //    set
+        //    {
+        //        if ( SelectedSegmentInfo.Id != value.Id )
+        //        {
+        //            mTileManager.SelectedSegmentId = value.Id;
+        //        }
+        //        mSelectedSegmentInfo = value;
+        //        OnPropertyChanged( "SelectedSegmentInfo" );
+        //    }
+        //}
 
         private int mSegmentInfoCurrentPageIndex = 0;
         private int mSegmentInfoPageCount = 0;
@@ -331,7 +456,7 @@ namespace Mojo.Wpf.ViewModel
             if ( mTileManager.SegmentationLoaded )
             {
                 var totalSegments = mTileManager.Internal.GetSegmentInfoCount();
-                mSegmentInfoPageCount = (int) ( 1 + ( totalSegments - 1 ) / mItemsPerPage );
+                mSegmentInfoPageCount = (int)( 1 + ( totalSegments - 1 ) / mItemsPerPage );
 
                 SegmentInfoList = mTileManager.Internal.GetSegmentInfoRange( mSegmentInfoCurrentPageIndex * mItemsPerPage, ( mSegmentInfoCurrentPageIndex + 1 ) * mItemsPerPage );
             }
@@ -342,6 +467,29 @@ namespace Mojo.Wpf.ViewModel
                 SegmentInfoList = null;
             }
             UpdateSegmentListCurrentPageString();
+        }
+
+        public void UpdateSegmentInfoList( uint segId )
+        {
+            if ( mTileManager.SegmentationLoaded )
+            {
+                for (int i = 0; i < SegmentInfoList.Count; ++i)
+                {
+                    if ( SegmentInfoList[i].Id == segId )
+                    {
+                        SegmentInfo updatedSegInfo = mTileManager.Internal.GetSegmentInfo( segId );
+                        SegmentInfoList[i].Name = updatedSegInfo.Name;
+                        SegmentInfoList[i].Size = updatedSegInfo.Size;
+                        SegmentInfoList[i].Confidence = updatedSegInfo.Confidence;
+                        SegmentInfoList[i].Color = updatedSegInfo.Color;
+                        SegmentInfoList[i].Type = updatedSegInfo.Type;
+                        SegmentInfoList[i].SubType = updatedSegInfo.SubType;
+                        //SegmentInfoList.RemoveAt(i);
+                        //SegmentInfoList.Insert(i, mTileManager.Internal.GetSegmentInfo( segId ));
+                        break;
+                    }
+                }
+            }
         }
 
         public void SortSegmentListBy( String fieldName )
@@ -364,6 +512,12 @@ namespace Mojo.Wpf.ViewModel
                     break;
                 case "Lock":
                     mTileManager.Internal.SortSegmentInfoByConfidence( sordDescending );
+                    break;
+                case "Type":
+                    mTileManager.Internal.SortSegmentInfoByType( sordDescending );
+                    break;
+                case "SubType":
+                    mTileManager.Internal.SortSegmentInfoBySubType( sordDescending );
                     break;
             }
 

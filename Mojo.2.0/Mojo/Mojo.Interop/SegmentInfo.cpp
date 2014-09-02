@@ -18,6 +18,8 @@ SegmentInfo::SegmentInfo( Native::SegmentInfo segmentInfo, std::string colorStri
     Size               = segmentInfo.size;
     Confidence         = segmentInfo.confidence;
 	Color              = msclr::interop::marshal_as< String^ >( colorString );
+	Type               = msclr::interop::marshal_as< String^ >( segmentInfo.type );
+	SubType            = msclr::interop::marshal_as< String^ >( segmentInfo.subtype );
 }
 
 Native::SegmentInfo SegmentInfo::ToNative()
@@ -28,6 +30,8 @@ Native::SegmentInfo SegmentInfo::ToNative()
     segmentInfo.name        = msclr::interop::marshal_as< std::string >( Name );
     segmentInfo.size        = Size;
     segmentInfo.confidence  = Confidence;
+    segmentInfo.type        = msclr::interop::marshal_as< std::string >( Type );
+    segmentInfo.subtype     = msclr::interop::marshal_as< std::string >( SubType );
 
     return segmentInfo;
 

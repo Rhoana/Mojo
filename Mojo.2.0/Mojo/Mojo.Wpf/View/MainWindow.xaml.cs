@@ -43,9 +43,10 @@ namespace Mojo.Wpf.View
             if ( DataContext != null && ( (ViewModel.EngineDataContext)DataContext ).TileManagerDataContext.SelectedSegmentConfidence != 0 )
             {
                 var segId = ( (ViewModel.EngineDataContext)DataContext ).Engine.TileManager.SelectedSegmentId;
+                if (segId == 0) return;
                 ( (ViewModel.EngineDataContext)DataContext ).Engine.TileManager.UnlockSegmentLabel( segId );
                 ( (ViewModel.EngineDataContext)DataContext ).TileManagerDataContext.SelectedSegmentConfidence = 0;
-                ( (ViewModel.EngineDataContext)DataContext ).TileManagerDataContext.UpdateSegmentInfoList();
+                ( (ViewModel.EngineDataContext)DataContext ).TileManagerDataContext.UpdateSegmentInfoList( segId );
             }
         }
 
@@ -54,9 +55,10 @@ namespace Mojo.Wpf.View
             if ( DataContext != null && ( (ViewModel.EngineDataContext)DataContext ).TileManagerDataContext.SelectedSegmentConfidence != 100 )
             {
                 var segId = ( (ViewModel.EngineDataContext)DataContext ).Engine.TileManager.SelectedSegmentId;
+                if (segId == 0) return;
                 ( (ViewModel.EngineDataContext)DataContext ).Engine.TileManager.LockSegmentLabel( segId );
                 ( (ViewModel.EngineDataContext)DataContext ).TileManagerDataContext.SelectedSegmentConfidence = 100;
-                ( (ViewModel.EngineDataContext)DataContext ).TileManagerDataContext.UpdateSegmentInfoList();
+                ( (ViewModel.EngineDataContext)DataContext ).TileManagerDataContext.UpdateSegmentInfoList( segId );
             }
         }
 
@@ -85,6 +87,34 @@ namespace Mojo.Wpf.View
                 {
                     ( (ViewModel.EngineDataContext)DataContext ).TileManagerDataContext.SelectedSegmentConfidence = 100;
                 }
+            }
+        }
+
+        public void SegmentTypeRadioButton_Checked( object sender, RoutedEventArgs e )
+        {
+            var newType = ( (RadioButton)sender ).CommandParameter.ToString();
+            ViewModel.TileManagerDataContext.SegmentType newEnumType = (ViewModel.TileManagerDataContext.SegmentType)Enum.Parse( typeof( ViewModel.TileManagerDataContext.SegmentType ), newType );
+
+            if ( DataContext != null && ( (ViewModel.EngineDataContext)DataContext ).TileManagerDataContext.SelectedSegmentType != newEnumType )
+            {
+                var segId = ( (ViewModel.EngineDataContext)DataContext ).Engine.TileManager.SelectedSegmentId;
+                ( (ViewModel.EngineDataContext)DataContext ).Engine.TileManager.SetSegmentType( segId, newType );
+                ( (ViewModel.EngineDataContext)DataContext ).TileManagerDataContext.SelectedSegmentType = newEnumType;
+                ( (ViewModel.EngineDataContext)DataContext ).TileManagerDataContext.UpdateSegmentInfoList( segId );
+            }
+        }
+
+        public void SegmentSubTypeRadioButton_Checked( object sender, RoutedEventArgs e )
+        {
+            var newSubType = ( (RadioButton)sender ).CommandParameter.ToString();
+            ViewModel.TileManagerDataContext.SegmentSubType newEnumSubType = (ViewModel.TileManagerDataContext.SegmentSubType)Enum.Parse( typeof( ViewModel.TileManagerDataContext.SegmentSubType ), newSubType );
+
+            if ( DataContext != null && ( (ViewModel.EngineDataContext)DataContext ).TileManagerDataContext.SelectedSegmentSubType != newEnumSubType )
+            {
+                var segId = ( (ViewModel.EngineDataContext)DataContext ).Engine.TileManager.SelectedSegmentId;
+                ( (ViewModel.EngineDataContext)DataContext ).Engine.TileManager.SetSegmentSubType( segId, newSubType );
+                ( (ViewModel.EngineDataContext)DataContext ).TileManagerDataContext.SelectedSegmentSubType = newEnumSubType;
+                ( (ViewModel.EngineDataContext)DataContext ).TileManagerDataContext.UpdateSegmentInfoList( segId );
             }
         }
 

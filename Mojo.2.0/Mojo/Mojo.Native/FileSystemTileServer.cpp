@@ -1745,15 +1745,24 @@ void FileSystemTileServer::LoadSplitDistances( unsigned int segId )
                     mCentroid.y += (float) areaY + mSplitWindowStart.y * numVoxelsPerTile.y;
                     mSplitBorderTargets[ areaIndex1D ] = 0;
                 }
-                else if ( mSegmentInfoManager.GetIdForLabel( currentIdVolume[ tileIndex1D ] ) != 0 ||
-                    areaX == 0 || areaX == mSplitWindowWidth - 1 || areaY == 0 || areaY == mSplitWindowHeight - 1 )
+				//
+				// Testing bug fix for 0-padded borders in segmentation
+				//
+                else
                 {
                     mSplitBorderTargets[ areaIndex1D ] = BORDER_TARGET;
                 }
-                else
-                {
-                    mSplitBorderTargets[ areaIndex1D ] = 0;
-                }
+
+                //else if ( mSegmentInfoManager.GetIdForLabel( currentIdVolume[ tileIndex1D ] ) != 0 ||
+                //    areaX == 0 || areaX == mSplitWindowWidth - 1 || areaY == 0 || areaY == mSplitWindowHeight - 1 )
+                //{
+                //    mSplitBorderTargets[ areaIndex1D ] = BORDER_TARGET;
+                //}
+                //else
+                //{
+                //    mSplitBorderTargets[ areaIndex1D ] = 0;
+                //}
+
             }
 
             UnloadTile( tileIndex );
@@ -1945,10 +1954,10 @@ void FileSystemTileServer::PrepForAdjust( unsigned int segId, MojoFloat3 pointTi
                 MojoInt3 numVoxelsPerTile = tiledVolumeDescription.numVoxelsPerTile();
                 MojoInt4 numTiles = tiledVolumeDescription.numTiles();
 
-                int minTileX = numTiles.x;
-                int maxTileX = 0;
-                int minTileY = numTiles.y;
-                int maxTileY = 0;
+                int minTileX = (int) pointTileSpace.x;
+                int maxTileX = (int) pointTileSpace.x;
+                int minTileY = (int) pointTileSpace.y;
+                int maxTileY = (int) pointTileSpace.y;
 
                 FileSystemTileSet tilesContainingSegId = mSegmentInfoManager.GetTiles( segId );
 
@@ -4797,9 +4806,7 @@ std::list< unsigned int > FileSystemTileServer::UndoChange()
 	}
 	else
 	{
-		Core::Printf( "\nWarning - invalid undo item - discarding.\n" );
-        mUndoDeque.pop_front();
-        mNextUndoItem = &mUndoDeque.front();
+		Core::Printf( "\nNo operations to undo - ignoring.\n" );
 	}
 
 	return remappedIds;
@@ -4941,8 +4948,7 @@ std::list< unsigned int > FileSystemTileServer::RedoChange()
     }
 	else
 	{
-		Core::Printf( "\nWarning - invalid redo item - discarding.\n" );
-        mRedoDeque.pop_front();
+		Core::Printf( "\nNo operations to redo - ignoring.\n" );
 	}
 
 	return remappedIds;
@@ -5410,6 +5416,16 @@ void FileSystemTileServer::SortSegmentInfoByConfidence( bool reverse )
 	mSegmentInfoManager.SortSegmentInfoByConfidence( reverse );
 }
 
+void FileSystemTileServer::SortSegmentInfoByType( bool reverse )
+{
+	mSegmentInfoManager.SortSegmentInfoByType( reverse );
+}
+
+void FileSystemTileServer::SortSegmentInfoBySubType( bool reverse )
+{
+	mSegmentInfoManager.SortSegmentInfoBySubType( reverse );
+}
+
 void FileSystemTileServer::LockSegmentLabel( unsigned int segId )
 {
 	mSegmentInfoManager.LockSegmentLabel( segId );
@@ -5420,6 +5436,18 @@ void FileSystemTileServer::UnlockSegmentLabel( unsigned int segId )
 {
 	mSegmentInfoManager.UnlockSegmentLabel( segId );
 	mLogger.Log( Core::ToString( "UnlockSegmentLabel: segId=", segId ) );
+}
+
+void FileSystemTileServer::SetSegmentType( unsigned int segId, std::string newType )
+{
+	mSegmentInfoManager.SetSegmentType( segId, newType );
+	mLogger.Log( Core::ToString( "SetSegmentType: segId=", segId, " type=", newType ) );
+}
+
+void FileSystemTileServer::SetSegmentSubType( unsigned int segId, std::string newSubType )
+{
+	mSegmentInfoManager.SetSegmentSubType( segId, newSubType );
+	mLogger.Log( Core::ToString( "SetSegmentSubType: segId=", segId, " type=", newSubType ) );
 }
 
 unsigned int FileSystemTileServer::GetSegmentInfoCount()

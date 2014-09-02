@@ -37,6 +37,7 @@
 
         <Mojo.Wpf.ViewModel:EnumBooleanConverter x:Key="EnumBooleanConverter" />
         <Mojo.Wpf.ViewModel:SegmentLockConverter x:Key="SegmentLockConverter" />
+        <Mojo.Wpf.ViewModel:SegmentTypeConverter x:Key="SegmentTypeConverter" />
         <Mojo.Wpf.ViewModel:ObjectsEqualParameterConverter x:Key="ObjectsEqualParameterConverter" />
         <Mojo.Wpf.ViewModel:ObjectsEqualBrushConverter x:Key="ObjectsEqualBrushConverter" />
 
@@ -60,7 +61,25 @@
         </DataTemplate>
 
     </Window.Resources>
+
+    <Window.InputBindings>
+        <KeyBinding Command="{Binding Path=ToggleSelectedSegmentLockCommand}" Key="L"/>
         
+        <KeyBinding Command="{Binding Path=SetSelectedSegmentTypeCommand}" CommandParameter="None" Key="F1"/>
+        <KeyBinding Command="{Binding Path=SetSelectedSegmentTypeCommand}" CommandParameter="Axon" Key="F2"/>
+        <KeyBinding Command="{Binding Path=SetSelectedSegmentTypeCommand}" CommandParameter="Dendrite" Key="F3"/>
+        <KeyBinding Command="{Binding Path=SetSelectedSegmentTypeCommand}" CommandParameter="Glia" Key="F4"/>
+        <KeyBinding Command="{Binding Path=SetSelectedSegmentTypeCommand}" CommandParameter="CellBody" Key="F5"/>
+        <KeyBinding Command="{Binding Path=SetSelectedSegmentTypeCommand}" CommandParameter="Synapse" Key="F6"/>
+        <KeyBinding Command="{Binding Path=SetSelectedSegmentTypeCommand}" CommandParameter="Mitochondron" Key="F7"/>
+        <KeyBinding Command="{Binding Path=SetSelectedSegmentTypeCommand}" CommandParameter="Unknown" Key="F8"/>
+
+        <KeyBinding Command="{Binding Path=SetSelectedSegmentSubTypeCommand}" CommandParameter="None" Key="F9"/>
+        <KeyBinding Command="{Binding Path=SetSelectedSegmentSubTypeCommand}" CommandParameter="Excitatory" Key="F10"/>
+        <KeyBinding Command="{Binding Path=SetSelectedSegmentSubTypeCommand}" CommandParameter="Inhibitory" Key="F11"/>
+        <KeyBinding Command="{Binding Path=SetSelectedSegmentSubTypeCommand}" CommandParameter="Unknown" Key="F12"/>
+    </Window.InputBindings>
+
     <DockPanel x:Name="DockPanel" Background="AntiqueWhite">
 
         <Menu DockPanel.Dock="Top" Focusable="False" Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}" BorderBrush="Gray" BorderThickness="1">
@@ -152,6 +171,8 @@
                     <MenuItem.Icon>
                         <Image Width="16" Height="16" Source="{StaticResource Open3DViewer}"/>
                     </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Name="Multi3DViewMenuItem" Header="3D View Multiple Objects..." Focusable="False" Command="{Binding Path=Multi3DViewCommand}" IsEnabled="{Binding Path=Engine.TileManager.SegmentationControlsEnabled}" >
                 </MenuItem>
             </MenuItem>
         </Menu>
@@ -266,7 +287,7 @@
                     <Label Focusable="False" MinHeight="20" MinWidth="50" Margin="0,0,10,0" Content="{Binding Path=TileManagerDataContext.CurrentZLocationString}" />
                     <Label Focusable="False" MinHeight="20" Content="Selection:" />
                     <Rectangle Height="20" Stroke="Gray" Width="50" Fill="{Binding Path=TileManagerDataContext.SelectedSegmentBrush}" />
-                    <Label Focusable="False" MinHeight="20" MinWidth="200" Margin="0,0,10,0" Content="{Binding Path=TileManagerDataContext.SelectedSegmentNameAndId}" />
+                    <Label Focusable="False" MinHeight="20" MinWidth="250" Margin="0,0,10,0" Content="{Binding Path=TileManagerDataContext.SelectedSegmentNameAndId}" />
                     <Label Focusable="False" MinHeight="20" Content="Target:" />
                     <Rectangle Height="20" Stroke="Gray" Width="50" Fill="{Binding Path=TileManagerDataContext.MouseOverSegmentBrush}" />
                     <Label Focusable="False" MinHeight="20" MinWidth="250" Margin="0,0,10,0" Content="{Binding Path=TileManagerDataContext.MouseOverSegmentNameAndId}" />
@@ -287,69 +308,153 @@
             <GridSplitter Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Stretch" Width="5" ShowsPreview="False" />
 
             <Border Grid.Column="1" Focusable="False" Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}" BorderBrush="Gray" BorderThickness="1,0,1,0" Margin="5,0,0,0">
+
                 <DockPanel Focusable="False" Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}">
 
                     <Border DockPanel.Dock="Top" BorderBrush="Gray" BorderThickness="0,0,0,1" >
-                        
-                        <Grid DockPanel.Dock="Top" Background="White" Margin="0,0,0,0" >
-                        
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                            </Grid.RowDefinitions>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto" />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
-                        
-                            <Label Grid.Column="0" Grid.Row="0" Focusable="False" MinHeight="20" Content="Location"></Label>
-                            <Label Grid.Column="0" Grid.Row="1" Focusable="False" MinHeight="20" Content="Selection"></Label>
-                            <Label Grid.Column="0" Grid.Row="2" Focusable="False" MinHeight="20" Content="Lock"></Label>
 
-                            <TextBox Grid.Column="1" Grid.Row="0" Margin="3" Text="{Binding Path=TileManagerDataContext.CurrentXYZLocationString}" Width="100" HorizontalAlignment="Left" >
-                                <TextBox.InputBindings>
-                                    <KeyBinding Gesture="Enter" Command="{Binding Path=UpdateLocationFromTextCommand}"
-                                                CommandParameter="{Binding RelativeSource={RelativeSource FindAncestor,AncestorType={x:Type TextBox}},Path=Text}" />
-                                </TextBox.InputBindings>
-                            </TextBox>
+                        <Expander Width="Auto" IsExpanded="True">
+                            <Expander.Header>
+                                <StackPanel Orientation="Horizontal">
+                                    <Label Content="Status" ></Label>
+                                </StackPanel>
+                            </Expander.Header>
+                            <Grid Background="White" Margin="0,0,0,0">
 
-                            <Label Grid.Column="1" Grid.Row="1" Content="{Binding Path=TileManagerDataContext.SelectedSegmentName}" HorizontalAlignment="Left" />
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
 
-                            <StackPanel Grid.Column="1" Grid.Row="2" Orientation="Horizontal">
-                                    
-                                <Grid Background="{Binding Path=TileManagerDataContext.SelectedSegmentBrush}" Margin="3,3,3,3" Width="100" HorizontalAlignment="Left" >
-                                    <CheckBox HorizontalAlignment="Left"
-                                Background="{Binding Path=TileManagerDataContext.SelectedSegmentBrush}" Height="20" Width="100" Margin="5,5,5,5" Name="SelectionLockCheckBox"
-                                IsChecked="{Binding Path=TileManagerDataContext.SelectedSegmentConfidence, Converter={StaticResource SegmentLockConverter}, Mode=OneWay}"
-                                Checked="SelectedSegmentLockCheckBox_OnChecked"
-                                Unchecked="SelectedSegmentLockCheckBox_OnUnchecked" />
-                                </Grid>
+                                <Label Grid.Column="0" Grid.Row="0" Focusable="False" MinHeight="20" Content="Location"></Label>
+                                <Label Grid.Column="0" Grid.Row="1" Focusable="False" MinHeight="20" Content="Selection"></Label>
+                                <Label Grid.Column="0" Grid.Row="2" Focusable="False" MinHeight="20" Content="Lock"></Label>
 
-                                <Grid>
-                                        
+                                <TextBox Grid.Column="1" Grid.Row="0" Margin="3" Text="{Binding Path=TileManagerDataContext.CurrentXYZLocationString}" Width="100" HorizontalAlignment="Left" IsEnabled="{Binding Path=Engine.TileManager.NavigationControlsEnabled}" >
+                                    <TextBox.InputBindings>
+                                        <KeyBinding Gesture="Enter" Command="{Binding Path=UpdateLocationFromTextCommand}"
+                                                    CommandParameter="{Binding RelativeSource={RelativeSource FindAncestor,AncestorType={x:Type TextBox}},Path=Text}" />
+                                    </TextBox.InputBindings>
+                                </TextBox>
+
+                                <Label Grid.Column="1" Grid.Row="1" Content="{Binding Path=TileManagerDataContext.SelectedSegmentName}" HorizontalAlignment="Left" />
+
+                                <StackPanel Grid.Column="1" Grid.Row="2" Orientation="Horizontal">
+
+                                    <Grid Background="{Binding Path=TileManagerDataContext.SelectedSegmentBrush}" Margin="3,3,3,3" Width="100" HorizontalAlignment="Left" >
+                                        <CheckBox HorizontalAlignment="Left"
+                                            Height="20" Width="100" Margin="5,5,5,5" Name="SelectionLockCheckBox"
+                                            IsChecked="{Binding Path=TileManagerDataContext.SelectedSegmentConfidence, Converter={StaticResource SegmentLockConverter}, Mode=OneWay}"
+                                            Checked="SelectedSegmentLockCheckBox_OnChecked"
+                                            Unchecked="SelectedSegmentLockCheckBox_OnUnchecked"
+                                            IsEnabled="{Binding Path=Engine.TileManager.SegmentationControlsEnabled}">
+                                            <CheckBox.Background>
+                                                <SolidColorBrush Color="White" Opacity="0.5"></SolidColorBrush>
+                                            </CheckBox.Background>
+                                        </CheckBox>
+                                    </Grid>
+
+                                    <Grid>
+
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                        </Grid.RowDefinitions>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+
+                                        <Label Grid.Column="0" Grid.Row="0" Focusable="False" MinHeight="20" Content="Size"></Label>
+                                        <Label Grid.Column="0" Grid.Row="1" Focusable="False" MinHeight="20" Content="Id"></Label>
+                                        <Label Grid.Column="1" Grid.Row="0" Content="{Binding Path=TileManagerDataContext.SelectedSegmentSize}" HorizontalAlignment="Left" />
+                                        <Label Grid.Column="1" Grid.Row="1" Content="{Binding Path=Engine.TileManager.SelectedSegmentId}" HorizontalAlignment="Left" />
+
+                                    </Grid>
+
+                                </StackPanel>
+
+                            </Grid>
+
+                        </Expander>
+
+                    </Border>
+                    
+                    <Border DockPanel.Dock="Top" BorderBrush="Gray" BorderThickness="0,0,0,1" >
+                        <Expander Width="Auto" IsExpanded="False">
+                            <Expander.Header>
+                                <StackPanel Orientation="Horizontal">
+                                    <Label Content="Selected Object Type" ></Label>
+                                    <Label Content="[" ></Label>
+                                    <Label Content="{Binding Path=TileManagerDataContext.SelectedSegmentTypeString}"></Label>
+                                    <Label Content="-" ></Label>
+                                    <Label Content="{Binding Path=TileManagerDataContext.SelectedSegmentSubTypeString}"></Label>
+                                    <Label Content="]" ></Label>
+                                </StackPanel>
+                            </Expander.Header>
+                            <StackPanel Orientation="Vertical" Background="White">
+                                <Grid Background="White" Margin="1,3,1,3" >
                                     <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
                                         <RowDefinition Height="Auto" />
                                         <RowDefinition Height="Auto" />
                                     </Grid.RowDefinitions>
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="Auto" />
                                         <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="Auto" />
                                     </Grid.ColumnDefinitions>
 
-                                    <Label Grid.Column="0" Grid.Row="0" Focusable="False" MinHeight="20" Content="Size"></Label>
-                                    <Label Grid.Column="0" Grid.Row="1" Focusable="False" MinHeight="20" Content="Id"></Label>
-                                    <Label Grid.Column="1" Grid.Row="0" Content="{Binding Path=TileManagerDataContext.SelectedSegmentSize}" HorizontalAlignment="Left" />
-                                    <Label Grid.Column="1" Grid.Row="1" Content="{Binding Path=Engine.TileManager.SelectedSegmentId}" HorizontalAlignment="Left" />
-                                        
-                                </Grid>
-                                
-                            </StackPanel>
+                                    <RadioButton Grid.Column="0" Grid.Row="0" Margin="3,3,3,3" GroupName="Type" Content="None"         CommandParameter="None"         IsEnabled="{Binding Path=Engine.TileManager.SegmentationControlsEnabled}" IsChecked="{Binding Path=TileManagerDataContext.SelectedSegmentType, Converter={StaticResource SegmentTypeConverter}, ConverterParameter=None, Mode=OneWay}" Checked="SegmentTypeRadioButton_Checked"></RadioButton>
+                                    <RadioButton Grid.Column="0" Grid.Row="1" Margin="3,3,3,3" GroupName="Type" Content="Axon"         CommandParameter="Axon"         IsEnabled="{Binding Path=Engine.TileManager.SegmentationControlsEnabled}" IsChecked="{Binding Path=TileManagerDataContext.SelectedSegmentType, Converter={StaticResource SegmentTypeConverter}, ConverterParameter=Axon, Mode=OneWay}" Checked="SegmentTypeRadioButton_Checked"></RadioButton>
+                                    <RadioButton Grid.Column="0" Grid.Row="2" Margin="3,3,3,3" GroupName="Type" Content="Dendrite"     CommandParameter="Dendrite"     IsEnabled="{Binding Path=Engine.TileManager.SegmentationControlsEnabled}" IsChecked="{Binding Path=TileManagerDataContext.SelectedSegmentType, Converter={StaticResource SegmentTypeConverter}, ConverterParameter=Dendrite, Mode=OneWay}" Checked="SegmentTypeRadioButton_Checked"></RadioButton>
+                                    <RadioButton Grid.Column="0" Grid.Row="3" Margin="3,3,3,3" GroupName="Type" Content="Glia"         CommandParameter="Glia"         IsEnabled="{Binding Path=Engine.TileManager.SegmentationControlsEnabled}" IsChecked="{Binding Path=TileManagerDataContext.SelectedSegmentType, Converter={StaticResource SegmentTypeConverter}, ConverterParameter=Glia, Mode=OneWay}" Checked="SegmentTypeRadioButton_Checked"></RadioButton>
+                                    <RadioButton Grid.Column="0" Grid.Row="4" Margin="3,3,3,3" GroupName="Type" Content="Cell Body"    CommandParameter="CellBody"     IsEnabled="{Binding Path=Engine.TileManager.SegmentationControlsEnabled}" IsChecked="{Binding Path=TileManagerDataContext.SelectedSegmentType, Converter={StaticResource SegmentTypeConverter}, ConverterParameter=CellBody, Mode=OneWay}" Checked="SegmentTypeRadioButton_Checked"></RadioButton>
+                                    <RadioButton Grid.Column="0" Grid.Row="5" Margin="3,3,3,3" GroupName="Type" Content="Synapse"      CommandParameter="Synapse"      IsEnabled="{Binding Path=Engine.TileManager.SegmentationControlsEnabled}" IsChecked="{Binding Path=TileManagerDataContext.SelectedSegmentType, Converter={StaticResource SegmentTypeConverter}, ConverterParameter=Synapse, Mode=OneWay}" Checked="SegmentTypeRadioButton_Checked"></RadioButton>
+                                    <RadioButton Grid.Column="0" Grid.Row="6" Margin="3,3,3,3" GroupName="Type" Content="Mitochondron" CommandParameter="Mitochondron" IsEnabled="{Binding Path=Engine.TileManager.SegmentationControlsEnabled}" IsChecked="{Binding Path=TileManagerDataContext.SelectedSegmentType, Converter={StaticResource SegmentTypeConverter}, ConverterParameter=Mitochondron, Mode=OneWay}" Checked="SegmentTypeRadioButton_Checked"></RadioButton>
+                                    <RadioButton Grid.Column="0" Grid.Row="7" Margin="3,3,3,3" GroupName="Type" Content="?"            CommandParameter="Unknown"      IsEnabled="{Binding Path=Engine.TileManager.SegmentationControlsEnabled}" IsChecked="{Binding Path=TileManagerDataContext.SelectedSegmentType, Converter={StaticResource SegmentTypeConverter}, ConverterParameter=Unknown, Mode=OneWay}" Checked="SegmentTypeRadioButton_Checked"></RadioButton>
 
-                        </Grid>
-                        
+                                    <Label Grid.Column="1" Grid.Row="0" Content="[F1]"></Label>
+                                    <Label Grid.Column="1" Grid.Row="1" Content="[F2]"></Label>
+                                    <Label Grid.Column="1" Grid.Row="2" Content="[F3]"></Label>
+                                    <Label Grid.Column="1" Grid.Row="3" Content="[F4]"></Label>
+                                    <Label Grid.Column="1" Grid.Row="4" Content="[F5]"></Label>
+                                    <Label Grid.Column="1" Grid.Row="5" Content="[F6]"></Label>
+                                    <Label Grid.Column="1" Grid.Row="6" Content="[F7]"></Label>
+                                    <Label Grid.Column="1" Grid.Row="7" Content="[F8]"></Label>
+
+                                    <RadioButton Grid.Column="2" Grid.Row="0" Margin="3,3,3,3" GroupName="SubType" Content="None"       CommandParameter="None"       IsEnabled="{Binding Path=Engine.TileManager.SegmentationControlsEnabled}" IsChecked="{Binding Path=TileManagerDataContext.SelectedSegmentSubType, Converter={StaticResource SegmentTypeConverter}, ConverterParameter=None, Mode=OneWay}" Checked="SegmentSubTypeRadioButton_Checked"></RadioButton>
+                                    <RadioButton Grid.Column="2" Grid.Row="1" Margin="3,3,3,3" GroupName="SubType" Content="Excitatory" CommandParameter="Excitatory" IsEnabled="{Binding Path=Engine.TileManager.SegmentationControlsEnabled}" IsChecked="{Binding Path=TileManagerDataContext.SelectedSegmentSubType, Converter={StaticResource SegmentTypeConverter}, ConverterParameter=Excitatory, Mode=OneWay}" Checked="SegmentSubTypeRadioButton_Checked"></RadioButton>
+                                    <RadioButton Grid.Column="2" Grid.Row="2" Margin="3,3,3,3" GroupName="SubType" Content="Inhibitory" CommandParameter="Inhibitory" IsEnabled="{Binding Path=Engine.TileManager.SegmentationControlsEnabled}" IsChecked="{Binding Path=TileManagerDataContext.SelectedSegmentSubType, Converter={StaticResource SegmentTypeConverter}, ConverterParameter=Inhibitory, Mode=OneWay}" Checked="SegmentSubTypeRadioButton_Checked"></RadioButton>
+                                    <RadioButton Grid.Column="2" Grid.Row="3" Margin="3,3,3,3" GroupName="SubType" Content="?"          CommandParameter="Unknown"    IsEnabled="{Binding Path=Engine.TileManager.SegmentationControlsEnabled}" IsChecked="{Binding Path=TileManagerDataContext.SelectedSegmentSubType, Converter={StaticResource SegmentTypeConverter}, ConverterParameter=Unknown, Mode=OneWay}" Checked="SegmentSubTypeRadioButton_Checked"></RadioButton>
+
+                                    <Label Grid.Column="3" Grid.Row="0" Content="[F9]"></Label>
+                                    <Label Grid.Column="3" Grid.Row="1" Content="[F10]"></Label>
+                                    <Label Grid.Column="3" Grid.Row="2" Content="[F11]"></Label>
+                                    <Label Grid.Column="3" Grid.Row="3" Content="[F12]"></Label>
+
+                                </Grid>
+                            </StackPanel>
+                        </Expander>
                     </Border>
+
                     <StackPanel DockPanel.Dock="Top" Orientation="Horizontal">
+                        <StackPanel DockPanel.Dock="Left" Orientation="Horizontal">
+                            <Label DockPanel.Dock="Left" Focusable="False" MinHeight="20" Content="Object List"></Label>
+                        </StackPanel>
                         <StackPanel DockPanel.Dock="Left" Orientation="Horizontal">
                             <Button Content="&lt;&lt;" Command="{Binding Path=FirstSegmentPageCommand}" Width="30" Margin="5"/>
                             <Button Content="&lt;" Command="{Binding Path=PreviousSegmentPageCommand}" Width="30" Margin="5"/>
@@ -357,8 +462,7 @@
                             <Button Content="&gt;&gt;" Command="{Binding Path=LastSegmentPageCommand}" Width="30" Margin="5"/>
                         </StackPanel>
                         <StackPanel DockPanel.Dock="Left" Orientation="Horizontal">
-                            <Label DockPanel.Dock="Left" Focusable="False" MinHeight="20" Content="{Binding Path=TileManagerDataContext.SegmentListCurrentPageString}">
-                            </Label>
+                            <Label DockPanel.Dock="Left" Focusable="False" MinHeight="20" Content="{Binding Path=TileManagerDataContext.SegmentListCurrentPageString}"></Label>
                         </StackPanel>
                     </StackPanel>
                     
@@ -422,10 +526,14 @@
                                     <GridViewColumn.CellTemplate>
                                         <DataTemplate>
                                             <Grid Background="{Binding Color}" Margin="0,0,0,0" >
-                                                <CheckBox Background="{Binding Color}" Height="20" Width="100" Margin="5,5,5,5" Name="SegmentLockCheckBox"
+                                                <CheckBox Height="20" Width="100" Margin="5,5,5,5" Name="SegmentLockCheckBox"
                                                           IsChecked="{Binding Confidence, Converter={StaticResource SegmentLockConverter}, Mode=OneWay}"
                                                           Checked="SegmentLockCheckBox_OnChecked"
-                                                          Unchecked="SegmentLockCheckBox_OnUnchecked" />
+                                                          Unchecked="SegmentLockCheckBox_OnUnchecked">
+                                                    <CheckBox.Background>
+                                                        <SolidColorBrush Color="White" Opacity="0.5"></SolidColorBrush>
+                                                    </CheckBox.Background>
+                                                </CheckBox>
                                             </Grid>
                                         </DataTemplate>
                                     </GridViewColumn.CellTemplate>
@@ -459,6 +567,28 @@
                                         <DataTemplate>
                                             <Grid HorizontalAlignment="Stretch" Margin="0,0,0,0">
                                                 <TextBlock Text="{Binding Id}" />
+                                            </Grid>
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+
+                                <GridViewColumn Width="70">
+                                    <GridViewColumnHeader Content="Type" Click="SegmentListColumnHeader_OnClick" Tag="Type" />
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Grid HorizontalAlignment="Stretch" Margin="0,0,0,0">
+                                                <TextBlock Text="{Binding Type}" />
+                                            </Grid>
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+
+                                <GridViewColumn Width="70">
+                                    <GridViewColumnHeader Content="SubType" Click="SegmentListColumnHeader_OnClick" Tag="SubType" />
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Grid HorizontalAlignment="Stretch" Margin="0,0,0,0">
+                                                <TextBlock Text="{Binding SubType}" />
                                             </Grid>
                                         </DataTemplate>
                                     </GridViewColumn.CellTemplate>

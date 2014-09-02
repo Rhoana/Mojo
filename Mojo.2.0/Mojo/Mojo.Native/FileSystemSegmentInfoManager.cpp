@@ -117,10 +117,69 @@ void FileSystemSegmentInfoManager::OpenDB()
 			}
 
 			//
+			// Check Segment Info table and modify if necessary
+			//
+			int nSegInfoCols = 0;
+			converter.str("");
+			converter << "PRAGMA table_info(segmentInfo);";
+            query = converter.str();
+
+            sqlReturn = sqlite3_prepare_v2(mIdTileIndexDB, query.c_str(), (int)query.size(), &statement, NULL); 
+
+            if ( sqlReturn )
+            {
+                Core::Printf( "Error preparing SQLite3 query (", sqlReturn, "): ", sqlite3_errmsg( mIdTileIndexDB ) );
+            }
+            else
+            {
+                while ( sqlite3_step( statement ) == SQLITE_ROW )
+                {
+					++nSegInfoCols;
+				}
+			}
+
+			if (nSegInfoCols == 4)
+			{
+				Core::Printf( "Adding type columns to segment info database." );
+				converter.str("");
+				converter << "BEGIN TRANSACTION;\n";
+				converter << "ALTER TABLE segmentInfo ADD COLUMN type text;\n";
+				converter << "ALTER TABLE segmentInfo ADD COLUMN subtype text;\n";
+				converter << "UPDATE segmentInfo SET type = \"None\", subtype = \"None\";\n";
+				converter << "END TRANSACTION;\n";
+
+				query = converter.str();
+				//Core::Printf( query );
+				sqlReturn = sqlite3_exec( mIdTileIndexDB, query.c_str(), NULL, NULL, &sqlError); 
+
+				if ( sqlReturn != SQLITE_OK )
+				{
+					Core::Printf( "ERROR: Unable to add type columns segment info database (", sqlReturn, "): ", std::string( sqlError ) );
+				}
+			} else
+			{
+				Core::Printf( "Setting blank type info to 'None' in segment info database." );
+				converter.str("");
+				converter << "BEGIN TRANSACTION;\n";
+				converter << "UPDATE segmentInfo SET type = \"None\" WHERE type is NULL;\n";
+				converter << "UPDATE segmentInfo SET subtype = \"None\" WHERE subtype is NULL;\n";
+				converter << "END TRANSACTION;\n";
+
+				query = converter.str();
+				//Core::Printf( query );
+				sqlReturn = sqlite3_exec( mIdTileIndexDB, query.c_str(), NULL, NULL, &sqlError); 
+
+				if ( sqlReturn != SQLITE_OK )
+				{
+					Core::Printf( "ERROR: Unable to set empty type columns to 'None' in segment info database (", sqlReturn, "): ", std::string( sqlError ) );
+				}
+			}
+
+			//
 			// Load the Segment Info 
 			//
             converter.str("");
-            converter << "SELECT id, name, size, confidence FROM segmentInfo ORDER BY id;";
+            converter << "SELECT id, name, size, confidence, type, subtype FROM segmentInfo ORDER BY id;";
             query = converter.str();
 
             sqlReturn = sqlite3_prepare_v2(mIdTileIndexDB, query.c_str(), (int)query.size(), &statement, NULL); 
@@ -137,7 +196,9 @@ void FileSystemSegmentInfoManager::OpenDB()
                         sqlite3_column_int(statement, 0),
                         std::string( reinterpret_cast<const char*>( sqlite3_column_text(statement, 1) ) ),
                         sqlite3_column_int(statement, 2),
-                        sqlite3_column_int(statement, 3) ) );
+                        sqlite3_column_int(statement, 3),
+                        std::string( reinterpret_cast<const char*>( sqlite3_column_text(statement, 4) ) ),
+                        std::string( reinterpret_cast<const char*>( sqlite3_column_text(statement, 5) ) ) ) );
 					mIdConfidenceMap( sqlite3_column_int(statement, 0) ) = sqlite3_column_int(statement, 3);
 
 					/*if ( ( sqlite3_column_int(statement, 0) ) < 500 )
@@ -247,14 +308,14 @@ void FileSystemSegmentInfoManager::Save()
     }
 
     //
-    // Update tile info
+    // Update segment info
     //
 
     for ( SegmentMultiIndex::iterator infoIt = mSegmentMultiIndex.begin(); infoIt != mSegmentMultiIndex.end(); ++infoIt )
     {
         if ( infoIt->changed )
         {
-            converter << "INSERT or REPLACE INTO segmentInfo (id, name, size, confidence) VALUES (" << infoIt->id << ",\"" << infoIt->name << "\"," << infoIt->size << "," << infoIt->confidence << ");\n";
+            converter << "INSERT or REPLACE INTO segmentInfo (id, name, size, confidence, type, subtype) VALUES (" << infoIt->id << ",\"" << infoIt->name << "\"," << infoIt->size << "," << infoIt->confidence << ",\"" << infoIt->type << "\",\"" << infoIt->subtype << "\");\n";
         }
     }
 
@@ -404,7 +465,7 @@ unsigned int FileSystemSegmentInfoManager::AddNewId()
     converter << "segment" << mIdMax;
     name = converter.str();
 
-    mSegmentMultiIndex.push_back( SegmentInfo( mIdMax, name, 0, 0, true ) );
+    mSegmentMultiIndex.push_back( SegmentInfo( mIdMax, name, 0, 0, std::string("None"), std::string("None"), true ) );
 
     //
     // Resize the label id map if necessary
@@ -499,6 +560,24 @@ void FileSystemSegmentInfoManager::SortSegmentInfoByConfidence( bool reverse )
     }
 }
 
+void FileSystemSegmentInfoManager::SortSegmentInfoByType( bool reverse )
+{
+    mSegmentMultiIndex.get<0>().rearrange( mSegmentMultiIndex.get<type>().begin() );
+    if ( reverse )
+    {
+        mSegmentMultiIndex.get<0>().reverse();
+    }
+}
+
+void FileSystemSegmentInfoManager::SortSegmentInfoBySubType( bool reverse )
+{
+    mSegmentMultiIndex.get<0>().rearrange( mSegmentMultiIndex.get<subtype>().begin() );
+    if ( reverse )
+    {
+        mSegmentMultiIndex.get<0>().reverse();
+    }
+}
+
 void FileSystemSegmentInfoManager::RemapSegmentLabel( unsigned int fromSegId, unsigned int toSegId )
 {
     if ( fromSegId <= mIdMax && toSegId <= mIdMax )
@@ -551,6 +630,30 @@ void FileSystemSegmentInfoManager::UnlockSegmentLabel( unsigned int segId )
     }
 }
 
+void FileSystemSegmentInfoManager::SetSegmentType( unsigned int segId, std::string newType )
+{
+    if ( segId <= mIdMax )
+    {
+	    SegmentMultiIndexById::iterator segmentInfoIt = mSegmentMultiIndex.get<id>().find( segId );
+        SegmentInfo changeSeg = *segmentInfoIt;
+	    changeSeg.type = newType;
+        changeSeg.changed = true;
+	    mSegmentMultiIndex.get<id>().replace( segmentInfoIt, changeSeg );
+    }
+}
+
+void FileSystemSegmentInfoManager::SetSegmentSubType( unsigned int segId, std::string newSubType )
+{
+    if ( segId <= mIdMax )
+    {
+	    SegmentMultiIndexById::iterator segmentInfoIt = mSegmentMultiIndex.get<id>().find( segId );
+        SegmentInfo changeSeg = *segmentInfoIt;
+	    changeSeg.subtype = newSubType;
+        changeSeg.changed = true;
+	    mSegmentMultiIndex.get<id>().replace( segmentInfoIt, changeSeg );
+    }
+}
+
 unsigned int FileSystemSegmentInfoManager::GetSegmentInfoCount()
 {
 	return (unsigned int)mSegmentMultiIndex.size();
@@ -587,7 +690,7 @@ SegmentInfo FileSystemSegmentInfoManager::GetSegmentInfo( unsigned int segId )
 	if ( segIt == idIndex.end() )
 	{
 		Core::Printf( "WARNING: Could not find segment for id  ", segId, " - id not found in multi index." );
-		return SegmentInfo( 0, "", 0, 0, false );
+		return SegmentInfo( 0, "", 0, 0, std::string("None"), std::string("None"), false );
 	}
 	else
 	{
