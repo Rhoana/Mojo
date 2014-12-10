@@ -141,8 +141,8 @@ for file in files:
 #Output TiledVolumeDescription xml file
 tiledVolumeDescription = lxml.etree.Element( "tiledVolumeDescription",
     fileExtension = output_image_extension[1:],
-    numTilesX = str( int( math.ceil( original_image_num_pixels_x / tile_num_pixels_x ) ) ),
-    numTilesY = str( int( math.ceil( original_image_num_pixels_y / tile_num_pixels_y ) ) ),
+    numTilesX = str( int( math.ceil( original_image_num_pixels_x / tile_num_pixels_x ) ) + ((original_image_num_pixels_x % tile_num_pixels_x) > 0) ),
+    numTilesY = str( int( math.ceil( original_image_num_pixels_y / tile_num_pixels_y ) ) + ((original_image_num_pixels_x % tile_num_pixels_x) > 0) ),
     numTilesZ = str( tile_index_z ),
     numTilesW = str( tile_index_w ),
     numVoxelsPerTileX = str( tile_num_pixels_x ),
