@@ -89,12 +89,28 @@
                         <Image Width="16" Height="16" Source="{StaticResource DatasetLoad}"/>
                     </MenuItem.Icon>
                 </MenuItem>
-                <Separator />
-                <MenuItem Name="LoadSegmentationMenuItem" Header="Load Segmentation…" Focusable="False" Command="{Binding Path=LoadSegmentationCommand}">
+                <MenuItem Name="LoadSegmentationMenuItem" Header="Load Segmentation…" Focusable="False" Command="{Binding Path=LoadSegmentationCommand}" IsEnabled="{Binding Path=Engine.TileManager.NavigationControlsEnabled}" >
                     <MenuItem.Icon>
                         <Image Width="16" Height="16" Source="{StaticResource SegmentationLoad}"/>
                     </MenuItem.Icon>
                 </MenuItem>
+                <MenuItem Header="Load Recent Images" Focusable="False" ItemsSource="{Binding Path=RecentDatasetList}">
+                    <MenuItem.ItemContainerStyle>
+                        <Style TargetType="{x:Type MenuItem}">
+                            <Setter Property="Header" Value="{Binding Header}" />
+                            <Setter Property="Command" Value="{Binding Command}" />
+                        </Style>
+                    </MenuItem.ItemContainerStyle>
+                </MenuItem>
+                <MenuItem Header="Load Recent Segmentation" Focusable="False" IsEnabled="{Binding Path=Engine.TileManager.NavigationControlsEnabled}"  ItemsSource="{Binding Path=RecentSegmentationList}">
+                    <MenuItem.ItemContainerStyle>
+                        <Style TargetType="{x:Type MenuItem}">
+                            <Setter Property="Header" Value="{Binding Header}" />
+                            <Setter Property="Command" Value="{Binding Command}" />
+                        </Style>
+                    </MenuItem.ItemContainerStyle>
+                </MenuItem>
+                <Separator />
                 <MenuItem Name="SaveSegmentationMenuItem" Header="Save Segmentation" Focusable="False" Command="{Binding Path=SaveSegmentationCommand}" IsEnabled="{Binding Path=Engine.TileManager.SegmentationControlsEnabled}">
                     <MenuItem.Icon>
                         <Image Width="16" Height="16" Source="{StaticResource SegmentationSave}"/>
@@ -171,6 +187,8 @@
                     <MenuItem.Icon>
                         <Image Width="16" Height="16" Source="{StaticResource Open3DViewer}"/>
                     </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Name="Set3DZSpacingMenuItem" Header="Set 3D Z-Spacing..." Focusable="False" Command="{Binding Path=Set3DZSpacingCommand}" IsEnabled="{Binding Path=Engine.TileManager.SegmentationControlsEnabled}" >
                 </MenuItem>
                 <MenuItem Name="Multi3DViewMenuItem" Header="3D View Multiple Objects..." Focusable="False" Command="{Binding Path=Multi3DViewCommand}" IsEnabled="{Binding Path=Engine.TileManager.SegmentationControlsEnabled}" >
                 </MenuItem>

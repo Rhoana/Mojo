@@ -569,6 +569,19 @@ namespace Mojo
 
         System.Diagnostics.Process mExternalViewerProcess = null;
 
+        private decimal mZSpacing = 2.5M;
+        public decimal ZSpacing
+        {
+            get
+            {
+                return mZSpacing;
+            }
+            set
+            {
+                mZSpacing = value;
+            }
+        }
+
         public void Open3DViewer()
         {
             if ( TileManager.SelectedSegmentId != 0 )
@@ -604,23 +617,35 @@ namespace Mojo
                 {
                     try
                     {
-                        String viewerArguments =
-                            TileManager.TiledDatasetDescription.TiledVolumeDescriptions.Get( "IdMap" ).ImageDataDirectory.Replace( "\\ids\\tiles", "" ) + " " +
-                            Math.Round( TileManager.TiledDatasetView.CenterDataSpace.X * Constants.ConstParameters.GetInt( "TILE_PIXELS_X" ) ) + " " +
-                            Math.Round( TileManager.TiledDatasetView.CenterDataSpace.Y * Constants.ConstParameters.GetInt( "TILE_PIXELS_Y" ) ) + " " +
-                            ( TileManager.TiledDatasetView.CenterDataSpace.Z * Constants.ConstParameters.GetInt( "TILE_PIXELS_Z" ) ) + " " +
-                            TileManager.TiledDatasetDescription.TiledVolumeDescriptions.Get( "IdMap" ).NumVoxelsX + " " +
-                            TileManager.TiledDatasetDescription.TiledVolumeDescriptions.Get( "IdMap" ).NumVoxelsY + " " +
-                            viewId + ":";
+                        String viewerArguments = "";
+                        if ( mExternalViewerArgs == null || mExternalViewerArgs.Length == 0 )
+                        {
+                            viewerArguments +=
+                                TileManager.TiledDatasetDescription.TiledVolumeDescriptions.Get( "IdMap" ).ImageDataDirectory.Replace( "\\ids\\tiles", "" ) + " " +
+                                Math.Round( TileManager.TiledDatasetView.CenterDataSpace.X * Constants.ConstParameters.GetInt( "TILE_PIXELS_X" ) ) + " " +
+                                Math.Round( TileManager.TiledDatasetView.CenterDataSpace.Y * Constants.ConstParameters.GetInt( "TILE_PIXELS_Y" ) ) + " " +
+                                ( TileManager.TiledDatasetView.CenterDataSpace.Z * Constants.ConstParameters.GetInt( "TILE_PIXELS_Z" ) ) + " " +
+                                TileManager.TiledDatasetDescription.TiledVolumeDescriptions.Get( "IdMap" ).NumVoxelsX + " " +
+                                TileManager.TiledDatasetDescription.TiledVolumeDescriptions.Get( "IdMap" ).NumVoxelsY + " " +
+                                viewId + ":";
+                        }
+                        else
+                        {
+                            viewerArguments += mExternalViewerArgs
+                                .Replace( "$DIRECTORY", TileManager.TiledDatasetDescription.TiledVolumeDescriptions.Get( "IdMap" ).ImageDataDirectory.Replace( "\\ids\\tiles", "" ) )
+                                .Replace( "$LOCATION", Math.Round( TileManager.TiledDatasetView.CenterDataSpace.X * Constants.ConstParameters.GetInt( "TILE_PIXELS_X" ) ) + "," +
+                                    Math.Round( TileManager.TiledDatasetView.CenterDataSpace.Y * Constants.ConstParameters.GetInt( "TILE_PIXELS_Y" ) ) + "," +
+                                    ( TileManager.TiledDatasetView.CenterDataSpace.Z * Constants.ConstParameters.GetInt( "TILE_PIXELS_Z" ) ) )
+                                .Replace( "$MAX_X", TileManager.TiledDatasetDescription.TiledVolumeDescriptions.Get( "IdMap" ).NumVoxelsX.ToString() )
+                                .Replace( "$MAX_Y", TileManager.TiledDatasetDescription.TiledVolumeDescriptions.Get( "IdMap" ).NumVoxelsY.ToString() )
+                                .Replace( "$Z_SPACING", mZSpacing.ToString() ) +
+                                " " + viewId + ":";
+                        }
 
                         System.Collections.Generic.IList<uint> tileIds = TileManager.GetRemappedChildren( viewId );
 
                         viewerArguments += String.Join( ",", tileIds );
 
-                        if (mExternalViewerArgs != null)
-                        {
-                            viewerArguments = mExternalViewerArgs + " " + viewerArguments;
-                        }
 
                         Console.WriteLine( "Running Viewer:" );
                         Console.WriteLine( mExternalViewerPath );

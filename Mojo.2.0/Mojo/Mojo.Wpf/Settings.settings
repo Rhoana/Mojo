@@ -14,11 +14,20 @@
     <Setting Name="SegmentListItemsPerPage" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">1000</Value>
     </Setting>
-    <Setting Name="ExternalViewerPath" Type="System.String" Scope="User">
-      <Value Profile="(Default)">C:\Program Files\Mojo\dist\viewer_3d.exe</Value>
-    </Setting>
     <Setting Name="FastZScrollWOffset" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">2</Value>
+    </Setting>
+    <Setting Name="ViewerZSpacing" Type="System.Decimal" Scope="User">
+      <Value Profile="(Default)">2.5</Value>
+    </Setting>
+    <Setting Name="ExternalViewerPath" Type="System.String" Scope="User">
+      <Value Profile="(Default)">C:\Program Files\Mojo\dist\viewer_3d.exe -d $DIRECTORY --xyz=$LOCATION --max_x=$MAX_X --max_y=$MAX_Y --z_spacing=$Z_SPACING</Value>
+    </Setting>
+    <Setting Name="RecentDatasetPaths" Type="System.Collections.Specialized.StringCollection" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="RecentSegmentationPaths" Type="System.Collections.Specialized.StringCollection" Scope="User">
+      <Value Profile="(Default)" />
     </Setting>
   </Settings>
 </SettingsFile>

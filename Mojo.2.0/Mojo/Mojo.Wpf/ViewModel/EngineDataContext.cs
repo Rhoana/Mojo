@@ -48,6 +48,7 @@ namespace Mojo.Wpf.ViewModel
         public RelayCommand IncreaseSegmentationVisibilityCommand { get; private set; }
         public RelayCommand DecreaseSegmentationVisibilityCommand { get; private set; }
         public RelayCommand Open3DViewerCommand { get; private set; }
+        public RelayCommand Set3DZSpacingCommand { get; private set; }
         public RelayCommand Multi3DViewCommand { get; private set; }
 
         //
@@ -62,6 +63,35 @@ namespace Mojo.Wpf.ViewModel
         public RelayCommand SetSelectedSegmentTypeCommand { get; private set; }
         public RelayCommand SetSelectedSegmentSubTypeCommand { get; private set; }
 
+        //
+        // Recent dataset details
+        //
+        public static String RecentRecentDataset1 { get; private set; }
+        public static String RecentRecentDataset2 { get; private set; }
+        public static String RecentRecentDataset3 { get; private set; }
+        public static String RecentRecentDataset4 { get; private set; }
+        public static String RecentRecentDataset5 { get; private set; }
+        public static Visibility RecentRecentDataset1Visibility { get; private set; }
+        public static Visibility RecentRecentDataset2Visibility { get; private set; }
+        public static Visibility RecentRecentDataset3Visibility { get; private set; }
+        public static Visibility RecentRecentDataset4Visibility { get; private set; }
+        public static Visibility RecentRecentDataset5Visibility { get; private set; }
+
+        //
+        // Recent segmentation details
+        //
+        public static String RecentRecentSegmentation1 { get; private set; }
+        public static String RecentRecentSegmentation2 { get; private set; }
+        public static String RecentRecentSegmentation3 { get; private set; }
+        public static String RecentRecentSegmentation4 { get; private set; }
+        public static String RecentRecentSegmentation5 { get; private set; }
+        public static Visibility RecentRecentSegmentation1Visibility { get; private set; }
+        public static Visibility RecentRecentSegmentation2Visibility { get; private set; }
+        public static Visibility RecentRecentSegmentation3Visibility { get; private set; }
+        public static Visibility RecentRecentSegmentation4Visibility { get; private set; }
+        public static Visibility RecentRecentSegmentation5Visibility { get; private set; }
+
+        private const int NumRecentItems = 5;
 
         public class MergeModeItem
         {
@@ -88,17 +118,21 @@ namespace Mojo.Wpf.ViewModel
         public EngineDataContext( Engine engine, TileManagerDataContext tileManagerDataContext )
         {
             Engine = engine;
+            Engine.ZSpacing = Settings.Default.ViewerZSpacing;
 
             TileManagerDataContext = tileManagerDataContext;
 
             //
             // File menu commands
             //
-            LoadDatasetCommand = new RelayCommand( param => LoadDataset() );
-            LoadSegmentationCommand = new RelayCommand( param => LoadSegmentation(), param => Engine.TileManager.TiledDatasetLoaded );
+            LoadDatasetCommand = new RelayCommand( param => LoadDataset( null ) );
+            LoadSegmentationCommand = new RelayCommand( param => LoadSegmentation( null ), param => Engine.TileManager.TiledDatasetLoaded );
             SaveSegmentationCommand = new RelayCommand( param => SaveSegmentation(), param => Engine.TileManager.SegmentationLoaded );
             SaveSegmentationAsCommand = new RelayCommand( param => SaveSegmentationAs(), param => Engine.TileManager.SegmentationLoaded );
             ExitCommand = new RelayCommand( param => Application.Current.MainWindow.Close() );
+
+            ResetRecentDatasets();
+            ResetRecentSegmentations();
 
             //
             // Edit menu commands
@@ -125,6 +159,7 @@ namespace Mojo.Wpf.ViewModel
             IncreaseSegmentationVisibilityCommand = new RelayCommand( param => Engine.TileManager.IncreaseSegmentationVisibility(), param => Engine.TileManager.SegmentationLoaded );
             DecreaseSegmentationVisibilityCommand = new RelayCommand( param => Engine.TileManager.DecreaseSegmentationVisibility(), param => Engine.TileManager.SegmentationLoaded );
             Open3DViewerCommand = new RelayCommand( param => Engine.Open3DViewer(), param => Engine.TileManager.SegmentationLoaded );
+            Set3DZSpacingCommand = new RelayCommand( param => Set3DZSpacing(), param => Engine.TileManager.SegmentationLoaded );
             Multi3DViewCommand = new RelayCommand( param => Multi3DView(), param => Engine.TileManager.SegmentationLoaded );
 
             //
@@ -164,6 +199,84 @@ namespace Mojo.Wpf.ViewModel
             OnPropertyChanged( "MergeControlModes" );
             OnPropertyChanged( "SplitModes" );
 
+        }
+
+        public class RecentMenuItem
+        {
+            public RelayCommand Command { get; set; }
+            public string Header { get; set; }
+        }
+
+        private IList<RecentMenuItem> mRecentDatasetList = new List<RecentMenuItem>();
+        public IList<RecentMenuItem> RecentDatasetList
+        {
+            get
+            {
+                return mRecentDatasetList;
+            }
+            set
+            {
+                mRecentDatasetList = value;
+                OnPropertyChanged( "RecentDatasetList" );
+            }
+        }
+        
+        public void ResetRecentDatasets()
+        {
+            IList<RecentMenuItem> newRecentDatasetList = new List<RecentMenuItem>();
+            for ( int menuIndex = 0; menuIndex < NumRecentItems; ++menuIndex )
+            {
+                if ( Settings.Default.RecentDatasetPaths != null && Settings.Default.RecentDatasetPaths.Count - menuIndex > 0 )
+                {
+                    String datasetPath = Settings.Default.RecentDatasetPaths[ Settings.Default.RecentDatasetPaths.Count - menuIndex - 1 ];
+                    newRecentDatasetList.Add( new RecentMenuItem
+                    {
+                        Command = new RelayCommand( param => LoadDataset( datasetPath ) ),
+                        Header = ( menuIndex + 1 ) + " " + datasetPath,
+                    } );
+                }
+                else
+                {
+                    break;
+                }
+            }
+            RecentDatasetList = newRecentDatasetList;
+        }
+
+        private IList<RecentMenuItem> mRecentSegmentationList = new List<RecentMenuItem>();
+        public IList<RecentMenuItem> RecentSegmentationList
+        {
+            get
+            {
+                return mRecentSegmentationList;
+            }
+            set
+            {
+                mRecentSegmentationList = value;
+                OnPropertyChanged( "RecentSegmentationList" );
+            }
+        }
+
+        public void ResetRecentSegmentations()
+        {
+            IList<RecentMenuItem> newRecentSegmentationList = new List<RecentMenuItem>();
+            for ( int menuIndex = 0; menuIndex < NumRecentItems; ++menuIndex )
+            {
+                if ( Settings.Default.RecentSegmentationPaths != null && Settings.Default.RecentSegmentationPaths.Count - menuIndex > 0 )
+                {
+                    String segmentationPath = Settings.Default.RecentSegmentationPaths[ Settings.Default.RecentSegmentationPaths.Count - menuIndex - 1 ];
+                    newRecentSegmentationList.Add( new RecentMenuItem
+                    {
+                        Command = new RelayCommand( param => LoadSegmentation( segmentationPath ) ),
+                        Header = ( menuIndex + 1 ) + " " + segmentationPath,
+                    } );
+                }
+                else
+                {
+                    break;
+                }
+            }
+            RecentSegmentationList = newRecentSegmentationList;
         }
 
         public void Dispose()
@@ -238,100 +351,75 @@ namespace Mojo.Wpf.ViewModel
 
         }
 
-        private void LoadDataset()
+        public void Set3DZSpacing()
         {
-            if ( Engine.TileManager.ChangesMade )
+            //
+            // Open a dialog to set z-spacing
+            //
+            var textInputDialog = new Ookii.Dialogs.InputDialog
             {
-                var mbresult = MessageBox.Show( "Changes were made to this segmentation. Do you want to save the changes?", "Save Changes?", MessageBoxButton.YesNoCancel, MessageBoxImage.Warning );
-                switch ( mbresult )
-                {
-                    case MessageBoxResult.Yes:
-                        Engine.TileManager.SaveSegmentation();
-                        break;
-                    case MessageBoxResult.No:
-                        Engine.TileManager.DiscardChanges();
-                        break;
-                    default:
-                        return;
-                }
-            }
-
-            var initialPath = Settings.Default.LoadDatasetPath;
-            if ( string.IsNullOrEmpty( initialPath ) || !Directory.Exists( initialPath ) )
-            {
-                initialPath = Environment.GetFolderPath( Environment.SpecialFolder.MyDocuments );
-            }
-
-            var folderBrowserDialog = new Ookii.Dialogs.Wpf.VistaFolderBrowserDialog
-            {
-                Description = "Select Mojo Dataset Folder (the folder you select should be called \"" + Constants.DATASET_ROOT_DIRECTORY_NAME + "\")",
-                UseDescriptionForTitle = true,
-                ShowNewFolderButton = false,
-                SelectedPath = initialPath
+                WindowTitle = "3D Z-Spacing",
+                MainInstruction = "Please enter the new z-spacing.",
+                Input = Engine.ZSpacing.ToString()
             };
 
-            var result = folderBrowserDialog.ShowDialog();
+            var result = textInputDialog.ShowDialog();
 
-            if ( result != null && result == true )
+            if ( result == System.Windows.Forms.DialogResult.OK )
             {
-                Settings.Default.LoadDatasetPath = folderBrowserDialog.SelectedPath;
+
+                decimal newSpacing = decimal.Parse( textInputDialog.Input );
+                Settings.Default.ViewerZSpacing = newSpacing;
                 Settings.Default.Save();
-
-                try
-                {
-
-                    //
-                    // Load the dataset and show (approximate) progress
-                    //
-
-                    TileManagerDataContext.Progress = 10;
-
-                    Engine.TileManager.LoadTiledDataset( folderBrowserDialog.SelectedPath );
-
-                    TileManagerDataContext.Progress = 70;
-
-                    if ( Engine.TileManager.TiledDatasetLoaded )
-                    {
-                        //
-                        // Set the initial view
-                        //
-                        var viewportDataSpaceX = Engine.Viewers.Internal[ViewerMode.TileManager2D].D3D11RenderingPane.Viewport.Width / Engine.TileManager.TiledDatasetDescription.TiledVolumeDescriptions.Get( "SourceMap" ).NumVoxelsPerTileX;
-                        var viewportDataSpaceY = Engine.Viewers.Internal[ViewerMode.TileManager2D].D3D11RenderingPane.Viewport.Height / Engine.TileManager.TiledDatasetDescription.TiledVolumeDescriptions.Get( "SourceMap" ).NumVoxelsPerTileY;
-                        var maxExtentDataSpaceX = Engine.TileManager.TiledDatasetDescription.TiledVolumeDescriptions.Get( "SourceMap" ).NumTilesX * Constants.ConstParameters.GetInt( "TILE_SIZE_X" );
-                        var maxExtentDataSpaceY = Engine.TileManager.TiledDatasetDescription.TiledVolumeDescriptions.Get( "SourceMap" ).NumTilesY * Constants.ConstParameters.GetInt( "TILE_SIZE_Y" );
-
-                        var zoomLevel = Math.Min( viewportDataSpaceX / maxExtentDataSpaceX, viewportDataSpaceY / maxExtentDataSpaceY );
-
-                        Engine.TileManager.TiledDatasetView.CenterDataSpace = new Vector3( maxExtentDataSpaceX / 2f, maxExtentDataSpaceY / 2f, 0f );
-                        Engine.TileManager.TiledDatasetView.ExtentDataSpace = new Vector3( viewportDataSpaceX / zoomLevel, viewportDataSpaceY / zoomLevel, 0f );
-
-                        Engine.CurrentToolMode = ToolMode.SplitSegmentation;
-
-                        Engine.TileManager.UpdateXYZ();
-
-                    }
-
-                    TileManagerDataContext.Progress = 90;
-
-                    //
-                    // Reset the segment info list
-                    //
-                    TileManagerDataContext.SortSegmentListBy( "Size", true );
-
-                    TileManagerDataContext.Progress = 100;
-
-                }
-                catch ( Exception e )
-                {
-                    String errorMessage = "Error loading images from:\n" + folderBrowserDialog.SelectedPath + "\n\n" + e.Message + "\n\nPlease check the path and try again.";
-                    MessageBox.Show( errorMessage, "Load Error", MessageBoxButton.OK, MessageBoxImage.Error );
-                    Console.WriteLine( errorMessage );
-                }
-
+                Engine.ZSpacing = newSpacing;
             }
         }
 
-        private void LoadSegmentation()
+        private void RememberDatasetPath( String datasetPath )
+        {
+            if ( Settings.Default.RecentDatasetPaths == null )
+            {
+                Settings.Default.RecentDatasetPaths = new System.Collections.Specialized.StringCollection();
+            }
+            var newDataset = true;
+            while ( Settings.Default.RecentDatasetPaths.Contains( datasetPath ) )
+            {
+                Settings.Default.RecentDatasetPaths.Remove( datasetPath );
+                newDataset = false;
+            }
+            Settings.Default.RecentDatasetPaths.Add( datasetPath );
+            while ( Settings.Default.RecentDatasetPaths.Count > NumRecentItems )
+            {
+                Settings.Default.RecentDatasetPaths.RemoveAt( 0 );
+            }
+            Settings.Default.Save();
+            ResetRecentDatasets();
+            if ( newDataset )
+            {
+                RememberSegmentationPath( datasetPath );
+            }
+        }
+
+        private void RememberSegmentationPath( String segmentationPath )
+        {
+            if ( Settings.Default.RecentSegmentationPaths == null )
+            {
+                Settings.Default.RecentSegmentationPaths = new System.Collections.Specialized.StringCollection();
+            }
+            while ( Settings.Default.RecentSegmentationPaths.Contains( segmentationPath ) )
+            {
+                Settings.Default.RecentSegmentationPaths.Remove( segmentationPath );
+            }
+            Settings.Default.RecentSegmentationPaths.Add( segmentationPath );
+            while ( Settings.Default.RecentSegmentationPaths.Count > NumRecentItems )
+            {
+                Settings.Default.RecentSegmentationPaths.RemoveAt( 0 );
+            }
+            Settings.Default.Save();
+            ResetRecentSegmentations();
+        }
+
+        private void LoadDataset( String datasetPath )
         {
             if ( Engine.TileManager.ChangesMade )
             {
@@ -349,63 +437,173 @@ namespace Mojo.Wpf.ViewModel
                 }
             }
 
-            var initialPath = Settings.Default.LoadSegmentationPath;
-            if ( string.IsNullOrEmpty( initialPath ) || !Directory.Exists( initialPath ) )
+            if ( datasetPath == null || datasetPath.Length == 0 )
             {
-                initialPath = Environment.GetFolderPath( Environment.SpecialFolder.MyDocuments );
+                var initialPath = Settings.Default.LoadDatasetPath;
+                if ( string.IsNullOrEmpty( initialPath ) || !Directory.Exists( initialPath ) )
+                {
+                    initialPath = Environment.GetFolderPath( Environment.SpecialFolder.MyDocuments );
+                }
+
+                var folderBrowserDialog = new Ookii.Dialogs.Wpf.VistaFolderBrowserDialog
+                {
+                    Description = "Select Mojo Dataset Folder (the folder you select should be called \"" + Constants.DATASET_ROOT_DIRECTORY_NAME + "\")",
+                    UseDescriptionForTitle = true,
+                    ShowNewFolderButton = false,
+                    SelectedPath = initialPath
+                };
+
+                var result = folderBrowserDialog.ShowDialog();
+
+                if ( result != null && result == true )
+                {
+                    datasetPath = folderBrowserDialog.SelectedPath;
+                }
             }
 
-            var folderBrowserDialog = new Ookii.Dialogs.Wpf.VistaFolderBrowserDialog
+            Settings.Default.LoadDatasetPath = datasetPath;
+
+            //
+            // Maintain recent file list
+            //
+            RememberDatasetPath( datasetPath );
+
+            try
             {
-                Description = "Select Mojo Segmentation Folder (the folder you select should be called \"" + Constants.DATASET_ROOT_DIRECTORY_NAME + "\")",
-                UseDescriptionForTitle = true,
-                ShowNewFolderButton = false,
-                SelectedPath = initialPath
-            };
+                //
+                // Load the dataset and show (approximate) progress
+                //
 
-            var result = folderBrowserDialog.ShowDialog();
+                TileManagerDataContext.Progress = 10;
 
-            if ( result != null && result == true )
-            {
-                Settings.Default.LoadSegmentationPath = folderBrowserDialog.SelectedPath;
-                Settings.Default.Save();
+                Engine.TileManager.LoadTiledDataset( datasetPath );
 
-                try
+                TileManagerDataContext.Progress = 70;
+
+                if ( Engine.TileManager.TiledDatasetLoaded )
                 {
                     //
-                    // Load the segmentation and show (approximate) progress
+                    // Set the initial view
                     //
+                    var viewportDataSpaceX = Engine.Viewers.Internal[ViewerMode.TileManager2D].D3D11RenderingPane.Viewport.Width / Engine.TileManager.TiledDatasetDescription.TiledVolumeDescriptions.Get( "SourceMap" ).NumVoxelsPerTileX;
+                    var viewportDataSpaceY = Engine.Viewers.Internal[ViewerMode.TileManager2D].D3D11RenderingPane.Viewport.Height / Engine.TileManager.TiledDatasetDescription.TiledVolumeDescriptions.Get( "SourceMap" ).NumVoxelsPerTileY;
+                    var maxExtentDataSpaceX = Engine.TileManager.TiledDatasetDescription.TiledVolumeDescriptions.Get( "SourceMap" ).NumTilesX * Constants.ConstParameters.GetInt( "TILE_SIZE_X" );
+                    var maxExtentDataSpaceY = Engine.TileManager.TiledDatasetDescription.TiledVolumeDescriptions.Get( "SourceMap" ).NumTilesY * Constants.ConstParameters.GetInt( "TILE_SIZE_Y" );
 
-                    TileManagerDataContext.Progress = 10;
+                    var zoomLevel = Math.Min( viewportDataSpaceX / maxExtentDataSpaceX, viewportDataSpaceY / maxExtentDataSpaceY );
 
-                    Engine.TileManager.LoadSegmentation( folderBrowserDialog.SelectedPath );
+                    Engine.TileManager.TiledDatasetView.CenterDataSpace = new Vector3( maxExtentDataSpaceX / 2f, maxExtentDataSpaceY / 2f, 0f );
+                    Engine.TileManager.TiledDatasetView.ExtentDataSpace = new Vector3( viewportDataSpaceX / zoomLevel, viewportDataSpaceY / zoomLevel, 0f );
 
-                    TileManagerDataContext.Progress = 70;
+                    Engine.CurrentToolMode = ToolMode.SplitSegmentation;
 
-                    if ( Engine.TileManager.SegmentationLoaded )
-                    {
-                        //
-                        // Set the initial view
-                        //
-                        Engine.CurrentToolMode = ToolMode.SplitSegmentation;
-                        Engine.TileManager.SegmentationVisibilityRatio = 0.5f;
-
-                        //
-                        // Load segment info list
-                        //
-                        TileManagerDataContext.SortSegmentListBy( "Size", true );
-
-                    }
-
-                    TileManagerDataContext.Progress = 100;
+                    Engine.TileManager.UpdateXYZ();
 
                 }
-                catch ( Exception e )
+
+                TileManagerDataContext.Progress = 90;
+
+                //
+                // Reset the segment info list
+                //
+                TileManagerDataContext.SortSegmentListBy( "Size", true );
+
+                TileManagerDataContext.Progress = 100;
+
+            }
+            catch ( Exception e )
+            {
+                String errorMessage = "Error loading images from:\n" + datasetPath + "\n\n" + e.Message + "\n\nPlease check the path and try again.";
+                MessageBox.Show( errorMessage, "Load Error", MessageBoxButton.OK, MessageBoxImage.Error );
+                Console.WriteLine( errorMessage );
+            }
+
+        }
+
+        private void LoadSegmentation( String segmentationPath )
+        {
+            if ( Engine.TileManager.ChangesMade )
+            {
+                var mbresult = MessageBox.Show( "Changes were made to this segmentation. Do you want to save the changes?", "Save Changes?", MessageBoxButton.YesNoCancel, MessageBoxImage.Warning );
+                switch ( mbresult )
                 {
-                    String errorMessage = "Error loading segmentation from:\n" + folderBrowserDialog.SelectedPath + "\n\n" + e.Message + "\n\nPlease check the path and try again.";
-                    MessageBox.Show( errorMessage, "Load Error", MessageBoxButton.OK, MessageBoxImage.Error );
-                    Console.WriteLine( errorMessage );
+                    case MessageBoxResult.Yes:
+                        Engine.TileManager.SaveSegmentation();
+                        break;
+                    case MessageBoxResult.No:
+                        Engine.TileManager.DiscardChanges();
+                        break;
+                    default:
+                        return;
                 }
+            }
+
+            if ( segmentationPath == null || segmentationPath.Length == 0 )
+            {
+                var initialPath = Settings.Default.LoadSegmentationPath;
+                if ( string.IsNullOrEmpty( initialPath ) || !Directory.Exists( initialPath ) )
+                {
+                    initialPath = Environment.GetFolderPath( Environment.SpecialFolder.MyDocuments );
+                }
+
+                var folderBrowserDialog = new Ookii.Dialogs.Wpf.VistaFolderBrowserDialog
+                {
+                    Description = "Select Mojo Segmentation Folder (the folder you select should be called \"" + Constants.DATASET_ROOT_DIRECTORY_NAME + "\")",
+                    UseDescriptionForTitle = true,
+                    ShowNewFolderButton = false,
+                    SelectedPath = initialPath
+                };
+
+                var result = folderBrowserDialog.ShowDialog();
+
+                if ( result != null && result == true )
+                {
+                    segmentationPath = folderBrowserDialog.SelectedPath;
+                }
+            }
+
+            Settings.Default.LoadSegmentationPath = segmentationPath;
+
+            //
+            // Maintain recent file list
+            //
+            RememberSegmentationPath( segmentationPath );
+
+            try
+            {
+                //
+                // Load the segmentation and show (approximate) progress
+                //
+
+                TileManagerDataContext.Progress = 10;
+
+                Engine.TileManager.LoadSegmentation( segmentationPath );
+
+                TileManagerDataContext.Progress = 70;
+
+                if ( Engine.TileManager.SegmentationLoaded )
+                {
+                    //
+                    // Set the initial view
+                    //
+                    Engine.CurrentToolMode = ToolMode.SplitSegmentation;
+                    Engine.TileManager.SegmentationVisibilityRatio = 0.5f;
+
+                    //
+                    // Load segment info list
+                    //
+                    TileManagerDataContext.SortSegmentListBy( "Size", true );
+
+                }
+
+                TileManagerDataContext.Progress = 100;
+
+            }
+            catch ( Exception e )
+            {
+                String errorMessage = "Error loading segmentation from:\n" + segmentationPath + "\n\n" + e.Message + "\n\nPlease check the path and try again.";
+                MessageBox.Show( errorMessage, "Load Error", MessageBoxButton.OK, MessageBoxImage.Error );
+                Console.WriteLine( errorMessage );
             }
         }
 

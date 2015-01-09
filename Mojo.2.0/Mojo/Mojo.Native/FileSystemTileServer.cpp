@@ -155,40 +155,54 @@ void FileSystemTileServer::SaveSegmentation()
         //Core::Printf( "Saving w=", w, "." );
         for ( int z = 0; z < numTiles.z; z++ )
         {
-            for ( int y = 0; y < numTiles.y; y++ )
-            {
-                for ( int x = 0; x < numTiles.x; x++ )
-                {
-                    std::string tempTilePathString = Core::ToString(
+			std::string tempZPathString = Core::ToString(
                         tempVolumeDesctiption.imageDataDirectory, "\\",
                         "w=", Core::ToStringZeroPad( w, 8 ), "\\",
-                        "z=", Core::ToStringZeroPad( z, 8 ), "\\",
-                        "y=", Core::ToStringZeroPad( y, 8 ), ",",
-                        "x=", Core::ToStringZeroPad( x, 8 ), ".",
-                        tempVolumeDesctiption.fileExtension );
+                        "z=", Core::ToStringZeroPad( z, 8 ));
 
-                    boost::filesystem::path tempTilePath = boost::filesystem::path( tempTilePathString );
+			boost::filesystem::path tempZPath = boost::filesystem::path( tempZPathString );
 
-                    if ( boost::filesystem::exists( tempTilePath ) )
-                    {
-                        //Core::Printf( "Moving file: ", tempTilePathString, "." );
+			if ( boost::filesystem::exists( tempZPath ) )
+			{
+				for ( int y = 0; y < numTiles.y; y++ )
+				{
+					for ( int x = 0; x < numTiles.x; x++ )
+					{
+						std::string tempTilePathString = Core::ToString(
+							tempVolumeDesctiption.imageDataDirectory, "\\",
+							"w=", Core::ToStringZeroPad( w, 8 ), "\\",
+							"z=", Core::ToStringZeroPad( z, 8 ), "\\",
+							"y=", Core::ToStringZeroPad( y, 8 ), ",",
+							"x=", Core::ToStringZeroPad( x, 8 ), ".",
+							tempVolumeDesctiption.fileExtension );
 
-                        std::string saveTilePathString = Core::ToString(
-                            saveVolumeDesctiption.imageDataDirectory, "\\",
-                            "w=", Core::ToStringZeroPad( w, 8 ), "\\",
-                            "z=", Core::ToStringZeroPad( z, 8 ), "\\",
-                            "y=", Core::ToStringZeroPad( y, 8 ), ",",
-                            "x=", Core::ToStringZeroPad( x, 8 ), ".",
-                            saveVolumeDesctiption.fileExtension );
+						boost::filesystem::path tempTilePath = boost::filesystem::path( tempTilePathString );
 
-                        //Core::Printf( "To: ", saveTilePathString, "." );
+						if ( boost::filesystem::exists( tempTilePath ) )
+						{
+							//Core::Printf( "Moving file: ", tempTilePathString, "." );
 
-                        boost::filesystem::path saveTilePath = boost::filesystem::path( saveTilePathString );
-                        boost::filesystem::remove( saveTilePath );
-                        boost::filesystem::rename( tempTilePath, saveTilePath );
-                    }
-                }
-            }
+							std::string saveTilePathString = Core::ToString(
+								saveVolumeDesctiption.imageDataDirectory, "\\",
+								"w=", Core::ToStringZeroPad( w, 8 ), "\\",
+								"z=", Core::ToStringZeroPad( z, 8 ), "\\",
+								"y=", Core::ToStringZeroPad( y, 8 ), ",",
+								"x=", Core::ToStringZeroPad( x, 8 ), ".",
+								saveVolumeDesctiption.fileExtension );
+
+							//Core::Printf( "To: ", saveTilePathString, "." );
+
+							boost::filesystem::path saveTilePath = boost::filesystem::path( saveTilePathString );
+							boost::filesystem::remove( saveTilePath );
+							boost::filesystem::rename( tempTilePath, saveTilePath );
+						}
+					}
+				}
+			}
+
+			// Remove z-directories so we don't have to check them next time
+			boost::filesystem::remove_all( tempZPath );
+
         }
     }
 

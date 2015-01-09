@@ -73,7 +73,32 @@ namespace Mojo.Wpf {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("C:\\Program Files\\Mojo\\dist\\viewer_3d.exe")]
+        [global::System.Configuration.DefaultSettingValueAttribute("2")]
+        public int FastZScrollWOffset {
+            get {
+                return ((int)(this["FastZScrollWOffset"]));
+            }
+            set {
+                this["FastZScrollWOffset"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("2.5")]
+        public decimal ViewerZSpacing {
+            get {
+                return ((decimal)(this["ViewerZSpacing"]));
+            }
+            set {
+                this["ViewerZSpacing"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("C:\\Program Files\\Mojo\\dist\\viewer_3d.exe -d $DIRECTORY --xyz=$LOCATION --max_x=$M" +
+            "AX_X --max_y=$MAX_Y --z_spacing=$Z_SPACING")]
         public string ExternalViewerPath {
             get {
                 return ((string)(this["ExternalViewerPath"]));
@@ -85,13 +110,23 @@ namespace Mojo.Wpf {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("2")]
-        public int FastZScrollWOffset {
+        public global::System.Collections.Specialized.StringCollection RecentDatasetPaths {
             get {
-                return ((int)(this["FastZScrollWOffset"]));
+                return ((global::System.Collections.Specialized.StringCollection)(this["RecentDatasetPaths"]));
             }
             set {
-                this["FastZScrollWOffset"] = value;
+                this["RecentDatasetPaths"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        public global::System.Collections.Specialized.StringCollection RecentSegmentationPaths {
+            get {
+                return ((global::System.Collections.Specialized.StringCollection)(this["RecentSegmentationPaths"]));
+            }
+            set {
+                this["RecentSegmentationPaths"] = value;
             }
         }
     }
