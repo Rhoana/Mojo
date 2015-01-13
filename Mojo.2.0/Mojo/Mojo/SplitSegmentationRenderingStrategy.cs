@@ -134,7 +134,7 @@ namespace Mojo
 
         public void Render( DeviceContext deviceContext, Viewport viewport, RenderTargetView renderTargetView, DepthStencilView depthStencilView )
         {
-            if ( !mTileManager.SegmentationChangeInProgress )
+            if ( mTileManager.NavigationControlsEnabled && !mTileManager.SegmentationChangeInProgress )
             {
                 deviceContext.ClearRenderTargetView( renderTargetView, Constants.CLEAR_COLOR );
                 deviceContext.ClearDepthStencilView( depthStencilView, DepthStencilClearFlags.Depth | DepthStencilClearFlags.Stencil, 1.0f, 0x00 );

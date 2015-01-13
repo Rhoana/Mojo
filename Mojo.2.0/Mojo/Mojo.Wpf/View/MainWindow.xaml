@@ -354,14 +354,16 @@
                                 <Label Grid.Column="0" Grid.Row="1" Focusable="False" MinHeight="20" Content="Selection"></Label>
                                 <Label Grid.Column="0" Grid.Row="2" Focusable="False" MinHeight="20" Content="Lock"></Label>
 
-                                <TextBox Grid.Column="1" Grid.Row="0" Margin="3" Text="{Binding Path=TileManagerDataContext.CurrentXYZLocationString}" Width="100" HorizontalAlignment="Left" IsEnabled="{Binding Path=Engine.TileManager.NavigationControlsEnabled}" >
+                                <TextBox Grid.Column="1" Grid.Row="0" Margin="3" Text="{Binding Path=TileManagerDataContext.CurrentXYZLocationString}" Width="100" HorizontalAlignment="Left" IsEnabled="{Binding Path=Engine.TileManager.NavigationControlsEnabled}"
+                                         PreviewMouseLeftButtonDown="TextBox_SelectAllIfNotFocused" GotKeyboardFocus="TextBox_KeySelectAll" >
                                     <TextBox.InputBindings>
                                         <KeyBinding Gesture="Enter" Command="{Binding Path=UpdateLocationFromTextCommand}"
                                                     CommandParameter="{Binding RelativeSource={RelativeSource FindAncestor,AncestorType={x:Type TextBox}},Path=Text}" />
                                     </TextBox.InputBindings>
                                 </TextBox>
 
-                                <Label Grid.Column="1" Grid.Row="1" Content="{Binding Path=TileManagerDataContext.SelectedSegmentName}" HorizontalAlignment="Left" />
+                                <TextBox Grid.Column="1" Grid.Row="1" Text="{Binding Path=TileManagerDataContext.SelectedSegmentName}" HorizontalAlignment="Left" VerticalAlignment="Center" Background="Transparent" BorderThickness="0" IsReadOnly="True"
+                                         PreviewMouseLeftButtonDown="TextBox_SelectAllIfNotFocused" GotKeyboardFocus="TextBox_KeySelectAll" />
 
                                 <StackPanel Grid.Column="1" Grid.Row="2" Orientation="Horizontal">
 
@@ -391,8 +393,10 @@
 
                                         <Label Grid.Column="0" Grid.Row="0" Focusable="False" MinHeight="20" Content="Size"></Label>
                                         <Label Grid.Column="0" Grid.Row="1" Focusable="False" MinHeight="20" Content="Id"></Label>
-                                        <Label Grid.Column="1" Grid.Row="0" Content="{Binding Path=TileManagerDataContext.SelectedSegmentSize}" HorizontalAlignment="Left" />
-                                        <Label Grid.Column="1" Grid.Row="1" Content="{Binding Path=Engine.TileManager.SelectedSegmentId}" HorizontalAlignment="Left" />
+                                        <TextBox Grid.Column="1" Grid.Row="0" Text="{Binding Path=TileManagerDataContext.SelectedSegmentSize}" HorizontalAlignment="Left" VerticalAlignment="Center" Background="Transparent" BorderThickness="0" IsReadOnly="True"
+                                                 PreviewMouseLeftButtonDown="TextBox_SelectAllIfNotFocused" GotKeyboardFocus="TextBox_KeySelectAll" />
+                                        <TextBox Grid.Column="1" Grid.Row="1" Text="{Binding Path=Engine.TileManager.SelectedSegmentId}" HorizontalAlignment="Left" VerticalAlignment="Center" Background="Transparent" BorderThickness="0" IsReadOnly="True"
+                                                 PreviewMouseLeftButtonDown="TextBox_SelectAllIfNotFocused" GotKeyboardFocus="TextBox_KeySelectAll" />
 
                                     </Grid>
 

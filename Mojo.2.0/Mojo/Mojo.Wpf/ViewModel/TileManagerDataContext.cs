@@ -375,10 +375,10 @@ namespace Mojo.Wpf.ViewModel
         {
             if ( mTileManager.TiledDatasetLoaded )
             {
-                CurrentXYZLocationString =
+                CurrentXYZLocationString = "(" +
                     Math.Round( mTileManager.TiledDatasetView.CenterDataSpace.X * Constants.ConstParameters.GetInt( "TILE_PIXELS_X" ) ) + "," +
                     Math.Round( mTileManager.TiledDatasetView.CenterDataSpace.Y * Constants.ConstParameters.GetInt( "TILE_PIXELS_Y" ) ) + "," +
-                    ( mTileManager.TiledDatasetView.CenterDataSpace.Z * Constants.ConstParameters.GetInt( "TILE_PIXELS_Z" ) );
+                    ( mTileManager.TiledDatasetView.CenterDataSpace.Z * Constants.ConstParameters.GetInt( "TILE_PIXELS_Z" ) ) + ")";
             }
             else
             {

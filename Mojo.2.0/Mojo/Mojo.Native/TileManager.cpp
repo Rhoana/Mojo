@@ -984,6 +984,8 @@ void TileManager::UnloadTiledDatasetInternal()
             mTileCache[ i ].d3d11CudaTextures.GetHashMap().clear();
         }
 
+		mTileCache.clear();
+
         //
         // output memory stats to the console
         //

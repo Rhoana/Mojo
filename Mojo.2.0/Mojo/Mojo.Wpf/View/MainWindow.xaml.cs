@@ -192,6 +192,24 @@ namespace Mojo.Wpf.View
             }
         }
 
+        private void TextBox_KeySelectAll( object sender, KeyboardFocusChangedEventArgs e )
+        {
+            ( (TextBox)sender ).SelectAll();
+        }
+
+        private void TextBox_SelectAllIfNotFocused( object sender, MouseButtonEventArgs e )
+        {
+            if ( !((TextBox)sender).IsKeyboardFocusWithin )
+            {
+                ( (TextBox)sender ).Focus();
+                e.Handled = true;
+            }
+            else if ( e.ClickCount == 3 )
+            {
+                ( (TextBox)sender ).SelectAll();
+            }
+        }
+
     }
 
 

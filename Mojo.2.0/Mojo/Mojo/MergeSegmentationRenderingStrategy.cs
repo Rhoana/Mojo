@@ -134,36 +134,38 @@ namespace Mojo
 
         public void Render( DeviceContext deviceContext, Viewport viewport, RenderTargetView renderTargetView, DepthStencilView depthStencilView )
         {
+            if ( mTileManager.NavigationControlsEnabled )
+            {
+                deviceContext.ClearRenderTargetView( renderTargetView, Constants.CLEAR_COLOR );
+                deviceContext.ClearDepthStencilView( depthStencilView, DepthStencilClearFlags.Depth | DepthStencilClearFlags.Stencil, 1.0f, 0x00 );
 
-            deviceContext.ClearRenderTargetView( renderTargetView, Constants.CLEAR_COLOR );
-            deviceContext.ClearDepthStencilView( depthStencilView, DepthStencilClearFlags.Depth | DepthStencilClearFlags.Stencil, 1.0f, 0x00 );
+                var centerDataSpace = mTileManager.TiledDatasetView.CenterDataSpace;
+                var extentDataSpace = mTileManager.TiledDatasetView.ExtentDataSpace;
 
-            var centerDataSpace = mTileManager.TiledDatasetView.CenterDataSpace;
-            var extentDataSpace = mTileManager.TiledDatasetView.ExtentDataSpace;
+                var camera = new Camera(
+                    new Vector3( 0, 0, 0 ),
+                    new Vector3( 0, 0, 1 ),
+                    new Vector3( 0, 1, 0 ),
+                    Matrix.OrthoOffCenterLH(
+                        centerDataSpace.X - ( extentDataSpace.X / 2f ),
+                        centerDataSpace.X + ( extentDataSpace.X / 2f ),
+                        centerDataSpace.Y + ( extentDataSpace.Y / 2f ),
+                        centerDataSpace.Y - ( extentDataSpace.Y / 2f ),
+                        0.1f,
+                        100f ) );
 
-            var camera = new Camera(
-                new Vector3( 0, 0, 0 ),
-                new Vector3( 0, 0, 1 ),
-                new Vector3( 0, 1, 0 ),
-                Matrix.OrthoOffCenterLH(
-                    centerDataSpace.X - ( extentDataSpace.X / 2f ),
-                    centerDataSpace.X + ( extentDataSpace.X / 2f ),
-                    centerDataSpace.Y + ( extentDataSpace.Y / 2f ),
-                    centerDataSpace.Y - ( extentDataSpace.Y / 2f ),
-                    0.1f,
-                    100f ) );
+                var datasetExtentDataSpaceX = mTileManager.TiledDatasetDescription.TiledVolumeDescriptions.Get( "SourceMap" ).NumTilesX * Constants.ConstParameters.GetInt( "TILE_SIZE_X" );
+                var datasetExtentDataSpaceY = mTileManager.TiledDatasetDescription.TiledVolumeDescriptions.Get( "SourceMap" ).NumTilesY * Constants.ConstParameters.GetInt( "TILE_SIZE_Y" );
 
-            var datasetExtentDataSpaceX = mTileManager.TiledDatasetDescription.TiledVolumeDescriptions.Get( "SourceMap" ).NumTilesX * Constants.ConstParameters.GetInt( "TILE_SIZE_X" );
-            var datasetExtentDataSpaceY = mTileManager.TiledDatasetDescription.TiledVolumeDescriptions.Get( "SourceMap" ).NumTilesY * Constants.ConstParameters.GetInt( "TILE_SIZE_Y" );
+                mTileManager.GetTileCache().ToList().ForEach( tileCacheEntry => RenderTileCacheEntry( deviceContext, camera, datasetExtentDataSpaceX, datasetExtentDataSpaceY, tileCacheEntry ) );
 
-            mTileManager.GetTileCache().ToList().ForEach( tileCacheEntry => RenderTileCacheEntry( deviceContext, camera, datasetExtentDataSpaceX, datasetExtentDataSpaceY, tileCacheEntry ) );
+                //mTinyTextContext.Print( viewport, "Frame Time: " + FrameTimeString, 10, 10 );
+                //mTinyTextContext.Print( viewport, "Number of Active Cache Entries: " + mTileManager.GetTileCache().Count, 10, 30 );
+                //mTinyTextContext.Render();
 
-            //mTinyTextContext.Print( viewport, "Frame Time: " + FrameTimeString, 10, 10 );
-            //mTinyTextContext.Print( viewport, "Number of Active Cache Entries: " + mTileManager.GetTileCache().Count, 10, 30 );
-            //mTinyTextContext.Render();
-
-            mStopwatch.Reset();
-            mStopwatch.Start();
+                mStopwatch.Reset();
+                mStopwatch.Start();
+            }
         }
 
         private void RenderTileCacheEntry( DeviceContext deviceContext, Camera camera, int datasetExtentDataSpaceX, int datasetExtentDataSpaceY, TileCacheEntry tileCacheEntry )

@@ -1127,6 +1127,7 @@ namespace Mojo
 
                 if ( !Directory.Exists( sourceMapRootDirectory ) )
                 {
+                    SegmentationChangeInProgress = false;
                     throw new Exception( "Image subdirectory not found." );
                 }
 
@@ -1145,6 +1146,18 @@ namespace Mojo
                 }
 
                 var idMapTiledVolumeDescription = GetTiledVolumeDescription( idMapRootDirectory, idMapTiledVolumeDescriptionPath );
+
+                //
+                // Check that the number of tiles in each dimension is the same for images and ids
+                //
+                if ( sourceMapTiledVolumeDescription.NumTilesW != idMapTiledVolumeDescription.NumTilesW ||
+                     sourceMapTiledVolumeDescription.NumTilesX != idMapTiledVolumeDescription.NumTilesX ||
+                     sourceMapTiledVolumeDescription.NumTilesY != idMapTiledVolumeDescription.NumTilesY ||
+                     sourceMapTiledVolumeDescription.NumTilesZ != idMapTiledVolumeDescription.NumTilesZ )
+                {
+                    SegmentationChangeInProgress = false;
+                    throw new Exception( "Image and Segmentation volume dimensions do not match." );
+                }
 
                 var tiledDatasetDescription = new TiledDatasetDescription
                                               {
@@ -1193,6 +1206,7 @@ namespace Mojo
 
                 if ( !Directory.Exists( segmentationRootDirectory ) )
                 {
+                    SegmentationChangeInProgress = false;
                     throw new Exception( "Dataset directory not found." );
                 }
 
@@ -1200,15 +1214,30 @@ namespace Mojo
 
                 if ( !Directory.Exists( idMapRootDirectory ) )
                 {
+                    SegmentationChangeInProgress = false;
                     throw new Exception( "Id subdirectory not found." );
+                }
+
+                var currentIdMapTiledVolumeDescription = TiledDatasetDescription.TiledVolumeDescriptions.Get( "IdMap" );
+                var idMapTiledVolumeDescriptionPath = Path.Combine( segmentationRootDirectory, Constants.ID_MAP_TILED_VOLUME_DESCRIPTION_NAME );
+                var idMapTiledVolumeDescription = GetTiledVolumeDescription( idMapRootDirectory, idMapTiledVolumeDescriptionPath );
+
+                //
+                // Check that the number of tiles in each dimension is the same as the currently loaded (and memory allocated) dataset
+                //
+                if ( currentIdMapTiledVolumeDescription.NumTilesW != idMapTiledVolumeDescription.NumTilesW ||
+                     currentIdMapTiledVolumeDescription.NumTilesX != idMapTiledVolumeDescription.NumTilesX ||
+                     currentIdMapTiledVolumeDescription.NumTilesY != idMapTiledVolumeDescription.NumTilesY ||
+                     currentIdMapTiledVolumeDescription.NumTilesZ != idMapTiledVolumeDescription.NumTilesZ ||
+                     currentIdMapTiledVolumeDescription.NumBytesPerVoxel != idMapTiledVolumeDescription.NumBytesPerVoxel )
+                {
+                    SegmentationChangeInProgress = false;
+                    throw new Exception( "Segmentation volume dimensions do not match current Image volume dimensions." );
                 }
 
                 var tempIdMapRootDirectory = Path.Combine( segmentationRootDirectory, Constants.TEMP_ID_MAP_ROOT_DIRECTORY_NAME );
                 var autosaveIdMapRootDirectory = Path.Combine( segmentationRootDirectory, Constants.AUTOSAVE_ID_MAP_ROOT_DIRECTORY_NAME );
 
-                var idMapTiledVolumeDescriptionPath = Path.Combine( segmentationRootDirectory, Constants.ID_MAP_TILED_VOLUME_DESCRIPTION_NAME );
-
-                var idMapTiledVolumeDescription = GetTiledVolumeDescription( idMapRootDirectory, idMapTiledVolumeDescriptionPath );
                 var tempIdMapTiledVolumeDescription = GetTiledVolumeDescription( tempIdMapRootDirectory, idMapTiledVolumeDescriptionPath );
                 var autosaveIdMapTiledVolumeDescription = GetTiledVolumeDescription( autosaveIdMapRootDirectory, idMapTiledVolumeDescriptionPath );
 
@@ -1330,6 +1359,9 @@ namespace Mojo
             {
                 Internal.UnloadSegmentation();
             }
+
+            SelectedSegmentId = 0;
+            MouseOverSegmentId = 0;
 
             SegmentationControlsEnabled = false;
             ChangesMade = false;

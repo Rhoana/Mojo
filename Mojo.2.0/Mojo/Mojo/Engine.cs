@@ -316,7 +316,7 @@ namespace Mojo
             if ( parameterString != null )
             {
                 Console.WriteLine( parameterString );
-                string[] coordinateStrings = parameterString.Split( ',' );
+                string[] coordinateStrings = parameterString.Replace("(", "").Replace(")", "").Split( ',' );
                 if ( coordinateStrings.Length >= 3 )
                 {
                     try
@@ -347,32 +347,38 @@ namespace Mojo
 
             var tiledVolumeDescription = TileManager.TiledDatasetDescription.TiledVolumeDescriptions.Get( "SourceMap" );
 
+            var xMax = (float)( tiledVolumeDescription.NumVoxelsX - 1 ) / (float)tiledVolumeDescription.NumVoxelsPerTileX;
+
             if ( centerDataSpace.X < 0 )
             {
                 centerDataSpace.X = 0;
 
             }
-            else if ( centerDataSpace.X > (float)tiledVolumeDescription.NumVoxelsX / (float)tiledVolumeDescription.NumVoxelsPerTileX )
+            else if ( centerDataSpace.X > xMax )
             {
-                centerDataSpace.X = (float)tiledVolumeDescription.NumVoxelsX / (float)tiledVolumeDescription.NumVoxelsPerTileX;
+                centerDataSpace.X = xMax;
             }
+            
+            var yMax = (float)( tiledVolumeDescription.NumVoxelsY - 1 ) / (float)tiledVolumeDescription.NumVoxelsPerTileY;
 
             if ( centerDataSpace.Y < 0 )
             {
                 centerDataSpace.Y = 0;
             }
-            else if ( centerDataSpace.Y > (float)tiledVolumeDescription.NumVoxelsY / (float)tiledVolumeDescription.NumVoxelsPerTileY )
+            else if ( centerDataSpace.Y > yMax )
             {
-                centerDataSpace.Y = (float)tiledVolumeDescription.NumVoxelsY / (float)tiledVolumeDescription.NumVoxelsPerTileY;
+                centerDataSpace.Y = yMax;
             }
+
+            var zMax = (float)( tiledVolumeDescription.NumVoxelsZ - 1 ) / (float)tiledVolumeDescription.NumVoxelsPerTileZ;
 
             if ( centerDataSpace.Z < 0 )
             {
                 centerDataSpace.Z = 0;
             }
-            else if ( centerDataSpace.Z > (float)tiledVolumeDescription.NumVoxelsZ / (float)tiledVolumeDescription.NumVoxelsPerTileZ )
+            else if ( centerDataSpace.Z > zMax )
             {
-                centerDataSpace.Z = (float)tiledVolumeDescription.NumVoxelsZ / (float)tiledVolumeDescription.NumVoxelsPerTileZ;
+                centerDataSpace.Z = zMax;
             }
 
             TileManager.TiledDatasetView.CenterDataSpace = centerDataSpace;

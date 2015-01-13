@@ -51,8 +51,12 @@
         <File Id="ObservableDictionaryDLL" Name="ObservableDictionary.dll" Source="..\Mojo\Mojo.Wpf\bin\x64\Release\ObservableDictionary.dll" />
       </Component>
 
-      <Component Id="OokiDialogs" Guid="FC73C862-0230-4640-9D1E-6DF1CB6A21D1">
-        <File Id="OokiDialogs" Name="Ookii.Dialogs.Wpf.dll" Source="..\Mojo\Mojo.Wpf\bin\x64\Release\Ookii.Dialogs.Wpf.dll" />
+      <Component Id="OokiDialogsWpf" Guid="FC73C862-0230-4640-9D1E-6DF1CB6A21D1">
+        <File Id="OokiDialogsWpf" Name="Ookii.Dialogs.Wpf.dll" Source="..\Mojo\Mojo.Wpf\bin\x64\Release\Ookii.Dialogs.Wpf.dll" />
+      </Component>
+
+      <Component Id="OokiDialogs" Guid="5F4D4739-E9C5-4354-845E-783033C07CBA">
+        <File Id="OokiDialogs" Name="Ookii.Dialogs.dll" Source="..\Mojo\Mojo.Wpf\bin\x64\Release\Ookii.Dialogs.dll" />
       </Component>
 
       <Component Id="SlimDX" Guid="B71E18D9-7539-49F8-8E7F-7838E5D34E7E">
@@ -620,6 +624,7 @@
       <ComponentRef Id="MojoDLL" />
       <ComponentRef Id="MojoInteropDLL" />
       <ComponentRef Id="ObservableDictionaryDLL" />
+      <ComponentRef Id="OokiDialogsWpf" />
       <ComponentRef Id="OokiDialogs" />
       <ComponentRef Id="SlimDX" />
       <ComponentRef Id="OpenCvCoreDLL" />

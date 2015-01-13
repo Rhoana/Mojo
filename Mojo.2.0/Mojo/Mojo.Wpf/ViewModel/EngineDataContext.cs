@@ -459,14 +459,16 @@ namespace Mojo.Wpf.ViewModel
                 {
                     datasetPath = folderBrowserDialog.SelectedPath;
                 }
+                else
+                {
+                    //
+                    // Cancel button clicked or dialog closed
+                    //
+                    return;
+                }
             }
 
             Settings.Default.LoadDatasetPath = datasetPath;
-
-            //
-            // Maintain recent file list
-            //
-            RememberDatasetPath( datasetPath );
 
             try
             {
@@ -485,8 +487,8 @@ namespace Mojo.Wpf.ViewModel
                     //
                     // Set the initial view
                     //
-                    var viewportDataSpaceX = Engine.Viewers.Internal[ViewerMode.TileManager2D].D3D11RenderingPane.Viewport.Width / Engine.TileManager.TiledDatasetDescription.TiledVolumeDescriptions.Get( "SourceMap" ).NumVoxelsPerTileX;
-                    var viewportDataSpaceY = Engine.Viewers.Internal[ViewerMode.TileManager2D].D3D11RenderingPane.Viewport.Height / Engine.TileManager.TiledDatasetDescription.TiledVolumeDescriptions.Get( "SourceMap" ).NumVoxelsPerTileY;
+                    var viewportDataSpaceX = Engine.Viewers.Internal[ ViewerMode.TileManager2D ].D3D11RenderingPane.Viewport.Width / Engine.TileManager.TiledDatasetDescription.TiledVolumeDescriptions.Get( "SourceMap" ).NumVoxelsPerTileX;
+                    var viewportDataSpaceY = Engine.Viewers.Internal[ ViewerMode.TileManager2D ].D3D11RenderingPane.Viewport.Height / Engine.TileManager.TiledDatasetDescription.TiledVolumeDescriptions.Get( "SourceMap" ).NumVoxelsPerTileY;
                     var maxExtentDataSpaceX = Engine.TileManager.TiledDatasetDescription.TiledVolumeDescriptions.Get( "SourceMap" ).NumTilesX * Constants.ConstParameters.GetInt( "TILE_SIZE_X" );
                     var maxExtentDataSpaceY = Engine.TileManager.TiledDatasetDescription.TiledVolumeDescriptions.Get( "SourceMap" ).NumTilesY * Constants.ConstParameters.GetInt( "TILE_SIZE_Y" );
 
@@ -499,24 +501,36 @@ namespace Mojo.Wpf.ViewModel
 
                     Engine.TileManager.UpdateXYZ();
 
+                    TileManagerDataContext.Progress = 90;
+
+                    //
+                    // Reset the segment info list
+                    //
+                    TileManagerDataContext.SortSegmentListBy( "Size", true );
+
+                    //
+                    // Maintain recent file list
+                    //
+                    RememberDatasetPath( datasetPath );
+
                 }
-
-                TileManagerDataContext.Progress = 90;
-
-                //
-                // Reset the segment info list
-                //
-                TileManagerDataContext.SortSegmentListBy( "Size", true );
-
-                TileManagerDataContext.Progress = 100;
+                else
+                {
+                    Engine.CurrentToolMode = ToolMode.Null;
+                    Engine.TileManager.UnloadTiledDataset();
+                }
 
             }
             catch ( Exception e )
             {
+                Engine.CurrentToolMode = ToolMode.Null;
+                Engine.TileManager.UnloadTiledDataset();
                 String errorMessage = "Error loading images from:\n" + datasetPath + "\n\n" + e.Message + "\n\nPlease check the path and try again.";
                 MessageBox.Show( errorMessage, "Load Error", MessageBoxButton.OK, MessageBoxImage.Error );
                 Console.WriteLine( errorMessage );
             }
+
+            TileManagerDataContext.Progress = 100;
 
         }
 
@@ -560,14 +574,16 @@ namespace Mojo.Wpf.ViewModel
                 {
                     segmentationPath = folderBrowserDialog.SelectedPath;
                 }
+                else
+                {
+                    //
+                    // Cancel button clicked or dialog closed
+                    //
+                    return;
+                }
             }
 
             Settings.Default.LoadSegmentationPath = segmentationPath;
-
-            //
-            // Maintain recent file list
-            //
-            RememberSegmentationPath( segmentationPath );
 
             try
             {
@@ -594,17 +610,29 @@ namespace Mojo.Wpf.ViewModel
                     //
                     TileManagerDataContext.SortSegmentListBy( "Size", true );
 
+                    //
+                    // Maintain recent file list
+                    //
+                    RememberSegmentationPath( segmentationPath );
+
                 }
-
-                TileManagerDataContext.Progress = 100;
-
+                else
+                {
+                    Engine.TileManager.UnloadSegmentation();
+                    TileManagerDataContext.UpdateSegmentInfoList();
+                }
             }
             catch ( Exception e )
             {
+                Engine.TileManager.UnloadSegmentation();
+                TileManagerDataContext.UpdateSegmentInfoList();
                 String errorMessage = "Error loading segmentation from:\n" + segmentationPath + "\n\n" + e.Message + "\n\nPlease check the path and try again.";
                 MessageBox.Show( errorMessage, "Load Error", MessageBoxButton.OK, MessageBoxImage.Error );
                 Console.WriteLine( errorMessage );
             }
+
+            TileManagerDataContext.Progress = 100;
+
         }
 
         private void SaveSegmentation()
