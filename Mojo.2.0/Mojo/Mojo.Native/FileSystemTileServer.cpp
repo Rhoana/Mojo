@@ -28,6 +28,7 @@ FileSystemTileServer::FileSystemTileServer( Core::PrimitiveMap constParameters )
 	mIsSegmentationLoaded      ( false )
 {
     mSplitStepDist = 0;
+    mSplitStepDistBlur = 0;
     mSplitResultDist = 0;
     mSplitPrev = 0;
     mSplitSearchMask = 0;
@@ -45,6 +46,9 @@ FileSystemTileServer::~FileSystemTileServer()
 {
     if ( mSplitStepDist != 0 )
         delete[] mSplitStepDist;
+
+    if ( mSplitStepDistBlur != 0 )
+        delete[] mSplitStepDistBlur;
 
     if ( mSplitResultDist != 0 )
         delete[] mSplitResultDist;
@@ -468,9 +472,9 @@ MojoInt4 FileSystemTileServer::GetSegmentZTileBounds( unsigned int segId, int zI
 // Edit Methods
 //
 
-void FileSystemTileServer::RemapSegmentLabels( std::set< unsigned int > fromSegIds, unsigned int toSegId )
+void FileSystemTileServer::RemapSegmentLabels( std::set< unsigned int > fromSegIds, unsigned int toSegId, bool ignoreLocks )
 {
-	if ( mIsSegmentationLoaded && toSegId != 0 && mSegmentInfoManager.GetConfidence( toSegId ) < 100 )
+	if ( mIsSegmentationLoaded && toSegId != 0 && ( ignoreLocks || mSegmentInfoManager.GetConfidence( toSegId ) < 100 ) )
 	{
 		Core::Printf( "\nRemapping ", (int)fromSegIds.size(), " segmentation labels to segmentation label ", toSegId, "...\n" );
 		FileSystemTileSet tilesContainingNewId = mSegmentInfoManager.GetTiles( toSegId );
@@ -486,7 +490,7 @@ void FileSystemTileServer::RemapSegmentLabels( std::set< unsigned int > fromSegI
 		{
 			unsigned int fromSegId = *fromIt;
 
-			if ( fromSegId != 0 && fromSegId != toSegId && mSegmentInfoManager.GetConfidence( fromSegId ) < 100 )
+			if ( fromSegId != 0 && fromSegId != toSegId && ( ignoreLocks || mSegmentInfoManager.GetConfidence( fromSegId ) < 100 ) )
 			{
 				//Core::Printf( "\nRemapping segmentation label ", fromSegId, " to segmentation label ", toSegId, "...\n" );
 
@@ -541,9 +545,9 @@ void FileSystemTileServer::RemapSegmentLabels( std::set< unsigned int > fromSegI
 	}
 }
 
-void FileSystemTileServer::ReplaceSegmentationLabel( unsigned int oldId, unsigned int newId )
+void FileSystemTileServer::ReplaceSegmentationLabel( unsigned int oldId, unsigned int newId, bool ignoreLocks )
 {
-	if ( oldId != newId && mIsSegmentationLoaded && mSegmentInfoManager.GetConfidence( newId ) < 100 && mSegmentInfoManager.GetConfidence( oldId ) < 100 )
+	if ( oldId != newId && mIsSegmentationLoaded && ( ignoreLocks || ( mSegmentInfoManager.GetConfidence( newId ) < 100 && mSegmentInfoManager.GetConfidence( oldId ) < 100 ) ) )
     {
         long voxelChangeCount = 0;
 
@@ -681,9 +685,9 @@ bool FileSystemTileServer::TileContainsId ( MojoInt3 numVoxelsPerTile, MojoInt3 
     return found;
 }
 
-void FileSystemTileServer::ReplaceSegmentationLabelCurrentSlice( unsigned int oldId, unsigned int newId, MojoFloat3 pointTileSpace )
+void FileSystemTileServer::ReplaceSegmentationLabelCurrentSlice( unsigned int oldId, unsigned int newId, MojoFloat3 pointTileSpace, bool ignoreLocks )
 {
-    if ( oldId != newId && mIsSegmentationLoaded && mSegmentInfoManager.GetConfidence( newId ) < 100 && mSegmentInfoManager.GetConfidence( oldId ) < 100 )
+    if ( oldId != newId && mIsSegmentationLoaded && ( ignoreLocks || ( mSegmentInfoManager.GetConfidence( newId ) < 100 && mSegmentInfoManager.GetConfidence( oldId ) < 100 ) ) )
     {
         long voxelChangeCount = 0;
 
@@ -982,9 +986,9 @@ void FileSystemTileServer::ReplaceSegmentationLabelCurrentSlice( unsigned int ol
     }
 }
 
-void FileSystemTileServer::ReplaceSegmentationLabelCurrentConnectedComponent( unsigned int oldId, unsigned int newId, MojoFloat3 pointTileSpace )
+void FileSystemTileServer::ReplaceSegmentationLabelCurrentConnectedComponent( unsigned int oldId, unsigned int newId, MojoFloat3 pointTileSpace, bool ignoreLocks )
 {
-    if ( oldId != newId && mIsSegmentationLoaded && mSegmentInfoManager.GetConfidence( newId ) < 100 && mSegmentInfoManager.GetConfidence( oldId ) < 100 )
+    if ( oldId != newId && mIsSegmentationLoaded && ( ignoreLocks || ( mSegmentInfoManager.GetConfidence( newId ) < 100 && mSegmentInfoManager.GetConfidence( oldId ) < 100 ) ) )
     {
         long voxelChangeCount = 0;
 
@@ -1697,7 +1701,7 @@ void FileSystemTileServer::ResetDrawMergeState()
 
 }
 
-void FileSystemTileServer::LoadSplitDistances( unsigned int segId )
+void FileSystemTileServer::LoadSplitDistances( unsigned int segId, bool applyBlur )
 {
     //
     // Load distances
@@ -1784,6 +1788,79 @@ void FileSystemTileServer::LoadSplitDistances( unsigned int segId )
         }
     }
 
+
+	if ( applyBlur )
+	{
+		//
+		// Fast blur using box filter (3x3 kernel, mirror at edges)
+		//
+		Core::Printf("Bluring...");
+		for (int x = 0; x < mSplitWindowWidth; ++x)
+		{
+			//
+			// Mirror input for the first entry
+			//
+			int sum = mSplitStepDist[ x ] + mSplitStepDist[ x ] + mSplitStepDist[ x + mSplitWindowWidth ];
+			mSplitStepDistBlur[ x ] = (int)floor( ( (float) sum ) / 3.0 + 0.5 );
+
+			sum = sum - mSplitStepDist[ x ] + mSplitStepDist[ x + mSplitWindowWidth + mSplitWindowWidth ];
+			mSplitStepDistBlur[ x + mSplitWindowWidth ] = (int)floor( ( (float) sum ) / 3.0 + 0.5 );
+
+			int lo_y = mSplitWindowWidth;
+			int to_y = lo_y + mSplitWindowWidth + mSplitWindowWidth;
+			int hi_y = to_y + mSplitWindowWidth;
+
+			for (int y = 2; y < mSplitWindowHeight-1; ++y)
+			{
+				sum = sum - mSplitStepDist[ x + lo_y ] + mSplitStepDist[ x + hi_y ];
+				mSplitStepDistBlur[x + to_y] = (int)floor( ( (float) sum ) / 3.0 + 0.5 );
+				lo_y += mSplitWindowWidth;
+				to_y += mSplitWindowWidth;
+				hi_y += mSplitWindowWidth;
+			}
+
+			//
+			// Mirror input for the last entry
+			//
+			sum = sum - mSplitStepDist[ x + lo_y ] + mSplitStepDist[ x + to_y ];
+			mSplitStepDistBlur[ x + to_y ] = (int)floor( ( (float) sum ) / 3.0 + 0.5 );
+		}
+
+		int yi = 0;
+		for (int y = 0; y < mSplitWindowHeight; ++y)
+		{
+			//
+			// Mirror input for the first entry
+			//
+			int sum = mSplitStepDistBlur[ yi ] + mSplitStepDistBlur[ yi ] + mSplitStepDistBlur[ yi + 1 ];
+			mSplitStepDist[ yi ] = (int)floor( ( (float) sum ) / 3.0 + 0.5 );
+
+			sum = sum - mSplitStepDistBlur[ yi ] + mSplitStepDistBlur[ yi + 2 ];
+			mSplitStepDist[ yi ] = (int)floor( ( (float) sum ) / 3.0 + 0.5 );
+
+			int lo_x = 0;
+			int to_x = 1;
+			int hi_x = 2;
+
+			for (int x = 2; x < mSplitWindowWidth-1; ++x)
+			{
+				sum = sum - mSplitStepDistBlur[ yi + lo_x ] + mSplitStepDistBlur[ yi + hi_x ];
+				mSplitStepDist[yi + to_x] = (int)floor( ( (float) sum ) / 3.0 + 0.5 );
+				lo_x += 1;
+				to_x += 1;
+				hi_x += 1;
+			}
+
+			//
+			// Mirror input for the last entry
+			//
+			sum = sum - mSplitStepDistBlur[ yi + lo_x ] + mSplitStepDistBlur[ yi + to_x ];
+			mSplitStepDist[ yi + to_x ] = (int)floor( ( (float) sum ) / 3.0 + 0.5 );
+			yi += mSplitWindowWidth;
+		}
+		Core::Printf("Bluring done.");
+	}
+
     mCentroid.x /= (float) mSplitLabelCount;
     mCentroid.y /= (float) mSplitLabelCount;
     Core::Printf( "Segment centroid at ", mCentroid.x, "x", mCentroid.y, "." );
@@ -1793,7 +1870,7 @@ void FileSystemTileServer::LoadSplitDistances( unsigned int segId )
 
 }
 
-void FileSystemTileServer::PrepForSplit( unsigned int segId, MojoFloat3 pointTileSpace )
+void FileSystemTileServer::PrepForSplit( unsigned int segId, MojoFloat3 pointTileSpace, bool applyBlur )
 {
     //
     // Find the size of this segment and load the bounding box of tiles
@@ -1895,6 +1972,9 @@ void FileSystemTileServer::PrepForSplit( unsigned int segId, MojoFloat3 pointTil
                 if ( mSplitStepDist == 0 )
 		            mSplitStepDist = new int[ maxBufferSize ];
                     
+                if ( mSplitStepDistBlur == 0 )
+		            mSplitStepDistBlur = new int[ maxBufferSize ];
+                    
                 if ( mSplitResultDist == 0 )
                     mSplitResultDist = new int[ maxBufferSize ];
 
@@ -1914,7 +1994,7 @@ void FileSystemTileServer::PrepForSplit( unsigned int segId, MojoFloat3 pointTil
 		            mSplitResultArea = new unsigned int[ maxBufferSize ];
 
 
-                LoadSplitDistances( segId );
+                LoadSplitDistances( segId, applyBlur );
 
                 ResetSplitState();
 
@@ -2296,11 +2376,11 @@ void FileSystemTileServer::PredictSplit( unsigned int segId, MojoFloat3 pointTil
     }
 }
 
-unsigned int FileSystemTileServer::CompletePointSplit( unsigned int segId, MojoFloat3 pointTileSpace )
+unsigned int FileSystemTileServer::CompletePointSplit( unsigned int segId, MojoFloat3 pointTileSpace, bool applyBlur, bool ignoreLocks )
 {
 	unsigned int newId = 0;
 
-	if ( mIsSegmentationLoaded && mSplitSourcePoints.size() > 0 && mSegmentInfoManager.GetConfidence( segId ) < 100 )
+	if ( mIsSegmentationLoaded && mSplitSourcePoints.size() > 0 && ( ignoreLocks || mSegmentInfoManager.GetConfidence( segId ) < 100 ) )
     {
         long voxelChangeCount = 0;
 
@@ -2866,18 +2946,18 @@ unsigned int FileSystemTileServer::CompletePointSplit( unsigned int segId, MojoF
 	//
 	// Prep for more splitting
 	//
-	LoadSplitDistances( segId );
+	LoadSplitDistances( segId, applyBlur );
     ResetSplitState();
 
 	return newId;
 
 }
 
-unsigned int FileSystemTileServer::CompleteDrawSplit( unsigned int segId, MojoFloat3 pointTileSpace, bool join3D, int splitStartZ )
+unsigned int FileSystemTileServer::CompleteDrawSplit( unsigned int segId, MojoFloat3 pointTileSpace, bool applyBlur, bool join3D, int splitStartZ, bool ignoreLocks )
 {
 	unsigned int newId = 0;
 
-	if ( mIsSegmentationLoaded && mSplitNPerimiters > 0 && mSegmentInfoManager.GetConfidence( segId ) < 100 )
+	if ( mIsSegmentationLoaded && mSplitNPerimiters > 0 && ( ignoreLocks || mSegmentInfoManager.GetConfidence( segId ) < 100 ) )
     {
         long voxelChangeCount = 0;
 
@@ -3592,7 +3672,7 @@ unsigned int FileSystemTileServer::CompleteDrawSplit( unsigned int segId, MojoFl
 					if ( thisId != segId && prevId != segId )
 					{
 						Core::Printf( "Found centroid match at distance ", dist, " previd=", prevId, " newid=", thisId, ".");
-						ReplaceSegmentationLabel( thisId, prevId );
+						ReplaceSegmentationLabel( thisId, prevId, ignoreLocks );
 
 						//
 						// Update centroid info
@@ -3658,14 +3738,14 @@ unsigned int FileSystemTileServer::CompleteDrawSplit( unsigned int segId, MojoFl
 	//
 	// Prep for more splitting
 	//
-	LoadSplitDistances( segId );
+	LoadSplitDistances( segId, applyBlur );
     ResetSplitState();
 
 	return newId;
 
 }
 
-void FileSystemTileServer::CommitAdjustChange( unsigned int segId, MojoFloat3 pointTileSpace )
+void FileSystemTileServer::CommitAdjustChange( unsigned int segId, MojoFloat3 pointTileSpace, bool ignoreLocks )
 {
 	if ( mIsSegmentationLoaded )
     {
@@ -3729,7 +3809,7 @@ void FileSystemTileServer::CommitAdjustChange( unsigned int segId, MojoFloat3 po
                     //RELEASE_ASSERT( areaIndex1D < mSplitWindowNPix );
 
 					unsigned int idValue = mSegmentInfoManager.GetIdForLabel( currentIdVolume[ tileIndex1D ] );
-					if ( idValue != segId && mSplitDrawArea[ areaIndex1D ] == REGION_A && mSegmentInfoManager.GetConfidence( idValue ) < 100 )
+					if ( idValue != segId && mSplitDrawArea[ areaIndex1D ] == REGION_A && ( ignoreLocks || mSegmentInfoManager.GetConfidence( idValue ) < 100 ) )
                     {
                         if ( !tileChanged )
                         {
@@ -3820,7 +3900,7 @@ void FileSystemTileServer::CommitAdjustChange( unsigned int segId, MojoFloat3 po
     }
 }
 
-std::set< unsigned int > FileSystemTileServer::GetDrawMergeIds( MojoFloat3 pointTileSpace )
+std::set< unsigned int > FileSystemTileServer::GetDrawMergeIds( MojoFloat3 pointTileSpace, bool ignoreLocks )
 {
 	std::set< unsigned int > mergeIds;
 
@@ -3871,7 +3951,7 @@ std::set< unsigned int > FileSystemTileServer::GetDrawMergeIds( MojoFloat3 point
 					if ( mSplitDrawArea[ areaIndex1D ] == REGION_A )
 					{
 						unsigned int idValue = mSegmentInfoManager.GetIdForLabel( currentIdVolume[ tileIndex1D ] );
-						if ( mSegmentInfoManager.GetConfidence( idValue ) < 100 )
+						if ( ignoreLocks || mSegmentInfoManager.GetConfidence( idValue ) < 100 )
 						{
 							mergeIds.insert( idValue );
 						}
@@ -3888,7 +3968,7 @@ std::set< unsigned int > FileSystemTileServer::GetDrawMergeIds( MojoFloat3 point
 
 }
 
-std::map< unsigned int, MojoFloat3 > FileSystemTileServer::GetDrawMergeIdsAndPoints( MojoFloat3 pointTileSpace )
+std::map< unsigned int, MojoFloat3 > FileSystemTileServer::GetDrawMergeIdsAndPoints( MojoFloat3 pointTileSpace, bool ignoreLocks )
 {
 	std::map< unsigned int, MojoFloat3 > mergeIdsAndPoints;
 
@@ -3939,7 +4019,7 @@ std::map< unsigned int, MojoFloat3 > FileSystemTileServer::GetDrawMergeIdsAndPoi
 					if ( mSplitDrawArea[ areaIndex1D ] == REGION_A )
 					{
 						unsigned int idValue = mSegmentInfoManager.GetIdForLabel( currentIdVolume[ tileIndex1D ] );
-						if ( mSegmentInfoManager.GetConfidence( idValue ) < 100 )
+						if ( ignoreLocks || mSegmentInfoManager.GetConfidence( idValue ) < 100 )
 						{
 							mergeIdsAndPoints[ idValue ] = MojoFloat3(
 								((float) tileIndex.x * numVoxelsPerTile.x + tileIndex1D % numVoxelsPerTile.x ) / ((float) numVoxelsPerTile.x ),
@@ -3959,7 +4039,7 @@ std::map< unsigned int, MojoFloat3 > FileSystemTileServer::GetDrawMergeIdsAndPoi
 
 }
 
-unsigned int FileSystemTileServer::CommitDrawMerge( std::set< unsigned int > mergeIds, MojoFloat3 pointTileSpace )
+unsigned int FileSystemTileServer::CommitDrawMerge( std::set< unsigned int > mergeIds, MojoFloat3 pointTileSpace, bool ignoreLocks )
 {
 	unsigned int largestSegId = 0;
 
@@ -3986,7 +4066,7 @@ unsigned int FileSystemTileServer::CommitDrawMerge( std::set< unsigned int > mer
 		if ( largestSegId != 0 )
 		{
 			mergeIds.erase( largestSegId );
-			RemapSegmentLabels( mergeIds, largestSegId );
+			RemapSegmentLabels( mergeIds, largestSegId, ignoreLocks );
 		}
 
 	}
@@ -3997,9 +4077,9 @@ unsigned int FileSystemTileServer::CommitDrawMerge( std::set< unsigned int > mer
 
 }
 
-unsigned int FileSystemTileServer::CommitDrawMergeCurrentSlice( MojoFloat3 pointTileSpace )
+unsigned int FileSystemTileServer::CommitDrawMergeCurrentSlice( MojoFloat3 pointTileSpace, bool ignoreLocks )
 {
-	std::map< unsigned int, MojoFloat3 > mergeIdsAndPoints = GetDrawMergeIdsAndPoints( pointTileSpace );
+	std::map< unsigned int, MojoFloat3 > mergeIdsAndPoints = GetDrawMergeIdsAndPoints( pointTileSpace, ignoreLocks );
 
 	unsigned int largestSegId = 0;
 
@@ -4032,7 +4112,7 @@ unsigned int FileSystemTileServer::CommitDrawMergeCurrentSlice( MojoFloat3 point
 			mergeIdsAndPoints.erase( largestSegId );
 			for ( std::map< unsigned int, MojoFloat3 >::iterator mergeIt = mergeIdsAndPoints.begin(); mergeIt != mergeIdsAndPoints.end(); ++mergeIt )
 			{
-				ReplaceSegmentationLabelCurrentSlice( mergeIt->first, largestSegId, mergeIt->second );
+				ReplaceSegmentationLabelCurrentSlice( mergeIt->first, largestSegId, mergeIt->second, ignoreLocks );
 			}
 		}
 
@@ -4044,9 +4124,9 @@ unsigned int FileSystemTileServer::CommitDrawMergeCurrentSlice( MojoFloat3 point
 
 }
 
-unsigned int FileSystemTileServer::CommitDrawMergeCurrentConnectedComponent( MojoFloat3 pointTileSpace )
+unsigned int FileSystemTileServer::CommitDrawMergeCurrentConnectedComponent( MojoFloat3 pointTileSpace, bool ignoreLocks )
 {
-	std::map< unsigned int, MojoFloat3 > mergeIdsAndPoints = GetDrawMergeIdsAndPoints( pointTileSpace );
+	std::map< unsigned int, MojoFloat3 > mergeIdsAndPoints = GetDrawMergeIdsAndPoints( pointTileSpace, ignoreLocks );
 
 	unsigned int largestSegId = 0;
 
@@ -4080,7 +4160,7 @@ unsigned int FileSystemTileServer::CommitDrawMergeCurrentConnectedComponent( Moj
 			mergeIdsAndPoints.erase( largestSegId );
 			for ( std::map< unsigned int, MojoFloat3 >::iterator mergeIt = mergeIdsAndPoints.begin(); mergeIt != mergeIdsAndPoints.end(); ++mergeIt )
 			{
-				ReplaceSegmentationLabelCurrentConnectedComponent( mergeIt->first, largestSegId, mergeIt->second );
+				ReplaceSegmentationLabelCurrentConnectedComponent( mergeIt->first, largestSegId, mergeIt->second, ignoreLocks );
 			}
 		}
 

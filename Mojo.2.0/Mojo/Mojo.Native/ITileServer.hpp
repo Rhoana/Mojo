@@ -45,10 +45,10 @@ public:
     virtual Core::HashMap< std::string, Core::VolumeDescription > LoadTile( MojoInt4 tileIndex )                                                                                         = 0;
     virtual void                                                  UnloadTile( MojoInt4 tileIndex )                                                                                       = 0;
 																																					                                  
-    virtual void                                                  RemapSegmentLabels( std::set< unsigned int > fromSegIds, unsigned int toSegId )                                       = 0;
-    virtual void                                                  ReplaceSegmentationLabel( unsigned int oldId, unsigned int newId )                                                     = 0;
-    virtual void                                                  ReplaceSegmentationLabelCurrentSlice( unsigned int oldId, unsigned int newId, MojoFloat3 pointTileSpace )              = 0;
-    virtual void                                                  ReplaceSegmentationLabelCurrentConnectedComponent( unsigned int oldId, unsigned int newId, MojoFloat3 pointTileSpace ) = 0;
+    virtual void                                                  RemapSegmentLabels( std::set< unsigned int > fromSegIds, unsigned int toSegId, bool ignoreLocks )                                        = 0;
+    virtual void                                                  ReplaceSegmentationLabel( unsigned int oldId, unsigned int newId, bool ignoreLocks )                                                     = 0;
+    virtual void                                                  ReplaceSegmentationLabelCurrentSlice( unsigned int oldId, unsigned int newId, MojoFloat3 pointTileSpace, bool ignoreLocks )              = 0;
+    virtual void                                                  ReplaceSegmentationLabelCurrentConnectedComponent( unsigned int oldId, unsigned int newId, MojoFloat3 pointTileSpace, bool ignoreLocks ) = 0;
 
     virtual void                                                  DrawSplit( MojoFloat3 pointTileSpace, float radius )                                                                   = 0;
     virtual void                                                  DrawErase( MojoFloat3 pointTileSpace, float radius )                                                                   = 0;
@@ -58,27 +58,27 @@ public:
     virtual void                                                  AddSplitSource( MojoFloat3 pointTileSpace )                                                                            = 0;
     virtual void                                                  RemoveSplitSource()                                                                                                    = 0;
     virtual void                                                  ResetSplitState()                                                                                                      = 0;
-    virtual void                                                  PrepForSplit( unsigned int segId, MojoFloat3 pointTileSpace )                                                          = 0;
+    virtual void                                                  PrepForSplit( unsigned int segId, MojoFloat3 pointTileSpace, bool applyBlur )                                                          = 0;
 	virtual void                                                  FindBoundaryJoinPoints2D( unsigned int segId )                                                                         = 0;
 	virtual void                                                  FindBoundaryWithinRegion2D( unsigned int segId )                                                                       = 0;
 	virtual void                                                  FindBoundaryBetweenRegions2D( unsigned int segId )                                                                     = 0;
-    virtual unsigned int                                          CompletePointSplit( unsigned int segId, MojoFloat3 pointTileSpace )                                                    = 0;
-    virtual unsigned int                                          CompleteDrawSplit( unsigned int segId, MojoFloat3 pointTileSpace, bool join3D, int splitStartZ )                       = 0;
+    virtual unsigned int                                          CompletePointSplit( unsigned int segId, MojoFloat3 pointTileSpace, bool applyBlur, bool ignoreLocks )                                                    = 0;
+    virtual unsigned int                                          CompleteDrawSplit( unsigned int segId, MojoFloat3 pointTileSpace, bool applyBlur, bool join3D, int splitStartZ, bool ignoreLocks )                       = 0;
 
     virtual void                                                  RecordSplitState( unsigned int segId, MojoFloat3 pointTileSpace )                                                      = 0;
     virtual void                                                  PredictSplit( unsigned int segId, MojoFloat3 pointTileSpace, float radius )                                            = 0;
 																																						                               
     virtual void                                                  ResetAdjustState()                                                                                                     = 0;
     virtual void                                                  PrepForAdjust( unsigned int segId, MojoFloat3 pointTileSpace )                                                         = 0;
-    virtual void                                                  CommitAdjustChange( unsigned int segId, MojoFloat3 pointTileSpace )                                                    = 0;
+    virtual void                                                  CommitAdjustChange( unsigned int segId, MojoFloat3 pointTileSpace, bool ignoreLocks )                                                    = 0;
 
     virtual void                                                  ResetDrawMergeState()                                                                                                  = 0;
     virtual void                                                  PrepForDrawMerge( MojoFloat3 pointTileSpace )                                                                          = 0;
-	virtual std::set< unsigned int >                              GetDrawMergeIds( MojoFloat3 pointTileSpace )                                                                           = 0;
-	virtual std::map< unsigned int, MojoFloat3 >                  GetDrawMergeIdsAndPoints( MojoFloat3 pointTileSpace )                                                                  = 0;
-	virtual unsigned int                                          CommitDrawMerge( std::set< unsigned int > mergeIds, MojoFloat3 pointTileSpace )                                        = 0;
-	virtual unsigned int                                          CommitDrawMergeCurrentSlice( MojoFloat3 pointTileSpace )                                                               = 0;
-	virtual unsigned int                                          CommitDrawMergeCurrentConnectedComponent( MojoFloat3 pointTileSpace )                                                  = 0;
+	virtual std::set< unsigned int >                              GetDrawMergeIds( MojoFloat3 pointTileSpace, bool ignoreLocks )                                                                           = 0;
+	virtual std::map< unsigned int, MojoFloat3 >                  GetDrawMergeIdsAndPoints( MojoFloat3 pointTileSpace, bool ignoreLocks )                                                                  = 0;
+	virtual unsigned int                                          CommitDrawMerge( std::set< unsigned int > mergeIds, MojoFloat3 pointTileSpace, bool ignoreLocks )                                        = 0;
+	virtual unsigned int                                          CommitDrawMergeCurrentSlice( MojoFloat3 pointTileSpace, bool ignoreLocks )                                                               = 0;
+	virtual unsigned int                                          CommitDrawMergeCurrentConnectedComponent( MojoFloat3 pointTileSpace, bool ignoreLocks )                                                  = 0;
 
 	virtual unsigned int                                          GetNewId()                                                                                                             = 0;
 	virtual std::list< unsigned int >                             UndoChange()                                                                                                           = 0;

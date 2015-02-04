@@ -235,6 +235,30 @@ namespace Mojo
             }
         }
 
+        private bool mSmoothSplits = true;
+        public bool SmoothSplits
+        {
+            get
+            {
+                return SegmentationLoaded && mSmoothSplits;
+            }
+            set
+            {
+                mSmoothSplits = value;
+                OnPropertyChanged( "SmoothSplits" );
+            }
+        }
+
+        public void ToggleSmoothSplits()
+        {
+            if ( SegmentationLoaded )
+            {
+                SmoothSplits = !SmoothSplits;
+                var p = new Vector2( 0.5f, 0.5f );
+                PrepForSplit( p );
+            }
+        }
+
         private float mSplitStartZ = 0;
         public float SplitStartZ
         {
@@ -502,7 +526,7 @@ namespace Mojo
             lock ( this )
             {
                 if ( SegmentationChangeInProgress ) return;
-                Internal.PrepForSplit( mSelectedSegmentId, GetPointDataSpace( p ) );
+                Internal.PrepForSplit( mSelectedSegmentId, GetPointDataSpace( p ), mSmoothSplits );
             }
         }
 
@@ -702,7 +726,7 @@ namespace Mojo
                     DoWorkAndUpdateProgressBlocking(
                         delegate( object s, DoWorkEventArgs args )
                         {
-                            Internal.CompletePointSplit( mSelectedSegmentId, new Vector3( mMouseOverX, mMouseOverY, mTiledDatasetView.CenterDataSpace.Z ) );
+                            Internal.CompletePointSplit( mSelectedSegmentId, new Vector3( mMouseOverX, mMouseOverY, mTiledDatasetView.CenterDataSpace.Z ), mSmoothSplits, !mLocksEnabled );
                         });
                 }
                 else
@@ -710,10 +734,11 @@ namespace Mojo
                     DoWorkAndUpdateProgressBlocking(
                         delegate( object s, DoWorkEventArgs args )
                         {
-                            Internal.CompleteDrawSplit( mSelectedSegmentId, new Vector3( mMouseOverX, mMouseOverY, mTiledDatasetView.CenterDataSpace.Z ), mJoinSplits3D, (int)mSplitStartZ );
+                            Internal.CompleteDrawSplit( mSelectedSegmentId, new Vector3( mMouseOverX, mMouseOverY, mTiledDatasetView.CenterDataSpace.Z ), mSmoothSplits, mJoinSplits3D, (int)mSplitStartZ, !mLocksEnabled );
                         } );
                 }
 
+                ResetLocks();
                 SplitStartZ = TiledDatasetView.CenterDataSpace.Z;
                 ChangesMade = true;
 
@@ -743,11 +768,11 @@ namespace Mojo
                 DoWorkAndUpdateProgressBlocking(
                     delegate( object s, DoWorkEventArgs args )
                     {
-                        Internal.CommitAdjustChange( SelectedSegmentId, new Vector3( mMouseOverX, mMouseOverY, mTiledDatasetView.CenterDataSpace.Z ) );
+                        Internal.CommitAdjustChange( SelectedSegmentId, new Vector3( mMouseOverX, mMouseOverY, mTiledDatasetView.CenterDataSpace.Z ), !mLocksEnabled );
                     } );
 
+                ResetLocks();
                 ChangesMade = true;
-
                 SegmentationChangeInProgress = false;
             }
         }
@@ -774,11 +799,11 @@ namespace Mojo
                 DoWorkAndUpdateProgressBlocking(
                     delegate( object s, DoWorkEventArgs args )
                     {
-                        mSelectedSegmentId = Internal.CommitDrawMerge( new Vector3( mMouseOverX, mMouseOverY, mTiledDatasetView.CenterDataSpace.Z ) );
+                        mSelectedSegmentId = Internal.CommitDrawMerge( new Vector3( mMouseOverX, mMouseOverY, mTiledDatasetView.CenterDataSpace.Z ), !mLocksEnabled );
                     } );
 
+                ResetLocks();
                 ChangesMade = true;
-
                 SegmentationChangeInProgress = false;
             }
         }
@@ -795,11 +820,11 @@ namespace Mojo
                 DoWorkAndUpdateProgressBlocking(
                     delegate( object s, DoWorkEventArgs args )
                     {
-                        mSelectedSegmentId = Internal.CommitDrawMergeCurrentSlice( new Vector3( mMouseOverX, mMouseOverY, mTiledDatasetView.CenterDataSpace.Z ) );
+                        mSelectedSegmentId = Internal.CommitDrawMergeCurrentSlice( new Vector3( mMouseOverX, mMouseOverY, mTiledDatasetView.CenterDataSpace.Z ), !mLocksEnabled );
                     } );
 
+                ResetLocks();
                 ChangesMade = true;
-
                 SegmentationChangeInProgress = false;
             }
         }
@@ -816,11 +841,11 @@ namespace Mojo
                 DoWorkAndUpdateProgressBlocking(
                     delegate( object s, DoWorkEventArgs args )
                     {
-                        mSelectedSegmentId = Internal.CommitDrawMergeCurrentConnectedComponent( new Vector3( mMouseOverX, mMouseOverY, mTiledDatasetView.CenterDataSpace.Z ) );
+                        mSelectedSegmentId = Internal.CommitDrawMergeCurrentConnectedComponent( new Vector3( mMouseOverX, mMouseOverY, mTiledDatasetView.CenterDataSpace.Z ), !mLocksEnabled );
                     } );
 
+                ResetLocks();
                 ChangesMade = true;
-
                 SegmentationChangeInProgress = false;
             }
             return;
@@ -838,11 +863,11 @@ namespace Mojo
                 DoWorkAndUpdateProgressBlocking(
                     delegate( object s, DoWorkEventArgs args )
                     {
-                        Internal.RemapSegmentLabel( clickedId, mSelectedSegmentId );
+                        Internal.RemapSegmentLabel( clickedId, mSelectedSegmentId, !mLocksEnabled );
                     } );
 
+                ResetLocks();
                 ChangesMade = true;
-
                 SegmentationChangeInProgress = false;
             }
         }
@@ -859,11 +884,11 @@ namespace Mojo
                 DoWorkAndUpdateProgressBlocking(
                     delegate( object s, DoWorkEventArgs args )
                     {
-                        Internal.ReplaceSegmentationLabelCurrentSlice( clickedId, mSelectedSegmentId, mTiledDatasetView, GetPointDataSpace( p ) );
+                        Internal.ReplaceSegmentationLabelCurrentSlice( clickedId, mSelectedSegmentId, mTiledDatasetView, GetPointDataSpace( p ), !mLocksEnabled );
                     } );
 
+                ResetLocks();
                 ChangesMade = true;
-
                 SegmentationChangeInProgress = false;
             }
         }
@@ -880,11 +905,11 @@ namespace Mojo
                 DoWorkAndUpdateProgressBlocking(
                     delegate( object s, DoWorkEventArgs args )
                     {
-                        Internal.ReplaceSegmentationLabelCurrentConnectedComponent( clickedId, mSelectedSegmentId, mTiledDatasetView, GetPointDataSpace( p ) );
+                        Internal.ReplaceSegmentationLabelCurrentConnectedComponent( clickedId, mSelectedSegmentId, mTiledDatasetView, GetPointDataSpace( p ), !mLocksEnabled );
                     } );
 
+                ResetLocks();
                 ChangesMade = true;
-
                 SegmentationChangeInProgress = false;
             }
         }
@@ -973,6 +998,26 @@ namespace Mojo
 
                 SegmentationChangeInProgress = false;
             }
+        }
+
+        private bool mLocksEnabled = false;
+        public bool LocksEnabled
+        {
+            get
+            {
+                return mLocksEnabled;
+            }
+            set
+            {
+                mLocksEnabled = value;
+                OnPropertyChanged( "LocksEnabled" );
+            }
+        }
+
+        public void ResetLocks()
+        {
+            if ( !LocksEnabled )
+                LocksEnabled = true;
         }
 
         public void SetSegmentType( uint segId, string newType )
@@ -1076,6 +1121,7 @@ namespace Mojo
             OnPropertyChanged( "TiledDatasetView" );
             OnPropertyChanged( "SegmentationControlsEnabled" );
             OnPropertyChanged( "NavigationControlsEnabled" );
+            OnPropertyChanged( "LocksEnabled" );
             OnPropertyChanged( "ShowSegmentation" );
             OnPropertyChanged( "SegmentationVisibilityRatio" );
             OnPropertyChanged( "ShowBoundaryLines" );
@@ -1084,6 +1130,7 @@ namespace Mojo
             OnPropertyChanged( "CurrentMergeMode" );
             OnPropertyChanged( "CurrentSplitMode" );
             OnPropertyChanged( "JoinSplits3D" );
+            OnPropertyChanged( "SmoothSplits" );
         }
 
         public void UpdateZ()
@@ -1257,11 +1304,11 @@ namespace Mojo
                 LoadSegmentation( TiledDatasetDescription );
 
                 SegmentationControlsEnabled = true;
+                LocksEnabled = true;
 
                 UpdateView();
 
                 ChangesMade = false;
-
                 SegmentationChangeInProgress = false;
             }
         }
@@ -1364,6 +1411,7 @@ namespace Mojo
             MouseOverSegmentId = 0;
 
             SegmentationControlsEnabled = false;
+            LocksEnabled = false;
             ChangesMade = false;
         }
 

@@ -265,6 +265,7 @@ namespace Mojo
             mEffect.GetVariableByName( "gBoundaryLinesVisible" ).AsScalar().Set( mTileManager.ShowBoundaryLines );
             mEffect.GetVariableByName( "gSelectedSegmentId" ).AsScalar().Set( mTileManager.SelectedSegmentId );
             mEffect.GetVariableByName( "gMouseOverSegmentId" ).AsScalar().Set( mTileManager.MouseOverSegmentId );
+            mEffect.GetVariableByName( "gIgnoreConfidence" ).AsScalar().Set( !mTileManager.LocksEnabled );
 
             mPass.Apply( deviceContext );
             deviceContext.Draw( QUAD_NUM_VERTICES, 0 );

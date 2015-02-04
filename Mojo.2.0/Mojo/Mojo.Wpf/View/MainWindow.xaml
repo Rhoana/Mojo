@@ -36,6 +36,7 @@
         <BitmapImage x:Key="SegmentationJoinSplits3D"        UriSource="../Icons/SegmentationJoinSplits3D.png"       />
 
         <Mojo.Wpf.ViewModel:EnumBooleanConverter x:Key="EnumBooleanConverter" />
+        <Mojo.Wpf.ViewModel:LocksDisabledVisibilityConverter x:Key="LocksDisabledVisibilityConverter" />
         <Mojo.Wpf.ViewModel:SegmentLockConverter x:Key="SegmentLockConverter" />
         <Mojo.Wpf.ViewModel:SegmentTypeConverter x:Key="SegmentTypeConverter" />
         <Mojo.Wpf.ViewModel:ObjectsEqualParameterConverter x:Key="ObjectsEqualParameterConverter" />
@@ -64,6 +65,7 @@
 
     <Window.InputBindings>
         <KeyBinding Command="{Binding Path=ToggleSelectedSegmentLockCommand}" Key="L"/>
+        <KeyBinding Command="{Binding Path=ToggleLockOverride}" Key="O" Modifiers="Ctrl+Shift" />
         
         <KeyBinding Command="{Binding Path=SetSelectedSegmentTypeCommand}" CommandParameter="None" Key="F1"/>
         <KeyBinding Command="{Binding Path=SetSelectedSegmentTypeCommand}" CommandParameter="Axon" Key="F2"/>
@@ -139,6 +141,8 @@
                 <Separator />
                 <MenuItem Name="SelectNewIdMenuItem" Header="Select New Id" InputGestureText="Ctrl+N" Focusable="False" Command="{Binding Path=SelectNewIdCommand}" IsEnabled="{Binding Path=Engine.TileManager.SegmentationControlsEnabled}">
                 </MenuItem>
+                <MenuItem Name="MenuSmoothSplits" Header="Smooth Splits" Focusable="False" Command="{Binding Path=ToggleSmoothSplitsCommand}" IsEnabled="{Binding Path=Engine.TileManager.SegmentationControlsEnabled}" IsCheckable="True" IsChecked="{Binding Path=Engine.TileManager.SmoothSplits, Mode=OneWay}">
+                </MenuItem>
                 <MenuItem Name="MenuJoin3DSplits" Header="3D Splits" Focusable="False" Command="{Binding Path=ToggleJoinSplits3DCommand}" IsEnabled="{Binding Path=Engine.TileManager.SegmentationControlsEnabled}" IsCheckable="True" IsChecked="{Binding Path=Engine.TileManager.JoinSplits3D, Mode=OneWay}">
                     <MenuItem.Icon>
                         <Image Width="16" Height="16" Source="{StaticResource SegmentationJoinSplits3D}"/>
@@ -159,6 +163,11 @@
                 <MenuItem Name="LargerBrushMenuItem" Header="Larger Brush" InputGestureText="=" Focusable="False" Command="{Binding Path=IncreaseBrushSizeCommand}" IsEnabled="{Binding Path=Engine.TileManager.SegmentationControlsEnabled}">
                 </MenuItem>
                 <MenuItem Name="SmallerBrushMenuItem" Header="Smaller Brush" InputGestureText="-" Focusable="False" Command="{Binding Path=DecreaseBrushSizeCommand}" IsEnabled="{Binding Path=Engine.TileManager.SegmentationControlsEnabled}">
+                </MenuItem>
+                <Separator />
+                <MenuItem Name="ToggleLockMenuItem" Header="Toggle Lock" InputGestureText="L" Focusable="False" Command="{Binding Path=ToggleSelectedSegmentLockCommand}" IsEnabled="{Binding Path=Engine.TileManager.SegmentationControlsEnabled}">
+                </MenuItem>
+                <MenuItem Name="ToggleLockOverrideMenuItem" Header="Disable All Locks" InputGestureText="Ctrl+Shift+O" Focusable="False" Command="{Binding Path=ToggleLockOverride}" IsEnabled="{Binding Path=Engine.TileManager.SegmentationControlsEnabled}">
                 </MenuItem>
             </MenuItem>
             <MenuItem Header="View" Focusable="False">
@@ -333,9 +342,17 @@
 
                         <Expander Width="Auto" IsExpanded="True">
                             <Expander.Header>
-                                <StackPanel Orientation="Horizontal">
-                                    <Label Content="Status" ></Label>
-                                </StackPanel>
+                                <DockPanel Width="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type Expander}}, Path=ActualWidth}" HorizontalAlignment="Stretch" LastChildFill="True">
+                                    <Label DockPanel.Dock="Left" Content="Status"></Label>
+                                    <Label Content="Locks Disabled" Background="Red" Width="Auto" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Margin="10,0,30,0" >
+                                        <Label.Visibility>
+                                            <MultiBinding Converter="{StaticResource LocksDisabledVisibilityConverter}">
+                                                <Binding Path="Engine.TileManager.SegmentationControlsEnabled" />
+                                                <Binding Path="Engine.TileManager.LocksEnabled" />
+                                            </MultiBinding>
+                                        </Label.Visibility>
+                                    </Label>
+                                </DockPanel>
                             </Expander.Header>
                             <Grid Background="White" Margin="0,0,0,0">
 
@@ -370,10 +387,14 @@
                                     <Grid Background="{Binding Path=TileManagerDataContext.SelectedSegmentBrush}" Margin="3,3,3,3" Width="100" HorizontalAlignment="Left" >
                                         <CheckBox HorizontalAlignment="Left"
                                             Height="20" Width="100" Margin="5,5,5,5" Name="SelectionLockCheckBox"
-                                            IsChecked="{Binding Path=TileManagerDataContext.SelectedSegmentConfidence, Converter={StaticResource SegmentLockConverter}, Mode=OneWay}"
                                             Checked="SelectedSegmentLockCheckBox_OnChecked"
-                                            Unchecked="SelectedSegmentLockCheckBox_OnUnchecked"
-                                            IsEnabled="{Binding Path=Engine.TileManager.SegmentationControlsEnabled}">
+                                            Unchecked="SelectedSegmentLockCheckBox_OnUnchecked">                                            
+                                            <CheckBox.IsChecked>
+                                                <Binding Path="TileManagerDataContext.SelectedSegmentConfidence" Converter="{StaticResource SegmentLockConverter}" Mode="OneWay" />
+                                            </CheckBox.IsChecked>
+                                            <CheckBox.IsEnabled>
+                                                <Binding Path="Engine.TileManager.LocksEnabled" />
+                                            </CheckBox.IsEnabled>
                                             <CheckBox.Background>
                                                 <SolidColorBrush Color="White" Opacity="0.5"></SolidColorBrush>
                                             </CheckBox.Background>
@@ -549,9 +570,14 @@
                                         <DataTemplate>
                                             <Grid Background="{Binding Color}" Margin="0,0,0,0" >
                                                 <CheckBox Height="20" Width="100" Margin="5,5,5,5" Name="SegmentLockCheckBox"
-                                                          IsChecked="{Binding Confidence, Converter={StaticResource SegmentLockConverter}, Mode=OneWay}"
                                                           Checked="SegmentLockCheckBox_OnChecked"
                                                           Unchecked="SegmentLockCheckBox_OnUnchecked">
+                                                    <CheckBox.IsChecked>
+                                                        <Binding Path="Confidence" Converter="{StaticResource SegmentLockConverter}" Mode="OneWay" />
+                                                    </CheckBox.IsChecked>
+                                                    <CheckBox.IsEnabled>
+                                                        <Binding RelativeSource="{RelativeSource FindAncestor, AncestorType={x:Type Window}}" Path="DataContext.Engine.TileManager.LocksEnabled" />
+                                                    </CheckBox.IsEnabled>
                                                     <CheckBox.Background>
                                                         <SolidColorBrush Color="White" Opacity="0.5"></SolidColorBrush>
                                                     </CheckBox.Background>

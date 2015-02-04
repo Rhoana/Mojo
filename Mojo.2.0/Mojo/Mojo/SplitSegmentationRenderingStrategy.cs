@@ -272,6 +272,7 @@ namespace Mojo
             mEffect.GetVariableByName( "gCrosshairVisible" ).AsScalar().Set( mTileManager.CurrentSplitMode == SplitMode.JoinPoints );
             mEffect.GetVariableByName( "gSelectedSegmentId" ).AsScalar().Set( mTileManager.SelectedSegmentId );
             mEffect.GetVariableByName( "gMouseOverSegmentId" ).AsScalar().Set( mTileManager.MouseOverSegmentId );
+            mEffect.GetVariableByName( "gIgnoreConfidence" ).AsScalar().Set( !mTileManager.LocksEnabled );
 
             mEffect.GetVariableByName( "gMouseOverX" ).AsScalar().Set( ( mTileManager.MouseOverX - tileMinExtentX ) / tileCacheEntry.ExtentDataSpace.X );
             mEffect.GetVariableByName( "gMouseOverY" ).AsScalar().Set( ( mTileManager.MouseOverY - tileMinExtentY ) / tileCacheEntry.ExtentDataSpace.Y );

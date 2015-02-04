@@ -59,7 +59,7 @@ public:
     void                                                    SortSegmentInfoByConfidence( bool reverse );
     void                                                    SortSegmentInfoByType( bool reverse );
     void                                                    SortSegmentInfoBySubType( bool reverse );
-	void                                                    RemapSegmentLabel( unsigned int fromSegId, unsigned int toSegId );
+	void                                                    RemapSegmentLabel( unsigned int fromSegId, unsigned int toSegId, bool ignoreLocks );
 	void                                                    LockSegmentLabel( unsigned int segId );
 	void                                                    UnlockSegmentLabel( unsigned int segId );
 	void                                                    SetSegmentType( unsigned int segId, String^ newType );
@@ -76,9 +76,9 @@ public:
     Vector3                                                 GetSegmentCentralTileLocation( unsigned int segId );
     Vector4                                                 GetSegmentZTileBounds( unsigned int segId, int zIndex );
 
-    void                                                    ReplaceSegmentationLabel( unsigned int oldId, unsigned int newId );
-    void                                                    ReplaceSegmentationLabelCurrentSlice( unsigned int oldId, unsigned int newId, TiledDatasetView^ tiledDatasetView, Vector3^ pDataSpace );
-    void                                                    ReplaceSegmentationLabelCurrentConnectedComponent( unsigned int oldId, unsigned int newId, TiledDatasetView^ tiledDatasetView, Vector3^ pDataSpace );
+    void                                                    ReplaceSegmentationLabel( unsigned int oldId, unsigned int newId, bool ignoreLocks );
+    void                                                    ReplaceSegmentationLabelCurrentSlice( unsigned int oldId, unsigned int newId, TiledDatasetView^ tiledDatasetView, Vector3^ pDataSpace, bool ignoreLocks );
+    void                                                    ReplaceSegmentationLabelCurrentConnectedComponent( unsigned int oldId, unsigned int newId, TiledDatasetView^ tiledDatasetView, Vector3^ pDataSpace, bool ignoreLocks );
 
     void                                                    DrawSplit( TiledDatasetView^ tiledDatasetView, Vector3^ pDataSpace, float radius );
     void                                                    DrawErase( TiledDatasetView^ tiledDatasetView, Vector3^ pDataSpace, float radius );
@@ -88,24 +88,24 @@ public:
     void                                                    AddSplitSource( TiledDatasetView^ tiledDatasetView, Vector3^ pDataSpace );
     void                                                    RemoveSplitSource();
     void                                                    ResetSplitState( Vector3^ pDataSpace );
-    void                                                    PrepForSplit( unsigned int segId, Vector3^ pDataSpace );
+    void                                                    PrepForSplit( unsigned int segId, Vector3^ pDataSpace, bool applyBlur );
 	void                                                    FindBoundaryJoinPoints2D( unsigned int segId, Vector3^ pDataSpace );
 	void                                                    FindBoundaryWithinRegion2D( unsigned int segId, Vector3^ pDataSpace );
 	void                                                    FindBoundaryBetweenRegions2D( unsigned int segId, Vector3^ pDataSpace );
-    int                                                     CompletePointSplit( unsigned int segId, Vector3^ pDataSpace );
-    int                                                     CompleteDrawSplit( unsigned int segId, Vector3^ pDataSpace, bool join3D, int splitStartZ );
+    int                                                     CompletePointSplit( unsigned int segId, Vector3^ pDataSpace, bool applyBlur, bool ignoreLocks );
+    int                                                     CompleteDrawSplit( unsigned int segId, Vector3^ pDataSpace, bool applyBlur, bool join3D, int splitStartZ, bool ignoreLocks );
     void                                                    RecordSplitState( unsigned int segId, Vector3^ pDataSpace );
     void                                                    PredictSplit( unsigned int segId, Vector3^ pDataSpace, float radius );
 
     void                                                    ResetAdjustState( Vector3^ pDataSpace );
     void                                                    PrepForAdjust( unsigned int segId, Vector3^ pDataSpace );
-    void                                                    CommitAdjustChange( unsigned int segId, Vector3^ pDataSpace );
+    void                                                    CommitAdjustChange( unsigned int segId, Vector3^ pDataSpace, bool ignoreLocks );
 
     void                                                    ResetDrawMergeState( Vector3^ pDataSpace );
     void                                                    PrepForDrawMerge( Vector3^ pDataSpace );
-    unsigned int                                            CommitDrawMerge( Vector3^ pDataSpace );
-    unsigned int                                            CommitDrawMergeCurrentSlice( Vector3^ pDataSpace );
-    unsigned int                                            CommitDrawMergeCurrentConnectedComponent( Vector3^ pDataSpace );
+    unsigned int                                            CommitDrawMerge( Vector3^ pDataSpace, bool ignoreLocks );
+    unsigned int                                            CommitDrawMergeCurrentSlice( Vector3^ pDataSpace, bool ignoreLocks );
+    unsigned int                                            CommitDrawMergeCurrentConnectedComponent( Vector3^ pDataSpace, bool ignoreLocks );
 
 	unsigned int                                            GetNewId();
 	void                                                    UndoChange();

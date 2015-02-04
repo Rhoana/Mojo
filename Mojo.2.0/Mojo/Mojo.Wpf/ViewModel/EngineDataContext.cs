@@ -30,6 +30,7 @@ namespace Mojo.Wpf.ViewModel
         public RelayCommand RedoChangeCommand { get; private set; }
         public RelayCommand SelectNewIdCommand { get; private set; }
         public RelayCommand ToggleJoinSplits3DCommand { get; private set; }
+        public RelayCommand ToggleSmoothSplitsCommand { get; private set; }
         public RelayCommand CommitChangeCommand { get; private set; }
         public RelayCommand CancelChangeCommand { get; private set; }
         public RelayCommand IncreaseBrushSizeCommand { get; private set; }
@@ -58,8 +59,8 @@ namespace Mojo.Wpf.ViewModel
         public RelayCommand PreviousSegmentPageCommand { get; private set; }
         public RelayCommand NextSegmentPageCommand { get; private set; }
         public RelayCommand LastSegmentPageCommand { get; private set; }
-        public RelayCommand LockSegmentLabelCommand { get; private set; }
         public RelayCommand ToggleSelectedSegmentLockCommand { get; private set; }
+        public RelayCommand ToggleLockOverride { get; private set; }
         public RelayCommand SetSelectedSegmentTypeCommand { get; private set; }
         public RelayCommand SetSelectedSegmentSubTypeCommand { get; private set; }
 
@@ -156,6 +157,7 @@ namespace Mojo.Wpf.ViewModel
             ToggleShowSegmentationCommand = new RelayCommand( param => Engine.TileManager.ToggleShowSegmentation(), param => Engine.TileManager.SegmentationLoaded );
             ToggleShowBoundaryLinesCommand = new RelayCommand( param => Engine.TileManager.ToggleShowBoundaryLines(), param => Engine.TileManager.SegmentationLoaded );
             ToggleJoinSplits3DCommand = new RelayCommand( param => Engine.TileManager.ToggleJoinSplits3D(), param => Engine.TileManager.SegmentationLoaded );
+            ToggleSmoothSplitsCommand = new RelayCommand( param => Engine.TileManager.ToggleSmoothSplits(), param => Engine.TileManager.SegmentationLoaded );
             IncreaseSegmentationVisibilityCommand = new RelayCommand( param => Engine.TileManager.IncreaseSegmentationVisibility(), param => Engine.TileManager.SegmentationLoaded );
             DecreaseSegmentationVisibilityCommand = new RelayCommand( param => Engine.TileManager.DecreaseSegmentationVisibility(), param => Engine.TileManager.SegmentationLoaded );
             Open3DViewerCommand = new RelayCommand( param => Engine.Open3DViewer(), param => Engine.TileManager.SegmentationLoaded );
@@ -170,6 +172,7 @@ namespace Mojo.Wpf.ViewModel
             NextSegmentPageCommand = new RelayCommand( param => TileManagerDataContext.MoveToNextSegmentInfoPage(), param => Engine.TileManager.SegmentationLoaded );
             LastSegmentPageCommand = new RelayCommand( param => TileManagerDataContext.MoveToLastSegmentInfoPage(), param => Engine.TileManager.SegmentationLoaded );
             ToggleSelectedSegmentLockCommand = new RelayCommand( param => TileManagerDataContext.ToggleSelectedSegmentLock(), param => Engine.TileManager.SegmentationLoaded );
+            ToggleLockOverride = new RelayCommand( param => TileManagerDataContext.ToggleLockOverride(), param => Engine.TileManager.SegmentationLoaded );
             SetSelectedSegmentTypeCommand = new RelayCommand( param => TileManagerDataContext.SetSelectedSegmentTypeCommand( param ), param => Engine.TileManager.SegmentationLoaded );
             SetSelectedSegmentSubTypeCommand = new RelayCommand( param => TileManagerDataContext.SetSelectedSegmentSubTypeCommand( param ), param => Engine.TileManager.SegmentationLoaded );
 

@@ -137,6 +137,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="ViewModel\LocksDisabledVisibilityConverter.cs" />
     <Compile Include="ViewModel\EnumBooleanConverter.cs" />
     <Compile Include="ViewModel\EngineDataContext.cs" />
     <Compile Include="ViewModel\ObjectsEqualParameterConverter.cs" />

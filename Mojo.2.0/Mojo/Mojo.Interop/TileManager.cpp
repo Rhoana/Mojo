@@ -195,11 +195,9 @@ void TileManager::SortSegmentInfoBySubType( bool reverse )
 	mTileManager->SortSegmentInfoBySubType( reverse );
 }
 
-void TileManager::RemapSegmentLabel( unsigned int fromSegId, unsigned int toSegId )
+void TileManager::RemapSegmentLabel( unsigned int fromSegId, unsigned int toSegId, bool ignoreLocks )
 {
-
-	mTileManager->RemapSegmentLabel( fromSegId, toSegId );
-
+	mTileManager->RemapSegmentLabel( fromSegId, toSegId, ignoreLocks );
 }
 
 void TileManager::LockSegmentLabel( unsigned int segId )
@@ -310,21 +308,21 @@ Vector4 TileManager::GetSegmentZTileBounds( unsigned int segId, int zIndex )
     return Vector4( (float)location.x, (float)location.y, (float)location.z, (float)location.w );
 }
 
-void TileManager::ReplaceSegmentationLabel( unsigned int oldId, unsigned int newId )
+void TileManager::ReplaceSegmentationLabel( unsigned int oldId, unsigned int newId, bool ignoreLocks )
 {
-    mTileManager->ReplaceSegmentationLabel( oldId, newId );
+    mTileManager->ReplaceSegmentationLabel( oldId, newId, ignoreLocks );
 }
 
-void TileManager::ReplaceSegmentationLabelCurrentSlice( unsigned int oldId, unsigned int newId, TiledDatasetView^ tiledDatasetView, Vector3^ pDataSpace )
+void TileManager::ReplaceSegmentationLabelCurrentSlice( unsigned int oldId, unsigned int newId, TiledDatasetView^ tiledDatasetView, Vector3^ pDataSpace, bool ignoreLocks )
 {
     MojoFloat3 pDataSpaceFloat3 = MojoFloat3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
-    mTileManager->ReplaceSegmentationLabelCurrentSlice( oldId, newId, pDataSpaceFloat3  );
+    mTileManager->ReplaceSegmentationLabelCurrentSlice( oldId, newId, pDataSpaceFloat3, ignoreLocks );
 }
 
-void TileManager::ReplaceSegmentationLabelCurrentConnectedComponent( unsigned int oldId, unsigned int newId, TiledDatasetView^ tiledDatasetView, Vector3^ pDataSpace )
+void TileManager::ReplaceSegmentationLabelCurrentConnectedComponent( unsigned int oldId, unsigned int newId, TiledDatasetView^ tiledDatasetView, Vector3^ pDataSpace, bool ignoreLocks )
 {
     MojoFloat3 pDataSpaceFloat3 = MojoFloat3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
-    mTileManager->ReplaceSegmentationLabelCurrentConnectedComponent( oldId, newId, pDataSpaceFloat3  );
+    mTileManager->ReplaceSegmentationLabelCurrentConnectedComponent( oldId, newId, pDataSpaceFloat3, ignoreLocks );
 }
 
 void TileManager::DrawSplit( TiledDatasetView^ tiledDatasetView, Vector3^ pDataSpace, float radius )
@@ -372,10 +370,10 @@ void TileManager::ResetSplitState( Vector3^ pDataSpace )
     mTileManager->ResetSplitState( pDataSpaceFloat3 );
 }
 
-void TileManager::PrepForSplit( unsigned int segId, Vector3^ pDataSpace )
+void TileManager::PrepForSplit( unsigned int segId, Vector3^ pDataSpace, bool applyBlur )
 {
     MojoFloat3 pDataSpaceFloat3 = MojoFloat3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
-    mTileManager->PrepForSplit( segId, pDataSpaceFloat3 );
+    mTileManager->PrepForSplit( segId, pDataSpaceFloat3, applyBlur );
 }
 
 void TileManager::FindBoundaryJoinPoints2D( unsigned int segId, Vector3^ pDataSpace  )
@@ -396,16 +394,16 @@ void TileManager::FindBoundaryBetweenRegions2D( unsigned int segId, Vector3^ pDa
     mTileManager->FindBoundaryBetweenRegions2D( segId, pDataSpaceFloat3 );
 }
 
-int TileManager::CompletePointSplit( unsigned int segId, Vector3^ pDataSpace )
+int TileManager::CompletePointSplit( unsigned int segId, Vector3^ pDataSpace, bool applyBlur, bool ignoreLocks )
 {
     MojoFloat3 pDataSpaceFloat3 = MojoFloat3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
-    return mTileManager->CompletePointSplit( segId, pDataSpaceFloat3 );
+    return mTileManager->CompletePointSplit( segId, pDataSpaceFloat3, applyBlur, ignoreLocks );
 }
 
-int TileManager::CompleteDrawSplit( unsigned int segId, Vector3^ pDataSpace, bool join3D, int splitStartZ )
+int TileManager::CompleteDrawSplit( unsigned int segId, Vector3^ pDataSpace, bool applyBlur, bool join3D, int splitStartZ, bool ignoreLocks )
 {
     MojoFloat3 pDataSpaceFloat3 = MojoFloat3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
-    return mTileManager->CompleteDrawSplit( segId, pDataSpaceFloat3, join3D, splitStartZ );
+    return mTileManager->CompleteDrawSplit( segId, pDataSpaceFloat3, applyBlur, join3D, splitStartZ, ignoreLocks );
 }
 
 void TileManager::RecordSplitState( unsigned int segId, Vector3^ pDataSpace )
@@ -432,10 +430,10 @@ void TileManager::PrepForAdjust( unsigned int segId, Vector3^ pDataSpace )
     mTileManager->PrepForAdjust( segId, pDataSpaceFloat3 );
 }
 
-void TileManager::CommitAdjustChange( unsigned int segId, Vector3^ pDataSpace )
+void TileManager::CommitAdjustChange( unsigned int segId, Vector3^ pDataSpace, bool ignoreLocks )
 {
     MojoFloat3 pDataSpaceFloat3 = MojoFloat3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
-    mTileManager->CommitAdjustChange( segId, pDataSpaceFloat3 );
+    mTileManager->CommitAdjustChange( segId, pDataSpaceFloat3, ignoreLocks );
 }
 
 void TileManager::ResetDrawMergeState( Vector3^ pDataSpace )
@@ -450,22 +448,22 @@ void TileManager::PrepForDrawMerge( Vector3^ pDataSpace )
     mTileManager->PrepForDrawMerge( pDataSpaceFloat3 );
 }
 
-unsigned int TileManager::CommitDrawMerge( Vector3^ pDataSpace )
+unsigned int TileManager::CommitDrawMerge( Vector3^ pDataSpace, bool ignoreLocks )
 {
     MojoFloat3 pDataSpaceFloat3 = MojoFloat3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
-    return mTileManager->CommitDrawMerge( pDataSpaceFloat3 );
+    return mTileManager->CommitDrawMerge( pDataSpaceFloat3, ignoreLocks );
 }
 
-unsigned int TileManager::CommitDrawMergeCurrentSlice( Vector3^ pDataSpace )
+unsigned int TileManager::CommitDrawMergeCurrentSlice( Vector3^ pDataSpace, bool ignoreLocks )
 {
     MojoFloat3 pDataSpaceFloat3 = MojoFloat3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
-    return mTileManager->CommitDrawMergeCurrentSlice( pDataSpaceFloat3 );
+    return mTileManager->CommitDrawMergeCurrentSlice( pDataSpaceFloat3, ignoreLocks );
 }
 
-unsigned int TileManager::CommitDrawMergeCurrentConnectedComponent( Vector3^ pDataSpace )
+unsigned int TileManager::CommitDrawMergeCurrentConnectedComponent( Vector3^ pDataSpace, bool ignoreLocks )
 {
     MojoFloat3 pDataSpaceFloat3 = MojoFloat3( pDataSpace->X, pDataSpace->Y, pDataSpace->Z );
-    return mTileManager->CommitDrawMergeCurrentConnectedComponent( pDataSpaceFloat3 );
+    return mTileManager->CommitDrawMergeCurrentConnectedComponent( pDataSpaceFloat3, ignoreLocks );
 }
 
 unsigned int TileManager::GetNewId()

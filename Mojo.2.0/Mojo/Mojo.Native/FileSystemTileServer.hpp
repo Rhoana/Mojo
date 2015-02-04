@@ -54,10 +54,10 @@ public:
     virtual Core::HashMap< std::string, Core::VolumeDescription > LoadTile( MojoInt4 tileIndex );
     virtual void                                                  UnloadTile( MojoInt4 tileIndex );
 
-    virtual void                                                  RemapSegmentLabels( std::set< unsigned int > fromSegId, unsigned int toSegId );
-    virtual void                                                  ReplaceSegmentationLabel( unsigned int oldId, unsigned int newId );
-    virtual void                                                  ReplaceSegmentationLabelCurrentSlice( unsigned int oldId, unsigned int newId, MojoFloat3 pointTileSpace );
-    virtual void                                                  ReplaceSegmentationLabelCurrentConnectedComponent( unsigned int oldId, unsigned int newId, MojoFloat3 pointTileSpace );
+    virtual void                                                  RemapSegmentLabels( std::set< unsigned int > fromSegId, unsigned int toSegId, bool ignoreLocks );
+    virtual void                                                  ReplaceSegmentationLabel( unsigned int oldId, unsigned int newId, bool ignoreLocks );
+    virtual void                                                  ReplaceSegmentationLabelCurrentSlice( unsigned int oldId, unsigned int newId, MojoFloat3 pointTileSpace, bool ignoreLocks );
+    virtual void                                                  ReplaceSegmentationLabelCurrentConnectedComponent( unsigned int oldId, unsigned int newId, MojoFloat3 pointTileSpace, bool ignoreLocks );
 
     virtual void                                                  DrawSplit( MojoFloat3 pointTileSpace, float radius );
     virtual void                                                  DrawErase( MojoFloat3 pointTileSpace, float radius );
@@ -67,29 +67,29 @@ public:
 
     virtual void                                                  AddSplitSource( MojoFloat3 pointTileSpace );
     virtual void                                                  RemoveSplitSource();
-    virtual void                                                  LoadSplitDistances( unsigned int segId );
+    virtual void                                                  LoadSplitDistances( unsigned int segId, bool applyBlur );
     virtual void                                                  ResetSplitState();
-    virtual void                                                  PrepForSplit( unsigned int segId, MojoFloat3 pointTileSpace );
+    virtual void                                                  PrepForSplit( unsigned int segId, MojoFloat3 pointTileSpace, bool applyBlur );
 	virtual void                                                  FindBoundaryJoinPoints2D( unsigned int segId );
 	virtual void                                                  FindBoundaryWithinRegion2D( unsigned int segId );
 	virtual void                                                  FindBoundaryBetweenRegions2D( unsigned int segId );
-    virtual unsigned int                                          CompletePointSplit( unsigned int segId, MojoFloat3 pointTileSpace );
-    virtual unsigned int                                          CompleteDrawSplit( unsigned int segId, MojoFloat3 pointTileSpace, bool join3D, int splitStartZ );
+    virtual unsigned int                                          CompletePointSplit( unsigned int segId, MojoFloat3 pointTileSpace, bool applyBlur, bool ignoreLocks );
+    virtual unsigned int                                          CompleteDrawSplit( unsigned int segId, MojoFloat3 pointTileSpace, bool applyBlur, bool join3D, int splitStartZ, bool ignoreLocks );
 
     virtual void                                                  RecordSplitState( unsigned int segId, MojoFloat3 pointTileSpace );
     virtual void                                                  PredictSplit( unsigned int segId, MojoFloat3 pointTileSpace, float radius );
 
     virtual void                                                  ResetAdjustState();
     virtual void                                                  PrepForAdjust( unsigned int segId, MojoFloat3 pointTileSpace );
-    virtual void                                                  CommitAdjustChange( unsigned int segId, MojoFloat3 pointTileSpace );
+    virtual void                                                  CommitAdjustChange( unsigned int segId, MojoFloat3 pointTileSpace, bool ignoreLocks );
 
     virtual void                                                  ResetDrawMergeState();
     virtual void                                                  PrepForDrawMerge( MojoFloat3 pointTileSpace );
-	virtual std::set< unsigned int >                              GetDrawMergeIds( MojoFloat3 pointTileSpace );
-	virtual std::map< unsigned int, MojoFloat3 >                  GetDrawMergeIdsAndPoints( MojoFloat3 pointTileSpace );
-	virtual unsigned int                                          CommitDrawMerge( std::set< unsigned int > mergeIds, MojoFloat3 pointTileSpace );
-	virtual unsigned int                                          CommitDrawMergeCurrentSlice( MojoFloat3 pointTileSpace );
-	virtual unsigned int                                          CommitDrawMergeCurrentConnectedComponent( MojoFloat3 pointTileSpace );
+	virtual std::set< unsigned int >                              GetDrawMergeIds( MojoFloat3 pointTileSpace, bool ignoreLocks );
+	virtual std::map< unsigned int, MojoFloat3 >                  GetDrawMergeIdsAndPoints( MojoFloat3 pointTileSpace, bool ignoreLocks );
+	virtual unsigned int                                          CommitDrawMerge( std::set< unsigned int > mergeIds, MojoFloat3 pointTileSpace, bool ignoreLocks );
+	virtual unsigned int                                          CommitDrawMergeCurrentSlice( MojoFloat3 pointTileSpace, bool ignoreLocks );
+	virtual unsigned int                                          CommitDrawMergeCurrentConnectedComponent( MojoFloat3 pointTileSpace, bool ignoreLocks );
 
 	virtual unsigned int                                          GetNewId();
 	virtual std::list< unsigned int >                             UndoChange();
@@ -191,6 +191,7 @@ private:
     int                                                           mSplitWindowNPix;
 	int                                                           mSplitLabelCount;
     int*                                                          mSplitStepDist;
+    int*                                                          mSplitStepDistBlur;
     int*                                                          mSplitResultDist;
     int*                                                          mSplitPrev;
     char*                                                         mSplitBorderTargets;

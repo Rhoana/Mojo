@@ -494,14 +494,14 @@ void TileManager::SortSegmentInfoBySubType( bool reverse )
 	mTileServer->SortSegmentInfoBySubType( reverse );
 }
 
-void TileManager::RemapSegmentLabel( unsigned int fromSegId, unsigned int toSegId )
+void TileManager::RemapSegmentLabel( unsigned int fromSegId, unsigned int toSegId, bool ignoreLocks )
 {
 	Core::Printf( "From ", fromSegId, " before -> ", (*mLabelIdMap)( fromSegId ), "." );	
 	Core::Printf( "To ", toSegId, " before -> ", (*mLabelIdMap)( toSegId ), "." );
 
 	std::set< unsigned int > fromSegIds;
 	fromSegIds.insert( fromSegId );
-	mTileServer->RemapSegmentLabels( fromSegIds, toSegId );
+	mTileServer->RemapSegmentLabels( fromSegIds, toSegId, ignoreLocks );
 
 	Core::Printf( "From ", fromSegId, " after -> ", (*mLabelIdMap)( fromSegId ), "." );
 	Core::Printf( "To ", toSegId, " after -> ", (*mLabelIdMap)( toSegId ), "." );
@@ -667,16 +667,16 @@ MojoInt4 TileManager::GetSegmentZTileBounds( unsigned int segId, int zIndex )
     return mTileServer->GetSegmentZTileBounds( segId, zIndex );
 }
 
-void TileManager::ReplaceSegmentationLabel( unsigned int oldId, unsigned int newId )
+void TileManager::ReplaceSegmentationLabel( unsigned int oldId, unsigned int newId, bool ignoreLocks )
 {
-    mTileServer->ReplaceSegmentationLabel( oldId, newId );
+    mTileServer->ReplaceSegmentationLabel( oldId, newId, ignoreLocks );
 
     ReloadTileCache();
 }
 
-void TileManager::ReplaceSegmentationLabelCurrentSlice( unsigned int oldId, unsigned int newId, MojoFloat3 pDataSpace )
+void TileManager::ReplaceSegmentationLabelCurrentSlice( unsigned int oldId, unsigned int newId, MojoFloat3 pDataSpace, bool ignoreLocks )
 {
-    mTileServer->ReplaceSegmentationLabelCurrentSlice( oldId, newId, pDataSpace );
+    mTileServer->ReplaceSegmentationLabelCurrentSlice( oldId, newId, pDataSpace, ignoreLocks );
 
 	ReloadTileCacheOverlayAndIds( (int)pDataSpace.z );
 }
@@ -726,9 +726,9 @@ void TileManager::ResetSplitState( MojoFloat3 pointTileSpace )
     ReloadTileCacheOverlayMapOnly( (int)pointTileSpace.z );
 }
 
-void TileManager::PrepForSplit( unsigned int segId, MojoFloat3 pointTileSpace )
+void TileManager::PrepForSplit( unsigned int segId, MojoFloat3 pointTileSpace, bool applyBlur )
 {
-    mTileServer->PrepForSplit( segId, pointTileSpace );
+    mTileServer->PrepForSplit( segId, pointTileSpace, applyBlur );
 
 	ReloadTileCacheOverlayMapOnly( (int)pointTileSpace.z );
 }
@@ -754,22 +754,22 @@ void TileManager::FindBoundaryBetweenRegions2D( unsigned int segId, MojoFloat3 p
     ReloadTileCacheOverlayMapOnly( (int)pointTileSpace.z );
 }
 
-int TileManager::CompletePointSplit( unsigned int segId, MojoFloat3 pointTileSpace )
+int TileManager::CompletePointSplit( unsigned int segId, MojoFloat3 pointTileSpace, bool applyBlur, bool ignoreLocks )
 {
-    int newId = mTileServer->CompletePointSplit( segId, pointTileSpace );
+    int newId = mTileServer->CompletePointSplit( segId, pointTileSpace, applyBlur, ignoreLocks );
 
-    mTileServer->PrepForSplit( segId, pointTileSpace );
+    mTileServer->PrepForSplit( segId, pointTileSpace, applyBlur );
 
 	ReloadTileCacheOverlayAndIds( (int)pointTileSpace.z );
 
 	return newId;
 }
 
-int TileManager::CompleteDrawSplit( unsigned int segId, MojoFloat3 pointTileSpace, bool join3D, int splitStartZ )
+int TileManager::CompleteDrawSplit( unsigned int segId, MojoFloat3 pointTileSpace, bool applyBlur, bool join3D, int splitStartZ, bool ignoreLocks )
 {
-    int newId = mTileServer->CompleteDrawSplit( segId, pointTileSpace, join3D, splitStartZ );
+    int newId = mTileServer->CompleteDrawSplit( segId, pointTileSpace, applyBlur, join3D, splitStartZ, ignoreLocks );
 
-    mTileServer->PrepForSplit( segId, pointTileSpace );
+    mTileServer->PrepForSplit( segId, pointTileSpace, applyBlur );
 
     ReloadTileCacheOverlayAndIds( (int)pointTileSpace.z );
 
@@ -802,9 +802,9 @@ void TileManager::PrepForAdjust( unsigned int segId, MojoFloat3 pointTileSpace )
     ReloadTileCacheOverlayMapOnly( (int)pointTileSpace.z );
 }
 
-void TileManager::CommitAdjustChange( unsigned int segId, MojoFloat3 pointTileSpace )
+void TileManager::CommitAdjustChange( unsigned int segId, MojoFloat3 pointTileSpace, bool ignoreLocks )
 {
-    mTileServer->CommitAdjustChange( segId, pointTileSpace );
+    mTileServer->CommitAdjustChange( segId, pointTileSpace, ignoreLocks );
 
     mTileServer->PrepForAdjust( segId, pointTileSpace );
 
@@ -825,9 +825,9 @@ void TileManager::PrepForDrawMerge( MojoFloat3 pointTileSpace )
     ReloadTileCacheOverlayMapOnly( (int)pointTileSpace.z );
 }
 
-unsigned int TileManager::CommitDrawMerge( MojoFloat3 pointTileSpace )
+unsigned int TileManager::CommitDrawMerge( MojoFloat3 pointTileSpace, bool ignoreLocks )
 {
-	std::set< unsigned int > remapIds = mTileServer->GetDrawMergeIds( pointTileSpace );
+	std::set< unsigned int > remapIds = mTileServer->GetDrawMergeIds( pointTileSpace, ignoreLocks );
 
 	unsigned int newId = 0;
 
@@ -838,7 +838,7 @@ unsigned int TileManager::CommitDrawMerge( MojoFloat3 pointTileSpace )
 	}
 	else if ( remapIds.size() > 1 )
 	{
-		newId = mTileServer->CommitDrawMerge( remapIds, pointTileSpace );
+		newId = mTileServer->CommitDrawMerge( remapIds, pointTileSpace, ignoreLocks );
 
 		for ( std::set< unsigned int >::iterator updateIt = remapIds.begin(); updateIt != remapIds.end(); ++updateIt )
 		{
@@ -854,10 +854,10 @@ unsigned int TileManager::CommitDrawMerge( MojoFloat3 pointTileSpace )
 
 }
 
-unsigned int TileManager::CommitDrawMergeCurrentSlice( MojoFloat3 pointTileSpace )
+unsigned int TileManager::CommitDrawMergeCurrentSlice( MojoFloat3 pointTileSpace, bool ignoreLocks )
 {
 
-	unsigned int newId = mTileServer->CommitDrawMergeCurrentSlice( pointTileSpace );
+	unsigned int newId = mTileServer->CommitDrawMergeCurrentSlice( pointTileSpace, ignoreLocks );
 
 	mTileServer->PrepForDrawMerge( pointTileSpace );
 
@@ -867,10 +867,10 @@ unsigned int TileManager::CommitDrawMergeCurrentSlice( MojoFloat3 pointTileSpace
 
 }
 
-unsigned int TileManager::CommitDrawMergeCurrentConnectedComponent( MojoFloat3 pointTileSpace )
+unsigned int TileManager::CommitDrawMergeCurrentConnectedComponent( MojoFloat3 pointTileSpace, bool ignoreLocks )
 {
 
-	unsigned int newId = mTileServer->CommitDrawMergeCurrentConnectedComponent( pointTileSpace );
+	unsigned int newId = mTileServer->CommitDrawMergeCurrentConnectedComponent( pointTileSpace, ignoreLocks );
 
 	mTileServer->PrepForDrawMerge( pointTileSpace );
 
@@ -880,9 +880,9 @@ unsigned int TileManager::CommitDrawMergeCurrentConnectedComponent( MojoFloat3 p
 
 }
 
-void TileManager::ReplaceSegmentationLabelCurrentConnectedComponent( unsigned int oldId, unsigned int newId, MojoFloat3 pDataSpace )
+void TileManager::ReplaceSegmentationLabelCurrentConnectedComponent( unsigned int oldId, unsigned int newId, MojoFloat3 pDataSpace, bool ignoreLocks )
 {
-    mTileServer->ReplaceSegmentationLabelCurrentConnectedComponent( oldId, newId, pDataSpace );
+    mTileServer->ReplaceSegmentationLabelCurrentConnectedComponent( oldId, newId, pDataSpace, ignoreLocks );
 
     ReloadTileCache();
 }

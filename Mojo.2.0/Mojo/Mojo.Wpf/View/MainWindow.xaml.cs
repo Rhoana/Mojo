@@ -40,52 +40,74 @@ namespace Mojo.Wpf.View
 
         public void SelectedSegmentLockCheckBox_OnUnchecked( object sender, RoutedEventArgs e )
         {
-            if ( DataContext != null && ( (ViewModel.EngineDataContext)DataContext ).TileManagerDataContext.SelectedSegmentConfidence != 0 )
+            if ( DataContext != null )
             {
-                var segId = ( (ViewModel.EngineDataContext)DataContext ).Engine.TileManager.SelectedSegmentId;
-                if (segId == 0) return;
-                ( (ViewModel.EngineDataContext)DataContext ).Engine.TileManager.UnlockSegmentLabel( segId );
-                ( (ViewModel.EngineDataContext)DataContext ).TileManagerDataContext.SelectedSegmentConfidence = 0;
-                ( (ViewModel.EngineDataContext)DataContext ).TileManagerDataContext.UpdateSegmentInfoList( segId );
+                ViewModel.EngineDataContext dataContext = ( (ViewModel.EngineDataContext)DataContext );
+                if ( dataContext.Engine.TileManager.LocksEnabled && dataContext.TileManagerDataContext.SelectedSegmentConfidence != 0 )
+                {
+                    var segId = dataContext.Engine.TileManager.SelectedSegmentId;
+                    if ( segId == 0 ) return;
+                    dataContext.Engine.TileManager.UnlockSegmentLabel( segId );
+                    dataContext.TileManagerDataContext.SelectedSegmentConfidence = 0;
+                    dataContext.TileManagerDataContext.UpdateSegmentInfoList( segId );
+                }
             }
         }
 
         public void SelectedSegmentLockCheckBox_OnChecked( object sender, RoutedEventArgs e )
         {
-            if ( DataContext != null && ( (ViewModel.EngineDataContext)DataContext ).TileManagerDataContext.SelectedSegmentConfidence != 100 )
+            if ( DataContext != null )
             {
-                var segId = ( (ViewModel.EngineDataContext)DataContext ).Engine.TileManager.SelectedSegmentId;
-                if (segId == 0) return;
-                ( (ViewModel.EngineDataContext)DataContext ).Engine.TileManager.LockSegmentLabel( segId );
-                ( (ViewModel.EngineDataContext)DataContext ).TileManagerDataContext.SelectedSegmentConfidence = 100;
-                ( (ViewModel.EngineDataContext)DataContext ).TileManagerDataContext.UpdateSegmentInfoList( segId );
+                ViewModel.EngineDataContext dataContext = ( (ViewModel.EngineDataContext)DataContext );
+                if ( dataContext.Engine.TileManager.LocksEnabled && dataContext.TileManagerDataContext.SelectedSegmentConfidence != 100 )
+                {
+                    var segId = dataContext.Engine.TileManager.SelectedSegmentId;
+                    if ( segId == 0 ) return;
+                    dataContext.Engine.TileManager.LockSegmentLabel( segId );
+                    dataContext.TileManagerDataContext.SelectedSegmentConfidence = 100;
+                    dataContext.TileManagerDataContext.UpdateSegmentInfoList( segId );
+                }
             }
         }
 
         public void SegmentLockCheckBox_OnUnchecked( object sender, RoutedEventArgs e )
         {
-            var changedSegment = (Interop.SegmentInfo)( (CheckBox)sender ).DataContext;
-            if ( changedSegment != null && changedSegment.Confidence != 0 )
+            if ( DataContext != null )
             {
-                changedSegment.Confidence = 0;
-                ( (ViewModel.EngineDataContext)DataContext ).Engine.TileManager.UnlockSegmentLabel( changedSegment.Id );
-                if ( changedSegment.Id == ( (ViewModel.EngineDataContext)DataContext ).Engine.TileManager.SelectedSegmentId )
+                ViewModel.EngineDataContext dataContext = ( (ViewModel.EngineDataContext)DataContext );
+                if ( dataContext.Engine.TileManager.LocksEnabled )
                 {
-                    ( (ViewModel.EngineDataContext)DataContext ).TileManagerDataContext.SelectedSegmentConfidence = 0;
+                    var changedSegment = (Interop.SegmentInfo)( (CheckBox)sender ).DataContext;
+                    if ( changedSegment != null && changedSegment.Confidence != 0 )
+                    {
+                        changedSegment.Confidence = 0;
+                        dataContext.Engine.TileManager.UnlockSegmentLabel( changedSegment.Id );
+                        if ( changedSegment.Id == dataContext.Engine.TileManager.SelectedSegmentId )
+                        {
+                            dataContext.TileManagerDataContext.SelectedSegmentConfidence = 0;
+                        }
+                    }
                 }
             }
         }
 
         public void SegmentLockCheckBox_OnChecked( object sender, RoutedEventArgs e )
         {
-            var changedSegment = (Interop.SegmentInfo)( (CheckBox)sender ).DataContext;
-            if ( changedSegment != null && changedSegment.Confidence != 100 )
+            if ( DataContext != null )
             {
-                changedSegment.Confidence = 100;
-                ( (ViewModel.EngineDataContext)DataContext ).Engine.TileManager.LockSegmentLabel( changedSegment.Id );
-                if ( changedSegment.Id == ( (ViewModel.EngineDataContext)DataContext ).Engine.TileManager.SelectedSegmentId )
+                ViewModel.EngineDataContext dataContext = ( (ViewModel.EngineDataContext)DataContext );
+                if ( dataContext.Engine.TileManager.LocksEnabled )
                 {
-                    ( (ViewModel.EngineDataContext)DataContext ).TileManagerDataContext.SelectedSegmentConfidence = 100;
+                    var changedSegment = (Interop.SegmentInfo)( (CheckBox)sender ).DataContext;
+                    if ( changedSegment != null && changedSegment.Confidence != 100 )
+                    {
+                        changedSegment.Confidence = 100;
+                        dataContext.Engine.TileManager.LockSegmentLabel( changedSegment.Id );
+                        if ( changedSegment.Id == dataContext.Engine.TileManager.SelectedSegmentId )
+                        {
+                            dataContext.TileManagerDataContext.SelectedSegmentConfidence = 100;
+                        }
+                    }
                 }
             }
         }
@@ -97,10 +119,11 @@ namespace Mojo.Wpf.View
 
             if ( DataContext != null && ( (ViewModel.EngineDataContext)DataContext ).TileManagerDataContext.SelectedSegmentType != newEnumType )
             {
-                var segId = ( (ViewModel.EngineDataContext)DataContext ).Engine.TileManager.SelectedSegmentId;
-                ( (ViewModel.EngineDataContext)DataContext ).Engine.TileManager.SetSegmentType( segId, newType );
-                ( (ViewModel.EngineDataContext)DataContext ).TileManagerDataContext.SelectedSegmentType = newEnumType;
-                ( (ViewModel.EngineDataContext)DataContext ).TileManagerDataContext.UpdateSegmentInfoList( segId );
+                ViewModel.EngineDataContext dataContext = ( (ViewModel.EngineDataContext)DataContext );
+                var segId = dataContext.Engine.TileManager.SelectedSegmentId;
+                dataContext.Engine.TileManager.SetSegmentType( segId, newType );
+                dataContext.TileManagerDataContext.SelectedSegmentType = newEnumType;
+                dataContext.TileManagerDataContext.UpdateSegmentInfoList( segId );
             }
         }
 
@@ -111,10 +134,11 @@ namespace Mojo.Wpf.View
 
             if ( DataContext != null && ( (ViewModel.EngineDataContext)DataContext ).TileManagerDataContext.SelectedSegmentSubType != newEnumSubType )
             {
-                var segId = ( (ViewModel.EngineDataContext)DataContext ).Engine.TileManager.SelectedSegmentId;
-                ( (ViewModel.EngineDataContext)DataContext ).Engine.TileManager.SetSegmentSubType( segId, newSubType );
-                ( (ViewModel.EngineDataContext)DataContext ).TileManagerDataContext.SelectedSegmentSubType = newEnumSubType;
-                ( (ViewModel.EngineDataContext)DataContext ).TileManagerDataContext.UpdateSegmentInfoList( segId );
+                ViewModel.EngineDataContext dataContext = ( (ViewModel.EngineDataContext)DataContext );
+                var segId = dataContext.Engine.TileManager.SelectedSegmentId;
+                dataContext.Engine.TileManager.SetSegmentSubType( segId, newSubType );
+                dataContext.TileManagerDataContext.SelectedSegmentSubType = newEnumSubType;
+                dataContext.TileManagerDataContext.UpdateSegmentInfoList( segId );
             }
         }
 

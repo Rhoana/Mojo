@@ -66,7 +66,7 @@ public:
     void                                                  SortSegmentInfoByConfidence( bool reverse );
     void                                                  SortSegmentInfoByType( bool reverse );
     void                                                  SortSegmentInfoBySubType( bool reverse );
-    void                                                  RemapSegmentLabel( unsigned int fromSegId, unsigned int toSegId );
+    void                                                  RemapSegmentLabel( unsigned int fromSegId, unsigned int toSegId, bool ignoreLocks );
     void                                                  LockSegmentLabel( unsigned int segId );
     void                                                  UnlockSegmentLabel( unsigned int segId );
     void                                                  SetSegmentType( unsigned int segId, std::string newType );
@@ -84,9 +84,9 @@ public:
     MojoInt4                                              GetSegmentZTileBounds( unsigned int segId, int zIndex );
 
 
-    void                                                  ReplaceSegmentationLabel( unsigned int oldId, unsigned int newId );
-    void                                                  ReplaceSegmentationLabelCurrentSlice( unsigned int oldId, unsigned int newId, MojoFloat3 pDataSpace );
-    void                                                  ReplaceSegmentationLabelCurrentConnectedComponent( unsigned int oldId, unsigned int newId, MojoFloat3 pDataSpace );
+    void                                                  ReplaceSegmentationLabel( unsigned int oldId, unsigned int newId, bool ignoreLocks );
+    void                                                  ReplaceSegmentationLabelCurrentSlice( unsigned int oldId, unsigned int newId, MojoFloat3 pDataSpace, bool ignoreLocks );
+    void                                                  ReplaceSegmentationLabelCurrentConnectedComponent( unsigned int oldId, unsigned int newId, MojoFloat3 pDataSpace, bool ignoreLocks );
 
     void                                                  DrawSplit( MojoFloat3 pointTileSpace, float radius );
     void                                                  DrawErase( MojoFloat3 pointTileSpace, float radius );
@@ -96,24 +96,24 @@ public:
     void                                                  AddSplitSource( MojoFloat3 pointTileSpace );
     void                                                  RemoveSplitSource();
     void                                                  ResetSplitState( MojoFloat3 pointTileSpace );
-    void                                                  PrepForSplit( unsigned int segId, MojoFloat3 pointTileSpace );
+    void                                                  PrepForSplit( unsigned int segId, MojoFloat3 pointTileSpace, bool applyBlur );
 	void                                                  FindBoundaryJoinPoints2D( unsigned int segId, MojoFloat3 pointTileSpace );
 	void                                                  FindBoundaryWithinRegion2D( unsigned int segId, MojoFloat3 pointTileSpace );
 	void                                                  FindBoundaryBetweenRegions2D( unsigned int segId, MojoFloat3 pointTileSpace );
-    int                                                   CompletePointSplit( unsigned int segId, MojoFloat3 pointTileSpace );
-    int                                                   CompleteDrawSplit( unsigned int segId, MojoFloat3 pointTileSpace, bool join3D, int splitStartZ );
+    int                                                   CompletePointSplit( unsigned int segId, MojoFloat3 pointTileSpace, bool applyBlur, bool ignoreLocks );
+    int                                                   CompleteDrawSplit( unsigned int segId, MojoFloat3 pointTileSpace, bool applyBlur, bool join3D, int splitStartZ, bool ignoreLocks );
     void                                                  RecordSplitState( unsigned int segId, MojoFloat3 pointTileSpace );
     void                                                  PredictSplit( unsigned int segId, MojoFloat3 pointTileSpace, float radius );
 
     void                                                  ResetAdjustState( MojoFloat3 pointTileSpace );
     void                                                  PrepForAdjust( unsigned int segId, MojoFloat3 pointTileSpace );
-    void                                                  CommitAdjustChange( unsigned int segId, MojoFloat3 pointTileSpace );
+    void                                                  CommitAdjustChange( unsigned int segId, MojoFloat3 pointTileSpace, bool ignoreLocks );
 
     void                                                  ResetDrawMergeState( MojoFloat3 pointTileSpace );
     void                                                  PrepForDrawMerge( MojoFloat3 pointTileSpace );
-    unsigned int                                          CommitDrawMerge( MojoFloat3 pointTileSpace );
-    unsigned int                                          CommitDrawMergeCurrentSlice( MojoFloat3 pointTileSpace );
-    unsigned int                                          CommitDrawMergeCurrentConnectedComponent( MojoFloat3 pointTileSpace );
+    unsigned int                                          CommitDrawMerge( MojoFloat3 pointTileSpace, bool ignoreLocks );
+    unsigned int                                          CommitDrawMergeCurrentSlice( MojoFloat3 pointTileSpace, bool ignoreLocks );
+    unsigned int                                          CommitDrawMergeCurrentConnectedComponent( MojoFloat3 pointTileSpace, bool ignoreLocks );
 
 	unsigned int                                          GetNewId();
 	void                                                  UndoChange();

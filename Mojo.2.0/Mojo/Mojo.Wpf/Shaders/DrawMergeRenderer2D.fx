@@ -22,6 +22,7 @@ float4x4          gTransform;
 float             gSegmentationRatio;
 bool              gBoundaryLinesVisible;
 bool              gBrushVisible;
+bool              gIgnoreConfidence;
 uint              gSelectedSegmentId;
 uint              gMouseOverSegmentId;
 float             gMouseOverX;
@@ -85,7 +86,10 @@ float4 PS( PS_IN input ) : SV_Target
 
 	uint   overlay        = gOverlayTexture3D.Load( index3D );
     float4 idColor        = gIdColorMapBuffer.Load( id % gIdColorMapBuffer.Length );
-    float1 idConfidence   = gIdConfidenceMapBuffer.Load( id );
+    float1 idConfidence   = 0.0f;
+
+	if ( !gIgnoreConfidence )
+		idConfidence = gIdConfidenceMapBuffer.Load( id );
 
 	if ( idConfidence.x > 0.0f && index3D.x % 16 < 12 && index3D.y % 16 < 12 )
 		idColor = float4( 0.0f, 0.0f, 0.3f, 0.0f );

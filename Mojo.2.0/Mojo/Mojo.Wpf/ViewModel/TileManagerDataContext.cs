@@ -216,9 +216,21 @@ namespace Mojo.Wpf.ViewModel
             }
         }
 
+        public void ToggleLockOverride()
+        {
+            if ( mTileManager.LocksEnabled )
+            {
+                mTileManager.LocksEnabled = false;
+            }
+            else
+            {
+                mTileManager.LocksEnabled = true;
+            }
+        }
+
         public void ToggleSelectedSegmentLock()
         {
-            if ( mTileManager.SelectedSegmentId != 0 )
+            if ( mTileManager.LocksEnabled && mTileManager.SelectedSegmentId != 0 )
             {
                 if ( SelectedSegmentConfidence != 100 )
                 {
@@ -385,8 +397,6 @@ namespace Mojo.Wpf.ViewModel
                 CurrentZLocationString = "";
             }
         }
-
-
 
         private string mSegmentListCurrentPageString;
         public string SegmentListCurrentPageString
