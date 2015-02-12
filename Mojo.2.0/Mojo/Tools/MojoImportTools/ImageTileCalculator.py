@@ -12,65 +12,23 @@ import numpy as np
 tile_num_pixels_y = 512
 tile_num_pixels_x = 512
 
-original_input_images_path = 'D:\\dev\\datasets\\RDExtendLeft\\tatoo_images'
-output_tile_image_path     = 'D:\\dev\\datasets\\RDExtendLeft\\mojo_tatoo\\images\\tiles'
-output_tile_volume_file    = 'D:\\dev\\datasets\\RDExtendLeft\\mojo_tatoo\\images\\tiledVolumeDescription.xml'
-input_image_extension      = '.png'
-output_image_extension     = '.tif'
+original_input_images_path = r'C:\dev\datasets\conn\main_dataset\ac3train\input_images'
+output_tile_image_path     = r'C:\dev\datasets\ac3x20\mojo\images\tiles'
+output_tile_volume_file    = r'C:\dev\datasets\ac3x20\mojo\images\tiledVolumeDescription.xml'
+input_image_extension      = '.tif'
+output_image_extension     = '.jpg'
 image_resize_filter        = PIL.Image.ANTIALIAS
-nimages_to_process            = 300
-
-# original_input_images_path = 'D:\\dev\\datasets\\LGN1\\imageTifs'
-# output_tile_image_path     = 'D:\\dev\\datasets\\LGN1\\output_rf=combined_lessmito_pairwise=multijoin\\mojo\\images\\tiles'
-# output_tile_volume_file    = 'D:\\dev\\datasets\\LGN1\\output_rf=combined_lessmito_pairwise=multijoin\\mojo\\images\\tiledVolumeDescription.xml'
-# input_image_extension      = '.tif'
-# output_image_extension     = '.tif'
-# image_resize_filter        = PIL.Image.ANTIALIAS
-# nimages_to_process            = 168
-
-# nimages_to_process            = 1124
-# original_input_images_path = 'H:\\dev\\datasets\\conn\\main_dataset\\cube2\\input_images'
-# output_tile_image_path     = 'D:\\dev\\datasets\\Cube2\\mojo\\images\\tiles'
-# output_tile_volume_file    = 'D:\\dev\\datasets\\Cube2\\mojo\\images\\tiledVolumeDescription.xml'
-# input_image_extension      = '.tif'
-# output_image_extension     = '.tif'
-# image_resize_filter        = PIL.Image.ANTIALIAS
-# #nimages_to_process            = 100
-# nimages_to_process            = 1124
-
-#original_input_images_path = 'C:\\dev\\datasets\\conn\\main_dataset\\ac3train\\input_images'
-#output_tile_image_path     = 'C:\\dev\\datasets\\ac3x75_compress\\mojo\\images\\tiles'
-#output_tile_volume_file    = 'C:\\dev\\datasets\\ac3x75_compress\\mojo\\images\\tiledVolumeDescription.xml'
-#input_image_extension      = '.tif'
-#output_image_extension     = '.tif'
-#image_resize_filter        = PIL.Image.ANTIALIAS
-#nimages_to_process         = 75
-
-#original_input_images_path = 'C:\\dev\\datasets\\challengeCubeV2x20\\images'
-#output_tile_image_path     = 'C:\\dev\\datasets\\Cube1x10\\mojo\\images\\tiles'
-#output_tile_volume_file    = 'C:\\dev\\datasets\\Cube1x10\\mojo\\images\\tiledVolumeDescription.xml'
-#input_image_extension      = '.png'
-#output_image_extension     = '.tif'
-#image_resize_filter        = PIL.Image.ANTIALIAS
-#nimages_to_process         = 10
-
-#original_input_images_path = 'C:\\dev\\datasets\\conn\\main_dataset\\ac3train\\input_images'
-#output_tile_image_path     = 'C:\\dev\\datasets\\ac3x20\\mojo\\images\\tiles'
-#output_tile_volume_file    = 'C:\\dev\\datasets\\ac3x20\\mojo\\images\\tiledVolumeDescription.xml'
-#input_image_extension      = '.tif'
-#output_image_extension     = '.tif'
-#image_resize_filter        = PIL.Image.ANTIALIAS
-#nimages_to_process         = 20
-
+nimages_to_process         = 20
 
 
 def mkdir_safe( dir_to_make ):
 
     if not os.path.exists( dir_to_make ):
-        execute_string = 'mkdir ' + '"' + dir_to_make + '"'
-        print execute_string
-        print
-        os.system( execute_string )
+        os.makedirs(dir_to_make)
+        # execute_string = 'mkdir ' + '"' + dir_to_make + '"'
+        # print execute_string
+        # print
+        # os.system( execute_string )
                 
         
 files = sorted( glob.glob( original_input_images_path + '\\*' + input_image_extension ) )
@@ -81,7 +39,8 @@ for file in files:
 
     original_image = PIL.Image.open( file )
 
-    ( original_image_num_pixels_y, original_image_num_pixels_x ) = original_image.size
+    # Note - size returns reverse order to shape
+    ( original_image_num_pixels_x, original_image_num_pixels_y ) = original_image.size
 
     # Enhance contrast to 2% saturation
     saturation_level = 0.02
@@ -99,17 +58,11 @@ for file in files:
 
     while current_image_num_pixels_y > tile_num_pixels_y / 2 or current_image_num_pixels_x > tile_num_pixels_x / 2:
     
-        #current_pyramid_image_path = output_pyramid_image_path  + '\\' + 'w=' + '%08d' % ( tile_index_w )
-        #current_pyramid_image_name = current_pyramid_image_path + '\\' + 'z=' + '%08d' % ( tile_index_z ) + output_image_extension
         current_tile_image_path    = output_tile_image_path     + '\\' + 'w=' + '%08d' % ( tile_index_w ) + '\\' + 'z=' + '%08d' % ( tile_index_z )
 
         mkdir_safe( current_tile_image_path )
-        #mkdir_safe( current_pyramid_image_path )
 
-        current_image = original_image.resize( ( current_image_num_pixels_x, current_image_num_pixels_y ), image_resize_filter )            
-        #current_image.save( current_pyramid_image_name )
-        #print current_pyramid_image_name
-        #print
+        current_image = original_image.resize( ( current_image_num_pixels_x, current_image_num_pixels_y ), image_resize_filter )
         
         num_tiles_y = int( math.ceil( float( current_image_num_pixels_y ) / tile_num_pixels_y ) )
         num_tiles_x = int( math.ceil( float( current_image_num_pixels_x ) / tile_num_pixels_x ) )
