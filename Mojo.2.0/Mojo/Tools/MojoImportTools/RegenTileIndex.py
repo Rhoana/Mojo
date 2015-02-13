@@ -21,7 +21,7 @@ import colorsys
 
 input_mojo_path               = r'E:\CurrentIDs_9-1-2014_mojo\mojo'
 input_mojo_image_path         = r'Z:\PC1_Iteration_4\MojoData\full\mojo'
-output_regen_path         = r'E:\CurrentIDs_9-1-2014_regen'
+output_regen_path             = r'E:\CurrentIDs_9-1-2014_regen'
 
 min_slices_per_subvolume      = 0
 overlap_slices                = 1
@@ -35,8 +35,8 @@ input_tile_ids_volume_file    = input_ids_path + '\\tiledVolumeDescription.xml'
 input_color_map_file          = input_ids_path + '\\colorMap.hdf5'
 input_segment_info_db_file    = input_ids_path + '\\segmentInfo.db'
 
-copy_images                   = false
-copy_ids                      = false
+copy_images                   = False
+copy_ids                      = False
 
 def mkdir_safe( dir_to_make ):
 
