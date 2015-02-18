@@ -136,6 +136,8 @@ for subvolume_i in [len(subvolume_start_indices) - 1]: #range(len(subvolume_star
     output_color_map_file          = output_ids_path + '\\colorMap.hdf5'
     output_segment_info_db_file    = output_ids_path + '\\segmentInfo.db'
 
+    mkdir_safe( output_ids_path )
+
     segment_sizes = np.zeros(id_max + 1, dtype=np.int64)
     id_tile_list         = [];
 
