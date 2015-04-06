@@ -19,9 +19,13 @@ import colorsys
 
 ## Process existing mojo volume and output new volume with regenerated tile index
 
-input_mojo_path               = r'E:\CurrentIDs_9-1-2014_mojo\mojo'
-input_mojo_image_path         = r'Z:\PC1_Iteration_4\MojoData\full\mojo'
-output_regen_path             = r'E:\CurrentIDs_9-1-2014_regen'
+# input_mojo_path               = r'E:\CurrentIDs_9-1-2014_mojo\mojo'
+# input_mojo_image_path         = r'Z:\PC1_Iteration_4\MojoData\full\mojo'
+# output_regen_path             = r'E:\CurrentIDs_9-1-2014_regen'
+
+input_mojo_path               = r'G:\dev\cd1_scratch'
+input_mojo_image_path         = r'G:\dev\cd1_scratch'
+output_regen_path             = r'G:\dev\cd1_scratch\regen'
 
 min_slices_per_subvolume      = 0
 overlap_slices                = 1
@@ -47,13 +51,12 @@ def mkdir_safe( dir_to_make ):
 
 print 'Reading TiledVolumeDescription files'
 
-with open( input_tile_images_volume_file, 'r' ) as file:
-    imageTiledVolumeDescription = lxml.etree.parse(file).getroot()
+if copy_images:
+    with open( input_tile_images_volume_file, 'r' ) as file:
+        imageTiledVolumeDescription = lxml.etree.parse(file).getroot()
 
 with open( input_tile_ids_volume_file, 'r' ) as file:
     idTiledVolumeDescription = lxml.etree.parse(file).getroot()
-
-
 
 ## Open input volume database
 
@@ -174,9 +177,6 @@ for subvolume_i in [len(subvolume_start_indices) - 1]: #range(len(subvolume_star
                     from_tile_ids_name       = from_tile_ids_path       + '\\' + 'y=' + '%08d' % ( tile_index_y ) + ','  + 'x=' + '%08d' % ( tile_index_x ) + '.' + idTiledVolumeDescription.xpath('@fileExtension')[0]
                     current_tile_ids_name    = current_tile_ids_path    + '\\' + 'y=' + '%08d' % ( tile_index_y ) + ','  + 'x=' + '%08d' % ( tile_index_x ) + '.' + idTiledVolumeDescription.xpath('@fileExtension')[0]
 
-                    from_tile_images_name    = from_tile_images_path       + '\\' + 'y=' + '%08d' % ( tile_index_y ) + ','  + 'x=' + '%08d' % ( tile_index_x ) + '.' + imageTiledVolumeDescription.xpath('@fileExtension')[0]
-                    current_tile_images_name = current_tile_images_path    + '\\' + 'y=' + '%08d' % ( tile_index_y ) + ','  + 'x=' + '%08d' % ( tile_index_x ) + '.' + imageTiledVolumeDescription.xpath('@fileExtension')[0]
-
                     tile_hdf5        = h5py.File( from_tile_ids_name, 'r' )
                     tile_ids         = tile_hdf5['IdMap'][:,:]
                     tile_hdf5.close()
@@ -217,6 +217,8 @@ for subvolume_i in [len(subvolume_start_indices) - 1]: #range(len(subvolume_star
                         shutil.copyfile(from_tile_ids_name, current_tile_ids_name)
                         print current_tile_ids_name
                     if copy_images: 
+                        from_tile_images_name    = from_tile_images_path       + '\\' + 'y=' + '%08d' % ( tile_index_y ) + ','  + 'x=' + '%08d' % ( tile_index_x ) + '.' + imageTiledVolumeDescription.xpath('@fileExtension')[0]
+                        current_tile_images_name = current_tile_images_path    + '\\' + 'y=' + '%08d' % ( tile_index_y ) + ','  + 'x=' + '%08d' % ( tile_index_x ) + '.' + imageTiledVolumeDescription.xpath('@fileExtension')[0]
                         shutil.copyfile(from_tile_images_name, current_tile_images_name)
                         print current_tile_images_name
 
@@ -225,6 +227,8 @@ for subvolume_i in [len(subvolume_start_indices) - 1]: #range(len(subvolume_star
             current_tile_data_space_y  = current_tile_data_space_y  * 2
             current_tile_data_space_x  = current_tile_data_space_x  * 2
             tile_index_w               = tile_index_w               + 1
+
+        print "Processed z {0} of {1}.".format( tile_index_z + 1, original_image_num_tiles_z )
 
 
     ## Sort the tile list so that the same id appears together
@@ -291,43 +295,45 @@ for subvolume_i in [len(subvolume_start_indices) - 1]: #range(len(subvolume_star
 
     print 'Writing TiledVolumeDescription files'
 
-    output_imageTiledVolumeDescription = lxml.etree.Element( "tiledVolumeDescription",
-        fileExtension = imageTiledVolumeDescription.xpath('@fileExtension')[0],
-        numTilesX = imageTiledVolumeDescription.xpath('@numTilesX')[0],
-        numTilesY = imageTiledVolumeDescription.xpath('@numTilesY')[0],
-        numTilesZ = str( tile_index_z + 1 ),
-        numTilesW = imageTiledVolumeDescription.xpath('@numTilesW')[0],
-        numVoxelsPerTileX = imageTiledVolumeDescription.xpath('@numVoxelsPerTileX')[0],
-        numVoxelsPerTileY = imageTiledVolumeDescription.xpath('@numVoxelsPerTileY')[0],
-        numVoxelsPerTileZ = imageTiledVolumeDescription.xpath('@numVoxelsPerTileZ')[0],
-        numVoxelsX = imageTiledVolumeDescription.xpath('@numVoxelsX')[0],
-        numVoxelsY = imageTiledVolumeDescription.xpath('@numVoxelsY')[0],
-        numVoxelsZ = str( tile_index_z + 1 ),
-        dxgiFormat = imageTiledVolumeDescription.xpath('@dxgiFormat')[0],
-        numBytesPerVoxel = imageTiledVolumeDescription.xpath('@numBytesPerVoxel')[0],      
-        isSigned = imageTiledVolumeDescription.xpath('@isSigned')[0] )
-    
-    with open( output_tile_images_volume_file, 'w' ) as file:
-        file.write( lxml.etree.tostring( output_imageTiledVolumeDescription, pretty_print = True ) )
-
-    output_idTiledVolumeDescription = lxml.etree.Element( "tiledVolumeDescription",
-        fileExtension = idTiledVolumeDescription.xpath('@fileExtension')[0],
-        numTilesX = idTiledVolumeDescription.xpath('@numTilesX')[0],
-        numTilesY = idTiledVolumeDescription.xpath('@numTilesY')[0],
-        numTilesZ = str( tile_index_z + 1 ),
-        numTilesW = idTiledVolumeDescription.xpath('@numTilesW')[0],
-        numVoxelsPerTileX = idTiledVolumeDescription.xpath('@numVoxelsPerTileX')[0],
-        numVoxelsPerTileY = idTiledVolumeDescription.xpath('@numVoxelsPerTileY')[0],
-        numVoxelsPerTileZ = idTiledVolumeDescription.xpath('@numVoxelsPerTileZ')[0],
-        numVoxelsX = idTiledVolumeDescription.xpath('@numVoxelsX')[0],
-        numVoxelsY = idTiledVolumeDescription.xpath('@numVoxelsY')[0],
-        numVoxelsZ = str( tile_index_z + 1 ),
-        dxgiFormat = idTiledVolumeDescription.xpath('@dxgiFormat')[0],
-        numBytesPerVoxel = idTiledVolumeDescription.xpath('@numBytesPerVoxel')[0],      
-        isSigned = idTiledVolumeDescription.xpath('@isSigned')[0] )
+    if copy_images:
+        output_imageTiledVolumeDescription = lxml.etree.Element( "tiledVolumeDescription",
+            fileExtension = imageTiledVolumeDescription.xpath('@fileExtension')[0],
+            numTilesX = imageTiledVolumeDescription.xpath('@numTilesX')[0],
+            numTilesY = imageTiledVolumeDescription.xpath('@numTilesY')[0],
+            numTilesZ = str( tile_index_z + 1 ),
+            numTilesW = imageTiledVolumeDescription.xpath('@numTilesW')[0],
+            numVoxelsPerTileX = imageTiledVolumeDescription.xpath('@numVoxelsPerTileX')[0],
+            numVoxelsPerTileY = imageTiledVolumeDescription.xpath('@numVoxelsPerTileY')[0],
+            numVoxelsPerTileZ = imageTiledVolumeDescription.xpath('@numVoxelsPerTileZ')[0],
+            numVoxelsX = imageTiledVolumeDescription.xpath('@numVoxelsX')[0],
+            numVoxelsY = imageTiledVolumeDescription.xpath('@numVoxelsY')[0],
+            numVoxelsZ = str( tile_index_z + 1 ),
+            dxgiFormat = imageTiledVolumeDescription.xpath('@dxgiFormat')[0],
+            numBytesPerVoxel = imageTiledVolumeDescription.xpath('@numBytesPerVoxel')[0],      
+            isSigned = imageTiledVolumeDescription.xpath('@isSigned')[0] )
         
-    with open( output_tile_ids_volume_file, 'w' ) as file:
-        file.write( lxml.etree.tostring( output_idTiledVolumeDescription, pretty_print = True ) )
+        with open( output_tile_images_volume_file, 'w' ) as file:
+            file.write( lxml.etree.tostring( output_imageTiledVolumeDescription, pretty_print = True ) )
+
+    if copy_ids:
+        output_idTiledVolumeDescription = lxml.etree.Element( "tiledVolumeDescription",
+            fileExtension = idTiledVolumeDescription.xpath('@fileExtension')[0],
+            numTilesX = idTiledVolumeDescription.xpath('@numTilesX')[0],
+            numTilesY = idTiledVolumeDescription.xpath('@numTilesY')[0],
+            numTilesZ = str( tile_index_z + 1 ),
+            numTilesW = idTiledVolumeDescription.xpath('@numTilesW')[0],
+            numVoxelsPerTileX = idTiledVolumeDescription.xpath('@numVoxelsPerTileX')[0],
+            numVoxelsPerTileY = idTiledVolumeDescription.xpath('@numVoxelsPerTileY')[0],
+            numVoxelsPerTileZ = idTiledVolumeDescription.xpath('@numVoxelsPerTileZ')[0],
+            numVoxelsX = idTiledVolumeDescription.xpath('@numVoxelsX')[0],
+            numVoxelsY = idTiledVolumeDescription.xpath('@numVoxelsY')[0],
+            numVoxelsZ = str( tile_index_z + 1 ),
+            dxgiFormat = idTiledVolumeDescription.xpath('@dxgiFormat')[0],
+            numBytesPerVoxel = idTiledVolumeDescription.xpath('@numBytesPerVoxel')[0],      
+            isSigned = idTiledVolumeDescription.xpath('@isSigned')[0] )
+            
+        with open( output_tile_ids_volume_file, 'w' ) as file:
+            file.write( lxml.etree.tostring( output_idTiledVolumeDescription, pretty_print = True ) )
 
     print
     print "Subvolume {0} of {1} created.".format( subvolume_i + 1, len(subvolume_start_indices))
